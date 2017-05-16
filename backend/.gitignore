@@ -1,0 +1,7 @@
+
+# Ignore static build in repo
+rice-box.go
+
+# Ignore builds
+alice-lg-*
+
