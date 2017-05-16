@@ -1,6 +1,28 @@
 
-*.swo
-*.swp
-
 *.pyc
+__pycache__
 
+.cache
+
+*.swp
+*.swo
+
+*.sqlite*
+
+*.local.*
+
+venv/
+
+django_backend/birdseye/static
+
+node_modules/
+
+builds/
+
+RPMS/
+BUILD-RPM/
+
+
+var/
+
+etc/birdseye/*.conf
