@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/GeertJohan/go.rice"
+	"github.com/julienschmidt/httprouter"
 )
 
 // Web Client
@@ -14,7 +15,7 @@ import (
 
 // Register assets handler and index handler
 // at /static and /
-func httpRegisterAssets() error {
+func httpRegisterAssets(router *httprouter.Router) error {
 	log.Println("Preparing and installing assets")
 
 	// Serve static assets
@@ -24,7 +25,7 @@ func httpRegisterAssets() error {
 		http.FileServer(assets.HTTPBox()))
 
 	// Register static assets
-	http.Handle("/static/", assetsHandler)
+	router.Handler("GET", "/static/*path", assetsHandler)
 
 	// Prepare client html: Rewrite paths
 	indexHtml, err := assets.String("index.html")
@@ -39,7 +40,7 @@ func httpRegisterAssets() error {
 
 	// Rewrite paths
 	// Serve index html as root
-	http.HandleFunc("/", func(res http.ResponseWriter, _ *http.Request) {
+	router.GET("/", func(res http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
 		io.WriteString(res, indexHtml)
 	})
 

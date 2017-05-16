@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 	"net/http"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 func main() {
@@ -11,9 +13,15 @@ func main() {
 	// Load configuration
 	log.Println("Using configuration: ...")
 
+	// Setup request routing
+	router := httprouter.New()
+
 	// Serve static content
-	httpRegisterAssets()
+	err := httpRegisterAssets(router)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Start http server
-	http.ListenAndServe(":7340", nil)
+	log.Fatal(http.ListenAndServe(":7340", router))
 }
