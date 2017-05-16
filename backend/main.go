@@ -1,8 +1,6 @@
 package main
 
 import (
-	"github.com/GeertJohan/go.rice"
-
 	"log"
 	"net/http"
 )
@@ -11,21 +9,10 @@ func main() {
 	printBanner()
 
 	// Load configuration
+	log.Println("Using configuration: ...")
 
-	// Serve static assets
-	assets := rice.MustFindBox("../client/build")
-	assetsHandler := http.StripPrefix(
-		"/static/",
-		http.FileServer(assets.HTTPBox()))
-
-	index, err := assets.String("index.html")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Println(index)
-
-	http.Handle("/static/", assetsHandler)
+	// Serve static content
+	httpRegisterAssets()
 
 	// Start http server
 	http.ListenAndServe(":7340", nil)
