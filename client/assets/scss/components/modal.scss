@@ -1,0 +1,38 @@
+
+/**
+ * Show Modal
+ */
+
+.modal-show {
+  display: block;
+
+  .modal-content {
+    border-radius: 3px;
+  }
+}
+
+.bgp-attributes-modal {
+  .modal-header {
+    p {
+      margin: 0px;
+      font-size: 10px;
+    }
+    h4 {
+      font-size: 14px;
+      margin: 0px;
+    }
+  }
+
+  table {
+    th {
+      width: 142px;
+    }
+  }
+}
+
+.table-nolines {
+  td, th {
+    border: none !important;
+  }
+}
+

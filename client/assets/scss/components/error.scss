@@ -1,0 +1,36 @@
+.error-notify {
+    min-width: 250px;
+    margin-left: -125px;
+    border-bottom: 7px solid #7c0002;
+    background-color: rgba(255,0,0,0.8);
+    color: #fff;
+    border-radius: 2px;
+    padding: 16px;
+    position: fixed;
+    display: table;
+    z-index: 2;
+    right: 30px;
+    top: 20px;
+
+    .error-icon {
+      display: table-cell;
+      width: 60px;
+      padding: 10px 10px 0 10px;
+      text-align: center;
+      vertical-align: top;
+
+      > i {
+        font-size: 2em;
+        border-radius: 100%;
+      }
+    }
+
+    .error-message{
+      display: table-cell;
+
+      > p {
+        line-height: 1.2;
+        margin-top: 6px;
+      }
+    }
+}

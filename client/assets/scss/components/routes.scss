@@ -1,0 +1,28 @@
+
+.table-routes {
+  // Make pseudo links
+  td {
+    cursor: pointer;
+
+    color: #337ab7;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .reject-reason {
+    font-size: 90%;
+    color: #333;
+    margin-bottom: 1px;
+  }
+}
+
+
+.table-protocols {
+  .date-since {
+    white-space: nowrap;
+  }
+}
+
