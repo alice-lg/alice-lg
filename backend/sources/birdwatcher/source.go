@@ -2,8 +2,6 @@ package birdwatcher
 
 import (
 	"log"
-
-	"github.com/ecix/alice-lg/backend/sources"
 )
 
 type Birdwatcher struct {

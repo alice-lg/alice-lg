@@ -1,6 +1,6 @@
 package birdwatcher
 
 type Config struct {
-	Name string
-	Api  string
+	Api            string `ini:"api"`
+	ShowLastReboot bool   `ini:"show_last_reboot"`
 }
