@@ -3,6 +3,7 @@ package main
 import (
 	"compress/gzip"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -73,6 +74,7 @@ func apiRegisterEndpoints(router *httprouter.Router) error {
 	router.GET("/api/config", endpoint(apiConfigShow))
 
 	// Routeservers
+	router.GET("/api/routeservers", endpoint(apiRouteserversList))
 
 	return nil
 }
@@ -97,5 +99,21 @@ func apiConfigShow(_req *http.Request, _params httprouter.Params) (api.Response,
 
 // Handle Routeservers List
 func apiRouteserversList(_req *http.Request, _params httprouter.Params) (api.Response, error) {
-	return "foo", nil
+	// Get list of sources from config,
+	routeservers := []api.Routeserver{}
+
+	sources := AliceConfig.Sources
+	for id, source := range sources {
+		routeservers = append(routeservers, api.Routeserver{
+			Id:   id,
+			Name: source.Name,
+		})
+	}
+
+	// Make routeservers response
+	response := api.RouteserversResponse{
+		Routeservers: routeservers,
+	}
+
+	return response, nil
 }
