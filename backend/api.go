@@ -4,6 +4,7 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/ecix/alice-lg/backend/api"
@@ -25,7 +26,7 @@ import (
 //     List         /api/routeservers
 //     Status       /api/routeservers/:id/status
 //     Neighbours   /api/routeservers/:id/neighbours
-//     Routes       /api/routeservers/:id/neighbours/:neighbour_id/routes
+//     Routes       /api/routeservers/:id/neighbours/:neighbourId/routes
 //
 
 type apiEndpoint func(*http.Request, httprouter.Params) (api.Response, error)
@@ -73,7 +74,14 @@ func apiRegisterEndpoints(router *httprouter.Router) error {
 	router.GET("/api/config", endpoint(apiConfigShow))
 
 	// Routeservers
-	router.GET("/api/routeservers", endpoint(apiRouteserversList))
+	router.GET("/api/routeservers",
+		endpoint(apiRouteserversList))
+	router.GET("/api/routeservers/:id/status",
+		endpoint(apiStatus))
+	router.GET("/api/routeservers/:id/neighbours",
+		endpoint(apiNeighboursList))
+	router.GET("/api/routeservers/:id/neighbours/:neighbourId/routes",
+		endpoint(apiRoutesList))
 
 	return nil
 }
@@ -115,4 +123,29 @@ func apiRouteserversList(_req *http.Request, _params httprouter.Params) (api.Res
 	}
 
 	return response, nil
+}
+
+// Handle status
+func apiStatus(_req *http.Request, params httprouter.Params) (api.Response, error) {
+	rsId, _ := strconv.Atoi(params.ByName("id"))
+	source := AliceConfig.Sources[rsId].getInstance()
+	result, err := source.Status()
+	return result, err
+}
+
+// Handle get neighbours on routeserver
+func apiNeighboursList(_req *http.Request, params httprouter.Params) (api.Response, error) {
+	rsId, _ := strconv.Atoi(params.ByName("id"))
+	source := AliceConfig.Sources[rsId].getInstance()
+	result, err := source.Neighbours()
+	return result, err
+}
+
+// Handle routes
+func apiRoutesList(_req *http.Request, params httprouter.Params) (api.Response, error) {
+	rsId, _ := strconv.Atoi(params.ByName("id"))
+	neighbourId := params.ByName("neighbourId")
+	source := AliceConfig.Sources[rsId].getInstance()
+	result, err := source.Routes(neighbourId)
+	return result, err
 }
