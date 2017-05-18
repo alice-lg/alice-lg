@@ -1,4 +1,4 @@
-package main
+package api
 
 // Alice LG Rest API
 //
