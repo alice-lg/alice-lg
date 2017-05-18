@@ -206,6 +206,7 @@ func getSources(config *ini.File) ([]SourceConfig, error) {
 
 		// Make config
 		config := SourceConfig{
+			Name: section.Key("name").MustString("Unknown Source"),
 			Type: backendType,
 		}
 
@@ -257,7 +258,6 @@ func loadConfigs(base, global, local string) (*Config, error) {
 		Sources: sources,
 	}
 
-	fmt.Println(config)
 	return config, nil
 }
 
