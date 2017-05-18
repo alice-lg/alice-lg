@@ -26,8 +26,8 @@ type RejectionsConfig struct {
 }
 
 type NoexportsConfig struct {
-	Asn      int `ini:"asn"`
-	RejectId int `ini:"reject_id"`
+	Asn        int `ini:"asn"`
+	NoexportId int `ini:"noexport_id"`
 
 	Reasons map[int]string
 }

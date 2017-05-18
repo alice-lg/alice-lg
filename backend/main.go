@@ -7,22 +7,27 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+var AliceConfig *Config
+
 func main() {
+	var err error
+
 	printBanner()
 
 	// Load configuration
+	AliceConfig, err = loadConfigs("../etc/alicelg/alice.conf", "", "")
 	log.Println("Using configuration: ...")
 
 	// Setup request routing
 	router := httprouter.New()
 
 	// Serve static content
-	err := httpRegisterAssets(router)
+	err = httpRegisterAssets(router)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = apiRegisterEndpints(router)
+	err = apiRegisterEndpoints(router)
 	if err != nil {
 		log.Fatal(err)
 	}

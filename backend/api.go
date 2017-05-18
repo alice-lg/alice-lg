@@ -79,5 +79,18 @@ func apiRegisterEndpoints(router *httprouter.Router) error {
 
 // Handle Config Endpoint
 func apiConfigShow(_req *http.Request, _params httprouter.Params) (interface{}, error) {
-	return "Everythings fine."
+	result := api.ConfigResponse{
+		Rejection: api.Rejection{
+			Asn:      AliceConfig.Ui.RoutesRejections.Asn,
+			RejectId: AliceConfig.Ui.RoutesRejections.RejectId,
+		},
+		RejectReasons: AliceConfig.Ui.RoutesRejections.Reasons,
+		Noexport: api.Noexport{
+			Asn:        AliceConfig.Ui.RoutesNoexports.Asn,
+			NoexportId: AliceConfig.Ui.RoutesNoexports.NoexportId,
+		},
+		NoexportReasons: AliceConfig.Ui.RoutesNoexports.Reasons,
+		RoutesColumns:   AliceConfig.Ui.RoutesColumns,
+	}
+	return result, nil
 }
