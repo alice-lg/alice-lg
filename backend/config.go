@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ecix/alice-lg/backend/sources"
 	"github.com/ecix/alice-lg/backend/sources/birdwatcher"
 
 	"github.com/go-ini/ini"
@@ -267,4 +268,14 @@ func configOptions(filename string) []string {
 		strings.Join([]string{"./", filename}, ""),
 		strings.Replace(filename, ".conf", ".local.conf", 1),
 	}
+}
+
+// Get source instance from config
+func (source SourceConfig) getInstance() sources.Source {
+	switch source.Type {
+	case SOURCE_BIRDWATCHER:
+		return birdwatcher.NewBirdwatcher(source.Birdwatcher)
+	}
+
+	return nil
 }
