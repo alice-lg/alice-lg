@@ -28,7 +28,7 @@ import (
 //     Routes       /api/routeservers/:id/neighbours/:neighbour_id/routes
 //
 
-type apiEndpoint func(*http.Request, httprouter.Params) (interface{}, error)
+type apiEndpoint func(*http.Request, httprouter.Params) (api.Response, error)
 
 // Wrap handler for access controll, throtteling and compression
 func endpoint(wrapped apiEndpoint) httprouter.Handle {
@@ -78,7 +78,7 @@ func apiRegisterEndpoints(router *httprouter.Router) error {
 }
 
 // Handle Config Endpoint
-func apiConfigShow(_req *http.Request, _params httprouter.Params) (interface{}, error) {
+func apiConfigShow(_req *http.Request, _params httprouter.Params) (api.Response, error) {
 	result := api.ConfigResponse{
 		Rejection: api.Rejection{
 			Asn:      AliceConfig.Ui.RoutesRejections.Asn,
@@ -93,4 +93,9 @@ func apiConfigShow(_req *http.Request, _params httprouter.Params) (interface{}, 
 		RoutesColumns:   AliceConfig.Ui.RoutesColumns,
 	}
 	return result, nil
+}
+
+// Handle Routeservers List
+func apiRouteserversList(_req *http.Request, _params httprouter.Params) (api.Response, error) {
+	return "foo", nil
 }

@@ -4,6 +4,9 @@ import (
 	"time"
 )
 
+// General api response
+type Response interface{}
+
 // Details, usually the original backend response
 type Details map[string]interface{}
 
