@@ -3,7 +3,6 @@ package main
 import (
 	"compress/gzip"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 
