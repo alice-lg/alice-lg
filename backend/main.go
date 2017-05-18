@@ -22,6 +22,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	err = apiRegisterEndpints(router)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// Start http server
 	log.Fatal(http.ListenAndServe(":7340", router))
 }
