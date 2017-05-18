@@ -7,6 +7,32 @@ import (
 // Details, usually the original backend response
 type Details map[string]interface{}
 
+// Error Handling
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
+
+// Config
+type Config struct {
+	Rejection     Rejection         `json:"rejection"`
+	RejectReasons map[string]string `json:"reject_reasons"`
+
+	Noexport        Noexport          `json:"noexport"`
+	NoexportReasons map[string]string `json:"noexport_reasons"`
+
+	RoutesColumns map[string]string `json:"routes_columns"`
+}
+
+type Rejection struct {
+	Asn      int `json:"asn"`
+	RejectId int `json:"reject_id"`
+}
+
+type Noexport struct {
+	Asn        int `json:"asn"`
+	NoexportId int `json:"noexport_id"`
+}
+
 // Status
 type ApiStatus struct {
 	Version         string      `json:"version"`
