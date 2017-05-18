@@ -111,7 +111,7 @@ type BgpInfo struct {
 }
 
 // Prefixes
-type Prefix struct {
+type Route struct {
 	Network   string    `json:"network"`
 	Interface string    `json:"interface"`
 	Metric    int       `json:"metric"`
@@ -120,4 +120,10 @@ type Prefix struct {
 	Flags     []string  `json:"flags"` // [BGP, unicast, univ]
 
 	Details Details `json:"details"`
+}
+
+type RoutesResponse struct {
+	Routes []Route   `json:"routes"`
+	Api    ApiStatus `json:"api"`
+	Ttl    time.Time `json:"ttl"`
 }
