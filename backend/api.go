@@ -3,6 +3,7 @@ package main
 import (
 	"compress/gzip"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -125,9 +126,29 @@ func apiRouteserversList(_req *http.Request, _params httprouter.Params) (api.Res
 	return response, nil
 }
 
+// Helper: Validate source Id
+func validateSourceId(id string) (int, error) {
+	rsId, err := strconv.Atoi(id)
+	if err != nil {
+		return 0, err
+	}
+
+	if rsId < 0 {
+		return 0, fmt.Errorf("Source id may not be negative")
+	}
+	if rsId >= len(AliceConfig.Sources) {
+		return 0, fmt.Errorf("Source id not within [0, %d]", len(AliceConfig.Sources)-1)
+	}
+
+	return rsId, nil
+}
+
 // Handle status
 func apiStatus(_req *http.Request, params httprouter.Params) (api.Response, error) {
-	rsId, _ := strconv.Atoi(params.ByName("id"))
+	rsId, err := validateSourceId(params.ByName("id"))
+	if err != nil {
+		return nil, err
+	}
 	source := AliceConfig.Sources[rsId].getInstance()
 	result, err := source.Status()
 	return result, err
@@ -135,7 +156,10 @@ func apiStatus(_req *http.Request, params httprouter.Params) (api.Response, erro
 
 // Handle get neighbours on routeserver
 func apiNeighboursList(_req *http.Request, params httprouter.Params) (api.Response, error) {
-	rsId, _ := strconv.Atoi(params.ByName("id"))
+	rsId, err := validateSourceId(params.ByName("id"))
+	if err != nil {
+		return nil, err
+	}
 	source := AliceConfig.Sources[rsId].getInstance()
 	result, err := source.Neighbours()
 	return result, err
@@ -143,7 +167,10 @@ func apiNeighboursList(_req *http.Request, params httprouter.Params) (api.Respon
 
 // Handle routes
 func apiRoutesList(_req *http.Request, params httprouter.Params) (api.Response, error) {
-	rsId, _ := strconv.Atoi(params.ByName("id"))
+	rsId, err := validateSourceId(params.ByName("id"))
+	if err != nil {
+		return nil, err
+	}
 	neighbourId := params.ByName("neighbourId")
 	source := AliceConfig.Sources[rsId].getInstance()
 	result, err := source.Routes(neighbourId)
