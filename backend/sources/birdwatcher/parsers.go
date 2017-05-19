@@ -4,8 +4,11 @@ package birdwatcher
 
 import (
 	"time"
+
+	"github.com/ecix/alice-lg/backend/api"
 )
 
+const SERVER_TIME = time.RFC3339Nano
 const SERVER_TIME_SHORT = "2006-01-02 15:04:05"
 const SERVER_TIME_EXT = "Mon, 2 Jan 2006 15:04:05 +0000"
 
@@ -23,4 +26,24 @@ func parseServerTime(value interface{}, layout, timezone string) (time.Time, err
 
 	t, err := time.ParseInLocation(layout, svalue, loc)
 	return t, err
+}
+
+// Make api status from response:
+// The api status is always included in a birdwatcher response
+func parseApiStatus(bird ClientResponse, config Config) api.ApiStatus {
+	birdApi := bird["api"].(map[string]interface{})
+
+	ttl, err := parseServerTime(
+		bird["ttl"],
+		SERVER_TIME,
+		config.Timezone,
+	)
+
+	status := api.ApiStatus{
+		Version:         birdApi["Version"].(string),
+		ResultFromCache: birdApi["result_from_cache"].(bool),
+		Ttl:             ttl,
+	}
+
+	return status
 }

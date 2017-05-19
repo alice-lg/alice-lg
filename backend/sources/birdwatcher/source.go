@@ -27,6 +27,7 @@ func (self *Birdwatcher) Status() (api.StatusResponse, error) {
 		return api.StatusResponse{}, nil
 	}
 
+	apiStatus := parseApiStatus(bird, self.config)
 	birdStatus := bird["status"].(map[string]interface{})
 
 	// Get special fields
@@ -60,6 +61,7 @@ func (self *Birdwatcher) Status() (api.StatusResponse, error) {
 	}
 
 	response := api.StatusResponse{
+		Api:    apiStatus,
 		Status: status,
 	}
 
