@@ -41,6 +41,7 @@ type ApiStatus struct {
 	Version         string      `json:"version"`
 	CacheStatus     CacheStatus `json:"cache_status"`
 	ResultFromCache bool        `json:"result_from_cache"`
+	Ttl             time.Time   `json:"ttl"`
 }
 
 type CacheStatus struct {
@@ -60,7 +61,6 @@ type Status struct {
 
 type StatusResponse struct {
 	Api    ApiStatus `json:"api"`
-	Ttl    time.Time `json:"ttl"`
 	Status Status    `json:"status"`
 }
 
