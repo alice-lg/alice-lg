@@ -1,10 +1,8 @@
 package main
 
-import (
-	"strings"
+import ()
 
-	"github.com/GeertJohan/go.rice"
-)
+var version = "unknown"
 
 // Gather application status information
 type AppStatus struct {
@@ -15,20 +13,7 @@ type AppStatus struct {
 // on backends.
 func NewAppStatus() (*AppStatus, error) {
 	status := &AppStatus{
-		Version: statusGetVersion(),
+		Version: version,
 	}
 	return status, nil
-}
-
-// Get application version
-func statusGetVersion() string {
-	meta, err := rice.FindBox("../")
-	if err != nil {
-		return "unknown"
-	}
-	version, err := meta.String("VERSION")
-	if err != nil {
-		return "unknown"
-	}
-	return strings.Trim(version, "\n")
 }
