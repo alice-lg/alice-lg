@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
@@ -52,6 +53,7 @@ type Config struct {
 	Server  ServerConfig
 	Ui      UiConfig
 	Sources []SourceConfig
+	File    string
 }
 
 // Get sources keys form ini
@@ -231,8 +233,15 @@ func getSources(config *ini.File) ([]SourceConfig, error) {
 //    /etc/alicelg/alice.conf
 //    ./etc/alicelg/alice.local.conf
 //
-func loadConfigs(base, global, local string) (*Config, error) {
-	parsedConfig, err := ini.LooseLoad(base, global, local)
+func loadConfig(file string) (*Config, error) {
+
+	// Try to get config file, fallback to alternatives
+	file, err := getConfigFile(file)
+	if err != nil {
+		return nil, err
+	}
+
+	parsedConfig, err := ini.LooseLoad(file)
 	if err != nil {
 		return nil, err
 	}
@@ -257,17 +266,10 @@ func loadConfigs(base, global, local string) (*Config, error) {
 		Server:  server,
 		Ui:      ui,
 		Sources: sources,
+		File:    file,
 	}
 
 	return config, nil
-}
-
-func configOptions(filename string) []string {
-	return []string{
-		strings.Join([]string{"/", filename}, ""),
-		strings.Join([]string{"./", filename}, ""),
-		strings.Replace(filename, ".conf", ".local.conf", 1),
-	}
 }
 
 // Get source instance from config
@@ -278,4 +280,23 @@ func (source SourceConfig) getInstance() sources.Source {
 	}
 
 	return nil
+}
+
+// Get configuration file with fallbacks
+func getConfigFile(filename string) (string, error) {
+	// Check if requested file is present
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		// Fall back to local filename
+		filename = ".." + filename
+	}
+
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		filename = strings.Replace(filename, ".conf", ".local.conf", 1)
+	}
+
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		return "not_found", fmt.Errorf("could not find any configuration file")
+	}
+
+	return filename, nil
 }

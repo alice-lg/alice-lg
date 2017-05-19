@@ -1,7 +1,5 @@
 package main
 
-import ()
-
 var version = "unknown"
 
 // Gather application status information
