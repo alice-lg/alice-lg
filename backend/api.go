@@ -71,7 +71,8 @@ func endpoint(wrapped apiEndpoint) httprouter.Handle {
 // Register api endpoints
 func apiRegisterEndpoints(router *httprouter.Router) error {
 
-	// Config
+	// Meta
+	router.GET("/api/status", endpoint(apiStatusShow))
 	router.GET("/api/config", endpoint(apiConfigShow))
 
 	// Routeservers
@@ -85,6 +86,13 @@ func apiRegisterEndpoints(router *httprouter.Router) error {
 		endpoint(apiRoutesList))
 
 	return nil
+}
+
+// Handle Status Endpoint, this is intended for
+// monitoring and service health checks
+func apiStatusShow(_req *http.Request, _params httprouter.Params) (api.Response, error) {
+	status, err := NewAppStatus()
+	return status, err
 }
 
 // Handle Config Endpoint
