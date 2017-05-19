@@ -1,4 +1,6 @@
 
+bin/alice-lg-*
+
 *.pyc
 __pycache__
 
