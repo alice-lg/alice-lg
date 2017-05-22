@@ -79,14 +79,14 @@ class NeighboursTable extends React.Component {
           </td>
           <td>
             <RoutesLink routeserverId={this.props.routeserverId}
-                        protocol={n.protocol}
+                        protocol={n.id}
                         state={n.state}>
               {n.routes_received}
             </RoutesLink>
           </td>
         <td>
             <RoutesLink routeserverId={this.props.routeserverId}
-                        protocol={n.protocol}
+                        protocol={n.id}
                         state={n.state}>
               {n.routes_filtered}
             </RoutesLink>
