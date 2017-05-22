@@ -52,7 +52,7 @@ func parseApiStatus(bird ClientResponse, config Config) (api.ApiStatus, error) {
 }
 
 // Parse neighbour uptime
-func parseNeighbourUptime(uptime interface{}, config Config) time.Duration {
+func parseRelativeServerTime(uptime interface{}, config Config) time.Duration {
 	serverTime, _ := parseServerTime(uptime, SERVER_TIME_SHORT, config.Timezone)
 	return time.Since(serverTime)
 }
@@ -67,7 +67,7 @@ func parseNeighbours(bird ClientResponse, config Config) ([]api.Neighbour, error
 		protocol := proto.(map[string]interface{})
 		routes := protocol["routes"].(map[string]interface{})
 
-		uptime := parseNeighbourUptime(protocol["state_changed"], config)
+		uptime := parseRelativeServerTime(protocol["state_changed"], config)
 
 		neighbour := api.Neighbour{
 			Id: protocolId,
@@ -91,4 +91,57 @@ func parseNeighbours(bird ClientResponse, config Config) ([]api.Neighbour, error
 	}
 
 	return neighbours, nil
+}
+
+// Parse route bgp info
+func parseRouteBgpInfo(data interface{}) api.BgpInfo {
+	bgpData := data.(map[string]interface{})
+
+	_ = bgpData
+
+	bgp := api.BgpInfo{}
+	return bgp
+}
+
+// Get route type information
+func parseRouteType(data interface{}) []string {
+	rtype := []string{}
+	tdata := data.([]interface{})
+	for _, t := range tdata {
+		rtype = append(rtype, t.(string))
+	}
+	return rtype
+}
+
+// Parse routes response
+func parseRoutes(bird ClientResponse, config Config) ([]api.Route, error) {
+	routes := []api.Route{}
+	birdRoutes := bird["routes"].([]interface{})
+
+	for _, data := range birdRoutes {
+		rdata := data.(map[string]interface{})
+
+		age := parseRelativeServerTime(rdata["age"], config)
+		rtype := parseRouteType(rdata["type"])
+		bgpInfo := parseRouteBgpInfo(rdata["bgp"])
+
+		route := api.Route{
+			Id:          rdata["network"].(string),
+			NeighbourId: rdata["from_protocol"].(string),
+
+			Network:   rdata["network"].(string),
+			Interface: rdata["interface"].(string),
+			Gateway:   rdata["gateway"].(string),
+			Metric:    int(rdata["metric"].(float64)),
+			Age:       age,
+			Type:      rtype,
+			Bgp:       bgpInfo,
+
+			Details: rdata,
+		}
+
+		routes = append(routes, route)
+	}
+
+	return routes, nil
 }
