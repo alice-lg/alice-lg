@@ -53,6 +53,18 @@ func Test_NeighboursParsing(t *testing.T) {
 		t.Error("Number of neighbours should be 2, is:", len(neighbours))
 	}
 
-	t.Log(neighbours)
+	// Test neighbour parsing
+	neighbour := neighbours[0]
+	if neighbour.Asn == 0 {
+		t.Error("Expected ASN to be <> 0")
+	}
+
+	if neighbour.Address != "194.9.117.1" {
+		t.Error("Expected neighbour address to be: 194.9.117.1, not:", neighbour.Address)
+	}
+
+	if neighbour.Description == "" {
+		t.Error("Expected description to be set")
+	}
 
 }
