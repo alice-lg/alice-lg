@@ -113,9 +113,19 @@ func (self *Birdwatcher) Routes(neighbourId string) (api.RoutesResponse, error) 
 	}
 
 	// Filtered
+	bird, err = self.client.GetJson("/routes/filtered/" + neighbourId)
+	if err != nil {
+		return api.RoutesResponse{}, err
+	}
+
+	filtered, err := parseRoutes(bird, self.config)
+	if err != nil {
+		return api.RoutesResponse{}, err
+	}
 
 	return api.RoutesResponse{
 		Api:      apiStatus,
 		Exported: exported,
+		Filtered: filtered,
 	}, nil
 }

@@ -3,6 +3,7 @@ package birdwatcher
 // Parsers and helpers
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/ecix/alice-lg/backend/api"
@@ -97,20 +98,71 @@ func parseNeighbours(bird ClientResponse, config Config) ([]api.Neighbour, error
 func parseRouteBgpInfo(data interface{}) api.BgpInfo {
 	bgpData := data.(map[string]interface{})
 
-	_ = bgpData
+	asPath := parseIntList(bgpData["as_path"])
+	communities := parseBgpCommunities(bgpData["communities"])
+	largeCommunities := parseBgpCommunities(bgpData["large_communities"])
 
-	bgp := api.BgpInfo{}
+	localPref, _ := strconv.Atoi(bgpData["local_pref"].(string))
+	medInfo, ok := bgpData["med"].(string)
+	med := 0
+	if ok {
+		med, _ = strconv.Atoi(medInfo)
+	}
+
+	bgp := api.BgpInfo{
+		AsPath:           asPath,
+		NextHop:          bgpData["next_hop"].(string),
+		LocalPref:        localPref,
+		Med:              med,
+		Communities:      communities,
+		LargeCommunities: largeCommunities,
+	}
 	return bgp
 }
 
-// Get route type information
-func parseRouteType(data interface{}) []string {
-	rtype := []string{}
-	tdata := data.([]interface{})
-	for _, t := range tdata {
-		rtype = append(rtype, t.(string))
+// Extract bgp communities from response
+func parseBgpCommunities(data interface{}) []api.Community {
+	communities := []api.Community{}
+
+	ldata, ok := data.([]interface{})
+	if !ok { // We don't have any
+		return []api.Community{}
 	}
-	return rtype
+
+	for _, c := range ldata {
+		cdata := c.([]interface{})
+		community := api.Community{}
+		for _, cinfo := range cdata {
+			community = append(community, int(cinfo.(float64)))
+		}
+		communities = append(communities, community)
+	}
+
+	return communities
+}
+
+// Assert list of strings
+func mustStringList(data interface{}) []string {
+	list := []string{}
+	ldata := data.([]interface{})
+	for _, e := range ldata {
+		s, ok := e.(string)
+		if ok {
+			list = append(list, s)
+		}
+	}
+	return list
+}
+
+// Convert list of strings to int
+func parseIntList(data interface{}) []int {
+	list := []int{}
+	sdata := mustStringList(data)
+	for _, e := range sdata {
+		val, _ := strconv.Atoi(e)
+		list = append(list, val)
+	}
+	return list
 }
 
 // Parse routes response
@@ -122,7 +174,7 @@ func parseRoutes(bird ClientResponse, config Config) ([]api.Route, error) {
 		rdata := data.(map[string]interface{})
 
 		age := parseRelativeServerTime(rdata["age"], config)
-		rtype := parseRouteType(rdata["type"])
+		rtype := mustStringList(rdata["type"])
 		bgpInfo := parseRouteBgpInfo(rdata["bgp"])
 
 		route := api.Route{

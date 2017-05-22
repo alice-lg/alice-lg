@@ -102,11 +102,12 @@ type NeighboursResponse struct {
 type Community []int
 
 type BgpInfo struct {
-	AsPath      []int       `json:"as_path"`
-	NextHop     string      `json:"next_hop"`
-	Communities []Community `json:"communities"`
-	LocalPref   string      `json:"local_pref"`
-	Med         string      `json:"med"`
+	AsPath           []int       `json:"as_path"`
+	NextHop          string      `json:"next_hop"`
+	Communities      []Community `json:"communities"`
+	LargeCommunities []Community `json:"large_communities"`
+	LocalPref        int         `json:"local_pref"`
+	Med              int         `json:"med"`
 }
 
 // Prefixes
