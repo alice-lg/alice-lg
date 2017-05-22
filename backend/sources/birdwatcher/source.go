@@ -83,7 +83,7 @@ func (self *Birdwatcher) Neighbours() (api.NeighboursResponse, error) {
 		return api.NeighboursResponse{}, err
 	}
 
-	neighbours, err := parseNeighbours(bird)
+	neighbours, err := parseNeighbours(bird, self.config)
 	if err != nil {
 		return api.NeighboursResponse{}, err
 	}
