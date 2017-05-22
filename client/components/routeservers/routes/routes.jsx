@@ -131,10 +131,6 @@ class RoutesTables extends React.Component {
     this.props.dispatch(
       loadRouteserverRoutes(this.props.routeserverId, this.props.protocolId)
     );
-    this.props.dispatch(
-      loadRouteserverRoutesFiltered(this.props.routeserverId,
-                                    this.props.protocolId)
-    );
   }
 
   render() {

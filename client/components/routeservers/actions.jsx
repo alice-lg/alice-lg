@@ -176,7 +176,7 @@ export function loadRouteserverRoutes(routeserverId, protocolId) {
   return (dispatch) => {
     dispatch(loadRouteserverRoutesRequest(routeserverId, protocolId))
 
-    axios.get(`/api/routeserver/${routeserverId}/neighbours/${protocolId}/routes`)
+    axios.get(`/api/routeservers/${routeserverId}/neighbours/${protocolId}/routes`)
       .then(({data}) => {
         dispatch(
           loadRouteserverRoutesSuccess(routeserverId, protocolId, data.exported)
@@ -210,25 +210,6 @@ export function loadRouteserverRoutesFilteredSuccess(routeserverId, protocolId, 
       routes: routes
     }
   }
-}
-
-
-export function loadRouteserverRoutesFiltered(routeserverId, protocolId) {
-  console.log("!!!DEPRECATED!!! loadRouteserverRoutesFiltered")
-  /*
-  return (dispatch) => {
-    dispatch(loadRouteserverRoutesFilteredRequest(routeserverId, protocolId))
-
-    axios.get(`/birdseye/api/routeserver/${routeserverId}/routes/filtered/?protocol=${protocolId}`)
-      .then(({data}) => {
-        dispatch(
-          loadRouteserverRoutesFilteredSuccess(routeserverId, protocolId, data.routes)
-        );
-        dispatch(setRoutesFilterValue(""));
-      })
-      .catch(error => dispatch(apiError(error)));
-  }
-  */
 }
 
 
