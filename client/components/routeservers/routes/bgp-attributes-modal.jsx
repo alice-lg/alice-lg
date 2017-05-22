@@ -59,24 +59,23 @@ class BgpAttributesModal extends React.Component {
             <tr>
              <th>Next Hop:</th><td>{attrs.bgp.next_hop}</td>
             </tr>
-            {attrs.bgp && attrs.bgp.med &&
             <tr>
-              <th>MED:</th><td>{attrs.bgp.med}</td>
-            </tr>}
+                <th>MED</th>
+                <td>{attrs.bgp.med}</td>
+            </tr>
             {attrs.bgp && attrs.bgp.as_path &&
-              <tr>
-                <th>AS Path:</th><td>{attrs.bgp.as_path.join(' ')}</td>
-              </tr>
-            }
+                <tr>
+                  <th>AS Path:</th><td>{attrs.bgp.as_path.join(' ')}</td>
+                </tr>}
             <tr>
               <th>Communities:</th>
               <td>{communities.join(' ')}</td>
             </tr>
             {large_communities.length > 0 &&
-            <tr>
-              <th>Large Communities:</th>
-              <td>{large_communities.join(' ')}</td>
-            </tr>}
+                <tr>
+                  <th>Large Communities:</th>
+                  <td>{large_communities.join(' ')}</td>
+                </tr>}
            </tbody>
           </table>
         </Body>
