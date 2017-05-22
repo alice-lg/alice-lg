@@ -75,6 +75,8 @@ type RouteserversResponse struct {
 }
 
 // Neighbours
+type Neighbours []Neighbour
+
 type Neighbour struct {
 	Id string `json:"id"`
 
@@ -88,14 +90,28 @@ type Neighbour struct {
 	RoutesExported  int           `json:"routes_exported"`
 	RoutesPreferred int           `json:"routes_preferred"`
 	Uptime          time.Duration `json:"uptime"`
+	LastError       string        `json:"last_error"`
 
 	// Original response
 	Details map[string]interface{} `json:"details"`
 }
 
+// Implement sorting interface for routes
+func (neighbours Neighbours) Len() int {
+	return len(neighbours)
+}
+
+func (neighbours Neighbours) Less(i, j int) bool {
+	return neighbours[i].Asn < neighbours[j].Asn
+}
+
+func (neighbours Neighbours) Swap(i, j int) {
+	neighbours[i], neighbours[j] = neighbours[j], neighbours[i]
+}
+
 type NeighboursResponse struct {
-	Api        ApiStatus   `json:"api"`
-	Neighbours []Neighbour `json:"neighbours"`
+	Api        ApiStatus  `json:"api"`
+	Neighbours Neighbours `json:"neighbours"`
 }
 
 // BGP
@@ -124,6 +140,21 @@ type Route struct {
 	Type      []string      `json:"type"` // [BGP, unicast, univ]
 
 	Details Details `json:"details"`
+}
+
+type Routes []Route
+
+// Implement sorting interface for routes
+func (routes Routes) Len() int {
+	return len(routes)
+}
+
+func (routes Routes) Less(i, j int) bool {
+	return routes[i].Network < routes[j].Network
+}
+
+func (routes Routes) Swap(i, j int) {
+	routes[i], routes[j] = routes[j], routes[i]
 }
 
 type RoutesResponse struct {

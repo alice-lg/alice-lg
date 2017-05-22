@@ -3,6 +3,7 @@ package birdwatcher
 // Parsers and helpers
 
 import (
+	"sort"
 	"strconv"
 	"time"
 
@@ -60,7 +61,7 @@ func parseRelativeServerTime(uptime interface{}, config Config) time.Duration {
 
 // Parse neighbours response
 func parseNeighbours(bird ClientResponse, config Config) ([]api.Neighbour, error) {
-	neighbours := []api.Neighbour{}
+	neighbours := api.Neighbours{}
 	protocols := bird["protocols"].(map[string]interface{})
 
 	// Iterate over protocols map:
@@ -69,6 +70,7 @@ func parseNeighbours(bird ClientResponse, config Config) ([]api.Neighbour, error
 		routes := protocol["routes"].(map[string]interface{})
 
 		uptime := parseRelativeServerTime(protocol["state_changed"], config)
+		lastError := mustString(protocol["last_error"], "")
 
 		neighbour := api.Neighbour{
 			Id: protocolId,
@@ -83,13 +85,16 @@ func parseNeighbours(bird ClientResponse, config Config) ([]api.Neighbour, error
 			RoutesFiltered:  int(routes["filtered"].(float64)),
 			RoutesPreferred: int(routes["preferred"].(float64)),
 
-			Uptime: uptime,
+			Uptime:    uptime,
+			LastError: lastError,
 
 			Details: protocol,
 		}
 
 		neighbours = append(neighbours, neighbour)
 	}
+
+	sort.Sort(neighbours)
 
 	return neighbours, nil
 }
@@ -141,6 +146,15 @@ func parseBgpCommunities(data interface{}) []api.Community {
 	return communities
 }
 
+// Assert string, provide default
+func mustString(value interface{}, fallback string) string {
+	sval, ok := value.(string)
+	if !ok {
+		return fallback
+	}
+	return sval
+}
+
 // Assert list of strings
 func mustStringList(data interface{}) []string {
 	list := []string{}
@@ -167,7 +181,7 @@ func parseIntList(data interface{}) []int {
 
 // Parse routes response
 func parseRoutes(bird ClientResponse, config Config) ([]api.Route, error) {
-	routes := []api.Route{}
+	routes := api.Routes{}
 	birdRoutes := bird["routes"].([]interface{})
 
 	for _, data := range birdRoutes {
@@ -194,6 +208,9 @@ func parseRoutes(bird ClientResponse, config Config) ([]api.Route, error) {
 
 		routes = append(routes, route)
 	}
+
+	// Sort routes
+	sort.Sort(routes)
 
 	return routes, nil
 }
