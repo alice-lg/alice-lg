@@ -38,6 +38,9 @@ func parseApiStatus(bird ClientResponse, config Config) api.ApiStatus {
 		SERVER_TIME,
 		config.Timezone,
 	)
+	if err != nil {
+		return api.ApiStatus{}
+	}
 
 	status := api.ApiStatus{
 		Version:         birdApi["Version"].(string),

@@ -47,5 +47,5 @@ func main() {
 	}
 
 	// Start http server
-	log.Fatal(http.ListenAndServe(":7340", router))
+	log.Fatal(http.ListenAndServe(AliceConfig.Server.Listen, router))
 }
