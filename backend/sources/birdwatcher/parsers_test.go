@@ -88,5 +88,5 @@ func Test_RoutesParsing(t *testing.T) {
 		t.Error("Expected parsed routes to be 1, not:", len(routes))
 	}
 
-	t.Log(routes)
+	// TODO: addo more tests
 }

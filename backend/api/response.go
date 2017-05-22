@@ -123,9 +123,6 @@ type Route struct {
 	Age       time.Duration `json:"age"`
 	Type      []string      `json:"type"` // [BGP, unicast, univ]
 
-	Filtered       bool   `json:"filtered"`
-	FilteredReason string `json:"filtered_reason"`
-
 	Details Details `json:"details"`
 }
 
