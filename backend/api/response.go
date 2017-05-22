@@ -111,17 +111,25 @@ type BgpInfo struct {
 
 // Prefixes
 type Route struct {
-	Network   string    `json:"network"`
-	Interface string    `json:"interface"`
-	Metric    int       `json:"metric"`
-	Bgp       BgpInfo   `json:"bgp"`
-	Age       time.Time `json:"age"`
-	Flags     []string  `json:"flags"` // [BGP, unicast, univ]
+	Id          string `json:"id"`
+	NeighbourId string `json:"neighbour_id"`
+
+	Network   string        `json:"network"`
+	Interface string        `json:"interface"`
+	Gateway   string        `json:"gateway"`
+	Metric    int           `json:"metric"`
+	Bgp       BgpInfo       `json:"bgp"`
+	Age       time.Duration `json:"age"`
+	Type      []string      `json:"type"` // [BGP, unicast, univ]
+
+	Filtered       bool   `json:"filtered"`
+	FilteredReason string `json:"filtered_reason"`
 
 	Details Details `json:"details"`
 }
 
 type RoutesResponse struct {
-	Api    ApiStatus `json:"api"`
-	Routes []Route   `json:"routes"`
+	Api      ApiStatus `json:"api"`
+	Exported []Route   `json:"exported"`
+	Filtered []Route   `json:"filtered"`
 }
