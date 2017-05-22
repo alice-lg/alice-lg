@@ -1,8 +1,6 @@
 package birdwatcher
 
 import (
-	"log"
-
 	"github.com/ecix/alice-lg/backend/api"
 )
 
@@ -72,6 +70,7 @@ func (self *Birdwatcher) Status() (api.StatusResponse, error) {
 	return response, nil
 }
 
+// Get bird BGP protocols
 func (self *Birdwatcher) Neighbours() (api.NeighboursResponse, error) {
 	bird, err := self.client.GetJson("/protocols/bgp")
 	if err != nil {
@@ -94,8 +93,29 @@ func (self *Birdwatcher) Neighbours() (api.NeighboursResponse, error) {
 	}, nil
 }
 
+// Get filtered and exported routes
 func (self *Birdwatcher) Routes(neighbourId string) (api.RoutesResponse, error) {
-	log.Println("Implement me: Routes()")
+	// Exported
+	bird, err := self.client.GetJson("/routes/protocol/" + neighbourId)
+	if err != nil {
+		return api.RoutesResponse{}, err
+	}
 
-	return api.RoutesResponse{}, nil
+	// Use api status from first request
+	apiStatus, err := parseApiStatus(bird, self.config)
+	if err != nil {
+		return api.RoutesResponse{}, err
+	}
+
+	exported, err := parseRoutes(bird, self.config)
+	if err != nil {
+		return api.RoutesResponse{}, err
+	}
+
+	// Filtered
+
+	return api.RoutesResponse{
+		Api:      apiStatus,
+		Exported: exported,
+	}, nil
 }
