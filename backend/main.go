@@ -36,7 +36,7 @@ func main() {
 	router := httprouter.New()
 
 	// Serve static content
-	err = httpRegisterAssets(router)
+	err = webRegisterAssets(router)
 	if err != nil {
 		log.Fatal(err)
 	}
