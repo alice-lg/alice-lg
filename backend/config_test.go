@@ -9,10 +9,20 @@ import (
 
 func TestLoadConfigs(t *testing.T) {
 
-	config, err := loadConfigs("../etc/alicelg/alice.conf", "", "")
+	config, err := loadConfig("../etc/alicelg/alice.conf")
 	if err != nil {
 		t.Error("Could not load test config:", err)
 	}
 
-	t.Log(config)
+	if config.Server.Listen == "" {
+		t.Error("Listen string not present.")
+	}
+
+	if len(config.Ui.RoutesColumns) == 0 {
+		t.Error("Route columns settings missing")
+	}
+
+	if len(config.Ui.RoutesRejections.Reasons) == 0 {
+		t.Error("Rejection reasons missing")
+	}
 }
