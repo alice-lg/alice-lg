@@ -180,6 +180,14 @@ func parseIntList(data interface{}) []int {
 	return list
 }
 
+func mustInt(value interface{}, fallback int) int {
+	fval, ok := value.(float64)
+	if !ok {
+		return fallback
+	}
+	return int(fval)
+}
+
 // Parse routes response
 func parseRoutes(bird ClientResponse, config Config) ([]api.Route, error) {
 	routes := api.Routes{}
@@ -193,13 +201,13 @@ func parseRoutes(bird ClientResponse, config Config) ([]api.Route, error) {
 		bgpInfo := parseRouteBgpInfo(rdata["bgp"])
 
 		route := api.Route{
-			Id:          rdata["network"].(string),
-			NeighbourId: rdata["from_protocol"].(string),
+			Id:          mustString(rdata["network"], "unknown"),
+			NeighbourId: mustString(rdata["from_protocol"], "unknown neighbour"),
 
-			Network:   rdata["network"].(string),
-			Interface: rdata["interface"].(string),
-			Gateway:   rdata["gateway"].(string),
-			Metric:    int(rdata["metric"].(float64)),
+			Network:   mustString(rdata["network"], "unknown net"),
+			Interface: mustString(rdata["interface"], "unknown interface"),
+			Gateway:   mustString(rdata["gateway"], "unknown gateway"),
+			Metric:    mustInt(rdata["metric"], -1),
 			Age:       age,
 			Type:      rtype,
 			Bgp:       bgpInfo,
