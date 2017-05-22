@@ -53,22 +53,22 @@ class NeighboursTable extends React.Component {
   render() {
     let neighbours = this.props.neighbours.map( (n) => {
       return (
-        <tr key={n.protocol}>
+        <tr key={n.id}>
           <td>
             <RoutesLink routeserverId={this.props.routeserverId}
                         protocol={n.protocol}
                         state={n.state}>
-             {n.neighbor_address}
+             {n.address}
             </RoutesLink>
            </td>
-          <td>{n.neighbor_as}</td>
+          <td>{n.asn}</td>
           <td>{n.state}</td>
           <td className="date-since">
-            <RelativeTime value={n.state_changed} suffix={true} />
+            <RelativeTime value={n.details.state_changed} suffix={true} />
           </td>
           <td>
             <RoutesLink routeserverId={this.props.routeserverId}
-                        protocol={n.protocol}
+                        protocol={n.id}
                         state={n.state}>
               {n.description}
               {n.state != "up" && n.last_error &&
@@ -81,14 +81,14 @@ class NeighboursTable extends React.Component {
             <RoutesLink routeserverId={this.props.routeserverId}
                         protocol={n.protocol}
                         state={n.state}>
-              {n.routes.imported}
+              {n.routes_received}
             </RoutesLink>
           </td>
         <td>
             <RoutesLink routeserverId={this.props.routeserverId}
                         protocol={n.protocol}
                         state={n.state}>
-              {n.routes.filtered}
+              {n.routes_filtered}
             </RoutesLink>
           </td>
         </tr>
