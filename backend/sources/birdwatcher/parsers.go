@@ -51,8 +51,44 @@ func parseApiStatus(bird ClientResponse, config Config) (api.ApiStatus, error) {
 	return status, nil
 }
 
-// Parse neighbours response
-func parseNeighbours(bird ClientResponse) ([]api.Neighbour, error) {
+// Parse neighbour uptime
+func parseNeighbourUptime(uptime interface{}, config Config) time.Duration {
+	serverTime, _ := parseServerTime(uptime, SERVER_TIME_SHORT, config.Timezone)
+	return time.Since(serverTime)
+}
 
-	return []api.Neighbour{}, nil
+// Parse neighbours response
+func parseNeighbours(bird ClientResponse, config Config) ([]api.Neighbour, error) {
+	neighbours := []api.Neighbour{}
+	protocols := bird["protocols"].(map[string]interface{})
+
+	// Iterate over protocols map:
+	for protocolId, proto := range protocols {
+		protocol := proto.(map[string]interface{})
+		routes := protocol["routes"].(map[string]interface{})
+
+		uptime := parseNeighbourUptime(protocol["state_changed"], config)
+
+		neighbour := api.Neighbour{
+			Id: protocolId,
+
+			Address:     protocol["neighbor_address"].(string),
+			Asn:         int(protocol["neighbor_as"].(float64)),
+			State:       protocol["state"].(string),
+			Description: protocol["description"].(string),
+
+			RoutesReceived:  int(routes["imported"].(float64)),
+			RoutesExported:  int(routes["exported"].(float64)),
+			RoutesFiltered:  int(routes["filtered"].(float64)),
+			RoutesPreferred: int(routes["preferred"].(float64)),
+
+			Uptime: uptime,
+
+			Details: protocol,
+		}
+
+		neighbours = append(neighbours, neighbour)
+	}
+
+	return neighbours, nil
 }

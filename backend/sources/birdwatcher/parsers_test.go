@@ -40,5 +40,19 @@ func Test_ParseApiStatus(t *testing.T) {
 }
 
 func Test_NeighboursParsing(t *testing.T) {
+	config := Config{Timezone: "UTC"} // Or ""
+	bird := parseTestResponse(API_RESPONSE_NEIGHBOURS)
+
+	neighbours, err := parseNeighbours(bird, config)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// We have 4 neighbours in our test response
+	if len(neighbours) != 2 {
+		t.Error("Number of neighbours should be 2, is:", len(neighbours))
+	}
+
+	t.Log(neighbours)
 
 }
