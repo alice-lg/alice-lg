@@ -28,3 +28,5 @@ BUILD-RPM/
 var/
 
 etc/birdseye/*.conf
+
+.DS_Store
