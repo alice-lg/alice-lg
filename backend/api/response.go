@@ -95,7 +95,6 @@ type Neighbour struct {
 
 type NeighboursResponse struct {
 	Api        ApiStatus   `json:"api"`
-	Ttl        time.Time   `json:"ttl"`
 	Neighbours []Neighbour `json:"neighbours"`
 }
 
@@ -123,7 +122,6 @@ type Route struct {
 }
 
 type RoutesResponse struct {
-	Routes []Route   `json:"routes"`
 	Api    ApiStatus `json:"api"`
-	Ttl    time.Time `json:"ttl"`
+	Routes []Route   `json:"routes"`
 }

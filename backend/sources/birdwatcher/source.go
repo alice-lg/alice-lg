@@ -24,10 +24,14 @@ func NewBirdwatcher(config Config) *Birdwatcher {
 func (self *Birdwatcher) Status() (api.StatusResponse, error) {
 	bird, err := self.client.GetJson("/status")
 	if err != nil {
-		return api.StatusResponse{}, nil
+		return api.StatusResponse{}, err
 	}
 
-	apiStatus := parseApiStatus(bird, self.config)
+	apiStatus, err := parseApiStatus(bird, self.config)
+	if err != nil {
+		return api.StatusResponse{}, err
+	}
+
 	birdStatus := bird["status"].(map[string]interface{})
 
 	// Get special fields
@@ -69,9 +73,25 @@ func (self *Birdwatcher) Status() (api.StatusResponse, error) {
 }
 
 func (self *Birdwatcher) Neighbours() (api.NeighboursResponse, error) {
-	log.Println("Implement me: Neighbours()")
+	bird, err := self.client.GetJson("/protocols/bgp")
+	if err != nil {
+		return api.NeighboursResponse{}, err
+	}
 
-	return api.NeighboursResponse{}, nil
+	apiStatus, err := parseApiStatus(bird, self.config)
+	if err != nil {
+		return api.NeighboursResponse{}, err
+	}
+
+	neighbours, err := parseNeighbours(bird)
+	if err != nil {
+		return api.NeighboursResponse{}, err
+	}
+
+	return api.NeighboursResponse{
+		Api:        apiStatus,
+		Neighbours: neighbours,
+	}, nil
 }
 
 func (self *Birdwatcher) Routes(neighbourId string) (api.RoutesResponse, error) {

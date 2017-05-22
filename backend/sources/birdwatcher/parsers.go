@@ -30,7 +30,7 @@ func parseServerTime(value interface{}, layout, timezone string) (time.Time, err
 
 // Make api status from response:
 // The api status is always included in a birdwatcher response
-func parseApiStatus(bird ClientResponse, config Config) api.ApiStatus {
+func parseApiStatus(bird ClientResponse, config Config) (api.ApiStatus, error) {
 	birdApi := bird["api"].(map[string]interface{})
 
 	ttl, err := parseServerTime(
@@ -39,7 +39,7 @@ func parseApiStatus(bird ClientResponse, config Config) api.ApiStatus {
 		config.Timezone,
 	)
 	if err != nil {
-		return api.ApiStatus{}
+		return api.ApiStatus{}, err
 	}
 
 	status := api.ApiStatus{
@@ -48,5 +48,11 @@ func parseApiStatus(bird ClientResponse, config Config) api.ApiStatus {
 		Ttl:             ttl,
 	}
 
-	return status
+	return status, nil
+}
+
+// Parse neighbours response
+func parseNeighbours(bird ClientResponse) ([]api.Neighbour, error) {
+
+	return []api.Neighbour{}, nil
 }
