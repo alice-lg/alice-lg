@@ -45,10 +45,13 @@ ifeq ($(BUILD_SERVER), '')
 	$(error BUILD_SERVER not configured)
 endif
 
-dist: clean linux
+bundle:
+	rice embed-go
 
-	mkdir -p $(DIST)opt/ecix/birdwatcher/bin
-	mkdir -p $(DIST)etc/ecix
+dist: clean bundle linux
+
+	# mkdir -p $(DIST)opt/ecix/birdwatcher/bin
+	# mkdir -p $(DIST)etc/ecix
 
 ifeq ($(SYSTEM_INIT), systemd)
 	# Installing systemd services
@@ -106,6 +109,7 @@ remote_rpm: build_server dist
 
 
 clean:
+	rm -f rice-box.go
 	rm -f $(PROG)-osx-$(ARCH)
 	rm -f $(PROG)-linux-$(ARCH)
 	rm -rf $(DIST)
