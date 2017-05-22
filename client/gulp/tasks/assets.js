@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Task: assets 
+ * Task: assets
  *
  * Copy / process all assets like images, fonts, etc.
  */
@@ -23,8 +23,11 @@ gulp.task('assets', function(){
   gulp.src('app/assets/fonts/**')
     .pipe(gulp.dest('build/fonts/'));
 
+  // Copy images
+  gulp.src('assets/img/**')
+    .pipe(gulp.dest('build/img/'));
 
-  // Copy fonts from libraries 
+  // Copy fonts from libraries
   gulp.src('node_modules/**/*.{otf,eot,svg,ttf,woff,woff2}')
     .pipe(flatten())
     .pipe(gulp.dest('build/fonts/'));
