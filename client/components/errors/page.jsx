@@ -29,7 +29,7 @@ class ErrorsPage extends React.Component {
     if (status == 429) {
       body = (
         <div className="error-message">
-          <p>Birdseye reached the request limit.</p>
+          <p>Alice reached the request limit.</p>
           <p>We suggest you try at a less busy time.</p>
         </div>
       );
@@ -37,7 +37,7 @@ class ErrorsPage extends React.Component {
       body = (
         <div className="error-message">
           <p>
-            Birdseye has trouble connecting to the API
+            Alice has trouble connecting to the API
             {this.props.error.response &&
               " (got HTTP " + this.props.error.response.status + ")"}
             .

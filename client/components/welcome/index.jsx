@@ -12,7 +12,7 @@ export default class Welcome extends React.Component {
        <PageHeader></PageHeader>
 
        <div className="jumbotron">
-         <h1>Welcome to Birdseye!</h1>
+         <h1>Welcome to Alice!</h1>
          <p>Your friendly bird looking glass</p>
        </div>
 

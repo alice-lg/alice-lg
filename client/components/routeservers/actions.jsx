@@ -61,7 +61,7 @@ export function loadRouteservers() {
   return (dispatch) => {
     dispatch(loadRouteserversRequest())
 
-    axios.get('/birdseye/api/routeserver/')
+    axios.get('/api/routeservers')
       .then(({data}) => {
         dispatch(loadRouteserversSuccess(data["routeservers"]));
       })
@@ -106,7 +106,7 @@ export function loadRouteserverStatusError(routeserverId, error) {
 export function loadRouteserverStatus(routeserverId) {
   return (dispatch) => {
     dispatch(loadRouteserverStatusRequest(routeserverId));
-    axios.get(`/birdseye/api/routeserver/${routeserverId}/status/`)
+    axios.get(`/api/routeservers/${routeserverId}/status`)
       .then(({data}) => {
         dispatch(loadRouteserverStatusSuccess(routeserverId, data.status));
       })
@@ -140,10 +140,10 @@ export function loadRouteserverProtocolSuccess(routeserverId, protocol) {
 export function loadRouteserverProtocol(routeserverId) {
   return (dispatch) => {
     dispatch(loadRouteserverProtocolRequest(routeserverId));
-    axios.get(`/birdseye/api/routeserver/${routeserverId}/protocol/`)
+    axios.get(`/api/routeservers/${routeserverId}/neighbours`)
       .then(({data}) => {
         dispatch(setProtocolsFilterValue(""));
-        dispatch(loadRouteserverProtocolSuccess(routeserverId, data.protocols));
+        dispatch(loadRouteserverProtocolSuccess(routeserverId, data.neighbours));
       })
       .catch(error => dispatch(apiError(error)));
   }
@@ -176,10 +176,13 @@ export function loadRouteserverRoutes(routeserverId, protocolId) {
   return (dispatch) => {
     dispatch(loadRouteserverRoutesRequest(routeserverId, protocolId))
 
-    axios.get(`/birdseye/api/routeserver/${routeserverId}/routes/?protocol=${protocolId}`)
+    axios.get(`/api/routeserver/${routeserverId}/neighbours/${protocolId}/routes`)
       .then(({data}) => {
         dispatch(
-          loadRouteserverRoutesSuccess(routeserverId, protocolId, data.routes)
+          loadRouteserverRoutesSuccess(routeserverId, protocolId, data.exported)
+        );
+        dispatch(
+          loadRouteserverRoutesFilteredSuccess(routeserverId, protocolId, data.filtered)
         );
         dispatch(setRoutesFilterValue(""));
       })
@@ -211,6 +214,8 @@ export function loadRouteserverRoutesFilteredSuccess(routeserverId, protocolId, 
 
 
 export function loadRouteserverRoutesFiltered(routeserverId, protocolId) {
+  console.log("!!!DEPRECATED!!! loadRouteserverRoutesFiltered")
+  /*
   return (dispatch) => {
     dispatch(loadRouteserverRoutesFilteredRequest(routeserverId, protocolId))
 
@@ -223,6 +228,7 @@ export function loadRouteserverRoutesFiltered(routeserverId, protocolId) {
       })
       .catch(error => dispatch(apiError(error)));
   }
+  */
 }
 
 

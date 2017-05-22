@@ -12,7 +12,7 @@ export default class SidebarHeader extends React.Component {
           </Link>
         </div>
         <div className="title">
-          <h1>Birdseye</h1>
+          <h1>Alice</h1>
           <p>Your friendly bird looking glass</p>
         </div>
       </div>
