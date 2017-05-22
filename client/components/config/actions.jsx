@@ -13,7 +13,7 @@ function loadConfigSuccess(routes_columns) {
 
 export function loadConfig() {
   return (dispatch) => {
-    axios.get(`/birdseye/api/config/`)
+    axios.get(`/api/config`)
       .then(({data}) => {
         dispatch(
           loadRejectReasonsSuccess(data.config.rejection.asn,
