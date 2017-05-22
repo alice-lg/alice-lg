@@ -16,11 +16,11 @@ export function loadConfig() {
     axios.get(`/api/config`)
       .then(({data}) => {
         dispatch(
-          loadRejectReasonsSuccess(data.config.rejection.asn,
-                                   data.config.rejection.reject_id,
-                                   data.config.reject_reasons)
+          loadRejectReasonsSuccess(data.rejection.asn,
+                                   data.rejection.reject_id,
+                                   data.reject_reasons)
         );
-        dispatch(loadConfigSuccess(data.config.routes_columns));
+        dispatch(loadConfigSuccess(data.routes_columns));
       })
       .catch(error => dispatch(apiError(error)));
   }
