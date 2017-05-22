@@ -53,7 +53,7 @@ import combinedReducer from './reducer/app-reducer'
 
 // Setup routing
 const browserHistory = useRouterHistory(createHistory)({
-  basename: '/birdseye/app'
+  basename: '/alice'
 });
 
 // Setup application
