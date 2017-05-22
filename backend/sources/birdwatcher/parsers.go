@@ -115,8 +115,9 @@ func parseRouteBgpInfo(data interface{}) api.BgpInfo {
 	}
 
 	bgp := api.BgpInfo{
+		Origin:           mustString(bgpData["origin"], "unknown"),
 		AsPath:           asPath,
-		NextHop:          bgpData["next_hop"].(string),
+		NextHop:          mustString(bgpData["next_hop"], "unknown"),
 		LocalPref:        localPref,
 		Med:              med,
 		Communities:      communities,

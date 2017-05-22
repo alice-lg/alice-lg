@@ -118,6 +118,7 @@ type NeighboursResponse struct {
 type Community []int
 
 type BgpInfo struct {
+	Origin           string      `json:"origin"`
 	AsPath           []int       `json:"as_path"`
 	NextHop          string      `json:"next_hop"`
 	Communities      []Community `json:"communities"`
