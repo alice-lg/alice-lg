@@ -46,7 +46,6 @@ class QueryDispatcher extends React.Component {
         for (let rs of this.props.routeservers) {
             // Debug: limit to rs20
             if (rs.id != 20) { continue; }
-            console.log("DISPATCHING SEARCH FOR RS:", rs);
             switch (this.props.queryType) {
                 case QUERY_TYPE_PREFIX:
                     this.props.dispatch(
@@ -66,7 +65,6 @@ class QueryDispatcher extends React.Component {
      * all routeservers.
      */
     componentWillReceiveProps(nextProps) {
-        console.log("RECV PROPS:", nextProps);
         if (nextProps.isRunning) {
             return null; // Do nothing while a query is being processed
         }

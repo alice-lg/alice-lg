@@ -16,12 +16,14 @@ export default class Welcome extends React.Component {
          <p>Your friendly bird looking glass</p>
        </div>
 
-			 <div className="col-md-8">
-					<Lookup />
-			 </div>
 
       </div>
     )
+    /*
+			 <div className="col-md-8">
+					<Lookup />
+			 </div>
+     */
   }
 }
 
