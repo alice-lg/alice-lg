@@ -15,7 +15,7 @@ import FilterReason
   from 'components/routeservers/large-communities/filter-reason'
 
 import NoexportReason
-  from 'components/routeservers/large-communities/filter-reason'
+  from 'components/routeservers/large-communities/noexport-reason'
 
 
 function _filteredRoutes(routes, filter) {
@@ -65,7 +65,11 @@ class RoutesTable extends React.Component {
     let routesView = routes.map((r) => {
       return (
         <tr key={r.network} onClick={() => this.showAttributesModal(r)}>
-          <td>{r.network}{this.props.display_filter && <FilterReason route={r}/>}</td>
+          <td>
+            {r.network}
+            {this.props.display_reasons && <FilterReason route={r} />}
+            {this.props.display_reasons && <NoexportReason route={r} />}
+          </td>
           {Object.keys(routes_columns).map(col => <td key={col}>{_lookup(r, col)}</td>)}
         </tr>
       );
@@ -118,6 +122,7 @@ class RoutesTables extends React.Component {
 
     const routes = this.props.routes[this.props.protocolId];
     const filtered = this.props.filtered[this.props.protocolId] || [];
+    const noexport = this.props.noexport[this.props.protocolId] || [];
 
     if((!routes || routes.length == 0) &&
 			 (!filtered || filtered.length == 0)) {
@@ -138,13 +143,15 @@ class RoutesTables extends React.Component {
     );
 
     const filtdHeader = mkHeader("orange", "filtered");
-    const recvdHeader = mkHeader("green", "accepted");
+    const recvdHeader = mkHeader("green",  "accepted");
+    const noexHeader  = mkHeader("red",    "not exported");
 
 
     return (
       <div>
-        <RoutesTable header={filtdHeader} routes={filtered} display_filter={true}/>
-        <RoutesTable header={recvdHeader} routes={received} display_filter={false}/>
+        <RoutesTable header={filtdHeader} routes={filtered} display_reasons={true}/>
+        <RoutesTable header={recvdHeader} routes={received} display_reasons={false}/>
+        <RoutesTable header={recvdHeader} routes={noexport} display_reasons={true}/>
       </div>
     );
 
@@ -158,6 +165,7 @@ export default connect(
       isLoading: state.routeservers.routesAreLoading,
       routes:    state.routeservers.routes,
       filtered:  state.routeservers.filtered,
+      noexport:  state.routeservers.noexport,
     }
   }
 )(RoutesTables);
