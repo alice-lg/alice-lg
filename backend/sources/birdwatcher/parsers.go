@@ -228,7 +228,10 @@ func mustInt(value interface{}, fallback int) int {
 // Parse routes response
 func parseRoutes(bird ClientResponse, config Config) ([]api.Route, error) {
 	routes := api.Routes{}
-	birdRoutes := bird["routes"].([]interface{})
+	birdRoutes, ok := bird["routes"].([]interface{})
+	if !ok {
+		return routes, nil
+	}
 
 	for _, data := range birdRoutes {
 		rdata := data.(map[string]interface{})
