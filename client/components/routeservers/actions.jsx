@@ -179,7 +179,7 @@ export function loadRouteserverRoutes(routeserverId, protocolId) {
     axios.get(`/api/routeservers/${routeserverId}/neighbours/${protocolId}/routes`)
       .then(({data}) => {
         dispatch(
-          loadRouteserverRoutesSuccess(routeserverId, protocolId, data.exported)
+          loadRouteserverRoutesSuccess(routeserverId, protocolId, data.imported)
         );
         dispatch(
           loadRouteserverRoutesFilteredSuccess(routeserverId, protocolId, data.filtered)

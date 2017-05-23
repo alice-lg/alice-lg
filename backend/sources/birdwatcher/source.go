@@ -108,7 +108,7 @@ func (self *Birdwatcher) Routes(neighbourId string) (api.RoutesResponse, error) 
 		return api.RoutesResponse{}, err
 	}
 
-	exported, err := parseRoutes(bird, self.config)
+	imported, err := parseRoutes(bird, self.config)
 	if err != nil {
 		return api.RoutesResponse{}, err
 	}
@@ -124,10 +124,15 @@ func (self *Birdwatcher) Routes(neighbourId string) (api.RoutesResponse, error) 
 		return api.RoutesResponse{}, err
 	}
 
+	// Optional: NoExport
+	bird, _ = self.client.GetJson("/routes/noexport/" + neighbourId)
+	noexport, err := parseRoutes(bird, self.config)
+
 	return api.RoutesResponse{
-		Api:      apiStatus,
-		Exported: exported,
-		Filtered: filtered,
+		Api:         apiStatus,
+		Imported:    imported,
+		Filtered:    filtered,
+		NotExported: noexport,
 	}, nil
 }
 

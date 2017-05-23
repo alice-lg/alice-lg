@@ -159,9 +159,10 @@ func (routes Routes) Swap(i, j int) {
 }
 
 type RoutesResponse struct {
-	Api      ApiStatus `json:"api"`
-	Exported []Route   `json:"exported"`
-	Filtered []Route   `json:"filtered"`
+	Api         ApiStatus `json:"api"`
+	Imported    []Route   `json:"imported"`
+	Filtered    []Route   `json:"filtered"`
+	NotExported []Route   `json:"not_exported"`
 }
 
 type LookupResponse struct {
