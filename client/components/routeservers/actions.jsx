@@ -28,9 +28,6 @@ export const LOAD_ROUTESERVER_ROUTES_FILTERED_SUCCESS = '@birdseye/LOAD_ROUTESER
 export const SET_PROTOCOLS_FILTER_VALUE = '@birdseye/SET_PROTOCOLS_FILTER_VALUE';
 export const SET_ROUTES_FILTER_VALUE = '@birdseye/SET_ROUTES_FILTER_VALUE';
 
-export const LOAD_REJECT_REASONS_REQUEST = '@birdseye/LOAD_REJECT_REASONS_REQUEST';
-export const LOAD_REJECT_REASONS_SUCCESS = '@birdseye/LOAD_REJECT_REASONS_SUCCESS';
-
 
 // Action Creators
 export function loadRouteserversRequest() {
@@ -232,9 +229,3 @@ export function setRoutesFilterValue(value) {
   }
 }
 
-export function loadRejectReasonsSuccess(asn, reject_id, reject_reasons) {
-  return {
-    type: LOAD_REJECT_REASONS_SUCCESS,
-    payload: {asn, reject_id, reject_reasons}
-  };
-}
