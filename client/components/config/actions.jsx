@@ -24,9 +24,9 @@ export function loadConfig() {
         );
         dispatch(
             loadNoExportReasonsSuccess(
-                data.config.noexport.asn,
-                data.config.noexport.noexport_id,
-                data.config.noexport_reasons)
+                data.noexport.asn,
+                data.noexport.noexport_id,
+                data.noexport_reasons)
         );
         dispatch(loadConfigSuccess(data.routes_columns));
       })

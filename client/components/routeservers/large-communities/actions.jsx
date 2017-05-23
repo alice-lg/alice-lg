@@ -17,12 +17,12 @@ export function loadRejectReasonsSuccess(asn, reject_id, reject_reasons) {
 }
 
 
-export function loadNoExportReasonsSuccess(asn, reject_id, reasons) {
+export function loadNoExportReasonsSuccess(asn, noexport_id, reasons) {
   return {
     type: LOAD_NOEXPORT_REASONS_SUCCESS,
     payload: {
        noexport_asn: asn,
-       noexport_reject_id: reject_id,
+       noexport_id: noexport_id,
        noexport_reasons: reasons
     }
   };

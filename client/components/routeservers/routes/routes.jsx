@@ -11,35 +11,11 @@ import LoadingIndicator
 	from 'components/loading-indicator/small'
 
 
-class FilterReason extends React.Component {
-  render() {
-    const route = this.props.route;
+import FilterReason
+  from 'components/routeservers/large-communities/filter-reason'
 
-    if (!this.props.reject_reasons || !route || !route.bgp ||
-        !route.bgp.large_communities) {
-        return null;
-    }
-
-    const reason = route.bgp.large_communities.filter(elem =>
-      elem[0] == this.props.asn && elem[1] == this.props.reject_id
-    );
-    if (!reason.length) {
-      return null;
-    }
-
-    return <p className="reject-reason">{this.props.reject_reasons[reason[0][2]]}</p>;
-  }
-}
-
-FilterReason = connect(
-  state => {
-    return {
-      reject_reasons: state.routeservers.reject_reasons,
-      asn:            state.routeservers.asn,
-      reject_id:      state.routeservers.reject_id,
-    }
-  }
-)(FilterReason);
+import NoexportReason
+  from 'components/routeservers/large-communities/filter-reason'
 
 
 function _filteredRoutes(routes, filter) {
