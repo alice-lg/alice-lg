@@ -53,6 +53,43 @@ func parseApiStatus(bird ClientResponse, config Config) (api.ApiStatus, error) {
 	return status, nil
 }
 
+// Parse birdwatcher status
+func parseBirdwatcherStatus(bird ClientResponse, config Config) (api.Status, error) {
+	birdStatus := bird["status"].(map[string]interface{})
+
+	// Get special fields
+	serverTime, _ := parseServerTime(
+		birdStatus["current_server"],
+		SERVER_TIME_SHORT,
+		config.Timezone,
+	)
+
+	lastReboot, _ := parseServerTime(
+		birdStatus["last_reboot"],
+		SERVER_TIME_SHORT,
+		config.Timezone,
+	)
+
+	lastReconfig, _ := parseServerTime(
+		birdStatus["last_reconfig"],
+		SERVER_TIME_EXT,
+		config.Timezone,
+	)
+
+	// Make status response
+	status := api.Status{
+		ServerTime:   serverTime,
+		LastReboot:   lastReboot,
+		LastReconfig: lastReconfig,
+		Backend:      "bird",
+		Version:      mustString(birdStatus["version"], "unknown"),
+		Message:      mustString(birdStatus["message"], "unknown"),
+		RouterId:     mustString(birdStatus["router_id"], "unknown"),
+	}
+
+	return status, nil
+}
+
 // Parse neighbour uptime
 func parseRelativeServerTime(uptime interface{}, config Config) time.Duration {
 	serverTime, _ := parseServerTime(uptime, SERVER_TIME_SHORT, config.Timezone)

@@ -31,41 +31,14 @@ func (self *Birdwatcher) Status() (api.StatusResponse, error) {
 		return api.StatusResponse{}, err
 	}
 
-	birdStatus := bird["status"].(map[string]interface{})
-
-	// Get special fields
-	serverTime, _ := parseServerTime(
-		birdStatus["current_server"],
-		SERVER_TIME_SHORT,
-		self.config.Timezone,
-	)
-
-	lastReboot, _ := parseServerTime(
-		birdStatus["last_reboot"],
-		SERVER_TIME_SHORT,
-		self.config.Timezone,
-	)
-
-	lastReconfig, _ := parseServerTime(
-		birdStatus["last_reconfig"],
-		SERVER_TIME_EXT,
-		self.config.Timezone,
-	)
-
-	// Make status response
-	status := api.Status{
-		ServerTime:   serverTime,
-		LastReboot:   lastReboot,
-		LastReconfig: lastReconfig,
-		Backend:      "bird",
-		Version:      birdStatus["version"].(string),
-		Message:      birdStatus["message"].(string),
-		RouterId:     birdStatus["router_id"].(string),
+	birdStatus, err := parseBirdwatcherStatus(bird, self.config)
+	if err != nil {
+		return api.StatusResponse{}, err
 	}
 
 	response := api.StatusResponse{
 		Api:    apiStatus,
-		Status: status,
+		Status: birdStatus,
 	}
 
 	return response, nil
