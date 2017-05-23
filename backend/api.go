@@ -29,6 +29,9 @@ import (
 //     Neighbours   /api/routeservers/:id/neighbours
 //     Routes       /api/routeservers/:id/neighbours/:neighbourId/routes
 //
+//   Querying
+//     LookupPrefix /api/routeservers/:id/lookup/prefix?q=<prefix>
+//
 
 type apiEndpoint func(*http.Request, httprouter.Params) (api.Response, error)
 
@@ -84,6 +87,10 @@ func apiRegisterEndpoints(router *httprouter.Router) error {
 		endpoint(apiNeighboursList))
 	router.GET("/api/routeservers/:id/neighbours/:neighbourId/routes",
 		endpoint(apiRoutesList))
+
+	// Querying
+	router.GET("/api/routeservers/:id/lookup/prefix",
+		endpoint(apiLookupPrefix))
 
 	return nil
 }
@@ -151,6 +158,26 @@ func validateSourceId(id string) (int, error) {
 	return rsId, nil
 }
 
+// Helper: Validate query string
+func validateQueryString(req *http.Request, key string) (string, error) {
+	query := req.URL.Query()
+	values, ok := query[key]
+	if !ok {
+		return "", fmt.Errorf("Query param %s is missing.", key)
+	}
+
+	if len(values) != 1 {
+		return "", fmt.Errorf("Query param %s is ambigous.", key)
+	}
+
+	value := values[0]
+	if value == "" {
+		return "", fmt.Errorf("Query param %s may not be empty.", key)
+	}
+
+	return value, nil
+}
+
 // Handle status
 func apiStatus(_req *http.Request, params httprouter.Params) (api.Response, error) {
 	rsId, err := validateSourceId(params.ByName("id"))
@@ -182,5 +209,22 @@ func apiRoutesList(_req *http.Request, params httprouter.Params) (api.Response, 
 	neighbourId := params.ByName("neighbourId")
 	source := AliceConfig.Sources[rsId].getInstance()
 	result, err := source.Routes(neighbourId)
+	return result, err
+}
+
+// Handle lookup
+func apiLookupPrefix(req *http.Request, params httprouter.Params) (api.Response, error) {
+	rsId, err := validateSourceId(params.ByName("id"))
+	if err != nil {
+		return nil, err
+	}
+
+	prefix, err := validateQueryString(req, "q")
+	if err != nil {
+		return nil, err
+	}
+
+	source := AliceConfig.Sources[rsId].getInstance()
+	result, err := source.LookupPrefix(prefix)
 	return result, err
 }

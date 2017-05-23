@@ -163,3 +163,8 @@ type RoutesResponse struct {
 	Exported []Route   `json:"exported"`
 	Filtered []Route   `json:"filtered"`
 }
+
+type LookupResponse struct {
+	Api    ApiStatus `json:"api"`
+	Routes []Route   `json:"routes"`
+}

@@ -1,6 +1,7 @@
 package birdwatcher
 
 import (
+	"fmt"
 	"github.com/ecix/alice-lg/backend/api"
 )
 
@@ -128,4 +129,9 @@ func (self *Birdwatcher) Routes(neighbourId string) (api.RoutesResponse, error) 
 		Exported: exported,
 		Filtered: filtered,
 	}, nil
+}
+
+// Make routes lookup
+func (self *Birdwatcher) LookupPrefix(prefix string) (api.LookupResponse, error) {
+	return api.LookupResponse{}, fmt.Errorf("not implemented")
 }
