@@ -3,6 +3,7 @@ package birdwatcher
 // Parsers and helpers
 
 import (
+	"fmt"
 	"sort"
 	"strconv"
 	"time"
@@ -138,7 +139,11 @@ func parseNeighbours(bird ClientResponse, config Config) ([]api.Neighbour, error
 
 // Parse route bgp info
 func parseRouteBgpInfo(data interface{}) api.BgpInfo {
-	bgpData := data.(map[string]interface{})
+	bgpData, ok := data.(map[string]interface{})
+	if !ok {
+		// Info is missing
+		return api.BgpInfo{}
+	}
 
 	asPath := parseIntList(bgpData["as_path"])
 	communities := parseBgpCommunities(bgpData["communities"])
@@ -196,7 +201,10 @@ func mustString(value interface{}, fallback string) string {
 // Assert list of strings
 func mustStringList(data interface{}) []string {
 	list := []string{}
-	ldata := data.([]interface{})
+	ldata, ok := data.([]interface{})
+	if !ok {
+		return []string{}
+	}
 	for _, e := range ldata {
 		s, ok := e.(string)
 		if ok {
@@ -230,7 +238,7 @@ func parseRoutes(bird ClientResponse, config Config) ([]api.Route, error) {
 	routes := api.Routes{}
 	birdRoutes, ok := bird["routes"].([]interface{})
 	if !ok {
-		return routes, nil
+		return routes, fmt.Errorf("Routes response missing")
 	}
 
 	for _, data := range birdRoutes {
