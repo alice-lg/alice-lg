@@ -26,7 +26,7 @@ export default connect(
     return {
       noexport_reasons: state.routeservers.noexport_reasons,
       asn:              state.routeservers.noexport_asn,
-      reject_id:        state.routeservers.noexport_reject_id,
+      reject_id:        state.routeservers.noexport_id
     }
   }
 )(NoExportReason);

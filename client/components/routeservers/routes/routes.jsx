@@ -151,7 +151,7 @@ class RoutesTables extends React.Component {
       <div>
         <RoutesTable header={filtdHeader} routes={filtered} display_reasons={true}/>
         <RoutesTable header={recvdHeader} routes={received} display_reasons={false}/>
-        <RoutesTable header={recvdHeader} routes={noexport} display_reasons={true}/>
+        <RoutesTable header={noexHeader} routes={noexport} display_reasons={true}/>
       </div>
     );
 
