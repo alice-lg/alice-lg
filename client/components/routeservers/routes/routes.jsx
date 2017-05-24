@@ -67,8 +67,8 @@ class RoutesTable extends React.Component {
         <tr key={r.network} onClick={() => this.showAttributesModal(r)}>
           <td>
             {r.network}
-            {this.props.display_reasons && <FilterReason route={r} />}
-            {this.props.display_reasons && <NoexportReason route={r} />}
+            {this.props.display_reasons == "filtered" && <FilterReason route={r} />}
+            {this.props.display_reasons == "noexport" && <NoexportReason route={r} />}
           </td>
           {Object.keys(routes_columns).map(col => <td key={col}>{_lookup(r, col)}</td>)}
         </tr>
@@ -149,9 +149,9 @@ class RoutesTables extends React.Component {
 
     return (
       <div>
-        <RoutesTable header={filtdHeader} routes={filtered} display_reasons={true}/>
+        <RoutesTable header={filtdHeader} routes={filtered} display_reasons="filtered"/>
         <RoutesTable header={recvdHeader} routes={received} display_reasons={false}/>
-        <RoutesTable header={noexHeader} routes={noexport} display_reasons={true}/>
+        <RoutesTable header={noexHeader}  routes={noexport} display_reasons="noexport"/>
       </div>
     );
 
