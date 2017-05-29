@@ -86,6 +86,13 @@ If you want to build the package on a remote machine, just use
 
 which will copy the dist to the remote server and executes fpm via ssh.
 
+You can specify which system integration to use:
+Set the `SYSTEM_INIT` variable to `upstart` or `systemd` (default)
+prior to building the RPM.
+
+    make remote_rpm BUILD_SERVER=rpmbuild.example.com SYSTEM_INIT=upstart
+
+
 
 ## Hacking
 
