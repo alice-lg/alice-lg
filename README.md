@@ -1,5 +1,5 @@
 
-# Alice LG - Your friendly bird looking glass
+# Alice LG - Your friendly looking glass
 
 Alice is a frontend to the API exposed by 
 services implementing Barry O'Donovan's
