@@ -27,6 +27,6 @@ BUILD-RPM/
 
 var/
 
-etc/birdseye/*.conf
+etc/alicelg/alice.conf
 
 .DS_Store
