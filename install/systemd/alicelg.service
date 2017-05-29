@@ -1,0 +1,12 @@
+[Unit]
+Description=Alice Looking Glass
+Wants=network.target
+After=network.target
+
+[Service]
+Type=simple
+User=alicelg
+ExecStart=/opt/ecix/alicelg/bin/alice-lg-linux-amd64
+
+[Install]
+WantedBy=multi-user.target
