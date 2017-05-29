@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#
+# Alice Post Install Hook:
+# Create the required user and set permissions
+#
+
+SERVICE=alicelg
+
+echo "[i] Post install $SERVICE"
+echo "[i] Creating user and updating permissions"
+useradd --system -d /opt/ecix/$SERVICE $SERVICE
+
+echo "[i] Fixing permissions"
+chown -R $SERVICE:$SERVICE /opt/ecix/$SERVICE
+
