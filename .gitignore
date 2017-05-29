@@ -23,6 +23,7 @@ builds/
 
 RPMS/
 BUILD-RPM/
+DIST/
 
 
 var/
@@ -31,4 +32,3 @@ etc/alicelg/alice.conf
 
 .DS_Store
 
-DIST/
