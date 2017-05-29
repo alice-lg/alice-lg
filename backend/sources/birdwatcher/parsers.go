@@ -113,15 +113,15 @@ func parseNeighbours(bird ClientResponse, config Config) ([]api.Neighbour, error
 		neighbour := api.Neighbour{
 			Id: protocolId,
 
-			Address:     protocol["neighbor_address"].(string),
-			Asn:         int(protocol["neighbor_as"].(float64)),
-			State:       protocol["state"].(string),
-			Description: protocol["description"].(string),
+			Address:     mustString(protocol["neighbor_address"], "error"),
+			Asn:         mustInt(protocol["neighbor_as"], 0),
+			State:       mustString(protocol["state"], "unknown"),
+			Description: mustString(protocol["description"], "no description"),
 
-			RoutesReceived:  int(routes["imported"].(float64)),
-			RoutesExported:  int(routes["exported"].(float64)),
-			RoutesFiltered:  int(routes["filtered"].(float64)),
-			RoutesPreferred: int(routes["preferred"].(float64)),
+			RoutesReceived:  mustInt(routes["imported"], 0),
+			RoutesExported:  mustInt(routes["exported"], 0),
+			RoutesFiltered:  mustInt(routes["filtered"], 0),
+			RoutesPreferred: mustInt(routes["preferred"], 0),
 
 			Uptime:    uptime,
 			LastError: lastError,
@@ -149,12 +149,8 @@ func parseRouteBgpInfo(data interface{}) api.BgpInfo {
 	communities := parseBgpCommunities(bgpData["communities"])
 	largeCommunities := parseBgpCommunities(bgpData["large_communities"])
 
-	localPref, _ := strconv.Atoi(bgpData["local_pref"].(string))
-	medInfo, ok := bgpData["med"].(string)
-	med := 0
-	if ok {
-		med, _ = strconv.Atoi(medInfo)
-	}
+	localPref, _ := strconv.Atoi(mustString(bgpData["local_pref"], "0"))
+	med, _ := strconv.Atoi(mustString(bgpData["med"], "0"))
 
 	bgp := api.BgpInfo{
 		Origin:           mustString(bgpData["origin"], "unknown"),
