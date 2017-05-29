@@ -6,6 +6,8 @@
 #
 
 
+all: alice
+
 client_dev:
 	$(MAKE) -C client/
 
