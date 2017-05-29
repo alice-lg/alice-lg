@@ -30,13 +30,18 @@ endif
 
 LDFLAGS=-ldflags="-X main.version=$(APP_VERSION)"
 
+
+
 all: $(TARGET)
 	@echo "Built $(VERSION) @ $(TARGET)"
 
-osx:
+deps:
+	go get .
+
+osx: deps
 	GOARCH=$(ARCH) GOOS=darwin go build $(LDFLAGS) -o $(PROG)-osx-$(ARCH)
 
-linux:
+linux: deps
 	GOARCH=$(ARCH) GOOS=linux go build $(LDFLAGS) -o $(PROG)-linux-$(ARCH)
 
 
