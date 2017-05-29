@@ -30,3 +30,5 @@ var/
 etc/alicelg/alice.conf
 
 .DS_Store
+
+DIST/
