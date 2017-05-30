@@ -26,7 +26,7 @@ function _filteredProtocols(protocols, filter) {
 
   // Filter protocols
   filtered = _.filter(protocols, (p) => {
-    return (p.neighbor_address.toLowerCase().indexOf(filter) != -1 ||
+    return (p.address.toLowerCase().indexOf(filter) != -1 ||
             p.description.toLowerCase().indexOf(filter) != -1);
   });
 
