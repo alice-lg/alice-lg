@@ -67,7 +67,7 @@ You can copy it to any of the following locations:
     /etc/alicelg/alice.conf       # global
 ```
 
-You will have to edit the configuration file as you nee dto point Alice-LG to the correct [APIs](https://github.com/ecix/birdwatcher):
+You will have to edit the configuration file as you need to point Alice-LG to the correct [APIs](https://github.com/ecix/birdwatcher):
 ```
     [source.0]
     name = rs1.example.com (IPv4)
