@@ -1,7 +1,6 @@
 # Alice-LG - Your friendly looking glass
-
-"No, no! The adventures first, explanations take such a dreadful time."
-― Lewis Carroll, Alice's Adventures in Wonderland & Through the Looking-Glass
+__No, no! The adventures first, explanations take such a dreadful time."__
+*― Lewis Carroll, Alice's Adventures in Wonderland & Through the Looking-Glass_
 
 Take a look at an Alice-LG production example:
 - https://lg.ecix.net/
@@ -12,7 +11,7 @@ Take a look at an Alice-LG production example:
 - https://lg.ecix.net/api/routeservers/0/neighbours/ID109_AS31078/routes
 - https://lg.ecix.net/api/routeservers/0/lookup/prefix?q=217.115.15.0
 
-# Dreadfull time consuming explanations
+# Explanations
 Alice-LG is a BGP looking glass which gets its data from external APIs.
 
 Currently Alice-LG supports the following APIs:
