@@ -1,5 +1,5 @@
 # Alice-LG - Your friendly looking glass
-__"No, no! The adventures first, explanations take such a dreadful time."__\s\s
+__"No, no! The adventures first, explanations take such a dreadful time."__  
 _Lewis Carroll, Alice's Adventures in Wonderland & Through the Looking-Glass_
 
 Take a look at an Alice-LG production example:
