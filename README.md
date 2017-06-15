@@ -17,7 +17,7 @@ Alice-LG is a BGP looking glass which gets its data from external APIs.
 Currently Alice-LG supports the following APIs:
 - [birdwatcher API](https://github.com/ecix/birdwatcher) for [BIRD](http://bird.network.cz/)
 
-Normally you would install the [birdwatcher API](https://github.com/ecix/birdwatcher) directly on the machine where you run [BIRD](http://bird.network.cz/)
+Normally you would first install the [birdwatcher API](https://github.com/ecix/birdwatcher) directly on the machine(s) where you run [BIRD](http://bird.network.cz/) on
 and then install Alice-LG on a seperate public facing server and point her to the afore mentioned [birdwatcher API](https://github.com/ecix/birdwatcher).
 
 This project was a direct result of the [RIPE IXP Tools Hackathon](https://atlas.ripe.net/hackathon/ixp-tools/) 
