@@ -31,7 +31,7 @@ Major thanks to Barry O'Donovan who built the original [INEX Bird's Eye](https:/
 _These examples include setting up your Go environment, if you already have set that up then obviousely you can skip that_
 
 ### TLDR CentOS 7:
-First add to you ~/.bash_profile the following lines to the end of the file:
+First add the following lines at the end of your ~/.bash_profile:
 ```
 GOPATH=$HOME/go
 export GOPATH
