@@ -25,8 +25,6 @@ just prior to [RIPE73](https://ripe73.ripe.net/) in Madrid, Spain.
 
 Major thanks to Barry O'Donovan who built the original [INEX Bird's Eye](https://github.com/inex/birdseye) BIRD API of which Alice-LG is a spinnoff
 
-## Alice-LG RPMs
-
 ## Building Alice-LG from scratch
 __These examples include setting up your Go environment, if you already have set that up then you can obviously skip that__
 
