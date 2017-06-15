@@ -57,17 +57,17 @@ Your Alice_LG source will now be located at `~/go/src/alice-lg` and your alice-L
 
 ## Configuration
 
-An example configuration can be found under
-[etc/alicelg/alice.example.conf](https://github.com/ecix/alice/blob/master/etc/alicelg/alice.example.conf).
+An example configuration can be found at 
+[etc/alicelg/alice.example.conf](https://github.com/ecix/alice-lg/blob/readme_update/etc/alicelg/alice.example.conf).
 
 You can copy it to any of the following locations:
+```
+    etc/alicelg/alice.conf        # local
+    etc/alicelg/alice.local.conf  # local
+    /etc/alicelg/alice.conf       # global
+```
 
-    etc/alicelg/alice.conf # local
-    etc/alicelg/alice.local.conf # local as well
-    /etc/alicelg/alice.conf # global
-
-
-You will have to at least edit it to add BIRD API servers:
+You will have to edit the configuration file as you nee dto point Alice-LG to the correct [APIs](https://github.com/ecix/birdwatcher):
 ```
     [source.0]
     name = rs1.example.com (IPv4)
