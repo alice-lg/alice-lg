@@ -1,6 +1,7 @@
 # Alice-LG - Your friendly looking glass
 __No, no! The adventures first, explanations take such a dreadful time."__
-*― Lewis Carroll, Alice's Adventures in Wonderland & Through the Looking-Glass_
+
+_Lewis Carroll, Alice's Adventures in Wonderland & Through the Looking-Glass_
 
 Take a look at an Alice-LG production example:
 - https://lg.ecix.net/
