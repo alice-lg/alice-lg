@@ -73,9 +73,8 @@ You will have to edit the configuration file as you need to point Alice-LG to th
     name = rs1.example.com (IPv4)
     [source.0.birdwatcher]
     api = http://rs1.example.com:29184/
-    # Optional:
-    show_last_reboot = true
-    timezone = UTC
+    # show_last_reboot = true
+    # timezone = UTC
 
     [source.1]
     name = rs1.example.com (IPv6)
