@@ -27,10 +27,10 @@ Major thanks to Barry O'Donovan who built the original [INEX Bird's Eye](https:/
 
 ## Alice-LG RPMs
 
-## Building Alice from scratch
-_These examples include setting up your Go environment, if you already have set that up then obviousely you can skip that_
+## Building Alice-LG from scratch
+__These examples include setting up your Go environment, if you already have set that up then you can obviously skip that__
 
-### TLDR CentOS 7:
+### CentOS 7:
 First add the following lines at the end of your ~/.bash_profile:
 ```
 GOPATH=$HOME/go
@@ -55,14 +55,6 @@ make
 ```
 Your Alice_LG source will now be located at `~/go/src/alice-lg` and your alice-LG executable should be at `~/go/src/alice-lg/bin/alice-lg-linux-amd64`
 
-## Installation
-
-For systemwide deployment it is advised to add the contents
-of the local `etc/` to your system's `/etc`
-directory.
-
-
-
 ## Configuration
 
 An example configuration can be found under
@@ -75,8 +67,8 @@ You can copy it to any of the following locations:
     /etc/alicelg/alice.conf # global
 
 
-You will have to at least edit it to add bird API servers:
-
+You will have to at least edit it to add BIRD API servers:
+```
     [source.0]
     name = rs1.example.com (IPv4)
     [source.0.birdwatcher]
@@ -89,7 +81,7 @@ You will have to at least edit it to add bird API servers:
     name = rs1.example.com (IPv6)
     [source.1.birdwatcher]
     api = http://rs1.example.com:29186/
-
+```
 
 ## Running
 
