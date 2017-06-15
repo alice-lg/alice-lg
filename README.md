@@ -38,7 +38,7 @@ export GOPATH
 PATH=$PATH:$GOPATH/bin
 export PATH
 ```
-now run:
+Now run:
 ```
 source ~/.bash_profile
 sudo yum install golang npm
@@ -54,25 +54,6 @@ cd ..
 make
 ```
 Your Alice_LG source will now be located at `~/go/src/alice-lg` and your alice-LG executable should be at `~/go/src/alice-lg/bin/alice-lg-linux-amd64`
-
-### Installing and configuring golang
-Alice requires a working (and configured) `golang` installation
-for the backend. If you are already set up for go then just skip ahead!
-
-A full guide on setting up golang can be found at: https://golang.org/doc/install
-
-
-
-
-The frontend requires `npm` for building.
-
-
-Clone this repository in your go workspace and type
-`make`
-
-This will download all required *go* and *js* dependencies
-and will start building alice.
-
 
 ## Installation
 
