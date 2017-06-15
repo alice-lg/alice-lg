@@ -1,24 +1,45 @@
+# Alice-LG - Your friendly looking glass
 
-# Alice LG - Your friendly looking glass
+Alice-LG is a BGP looking glass which gets its data from external APIs.
 
-Alice is a frontend to the API exposed by 
-services implementing Barry O'Donovan's
-[birds-eye API design](https://github.com/inex/birds-eye-design/) to
-[the BIRD routing daemon](http://bird.network.cz/):
+Take a look at an Alice-LG production example:
+- https://lg.ecix.net/
+- https://lg.ecix.net/api/config
+- https://lg.ecix.net/api/routeservers
+- https://lg.ecix.net/api/routeservers/0
+- https://lg.ecix.net/api/routeservers/0/neighbours
+- https://lg.ecix.net/api/routeservers/0/neighbours/ID109_AS31078/routes
+- https://lg.ecix.net/api/routeservers/0/lookup/prefix?q=217.115.15.0/20
 
- * INEX Birdseye API (https://github.com/inex/birdseye)
- * Birdwatcher (https://github.com/ecix/birdwatcher)
+Currently Alice-LG supports the following APIs:
+- [birdwatcher API](https://github.com/ecix/birdwatcher) for [BIRD](http://bird.network.cz/)
 
-
-The project was started at the
-[RIPE IXP Tools Hackathon](https://atlas.ripe.net/hackathon/ixp-tools/) 
+This project was a direct result of the [RIPE IXP Tools Hackathon](https://atlas.ripe.net/hackathon/ixp-tools/) 
 just prior to [RIPE73](https://ripe73.ripe.net/) in Madrid, Spain.
 
+Major thanks to Barry O'Donovan who built the original [INEX Bird's Eye](https://github.com/inex/birdseye) BIRD API of which Alice_LG is a spinnoff
+
+## Alice RPMs
 
 ## Building Alice from scratch
+### TLDR CentOS 7:
 
+mkdir -p ~/go/bin ~/go/pkg ~/go/src
+
+### TLDR Ubuntu:
+apt-get install golang
+mkdir -p ~/go/bin ~/go/pkg ~/go/src
+
+
+### Installing and configuring golang
 Alice requires a working (and configured) `golang` installation
-for the backend.
+for the backend. If you are already set up for go then just skip ahead!
+
+A full guide on setting up golang can be found at: https://golang.org/doc/install
+
+
+
+
 The frontend requires `npm` for building.
 
 
