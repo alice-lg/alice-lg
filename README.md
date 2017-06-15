@@ -6,10 +6,10 @@ Take a look at an Alice-LG production example:
 - https://lg.ecix.net/
 - https://lg.ecix.net/api/config
 - https://lg.ecix.net/api/routeservers
-- https://lg.ecix.net/api/routeservers/0
+- https://lg.ecix.net/api/routeservers/0/status
 - https://lg.ecix.net/api/routeservers/0/neighbours
 - https://lg.ecix.net/api/routeservers/0/neighbours/ID109_AS31078/routes
-- https://lg.ecix.net/api/routeservers/0/lookup/prefix?q=217.115.15.0/20
+- https://lg.ecix.net/api/routeservers/0/lookup/prefix?q=217.115.15.0
 
 Currently Alice-LG supports the following APIs:
 - [birdwatcher API](https://github.com/ecix/birdwatcher) for [BIRD](http://bird.network.cz/)
