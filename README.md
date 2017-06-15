@@ -23,19 +23,37 @@ and then install Alice-LG on a seperate public facing server and point her to th
 This project was a direct result of the [RIPE IXP Tools Hackathon](https://atlas.ripe.net/hackathon/ixp-tools/) 
 just prior to [RIPE73](https://ripe73.ripe.net/) in Madrid, Spain.
 
-Major thanks to Barry O'Donovan who built the original [INEX Bird's Eye](https://github.com/inex/birdseye) BIRD API of which Alice_LG is a spinnoff
+Major thanks to Barry O'Donovan who built the original [INEX Bird's Eye](https://github.com/inex/birdseye) BIRD API of which Alice-LG is a spinnoff
 
-## Alice RPMs
+## Alice-LG RPMs
 
 ## Building Alice from scratch
+_These examples include setting up your Go environment, if you already have set that up then obviousely you can skip that_
+
 ### TLDR CentOS 7:
-
+First add to you ~/.bash_profile the following lines to the end of the file:
+```
+GOPATH=$HOME/go
+export GOPATH
+PATH=$PATH:$GOPATH/bin
+export PATH
+```
+now run:
+```
+source ~/.bash_profile
+sudo yum install golang npm
+sudo npm install --global gulp-cli
+go get github.com/GeertJohan/go.rice
+go get github.com/GeertJohan/go.rice/rice
 mkdir -p ~/go/bin ~/go/pkg ~/go/src
-
-### TLDR Ubuntu:
-apt-get install golang
-mkdir -p ~/go/bin ~/go/pkg ~/go/src
-
+cd ~/go/src/
+git clone git@github.com:ecix/alice-lg.git
+cd alice-lg/client
+make
+cd ..
+make
+```
+Your Alice_LG source will now be located at `~/go/src/alice-lg` and your alice-LG executable should be at `~/go/src/alice-lg/bin/alice-lg-linux-amd64`
 
 ### Installing and configuring golang
 Alice requires a working (and configured) `golang` installation
