@@ -1,7 +1,6 @@
 package birdwatcher
 
 import (
-	"fmt"
 	"github.com/ecix/alice-lg/backend/api"
 )
 
@@ -111,5 +110,67 @@ func (self *Birdwatcher) Routes(neighbourId string) (api.RoutesResponse, error) 
 
 // Make routes lookup
 func (self *Birdwatcher) LookupPrefix(prefix string) (api.LookupResponse, error) {
-	return api.LookupResponse{}, fmt.Errorf("not implemented")
+	// Get RS info
+	rs := api.Routeserver{
+		Id:   self.config.Id,
+		Name: self.config.Name,
+	}
+
+	// Get neighbours list from RS
+	neighboursRes, err := self.Neighbours()
+	if err != nil {
+		return api.LookupResponse{}, err
+	}
+	neighbours := neighboursRes.Neighbours
+
+	// Query prefix on RS
+	bird, err := self.client.GetJson("/routes/prefix?prefix=" + prefix)
+	if err != nil {
+		return api.LookupResponse{}, err
+	}
+
+	// Parse API status
+	apiStatus, err := parseApiStatus(bird, self.config)
+	if err != nil {
+		return api.LookupResponse{}, err
+	}
+
+	// Parse routes
+	routes, err := parseRoutes(bird, self.config)
+
+	// Add corresponding neighbour and source rs to result
+	results := []api.LookupRoute{}
+	for _, src := range routes {
+		// Get corresponding neighbour
+		neighbour, _ := getNeighbourById(neighbours, src.NeighbourId)
+
+		// Okay. This is actually really hacky.
+		// A less bruteforce approach would be highly appreciated
+		route := api.LookupRoute{
+			Id: src.Id,
+
+			Routeserver: rs,
+
+			NeighbourId: src.NeighbourId,
+			Neighbour:   neighbour,
+
+			Network:   src.Network,
+			Interface: src.Interface,
+			Gateway:   src.Gateway,
+			Metric:    src.Metric,
+			Bgp:       src.Bgp,
+			Age:       src.Age,
+			Type:      src.Type,
+
+			Details: src.Details,
+		}
+		results = append(results, route)
+	}
+
+	// Make result
+	response := api.LookupResponse{
+		Api:    apiStatus,
+		Routes: results,
+	}
+	return response, nil
 }
