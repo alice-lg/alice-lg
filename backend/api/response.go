@@ -189,3 +189,7 @@ type LookupResponse struct {
 	Api    ApiStatus     `json:"api"`
 	Routes []LookupRoute `json:"routes"`
 }
+
+type LookupResponseGlobal struct {
+	Routes []LookupRoute `json:"routes"`
+}

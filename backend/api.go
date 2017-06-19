@@ -92,6 +92,9 @@ func apiRegisterEndpoints(router *httprouter.Router) error {
 	router.GET("/api/routeservers/:id/lookup/prefix",
 		endpoint(apiLookupPrefix))
 
+	router.GET("/api/lookup/prefix",
+		endpoint(apiLookupPrefixGlobal))
+
 	return nil
 }
 
@@ -227,4 +230,38 @@ func apiLookupPrefix(req *http.Request, params httprouter.Params) (api.Response,
 	source := AliceConfig.Sources[rsId].getInstance()
 	result, err := source.LookupPrefix(prefix)
 	return result, err
+}
+
+// Handle global lookup
+func apiLookupPrefixGlobal(req *http.Request, params httprouter.Params) (api.Response, error) {
+	// Get prefix to query
+	prefix, err := validateQueryString(req, "q")
+	if err != nil {
+		return nil, err
+	}
+
+	// Run query on all sources
+	rsCount := len(AliceConfig.Sources)
+	responses := make(chan api.LookupResponse, rsCount)
+	for _, src := range AliceConfig.Sources {
+		go func(src SourceConfig) {
+			// Run query on RS
+			rs := src.getInstance()
+			result, _ := rs.LookupPrefix(prefix)
+			responses <- result
+		}(src)
+	}
+
+	// Collect results
+	routes := []api.LookupRoute{}
+	for i := 0; i < rsCount; i++ {
+		result := <-responses
+		routes = append(routes, result.Routes...)
+	}
+
+	// Make response
+	response := api.LookupResponseGlobal{
+		Routes: routes,
+	}
+	return response, nil
 }
