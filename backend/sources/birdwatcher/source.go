@@ -174,3 +174,18 @@ func (self *Birdwatcher) LookupPrefix(prefix string) (api.LookupResponse, error)
 	}
 	return response, nil
 }
+
+func (self *Birdwatcher) AllRoutes() (api.RoutesResponse, error) {
+	bird, err := self.client.GetJson("/routes/dump")
+	if err != nil {
+		return api.RoutesResponse{}, err
+	}
+
+	apiStatus, err := parseApiStatus(bird, self.config)
+
+	result := api.RoutesResponse{
+		Api: apiStatus,
+	}
+
+	return result, nil
+}
