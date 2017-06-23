@@ -145,8 +145,9 @@ type Route struct {
 
 // Lookup Prefixes
 type LookupRoute struct {
-	Id          string `json:"id"`
-	NeighbourId string `json:"neighbour_id"`
+	Id          string    `json:"id"`
+	NeighbourId string    `json:"neighbour_id"`
+	Neighbour   Neighbour `json:"neighbour"`
 
 	State string `json:"state"` // Filtered, Imported, ...
 

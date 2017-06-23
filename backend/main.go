@@ -10,6 +10,7 @@ import (
 
 var AliceConfig *Config
 var AliceRoutesStore *RoutesStore
+var AliceNeighboursStore *NeighboursStore
 
 func main() {
 	var err error
@@ -36,6 +37,10 @@ func main() {
 	// Setup local routes store
 	AliceRoutesStore = NewRoutesStore(AliceConfig)
 	AliceRoutesStore.Start()
+
+	// Setup local neighbours store
+	AliceNeighboursStore = NewNeighboursStore(AliceConfig)
+	AliceNeighboursStore.Start()
 
 	// Setup request routing
 	router := httprouter.New()

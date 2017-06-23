@@ -99,7 +99,7 @@ func (self *RoutesStore) Stats() RoutesStoreStats {
 	totalImported := 0
 	totalFiltered := 0
 
-	rsStats := []RouteServerStats{}
+	rsStats := []RouteServerRoutesStats{}
 
 	for source, routes := range self.routesMap {
 		status := self.statusMap[source]
@@ -107,7 +107,7 @@ func (self *RoutesStore) Stats() RoutesStoreStats {
 		totalImported += len(routes.Imported)
 		totalFiltered += len(routes.Filtered)
 
-		serverStats := RouteServerStats{
+		serverStats := RouteServerRoutesStats{
 			Name: self.configMap[source].Name,
 
 			Routes: RoutesStats{
@@ -171,6 +171,16 @@ func filterRoutes(
 	return results
 }
 
+func addNeighbour(
+	source sources.Source,
+	route api.LookupRoute,
+) api.LookupRoute {
+	neighbour := AliceNeighboursStore.GetNeighbourAt(
+		source, route.NeighbourId)
+	route.Neighbour = neighbour
+	return route
+}
+
 // Single RS lookup
 func (self *RoutesStore) lookupRs(
 	source sources.Source,
@@ -182,6 +192,8 @@ func (self *RoutesStore) lookupRs(
 	routes := self.routesMap[source]
 
 	go func() {
+		result := []api.LookupRoute{}
+
 		filtered := filterRoutes(
 			config,
 			routes.Filtered,
@@ -193,7 +205,14 @@ func (self *RoutesStore) lookupRs(
 			prefix,
 			"imported")
 
-		result := append(filtered, imported...)
+		// Add Neighbours to results
+		for _, route := range filtered {
+			result = append(result, addNeighbour(source, route))
+		}
+
+		for _, route := range imported {
+			result = append(result, addNeighbour(source, route))
+		}
 
 		response <- result
 	}()
