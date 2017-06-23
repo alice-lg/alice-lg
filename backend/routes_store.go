@@ -33,6 +33,27 @@ type StoreStats struct {
 	RouteServers []RouteServerStats `json:"route_servers"`
 }
 
+// Write stats to the log
+func (stats StoreStats) Log() {
+	log.Println("Routes store:")
+
+	log.Println("    Routes Imported:",
+		stats.TotalRoutes.Imported,
+		"Filtered:",
+		stats.TotalRoutes.Filtered)
+	log.Println("    Routeservers:")
+
+	for _, rs := range stats.RouteServers {
+		log.Println("      -", rs.Name)
+		log.Println("        State:", rs.State)
+		log.Println("        UpdatedAt:", rs.UpdatedAt)
+		log.Println("        Routes Imported:",
+			rs.Routes.Imported,
+			"Filtered:",
+			rs.Routes.Filtered)
+	}
+}
+
 type StoreStatus struct {
 	LastRefresh time.Time
 	LastError   error
@@ -42,6 +63,7 @@ type StoreStatus struct {
 type RoutesStore struct {
 	routesMap map[sources.Source]api.RoutesResponse
 	statusMap map[sources.Source]StoreStatus
+	configMap map[sources.Source]SourceConfig
 }
 
 func NewRoutesStore(config *Config) *RoutesStore {
@@ -49,8 +71,11 @@ func NewRoutesStore(config *Config) *RoutesStore {
 	// Build mapping based on source instances
 	routesMap := make(map[sources.Source]api.RoutesResponse)
 	statusMap := make(map[sources.Source]StoreStatus)
+	configMap := make(map[sources.Source]SourceConfig)
+
 	for _, source := range config.Sources {
 		instance := source.getInstance()
+		configMap[instance] = source
 		routesMap[instance] = api.RoutesResponse{}
 		statusMap[instance] = StoreStatus{
 			State: STATE_INIT,
@@ -60,15 +85,23 @@ func NewRoutesStore(config *Config) *RoutesStore {
 	store := &RoutesStore{
 		routesMap: routesMap,
 		statusMap: statusMap,
+		configMap: configMap,
 	}
 	return store
 }
 
 func (self *RoutesStore) Start() {
 	log.Println("Starting local routes store")
+	go self.init()
+}
 
+// Service initialization
+func (self *RoutesStore) init() {
 	// Initial refresh
-	go self.update()
+	self.update()
+
+	// Initial stats
+	self.Stats().Log()
 }
 
 // Update all routes
@@ -103,8 +136,6 @@ func (self *RoutesStore) update() {
 			State:       STATE_READY,
 		}
 	}
-
-	log.Println("All caches refreshed")
 }
 
 // Helper: stateToString
@@ -119,7 +150,7 @@ func stateToString(state int) string {
 	case STATE_ERROR:
 		return "ERROR"
 	}
-	return "UNKNOWN"
+	return "INVALID"
 }
 
 // Calculate store insights
@@ -136,6 +167,8 @@ func (self *RoutesStore) Stats() StoreStats {
 		totalFiltered += len(routes.Filtered)
 
 		serverStats := RouteServerStats{
+			Name: self.configMap[source].Name,
+
 			Routes: RoutesStats{
 				Filtered: len(routes.Filtered),
 				Imported: len(routes.Imported),
@@ -157,7 +190,6 @@ func (self *RoutesStore) Stats() StoreStats {
 		RouteServers: rsStats,
 	}
 	return storeStats
-
 }
 
 func (self *RoutesStore) Lookup(prefix string) []api.LookupRoute {
