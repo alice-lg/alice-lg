@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/ecix/alice-lg/backend/api"
-	"github.com/ecix/alice-lg/backend/sources"
 
 	"log"
 	"strings"
@@ -10,23 +9,24 @@ import (
 )
 
 type RoutesStore struct {
-	routesMap map[sources.Source]api.RoutesResponse
-	statusMap map[sources.Source]StoreStatus
-	configMap map[sources.Source]SourceConfig
+	routesMap map[int]api.RoutesResponse
+	statusMap map[int]StoreStatus
+	configMap map[int]SourceConfig
 }
 
 func NewRoutesStore(config *Config) *RoutesStore {
 
 	// Build mapping based on source instances
-	routesMap := make(map[sources.Source]api.RoutesResponse)
-	statusMap := make(map[sources.Source]StoreStatus)
-	configMap := make(map[sources.Source]SourceConfig)
+	routesMap := make(map[int]api.RoutesResponse)
+	statusMap := make(map[int]StoreStatus)
+	configMap := make(map[int]SourceConfig)
 
 	for _, source := range config.Sources {
-		instance := source.getInstance()
-		configMap[instance] = source
-		routesMap[instance] = api.RoutesResponse{}
-		statusMap[instance] = StoreStatus{
+		id := source.Id
+
+		configMap[id] = source
+		routesMap[id] = api.RoutesResponse{}
+		statusMap[id] = StoreStatus{
 			State: STATE_INIT,
 		}
 	}
@@ -62,20 +62,22 @@ func (self *RoutesStore) init() {
 
 // Update all routes
 func (self *RoutesStore) update() {
-	for source, _ := range self.routesMap {
+	for sourceId, _ := range self.routesMap {
+		source := self.configMap[sourceId].getInstance()
+
 		// Get current update state
-		if self.statusMap[source].State == STATE_UPDATING {
+		if self.statusMap[sourceId].State == STATE_UPDATING {
 			continue // nothing to do here
 		}
 
 		// Set update state
-		self.statusMap[source] = StoreStatus{
+		self.statusMap[sourceId] = StoreStatus{
 			State: STATE_UPDATING,
 		}
 
 		routes, err := source.AllRoutes()
 		if err != nil {
-			self.statusMap[source] = StoreStatus{
+			self.statusMap[sourceId] = StoreStatus{
 				State:       STATE_ERROR,
 				LastError:   err,
 				LastRefresh: time.Now(),
@@ -85,9 +87,9 @@ func (self *RoutesStore) update() {
 		}
 
 		// Update data
-		self.routesMap[source] = routes
+		self.routesMap[sourceId] = routes
 		// Update state
-		self.statusMap[source] = StoreStatus{
+		self.statusMap[sourceId] = StoreStatus{
 			LastRefresh: time.Now(),
 			State:       STATE_READY,
 		}
@@ -101,14 +103,14 @@ func (self *RoutesStore) Stats() RoutesStoreStats {
 
 	rsStats := []RouteServerRoutesStats{}
 
-	for source, routes := range self.routesMap {
-		status := self.statusMap[source]
+	for sourceId, routes := range self.routesMap {
+		status := self.statusMap[sourceId]
 
 		totalImported += len(routes.Imported)
 		totalFiltered += len(routes.Filtered)
 
 		serverStats := RouteServerRoutesStats{
-			Name: self.configMap[source].Name,
+			Name: self.configMap[sourceId].Name,
 
 			Routes: RoutesStats{
 				Filtered: len(routes.Filtered),
@@ -172,24 +174,24 @@ func filterRoutes(
 }
 
 func addNeighbour(
-	source sources.Source,
+	sourceId int,
 	route api.LookupRoute,
 ) api.LookupRoute {
 	neighbour := AliceNeighboursStore.GetNeighbourAt(
-		source, route.NeighbourId)
+		sourceId, route.NeighbourId)
 	route.Neighbour = neighbour
 	return route
 }
 
 // Single RS lookup
 func (self *RoutesStore) lookupRs(
-	source sources.Source,
+	sourceId int,
 	prefix string,
 ) chan []api.LookupRoute {
 
 	response := make(chan []api.LookupRoute)
-	config := self.configMap[source]
-	routes := self.routesMap[source]
+	config := self.configMap[sourceId]
+	routes := self.routesMap[sourceId]
 
 	go func() {
 		result := []api.LookupRoute{}
@@ -207,11 +209,11 @@ func (self *RoutesStore) lookupRs(
 
 		// Add Neighbours to results
 		for _, route := range filtered {
-			result = append(result, addNeighbour(source, route))
+			result = append(result, addNeighbour(sourceId, route))
 		}
 
 		for _, route := range imported {
-			result = append(result, addNeighbour(source, route))
+			result = append(result, addNeighbour(sourceId, route))
 		}
 
 		response <- result
@@ -225,8 +227,8 @@ func (self *RoutesStore) Lookup(prefix string) []api.LookupRoute {
 	responses := []chan []api.LookupRoute{}
 
 	// Dispatch
-	for source, _ := range self.routesMap {
-		res := self.lookupRs(source, prefix)
+	for sourceId, _ := range self.routesMap {
+		res := self.lookupRs(sourceId, prefix)
 		responses = append(responses, res)
 	}
 

@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/ecix/alice-lg/backend/api"
-	"github.com/ecix/alice-lg/backend/sources"
 
 	"log"
 	"time"
@@ -11,26 +10,26 @@ import (
 type NeighboursIndex map[string]api.Neighbour
 
 type NeighboursStore struct {
-	neighboursMap map[sources.Source]NeighboursIndex
-	configMap     map[sources.Source]SourceConfig
-	statusMap     map[sources.Source]StoreStatus
+	neighboursMap map[int]NeighboursIndex
+	configMap     map[int]SourceConfig
+	statusMap     map[int]StoreStatus
 }
 
 func NewNeighboursStore(config *Config) *NeighboursStore {
 
 	// Build source mapping
-	neighboursMap := make(map[sources.Source]NeighboursIndex)
-	configMap := make(map[sources.Source]SourceConfig)
-	statusMap := make(map[sources.Source]StoreStatus)
+	neighboursMap := make(map[int]NeighboursIndex)
+	configMap := make(map[int]SourceConfig)
+	statusMap := make(map[int]StoreStatus)
 
 	for _, source := range config.Sources {
-		instance := source.getInstance()
-		configMap[instance] = source
-		statusMap[instance] = StoreStatus{
+		sourceId := source.Id
+		configMap[sourceId] = source
+		statusMap[sourceId] = StoreStatus{
 			State: STATE_INIT,
 		}
 
-		neighboursMap[instance] = make(NeighboursIndex)
+		neighboursMap[sourceId] = make(NeighboursIndex)
 	}
 
 	store := &NeighboursStore{
@@ -61,22 +60,24 @@ func (self *NeighboursStore) init() {
 }
 
 func (self *NeighboursStore) update() {
-	for source, _ := range self.neighboursMap {
+	for sourceId, _ := range self.neighboursMap {
 		// Get current state
-		if self.statusMap[source].State == STATE_UPDATING {
+		if self.statusMap[sourceId].State == STATE_UPDATING {
 			continue // nothing to do here. really.
 		}
 
 		// Start updating
-		self.statusMap[source] = StoreStatus{
+		self.statusMap[sourceId] = StoreStatus{
 			State: STATE_UPDATING,
 		}
+
+		source := self.configMap[sourceId].getInstance()
 
 		neighboursRes, err := source.Neighbours()
 		neighbours := neighboursRes.Neighbours
 		if err != nil {
 			// That's sad.
-			self.statusMap[source] = StoreStatus{
+			self.statusMap[sourceId] = StoreStatus{
 				State:       STATE_ERROR,
 				LastError:   err,
 				LastRefresh: time.Now(),
@@ -91,9 +92,9 @@ func (self *NeighboursStore) update() {
 			index[neighbour.Id] = neighbour
 		}
 
-		self.neighboursMap[source] = index
+		self.neighboursMap[sourceId] = index
 		// Update state
-		self.statusMap[source] = StoreStatus{
+		self.statusMap[sourceId] = StoreStatus{
 			LastRefresh: time.Now(),
 			State:       STATE_READY,
 		}
@@ -101,14 +102,11 @@ func (self *NeighboursStore) update() {
 }
 
 func (self *NeighboursStore) GetNeighbourAt(
-	source sources.Source,
+	sourceId int,
 	id string,
 ) api.Neighbour {
 	// Lookup neighbour on RS
-	neighbours := self.neighboursMap[source]
-	log.Println("Fetching neighbour:", id)
-	log.Println("neighbour:", neighbours[id])
-	log.Println("neighbours:", neighbours)
+	neighbours := self.neighboursMap[sourceId]
 	return neighbours[id]
 }
 
@@ -117,11 +115,11 @@ func (self *NeighboursStore) Stats() NeighboursStoreStats {
 	totalNeighbours := 0
 	rsStats := []RouteServerNeighboursStats{}
 
-	for source, neighbours := range self.neighboursMap {
-		status := self.statusMap[source]
+	for sourceId, neighbours := range self.neighboursMap {
+		status := self.statusMap[sourceId]
 		totalNeighbours += len(neighbours)
 		serverStats := RouteServerNeighboursStats{
-			Name:       self.configMap[source].Name,
+			Name:       self.configMap[sourceId].Name,
 			State:      stateToString(status.State),
 			Neighbours: len(neighbours),
 			UpdatedAt:  status.LastRefresh,

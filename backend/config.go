@@ -55,6 +55,8 @@ type Config struct {
 	Ui      UiConfig
 	Sources []SourceConfig
 	File    string
+
+	instances map[SourceConfig]sources.Source
 }
 
 // Get sources keys form ini
