@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/ecix/alice-lg/backend/api"
 
@@ -215,34 +216,19 @@ func apiRoutesList(_req *http.Request, params httprouter.Params) (api.Response, 
 // Handle global lookup
 func apiLookupPrefixGlobal(req *http.Request, params httprouter.Params) (api.Response, error) {
 	// Get prefix to query
-	/*
-		prefix, err := validateQueryString(req, "q")
-		if err != nil {
-			return nil, err
-		}
-
-		// Run query on all sources
-		rsCount := len(AliceConfig.Sources)
-		responses := make(chan api.LookupResponse, rsCount)
-		for _, src := range AliceConfig.Sources {
-			go func(src SourceConfig) {
-				// Run query on RS
-				rs := src.getInstance()
-				result, _ := rs.LookupPrefix(prefix)
-				responses <- result
-			}(src)
-		}
-
-		// Collect results
-		routes := []api.LookupRoute{}
-		for i := 0; i < rsCount; i++ {
-			result := <-responses
-			routes = append(routes, result.Routes...)
-		}
-	*/
+	prefix, err := validateQueryString(req, "q")
+	if err != nil {
+		return nil, err
+	}
 
 	// Make response
-	response := api.LookupResponseGlobal{}
+	t0 := time.Now()
+	routes := AliceRoutesStore.Lookup(prefix)
 
+	queryDuration := time.Since(t0)
+	response := api.LookupResponseGlobal{
+		Routes: routes,
+		Time:   float64(queryDuration) / 1000.0 / 1000.0, // nano -> micro -> milli
+	}
 	return response, nil
 }

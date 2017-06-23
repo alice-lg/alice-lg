@@ -9,6 +9,7 @@ import (
 )
 
 var AliceConfig *Config
+var AliceRoutesStore *RoutesStore
 
 func main() {
 	var err error
@@ -33,8 +34,8 @@ func main() {
 	log.Println("Using configuration:", AliceConfig.File)
 
 	// Setup local routes store
-	routesStore := NewRoutesStore(AliceConfig)
-	routesStore.Start()
+	AliceRoutesStore = NewRoutesStore(AliceConfig)
+	AliceRoutesStore.Start()
 
 	// Setup request routing
 	router := httprouter.New()

@@ -116,13 +116,6 @@ func (self *Birdwatcher) LookupPrefix(prefix string) (api.LookupResponse, error)
 		Name: self.config.Name,
 	}
 
-	// Get neighbours list from RS
-	neighboursRes, err := self.Neighbours()
-	if err != nil {
-		return api.LookupResponse{}, err
-	}
-	neighbours := neighboursRes.Neighbours
-
 	// Query prefix on RS
 	bird, err := self.client.GetJson("/routes/prefix?prefix=" + prefix)
 	if err != nil {
@@ -141,9 +134,6 @@ func (self *Birdwatcher) LookupPrefix(prefix string) (api.LookupResponse, error)
 	// Add corresponding neighbour and source rs to result
 	results := []api.LookupRoute{}
 	for _, src := range routes {
-		// Get corresponding neighbour
-		neighbour, _ := getNeighbourById(neighbours, src.NeighbourId)
-
 		// Okay. This is actually really hacky.
 		// A less bruteforce approach would be highly appreciated
 		route := api.LookupRoute{
@@ -152,7 +142,6 @@ func (self *Birdwatcher) LookupPrefix(prefix string) (api.LookupResponse, error)
 			Routeserver: rs,
 
 			NeighbourId: src.NeighbourId,
-			Neighbour:   neighbour,
 
 			Network:   src.Network,
 			Interface: src.Interface,

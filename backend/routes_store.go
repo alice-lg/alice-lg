@@ -5,6 +5,7 @@ import (
 	"github.com/ecix/alice-lg/backend/sources"
 
 	"log"
+	"strings"
 	"time"
 )
 
@@ -192,8 +193,89 @@ func (self *RoutesStore) Stats() StoreStats {
 	return storeStats
 }
 
+// Routes filter
+func filterRoutes(
+	config SourceConfig,
+	routes []api.Route,
+	prefix string,
+	state string,
+) []api.LookupRoute {
+
+	results := []api.LookupRoute{}
+
+	for _, route := range routes {
+		// Naiive filtering:
+		if strings.HasPrefix(route.Network, prefix) {
+			lookup := api.LookupRoute{
+				Id:          route.Id,
+				NeighbourId: route.NeighbourId,
+
+				Routeserver: api.Routeserver{
+					Id:   config.Id,
+					Name: config.Name,
+				},
+
+				State: state,
+
+				Network:   route.Network,
+				Interface: route.Interface,
+				Gateway:   route.Gateway,
+				Metric:    route.Metric,
+				Bgp:       route.Bgp,
+				Age:       route.Age,
+				Type:      route.Type,
+			}
+			results = append(results, lookup)
+		}
+	}
+	return results
+}
+
+// Single RS lookup
+func (self *RoutesStore) lookupRs(
+	source sources.Source,
+	prefix string,
+) chan []api.LookupRoute {
+
+	response := make(chan []api.LookupRoute)
+	config := self.configMap[source]
+	routes := self.routesMap[source]
+
+	go func() {
+		filtered := filterRoutes(
+			config,
+			routes.Filtered,
+			prefix,
+			"filtered")
+		imported := filterRoutes(
+			config,
+			routes.Imported,
+			prefix,
+			"imported")
+
+		result := append(filtered, imported...)
+
+		response <- result
+	}()
+
+	return response
+}
+
 func (self *RoutesStore) Lookup(prefix string) []api.LookupRoute {
 	result := []api.LookupRoute{}
+	responses := []chan []api.LookupRoute{}
+
+	// Dispatch
+	for source, _ := range self.routesMap {
+		res := self.lookupRs(source, prefix)
+		responses = append(responses, res)
+	}
+
+	// Collect
+	for _, response := range responses {
+		routes := <-response
+		result = append(result, routes...)
+	}
 
 	return result
 }
