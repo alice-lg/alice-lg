@@ -145,12 +145,12 @@ type Route struct {
 
 // Lookup Prefixes
 type LookupRoute struct {
-	Id string `json:"id"`
+	Id          string `json:"id"`
+	NeighbourId string `json:"neighbour_id"`
+
+	State string `json:"state"` // Filtered, Imported, ...
 
 	Routeserver Routeserver `json:"routeserver"`
-
-	NeighbourId string    `json:"neighbour_id"`
-	Neighbour   Neighbour `json:"neighbour"`
 
 	Network   string        `json:"network"`
 	Interface string        `json:"interface"`
@@ -192,4 +192,5 @@ type LookupResponse struct {
 
 type LookupResponseGlobal struct {
 	Routes []LookupRoute `json:"routes"`
+	Time   float64       `json:"query_duration_ms"`
 }
