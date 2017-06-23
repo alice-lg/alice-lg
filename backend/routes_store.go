@@ -9,52 +9,6 @@ import (
 	"time"
 )
 
-const (
-	STATE_INIT = iota
-	STATE_READY
-	STATE_UPDATING
-	STATE_ERROR
-)
-
-type RoutesStats struct {
-	Filtered int `json:"filtered"`
-	Imported int `json:"imported"`
-}
-
-type RouteServerStats struct {
-	Name   string      `json:"name"`
-	Routes RoutesStats `json:"routes"`
-
-	State     string
-	UpdatedAt time.Time `json:"updated_at"`
-}
-
-type StoreStats struct {
-	TotalRoutes  RoutesStats        `json:"total_routes"`
-	RouteServers []RouteServerStats `json:"route_servers"`
-}
-
-// Write stats to the log
-func (stats StoreStats) Log() {
-	log.Println("Routes store:")
-
-	log.Println("    Routes Imported:",
-		stats.TotalRoutes.Imported,
-		"Filtered:",
-		stats.TotalRoutes.Filtered)
-	log.Println("    Routeservers:")
-
-	for _, rs := range stats.RouteServers {
-		log.Println("      -", rs.Name)
-		log.Println("        State:", rs.State)
-		log.Println("        UpdatedAt:", rs.UpdatedAt)
-		log.Println("        Routes Imported:",
-			rs.Routes.Imported,
-			"Filtered:",
-			rs.Routes.Filtered)
-	}
-}
-
 type StoreStatus struct {
 	LastRefresh time.Time
 	LastError   error
@@ -103,6 +57,13 @@ func (self *RoutesStore) init() {
 
 	// Initial stats
 	self.Stats().Log()
+
+	// Periodically update store
+	for {
+		// TODO: Add config option
+		time.Sleep(5 * time.Minute)
+		self.update()
+	}
 }
 
 // Update all routes
@@ -155,7 +116,7 @@ func stateToString(state int) string {
 }
 
 // Calculate store insights
-func (self *RoutesStore) Stats() StoreStats {
+func (self *RoutesStore) Stats() RoutesStoreStats {
 	totalImported := 0
 	totalFiltered := 0
 
@@ -183,7 +144,7 @@ func (self *RoutesStore) Stats() StoreStats {
 	}
 
 	// Make stats
-	storeStats := StoreStats{
+	storeStats := RoutesStoreStats{
 		TotalRoutes: RoutesStats{
 			Imported: totalImported,
 			Filtered: totalFiltered,
