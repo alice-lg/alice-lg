@@ -9,12 +9,6 @@ import (
 	"time"
 )
 
-type StoreStatus struct {
-	LastRefresh time.Time
-	LastError   error
-	State       int
-}
-
 type RoutesStore struct {
 	routesMap map[sources.Source]api.RoutesResponse
 	statusMap map[sources.Source]StoreStatus
