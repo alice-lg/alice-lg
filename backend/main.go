@@ -32,6 +32,10 @@ func main() {
 
 	log.Println("Using configuration:", AliceConfig.File)
 
+	// Setup local routes store
+	routesStore := NewRoutesStore(AliceConfig)
+	routesStore.Start()
+
 	// Setup request routing
 	router := httprouter.New()
 
