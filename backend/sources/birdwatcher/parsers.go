@@ -283,17 +283,25 @@ func parseRoutesDump(bird ClientResponse, config Config) (api.RoutesResponse, er
 	}
 	result.Api = apiStatus
 
+	// Fetch imported routes
 	importedRoutes, ok := bird["imported"].([]interface{})
 	if !ok {
 		return result, fmt.Errorf("Imported routes missing")
 	}
-	result.Imported = parseRoutesData(importedRoutes, config)
 
+	// Sort routes by network for faster querying
+	imported := parseRoutesData(importedRoutes, config)
+	sort.Sort(imported)
+	result.Imported = imported
+
+	// Fetch filtered routes
 	filteredRoutes, ok := bird["filtered"].([]interface{})
 	if !ok {
 		return result, fmt.Errorf("Filtered routes missing")
 	}
-	result.Filtered = parseRoutesData(filteredRoutes, config)
+	filtered := parseRoutesData(filteredRoutes, config)
+	sort.Sort(filtered)
+	result.Filtered = filtered
 
 	return result, nil
 }
