@@ -89,9 +89,6 @@ func apiRegisterEndpoints(router *httprouter.Router) error {
 		endpoint(apiRoutesList))
 
 	// Querying
-	router.GET("/api/routeservers/:id/lookup/prefix",
-		endpoint(apiLookupPrefix))
-
 	router.GET("/api/lookup/prefix",
 		endpoint(apiLookupPrefixGlobal))
 
@@ -215,53 +212,37 @@ func apiRoutesList(_req *http.Request, params httprouter.Params) (api.Response, 
 	return result, err
 }
 
-// Handle lookup
-func apiLookupPrefix(req *http.Request, params httprouter.Params) (api.Response, error) {
-	rsId, err := validateSourceId(params.ByName("id"))
-	if err != nil {
-		return nil, err
-	}
-
-	prefix, err := validateQueryString(req, "q")
-	if err != nil {
-		return nil, err
-	}
-
-	source := AliceConfig.Sources[rsId].getInstance()
-	result, err := source.LookupPrefix(prefix)
-	return result, err
-}
-
 // Handle global lookup
 func apiLookupPrefixGlobal(req *http.Request, params httprouter.Params) (api.Response, error) {
 	// Get prefix to query
-	prefix, err := validateQueryString(req, "q")
-	if err != nil {
-		return nil, err
-	}
+	/*
+		prefix, err := validateQueryString(req, "q")
+		if err != nil {
+			return nil, err
+		}
 
-	// Run query on all sources
-	rsCount := len(AliceConfig.Sources)
-	responses := make(chan api.LookupResponse, rsCount)
-	for _, src := range AliceConfig.Sources {
-		go func(src SourceConfig) {
-			// Run query on RS
-			rs := src.getInstance()
-			result, _ := rs.LookupPrefix(prefix)
-			responses <- result
-		}(src)
-	}
+		// Run query on all sources
+		rsCount := len(AliceConfig.Sources)
+		responses := make(chan api.LookupResponse, rsCount)
+		for _, src := range AliceConfig.Sources {
+			go func(src SourceConfig) {
+				// Run query on RS
+				rs := src.getInstance()
+				result, _ := rs.LookupPrefix(prefix)
+				responses <- result
+			}(src)
+		}
 
-	// Collect results
-	routes := []api.LookupRoute{}
-	for i := 0; i < rsCount; i++ {
-		result := <-responses
-		routes = append(routes, result.Routes...)
-	}
+		// Collect results
+		routes := []api.LookupRoute{}
+		for i := 0; i < rsCount; i++ {
+			result := <-responses
+			routes = append(routes, result.Routes...)
+		}
+	*/
 
 	// Make response
-	response := api.LookupResponseGlobal{
-		Routes: routes,
-	}
+	response := api.LookupResponseGlobal{}
+
 	return response, nil
 }
