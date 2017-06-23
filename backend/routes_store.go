@@ -15,6 +15,24 @@ const (
 	STATE_ERROR
 )
 
+type RoutesStats struct {
+	Filtered int `json:"filtered"`
+	Imported int `json:"imported"`
+}
+
+type RouteServerStats struct {
+	Name   string      `json:"name"`
+	Routes RoutesStats `json:"routes"`
+
+	State     string
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type StoreStats struct {
+	TotalRoutes  RoutesStats        `json:"total_routes"`
+	RouteServers []RouteServerStats `json:"route_servers"`
+}
+
 type StoreStatus struct {
 	LastRefresh time.Time
 	LastError   error
@@ -74,7 +92,6 @@ func (self *RoutesStore) update() {
 				LastRefresh: time.Now(),
 			}
 
-			log.Println("Error while updating routes cache:", err)
 			continue
 		}
 
@@ -88,6 +105,59 @@ func (self *RoutesStore) update() {
 	}
 
 	log.Println("All caches refreshed")
+}
+
+// Helper: stateToString
+func stateToString(state int) string {
+	switch state {
+	case STATE_INIT:
+		return "INIT"
+	case STATE_READY:
+		return "READY"
+	case STATE_UPDATING:
+		return "UPDATING"
+	case STATE_ERROR:
+		return "ERROR"
+	}
+	return "UNKNOWN"
+}
+
+// Calculate store insights
+func (self *RoutesStore) Stats() StoreStats {
+	totalImported := 0
+	totalFiltered := 0
+
+	rsStats := []RouteServerStats{}
+
+	for source, routes := range self.routesMap {
+		status := self.statusMap[source]
+
+		totalImported += len(routes.Imported)
+		totalFiltered += len(routes.Filtered)
+
+		serverStats := RouteServerStats{
+			Routes: RoutesStats{
+				Filtered: len(routes.Filtered),
+				Imported: len(routes.Imported),
+			},
+
+			State:     stateToString(status.State),
+			UpdatedAt: status.LastRefresh,
+		}
+
+		rsStats = append(rsStats, serverStats)
+	}
+
+	// Make stats
+	storeStats := StoreStats{
+		TotalRoutes: RoutesStats{
+			Imported: totalImported,
+			Filtered: totalFiltered,
+		},
+		RouteServers: rsStats,
+	}
+	return storeStats
+
 }
 
 func (self *RoutesStore) Lookup(prefix string) []api.LookupRoute {
