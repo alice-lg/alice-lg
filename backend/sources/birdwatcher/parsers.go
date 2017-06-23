@@ -229,13 +229,9 @@ func mustInt(value interface{}, fallback int) int {
 	return int(fval)
 }
 
-// Parse routes response
-func parseRoutes(bird ClientResponse, config Config) ([]api.Route, error) {
+// Parse partial routes response
+func parseRoutesData(birdRoutes []interface{}, config Config) api.Routes {
 	routes := api.Routes{}
-	birdRoutes, ok := bird["routes"].([]interface{})
-	if !ok {
-		return routes, fmt.Errorf("Routes response missing")
-	}
 
 	for _, data := range birdRoutes {
 		rdata := data.(map[string]interface{})
@@ -261,9 +257,43 @@ func parseRoutes(bird ClientResponse, config Config) ([]api.Route, error) {
 
 		routes = append(routes, route)
 	}
+	return routes
+}
+
+// Parse routes response
+func parseRoutes(bird ClientResponse, config Config) ([]api.Route, error) {
+	birdRoutes, ok := bird["routes"].([]interface{})
+	if !ok {
+		return []api.Route{}, fmt.Errorf("Routes response missing")
+	}
+
+	routes := parseRoutesData(birdRoutes, config)
 
 	// Sort routes
 	sort.Sort(routes)
-
 	return routes, nil
+}
+
+func parseRoutesDump(bird ClientResponse, config Config) (api.RoutesResponse, error) {
+	result := api.RoutesResponse{}
+
+	apiStatus, err := parseApiStatus(bird, config)
+	if err != nil {
+		return result, err
+	}
+	result.Api = apiStatus
+
+	importedRoutes, ok := bird["imported"].([]interface{})
+	if !ok {
+		return result, fmt.Errorf("Imported routes missing")
+	}
+	result.Imported = parseRoutesData(importedRoutes, config)
+
+	filteredRoutes, ok := bird["filtered"].([]interface{})
+	if !ok {
+		return result, fmt.Errorf("Filtered routes missing")
+	}
+	result.Filtered = parseRoutesData(filteredRoutes, config)
+
+	return result, nil
 }

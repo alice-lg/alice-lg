@@ -180,12 +180,6 @@ func (self *Birdwatcher) AllRoutes() (api.RoutesResponse, error) {
 	if err != nil {
 		return api.RoutesResponse{}, err
 	}
-
-	apiStatus, err := parseApiStatus(bird, self.config)
-
-	result := api.RoutesResponse{
-		Api: apiStatus,
-	}
-
-	return result, nil
+	result, err := parseRoutesDump(bird, self.config)
+	return result, err
 }
