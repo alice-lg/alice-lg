@@ -94,21 +94,6 @@ func (self *RoutesStore) update() {
 	}
 }
 
-// Helper: stateToString
-func stateToString(state int) string {
-	switch state {
-	case STATE_INIT:
-		return "INIT"
-	case STATE_READY:
-		return "READY"
-	case STATE_UPDATING:
-		return "UPDATING"
-	case STATE_ERROR:
-		return "ERROR"
-	}
-	return "INVALID"
-}
-
 // Calculate store insights
 func (self *RoutesStore) Stats() RoutesStoreStats {
 	totalImported := 0
