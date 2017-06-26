@@ -179,6 +179,18 @@ func validateQueryString(req *http.Request, key string) (string, error) {
 	return value, nil
 }
 
+// Helper: Validate prefix query
+func validatePrefixQuery(value string) (string, error) {
+
+	// Query constraints: Should at least include a dot or colon
+	if strings.Index(value, ".") == -1 &&
+		strings.Index(value, ":") == -1 {
+		return "", fmt.Errorf("Query needs at least a ':' or '.'")
+	}
+
+	return value, nil
+}
+
 // Handle status
 func apiStatus(_req *http.Request, params httprouter.Params) (api.Response, error) {
 	rsId, err := validateSourceId(params.ByName("id"))
@@ -217,6 +229,11 @@ func apiRoutesList(_req *http.Request, params httprouter.Params) (api.Response, 
 func apiLookupPrefixGlobal(req *http.Request, params httprouter.Params) (api.Response, error) {
 	// Get prefix to query
 	prefix, err := validateQueryString(req, "q")
+	if err != nil {
+		return nil, err
+	}
+
+	prefix, err = validatePrefixQuery(prefix)
 	if err != nil {
 		return nil, err
 	}
