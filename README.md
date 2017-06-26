@@ -9,7 +9,7 @@ Take a look at an Alice-LG production example:
 - https://lg.ecix.net/api/routeservers/0/status
 - https://lg.ecix.net/api/routeservers/0/neighbours
 - https://lg.ecix.net/api/routeservers/0/neighbours/ID109_AS31078/routes
-- https://lg.ecix.net/api/routeservers/0/lookup/prefix?q=217.115.15.0
+- https://lg.ecix.net/api/lookup/prefix?q=217.115.15.0
 
 # Explanations
 Alice-LG is a BGP looking glass which gets its data from external APIs.
@@ -27,6 +27,8 @@ Major thanks to Barry O'Donovan who built the original [INEX Bird's Eye](https:/
 
 ## Building Alice-LG from scratch
 __These examples include setting up your Go environment, if you already have set that up then you can obviously skip that__
+
+In case you have trouble with `npm` and `gulp` you can try using `yarn`.
 
 ### CentOS 7:
 First add the following lines at the end of your ~/.bash_profile:
