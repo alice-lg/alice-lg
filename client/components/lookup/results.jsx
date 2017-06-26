@@ -3,6 +3,7 @@ import _ from 'underscore'
 
 import React from 'react'
 import {connect} from 'react-redux'
+import {Link} from 'react-router'
 
 import FilterReason
   from 'components/routeservers/large-communities/filter-reason'
@@ -10,8 +11,22 @@ import FilterReason
 import NoexportReason
   from 'components/routeservers/large-communities/noexport-reason'
 
+import {showBgpAttributes}
+  from 'components/routeservers/routes/bgp-attributes-modal-actions'
 
-class ResultsTable extends React.Component {
+import BgpAttributesModal
+  from 'components/routeservers/routes/bgp-attributes-modal'
+
+import LoadingIndicator
+	from 'components/loading-indicator/small'
+
+class ResultsTableView extends React.Component {
+
+  showAttributesModal(route) {
+    this.props.dispatch(
+      showBgpAttributes(route)
+    );
+  }
 
   render() {
     if (this.props.routes.length == 0) {
@@ -20,14 +35,28 @@ class ResultsTable extends React.Component {
 
     const routes = this.props.routes.map((route) => (
       <tr key={route.id + '_' + route.neighbour.id + '_' + route.routeserver.id}>
-        <td>{route.network}
+        <td onClick={() => this.showAttributesModal(route)}>{route.network}
             {this.props.display_reasons == "filtered" && <FilterReason route={route} />}
         </td>
-        <td>{route.bgp.as_path.join(" ")}</td>
-        <td>{route.gateway}</td>
-        <td>{route.neighbour.description}</td>
-        <td>{route.neighbour.asn}</td>
-        <td>{route.routeserver.name}</td>
+        <td onClick={() => this.showAttributesModal(route)}>{route.bgp.as_path.join(" ")}</td>
+        <td onClick={() => this.showAttributesModal(route)}>
+          {route.gateway}
+        </td>
+        <td>
+          <Link to={`/routeservers/${route.routeserver.id}/protocols/${route.neighbour.id}/routes`}>
+            {route.neighbour.description}
+          </Link>
+        </td>
+        <td>
+          <Link to={`/routeservers/${route.routeserver.id}/protocols/${route.neighbour.id}/routes`}>
+            {route.neighbour.asn}
+          </Link>
+        </td>
+        <td>
+          <Link to={`/routeservers/${route.routeserver.id}`}>
+            {route.routeserver.name}
+          </Link>
+        </td>
       </tr>
     ));
 
@@ -52,13 +81,19 @@ class ResultsTable extends React.Component {
       </div>
     );
   }
-
 }
 
+const ResultsTable = connect()(ResultsTableView);
 
 class LookupResults extends React.Component {
 
   render() {
+    if(this.props.isLoading) {
+      return (
+				<LoadingIndicator />
+      );
+    }
+
     const mkHeader = (color, action) => (
         <p style={{"color": color, "textTransform": "uppercase"}}>
           Routes {action}
@@ -74,6 +109,9 @@ class LookupResults extends React.Component {
 
     return (
       <div className="lookup-results">
+
+        <BgpAttributesModal />
+
         <ResultsTable header={filtdHeader}
                       routes={filteredRoutes}
                       display_reasons="filtered" />
