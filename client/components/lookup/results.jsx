@@ -20,7 +20,9 @@ class ResultsTable extends React.Component {
 
     const routes = this.props.routes.map((route) => (
       <tr key={route.id + '_' + route.neighbour.id + '_' + route.routeserver.id}>
-        <td>{route.network}</td>
+        <td>{route.network}
+            {this.props.display_reasons == "filtered" && <FilterReason route={route} />}
+        </td>
         <td>{route.bgp.as_path.join(" ")}</td>
         <td>{route.gateway}</td>
         <td>{route.neighbour.description}</td>
@@ -72,8 +74,11 @@ class LookupResults extends React.Component {
 
     return (
       <div className="lookup-results">
-        <ResultsTable header={filtdHeader} routes={filteredRoutes} />
-        <ResultsTable header={recvdHeader} routes={importedRoutes} />
+        <ResultsTable header={filtdHeader}
+                      routes={filteredRoutes}
+                      display_reasons="filtered" />
+        <ResultsTable header={recvdHeader}
+                      routes={importedRoutes} />
       </div>
     )
   }
