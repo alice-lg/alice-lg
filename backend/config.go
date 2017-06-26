@@ -184,7 +184,8 @@ func getSources(config *ini.File) ([]SourceConfig, error) {
 	sources := []SourceConfig{}
 
 	sourceSections := config.ChildSections("source")
-	for id, section := range sourceSections {
+	sourceId := 0
+	for _, section := range sourceSections {
 		if !isSourceBase(section) {
 			continue
 		}
@@ -212,7 +213,7 @@ func getSources(config *ini.File) ([]SourceConfig, error) {
 
 		// Make config
 		config := SourceConfig{
-			Id:   id,
+			Id:   sourceId,
 			Name: section.Key("name").MustString("Unknown Source"),
 			Type: backendType,
 		}
@@ -227,6 +228,8 @@ func getSources(config *ini.File) ([]SourceConfig, error) {
 
 		// Add to list of sources
 		sources = append(sources, config)
+
+		sourceId += 1
 	}
 
 	return sources, nil
