@@ -182,11 +182,19 @@ func validateQueryString(req *http.Request, key string) (string, error) {
 // Helper: Validate prefix query
 func validatePrefixQuery(value string) (string, error) {
 
+	// We should at least provide 2 chars
+	if len(value) < 2 {
+		return "", fmt.Errorf("Query too short")
+	}
+
 	// Query constraints: Should at least include a dot or colon
+	/* let's try without this :)
+
 	if strings.Index(value, ".") == -1 &&
 		strings.Index(value, ":") == -1 {
 		return "", fmt.Errorf("Query needs at least a ':' or '.'")
 	}
+	*/
 
 	return value, nil
 }
