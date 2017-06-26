@@ -1,61 +1,100 @@
 
+import _ from 'underscore'
+
 import React from 'react'
+import {connect} from 'react-redux'
 
-export default class LookupResults extends React.Component {
+import FilterReason
+  from 'components/routeservers/large-communities/filter-reason'
 
-    _countResults() {
-        let count = 0;
-        for (let rs in this.props.results) {
-            let set = this.props.results[rs];
-            count += set.length;
-        }
-        return count;
+import NoexportReason
+  from 'components/routeservers/large-communities/noexport-reason'
+
+
+class ResultsTable extends React.Component {
+
+  render() {
+    if (this.props.routes.length == 0) {
+      return null;
     }
 
-    _resultSetEmpty() {
-        let resultCount = this._countResults();
-        if (this.props.finished && resultCount == 0){
-            return true;
-        }
-        return false;
-    }
+    const routes = this.props.routes.map((route) => (
+      <tr key={route.id + route.routeserver.id}>
+        <td>{route.network}</td>
+        <td>{route.bgp.as_path.join(" ")}</td>
+        <td>{route.gateway}</td>
+        <td>{route.neighbour.description}</td>
+        <td>{route.neighbour.asn}</td>
+        <td>{route.routeserver.name}</td>
+      </tr>
+    ));
 
-    _awaitingResults() {
-        let resultCount = this._countResults();
-        if (!this.props.finished && resultCount == 0) {
-            return true;
-        }
-        return false;
-    }
-
-
-    /* No Results */
-    renderEmpty() {
-        return (
-            <div className="card card-results card-no-results">
-                The prefix could not be found.
-                Did you specify a network address?
-            </div>
-        );
-    }
-
-    render() {
-        if (this._resultSetEmpty()) {
-            return this.renderEmpty();
-        }
-
-        if (this._awaitingResults) {
-            return null;
-        }
-
-        // Render Results table
-        return (
-            <div className="card card-results">
-                ROUTES INCOMING!
-            </div>
-        );
-    }
+    return (
+      <div className="card">
+        {this.props.header}
+        <table className="table table-striped table-routes">
+          <thead>
+            <tr>
+              <th>Network</th>
+              <th>AS Path</th>
+              <th>Gateway</th>
+              <th>Neighbour</th>
+              <th>ASN</th>
+              <th>RS</th>
+            </tr>
+          </thead>
+          <tbody>
+            {routes}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
 
 }
 
+
+class LookupResults extends React.Component {
+
+  render() {
+    const mkHeader = (color, action) => (
+        <p style={{"color": color, "textTransform": "uppercase"}}>
+          Routes {action}
+        </p>
+    );
+
+    const filtdHeader = mkHeader("orange", "filtered");
+    const recvdHeader = mkHeader("green",  "accepted");
+    const noexHeader  = mkHeader("red",    "not exported");
+
+    let filteredRoutes = this.props.routes.filtered;
+    let importedRoutes = this.props.routes.imported;
+
+    return (
+      <div className="lookup-results">
+        <ResultsTable header={filtdHeader} routes={filteredRoutes} />
+        <ResultsTable header={recvdHeader} routes={importedRoutes} />
+      </div>
+    )
+  }
+
+}
+
+function selectRoutes(routes, state) {
+  return _.where(routes, {state: state});
+}
+
+export default connect(
+  (state) => {
+    let routes = state.lookup.results;
+    let filteredRoutes = selectRoutes(routes, 'filtered');
+    let importedRoutes = selectRoutes(routes, 'imported');
+    return {
+      routes: {
+        filtered: filteredRoutes,
+        imported: importedRoutes
+      }
+    }
+  }
+)(LookupResults);
 
