@@ -19,7 +19,7 @@ just prior to [RIPE73](https://ripe73.ripe.net/) in Madrid, Spain.
 
 Alice requires a working (and configured) `golang` installation
 for the backend.
-The frontend requires `npm` for building.
+The frontend requires `yarn` and `gulp` for building.
 
 
 Clone this repository in your go workspace and type
