@@ -24,7 +24,7 @@ all: client
 
 deps:
 	@echo "Installing dependencies"
-	npm install
+	yarn install
 
 client: deps
 	@echo "Building alice UI"
