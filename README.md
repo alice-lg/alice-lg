@@ -61,14 +61,14 @@ An example configuration can be found at
 [etc/alicelg/alice.example.conf](https://github.com/ecix/alice-lg/blob/readme_update/etc/alicelg/alice.example.conf).
 
 You can copy it to any of the following locations:
-```
+
     etc/alicelg/alice.conf        # local
     etc/alicelg/alice.local.conf  # local
     /etc/alicelg/alice.conf       # global
-```
+
 
 You will have to edit the configuration file as you need to point Alice-LG to the correct [APIs](https://github.com/ecix/birdwatcher):
-```
+
     [source.0]
     name = rs1.example.com (IPv4)
     [source.0.birdwatcher]
@@ -80,7 +80,7 @@ You will have to edit the configuration file as you need to point Alice-LG to th
     name = rs1.example.com (IPv6)
     [source.1.birdwatcher]
     api = http://rs1.example.com:29186/
-```
+
 
 ## Running
 
