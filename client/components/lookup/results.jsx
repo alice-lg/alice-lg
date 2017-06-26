@@ -85,6 +85,41 @@ class ResultsTableView extends React.Component {
 
 const ResultsTable = connect()(ResultsTableView);
 
+
+class NoResultsView extends React.Component {
+  render() {
+    if (!this.props.show) {
+      return null;
+    }
+    return (
+      <p className="lookup-no-results text-info card">
+        No prefixes could be found for <b>{this.props.query}</b>
+      </p>
+    );
+  }
+}
+
+const NoResults = connect(
+  (state) => {
+    let total = state.lookup.results;
+    let query = state.lookup.query;
+    let isLoading = state.lookup.isLoading;
+
+    let show = false;
+
+    if (total == 0 && query != "" && isLoading == false) {
+      show = true;
+    }
+
+    return {
+      show: show,
+      query: state.lookup.query
+    }
+  }
+)(NoResultsView);
+
+
+
 class LookupResults extends React.Component {
 
   render() {
@@ -112,6 +147,8 @@ class LookupResults extends React.Component {
 
         <BgpAttributesModal />
 
+        <NoResults />
+
         <ResultsTable header={filtdHeader}
                       routes={filteredRoutes}
                       display_reasons="filtered" />
@@ -136,7 +173,7 @@ export default connect(
       routes: {
         filtered: filteredRoutes,
         imported: importedRoutes
-      }
+      },
     }
   }
 )(LookupResults);

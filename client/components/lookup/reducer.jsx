@@ -21,18 +21,21 @@ export default function reducer(state=initialState, action) {
   switch(action.type) {
     case LOAD_RESULTS_REQUEST:
       return Object.assign({}, state, initialState, {
-        isLoading: true,
+        query: action.payload.query,
+        isLoading: true
       });
     case LOAD_RESULTS_SUCCESS:
       return Object.assign({}, state, {
         isLoading: false,
+        query: action.payload.query,
         queryDurationMs: action.payload.results.query_duration_ms,
         results: action.payload.results.routes,
         error: null,
       });
     case LOAD_RESULTS_ERROR:
       return Object.assign({}, state, initialState, {
-        error: action.payload.error,
+        query: action.payload.query,
+        error: action.payload.error
       });
   }
   return state;
