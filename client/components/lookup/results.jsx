@@ -19,7 +19,7 @@ class ResultsTable extends React.Component {
     }
 
     const routes = this.props.routes.map((route) => (
-      <tr key={route.id + route.routeserver.id}>
+      <tr key={route.id + '_' + route.neighbour.id + '_' + route.routeserver.id}>
         <td>{route.network}</td>
         <td>{route.bgp.as_path.join(" ")}</td>
         <td>{route.gateway}</td>
