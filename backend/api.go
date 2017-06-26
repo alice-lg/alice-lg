@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/ecix/alice-lg/backend/api"
 
@@ -89,8 +90,8 @@ func apiRegisterEndpoints(router *httprouter.Router) error {
 		endpoint(apiRoutesList))
 
 	// Querying
-	router.GET("/api/routeservers/:id/lookup/prefix",
-		endpoint(apiLookupPrefix))
+	router.GET("/api/lookup/prefix",
+		endpoint(apiLookupPrefixGlobal))
 
 	return nil
 }
@@ -126,9 +127,9 @@ func apiRouteserversList(_req *http.Request, _params httprouter.Params) (api.Res
 	routeservers := []api.Routeserver{}
 
 	sources := AliceConfig.Sources
-	for id, source := range sources {
+	for _, source := range sources {
 		routeservers = append(routeservers, api.Routeserver{
-			Id:   id,
+			Id:   source.Id,
 			Name: source.Name,
 		})
 	}
@@ -178,6 +179,26 @@ func validateQueryString(req *http.Request, key string) (string, error) {
 	return value, nil
 }
 
+// Helper: Validate prefix query
+func validatePrefixQuery(value string) (string, error) {
+
+	// We should at least provide 2 chars
+	if len(value) < 2 {
+		return "", fmt.Errorf("Query too short")
+	}
+
+	// Query constraints: Should at least include a dot or colon
+	/* let's try without this :)
+
+	if strings.Index(value, ".") == -1 &&
+		strings.Index(value, ":") == -1 {
+		return "", fmt.Errorf("Query needs at least a ':' or '.'")
+	}
+	*/
+
+	return value, nil
+}
+
 // Handle status
 func apiStatus(_req *http.Request, params httprouter.Params) (api.Response, error) {
 	rsId, err := validateSourceId(params.ByName("id"))
@@ -212,19 +233,27 @@ func apiRoutesList(_req *http.Request, params httprouter.Params) (api.Response, 
 	return result, err
 }
 
-// Handle lookup
-func apiLookupPrefix(req *http.Request, params httprouter.Params) (api.Response, error) {
-	rsId, err := validateSourceId(params.ByName("id"))
-	if err != nil {
-		return nil, err
-	}
-
+// Handle global lookup
+func apiLookupPrefixGlobal(req *http.Request, params httprouter.Params) (api.Response, error) {
+	// Get prefix to query
 	prefix, err := validateQueryString(req, "q")
 	if err != nil {
 		return nil, err
 	}
 
-	source := AliceConfig.Sources[rsId].getInstance()
-	result, err := source.LookupPrefix(prefix)
-	return result, err
+	prefix, err = validatePrefixQuery(prefix)
+	if err != nil {
+		return nil, err
+	}
+
+	// Make response
+	t0 := time.Now()
+	routes := AliceRoutesStore.Lookup(prefix)
+
+	queryDuration := time.Since(t0)
+	response := api.LookupResponseGlobal{
+		Routes: routes,
+		Time:   float64(queryDuration) / 1000.0 / 1000.0, // nano -> micro -> milli
+	}
+	return response, nil
 }

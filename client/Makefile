@@ -20,17 +20,17 @@ DIST=birdseye-ui-dist-$(VERSION).tar.gz
 
 DIST_BUILD=$(addprefix $(DIST_BUILDS)/, $(DIST))
 
-all: deps client
+all: client
 
 deps:
 	@echo "Installing dependencies"
-	npm install
+	yarn install
 
-client:
+client: deps
 	@echo "Building alice UI"
 	gulp
 
-client_prod:
+client_prod: deps
 	@echo "Building alice UI (production)"
 	DISABLE_LOGGING=1 gulp
 

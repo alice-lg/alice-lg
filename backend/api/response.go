@@ -143,6 +143,27 @@ type Route struct {
 	Details Details `json:"details"`
 }
 
+// Lookup Prefixes
+type LookupRoute struct {
+	Id          string    `json:"id"`
+	NeighbourId string    `json:"neighbour_id"`
+	Neighbour   Neighbour `json:"neighbour"`
+
+	State string `json:"state"` // Filtered, Imported, ...
+
+	Routeserver Routeserver `json:"routeserver"`
+
+	Network   string        `json:"network"`
+	Interface string        `json:"interface"`
+	Gateway   string        `json:"gateway"`
+	Metric    int           `json:"metric"`
+	Bgp       BgpInfo       `json:"bgp"`
+	Age       time.Duration `json:"age"`
+	Type      []string      `json:"type"` // [BGP, unicast, univ]
+
+	Details Details `json:"details"`
+}
+
 type Routes []Route
 
 // Implement sorting interface for routes
@@ -166,6 +187,11 @@ type RoutesResponse struct {
 }
 
 type LookupResponse struct {
-	Api    ApiStatus `json:"api"`
-	Routes []Route   `json:"routes"`
+	Api    ApiStatus     `json:"api"`
+	Routes []LookupRoute `json:"routes"`
+}
+
+type LookupResponseGlobal struct {
+	Routes []LookupRoute `json:"routes"`
+	Time   float64       `json:"query_duration_ms"`
 }

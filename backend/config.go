@@ -42,6 +42,7 @@ type UiConfig struct {
 }
 
 type SourceConfig struct {
+	Id   int
 	Name string
 	Type int
 
@@ -54,6 +55,8 @@ type Config struct {
 	Ui      UiConfig
 	Sources []SourceConfig
 	File    string
+
+	instances map[SourceConfig]sources.Source
 }
 
 // Get sources keys form ini
@@ -181,6 +184,7 @@ func getSources(config *ini.File) ([]SourceConfig, error) {
 	sources := []SourceConfig{}
 
 	sourceSections := config.ChildSections("source")
+	sourceId := 0
 	for _, section := range sourceSections {
 		if !isSourceBase(section) {
 			continue
@@ -209,6 +213,7 @@ func getSources(config *ini.File) ([]SourceConfig, error) {
 
 		// Make config
 		config := SourceConfig{
+			Id:   sourceId,
 			Name: section.Key("name").MustString("Unknown Source"),
 			Type: backendType,
 		}
@@ -217,10 +222,14 @@ func getSources(config *ini.File) ([]SourceConfig, error) {
 		switch backendType {
 		case SOURCE_BIRDWATCHER:
 			backendConfig.MapTo(&config.Birdwatcher)
+			config.Birdwatcher.Id = config.Id
+			config.Birdwatcher.Name = config.Name
 		}
 
 		// Add to list of sources
 		sources = append(sources, config)
+
+		sourceId += 1
 	}
 
 	return sources, nil

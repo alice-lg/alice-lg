@@ -11,7 +11,7 @@ import{ push } from 'react-router-redux'
 
 import { loadRouteservers } from 'components/routeservers/actions'
 
-// Components 
+// Components
 import Status from './status'
 
 
