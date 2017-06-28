@@ -39,7 +39,7 @@ export function loadResultsError(query, error) {
   }
 }
 
-export function loadResults(query, limit=50, offset=0) {
+export function loadResults(query, limit=100, offset=0) {
   return (dispatch) => {
     dispatch(loadResultsRequest(query));
 
