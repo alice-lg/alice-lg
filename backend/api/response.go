@@ -193,5 +193,12 @@ type LookupResponse struct {
 
 type LookupResponseGlobal struct {
 	Routes []LookupRoute `json:"routes"`
-	Time   float64       `json:"query_duration_ms"`
+
+	// Pagination
+	TotalRoutes int `json:"total_routes"`
+	Limit       int `json:"limit"`
+	Offset      int `json:"offset"`
+
+	// Meta
+	Time float64 `json:"query_duration_ms"`
 }
