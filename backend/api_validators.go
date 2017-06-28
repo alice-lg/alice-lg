@@ -67,5 +67,24 @@ func validatePrefixQuery(value string) (string, error) {
 // Get pagination parameters: limit and offset
 // Refer to defaults if none are given.
 func validatePaginationParams(req *http.Request, limit, offset int) (int, int, error) {
+	query := req.URL.Query()
+	queryLimit, ok := query["limit"]
+	if ok {
+		limit, _ = strconv.Atoi(queryLimit[0])
+	}
+
+	queryOffset, ok := query["offset"]
+	if ok {
+		offset, _ = strconv.Atoi(queryOffset[0])
+	}
+
+	// Cap limit to [1, 1000]
+	if limit < 1 {
+		limit = 1
+	}
+	if limit > 1000 {
+		limit = 1000
+	}
+
 	return limit, offset, nil
 }

@@ -188,14 +188,32 @@ func apiLookupPrefixGlobal(req *http.Request, params httprouter.Params) (api.Res
 		return nil, err
 	}
 
+	// Get pagination params
+	limit, offset, err := validatePaginationParams(req, 100, 0)
+	if err != nil {
+		return nil, err
+	}
+
 	// Make response
 	t0 := time.Now()
 	routes := AliceRoutesStore.Lookup(prefix)
 
+	// Paginate result
+	totalRoutes := len(routes)
+	cap := offset + limit
+	if cap > totalRoutes {
+		cap = totalRoutes
+	}
+
 	queryDuration := time.Since(t0)
 	response := api.LookupResponseGlobal{
-		Routes: routes,
-		Time:   float64(queryDuration) / 1000.0 / 1000.0, // nano -> micro -> milli
+		Routes: routes[offset:cap],
+
+		TotalRoutes: totalRoutes,
+		Limit:       limit,
+		Offset:      offset,
+
+		Time: float64(queryDuration) / 1000.0 / 1000.0, // nano -> micro -> milli
 	}
 	return response, nil
 }
