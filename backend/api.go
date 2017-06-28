@@ -189,7 +189,7 @@ func apiLookupPrefixGlobal(req *http.Request, params httprouter.Params) (api.Res
 	}
 
 	// Get pagination params
-	limit, offset, err := validatePaginationParams(req, 100, 0)
+	limit, offset, err := validatePaginationParams(req, 50, 0)
 	if err != nil {
 		return nil, err
 	}

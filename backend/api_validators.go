@@ -82,8 +82,8 @@ func validatePaginationParams(req *http.Request, limit, offset int) (int, int, e
 	if limit < 1 {
 		limit = 1
 	}
-	if limit > 1000 {
-		limit = 1000
+	if limit > 500 {
+		limit = 500
 	}
 
 	return limit, offset, nil
