@@ -39,11 +39,11 @@ export function loadResultsError(query, error) {
   }
 }
 
-export function loadResults(query) {
+export function loadResults(query, limit=100, offset=0) {
   return (dispatch) => {
     dispatch(loadResultsRequest(query));
 
-    axios.get(`/api/lookup/prefix?q=${query}`)
+    axios.get(`/api/lookup/prefix?q=${query}&limit=${limit}&offset=${offset}`)
       .then((res) => {
         dispatch(loadResultsSuccess(query, res.data));
       })

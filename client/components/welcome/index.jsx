@@ -4,6 +4,7 @@ import React from 'react'
 import PageHeader from 'components/page-header'
 
 import Lookup from 'components/lookup'
+import LookupSummary from 'components/lookup/results-summary'
 
 export default class Welcome extends React.Component {
   render() {
@@ -19,7 +20,9 @@ export default class Welcome extends React.Component {
        <div className="col-md-8">
          <Lookup />
        </div>
-
+       <div className="col-md-4">
+         <LookupSummary />
+       </div>
       </div>
     )
   }

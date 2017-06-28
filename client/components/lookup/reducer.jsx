@@ -12,7 +12,12 @@ const initialState = {
 
   results: [],
   error: null,
+
   queryDurationMs: 0.0,
+
+  limit: 100,
+  offset: 0,
+  totalRoutes: 0,
 
   isLoading: false
 }
@@ -30,7 +35,10 @@ export default function reducer(state=initialState, action) {
         query: action.payload.query,
         queryDurationMs: action.payload.results.query_duration_ms,
         results: action.payload.results.routes,
-        error: null,
+        limit: action.payload.results.limit,
+        offset: action.payload.results.offset,
+        totalRoutes: action.payload.results.total_routes,
+        error: null
       });
     case LOAD_RESULTS_ERROR:
       return Object.assign({}, state, initialState, {
