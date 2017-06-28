@@ -17,9 +17,9 @@ class ResultsBox extends React.Component {
         <div className="lookup-result-summary">
           <ul>
             <li>
-            Displaying <b>{this.props.resultsCount}</b> of <b>{this.props.total}</b> routes.
+            Displaying <b>{this.props.resultsCount}</b> of <b>{this.props.total}</b> routes
             </li>
-            <li>The query took <b>{queryDuration} ms</b> to complete.</li>
+            <li>Query took <b>{queryDuration} ms</b> to complete</li>
           </ul>
         </div>
       </div>
