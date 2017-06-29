@@ -110,6 +110,15 @@ func (self *NeighboursStore) GetNeighbourAt(
 	return neighbours[id]
 }
 
+func (self *NeighboursStore) LookupNeighboursAt(
+	sourceId int,
+	query string,
+) []api.Neighbour {
+	results := []api.Neighbour{}
+
+	return results
+}
+
 // Build some stats for monitoring
 func (self *NeighboursStore) Stats() NeighboursStoreStats {
 	totalNeighbours := 0
