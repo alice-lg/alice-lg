@@ -58,5 +58,48 @@ func TestGetNeighbourAt(t *testing.T) {
 
 func TestNeighbourLookupAt(t *testing.T) {
 	store := makeNeighboursStore()
+
+	expected := []string{
+		"ID2233_AS2342",
+		"ID2233_AS2343",
+	}
+
+	neighbours := store.LookupNeighboursAt(1, "Peer 1")
+
+	// Make index
+	index := NeighboursIndex{}
+	for _, n := range neighbours {
+		index[n.Id] = n
+	}
+
+	for _, id := range expected {
+		_, ok := index[id]
+		if !ok {
+			t.Error("Expected", id, "to be in result set")
+		}
+	}
+}
+
+func TestNeighbourLookup(t *testing.T) {
+	store := makeNeighboursStore()
+
+	// First result set: "Peer 1"
 	_ = store
+
+	results := store.LookupNeighbours("Cloudfoo")
+
+	// Peer should be present at RS2
+	neighbours, ok := results[2]
+	if !ok {
+		t.Error("Lookup on rs2 unsuccessful.")
+	}
+
+	if len(neighbours) > 1 {
+		t.Error("Lookup should match exact 1 peer.")
+	}
+
+	n := neighbours[0]
+	if n.Id != "ID2233_AS4223" {
+		t.Error("Wrong peer in lookup response")
+	}
 }

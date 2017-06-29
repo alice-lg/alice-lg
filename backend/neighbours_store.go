@@ -4,6 +4,7 @@ import (
 	"github.com/ecix/alice-lg/backend/api"
 
 	"log"
+	"strings"
 	"time"
 )
 
@@ -115,6 +116,29 @@ func (self *NeighboursStore) LookupNeighboursAt(
 	query string,
 ) []api.Neighbour {
 	results := []api.Neighbour{}
+
+	neighbours := self.neighboursMap[sourceId]
+
+	for _, neighbour := range neighbours {
+		if !strings.Contains(neighbour.Description, query) {
+			continue
+		}
+
+		results = append(results, neighbour)
+	}
+
+	return results
+}
+
+func (self *NeighboursStore) LookupNeighbours(
+	query string,
+) api.NeighboursLookupResults {
+	// Create empty result set
+	results := make(api.NeighboursLookupResults)
+
+	for sourceId, _ := range self.neighboursMap {
+		results[sourceId] = self.LookupNeighboursAt(sourceId, query)
+	}
 
 	return results
 }

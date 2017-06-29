@@ -109,7 +109,7 @@ func (self *Birdwatcher) Routes(neighbourId string) (api.RoutesResponse, error) 
 }
 
 // Make routes lookup
-func (self *Birdwatcher) LookupPrefix(prefix string) (api.LookupResponse, error) {
+func (self *Birdwatcher) LookupPrefix(prefix string) (api.RoutesLookupResponse, error) {
 	// Get RS info
 	rs := api.Routeserver{
 		Id:   self.config.Id,
@@ -119,13 +119,13 @@ func (self *Birdwatcher) LookupPrefix(prefix string) (api.LookupResponse, error)
 	// Query prefix on RS
 	bird, err := self.client.GetJson("/routes/prefix?prefix=" + prefix)
 	if err != nil {
-		return api.LookupResponse{}, err
+		return api.RoutesLookupResponse{}, err
 	}
 
 	// Parse API status
 	apiStatus, err := parseApiStatus(bird, self.config)
 	if err != nil {
-		return api.LookupResponse{}, err
+		return api.RoutesLookupResponse{}, err
 	}
 
 	// Parse routes
@@ -157,7 +157,7 @@ func (self *Birdwatcher) LookupPrefix(prefix string) (api.LookupResponse, error)
 	}
 
 	// Make result
-	response := api.LookupResponse{
+	response := api.RoutesLookupResponse{
 		Api:    apiStatus,
 		Routes: results,
 	}

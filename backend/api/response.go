@@ -114,6 +114,8 @@ type NeighboursResponse struct {
 	Neighbours Neighbours `json:"neighbours"`
 }
 
+type NeighboursLookupResults map[int][]Neighbour
+
 // BGP
 type Community []int
 
@@ -186,12 +188,12 @@ type RoutesResponse struct {
 	NotExported []Route   `json:"not_exported"`
 }
 
-type LookupResponse struct {
+type RoutesLookupResponse struct {
 	Api    ApiStatus     `json:"api"`
 	Routes []LookupRoute `json:"routes"`
 }
 
-type LookupResponseGlobal struct {
+type RoutesLookupResponseGlobal struct {
 	Routes []LookupRoute `json:"routes"`
 
 	// Pagination

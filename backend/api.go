@@ -206,7 +206,7 @@ func apiLookupPrefixGlobal(req *http.Request, params httprouter.Params) (api.Res
 	}
 
 	queryDuration := time.Since(t0)
-	response := api.LookupResponseGlobal{
+	response := api.RoutesLookupResponseGlobal{
 		Routes: routes[offset:cap],
 
 		TotalRoutes: totalRoutes,
@@ -215,5 +215,6 @@ func apiLookupPrefixGlobal(req *http.Request, params httprouter.Params) (api.Res
 
 		Time: float64(queryDuration) / 1000.0 / 1000.0, // nano -> micro -> milli
 	}
+
 	return response, nil
 }
