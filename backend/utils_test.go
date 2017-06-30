@@ -22,6 +22,7 @@ func TestMaybePrefix(t *testing.T) {
 		{"A", true},
 		{"A b", false},
 		{"23 Foo", false},
+		{"Nordfoo", false},
 		{"122.beef:", true}, // sloppy
 		{"122.beef:", true}, // very
 		{"122:beef", true},  // sloppy.
