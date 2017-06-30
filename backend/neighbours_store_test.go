@@ -64,7 +64,7 @@ func TestNeighbourLookupAt(t *testing.T) {
 		"ID2233_AS2343",
 	}
 
-	neighbours := store.LookupNeighboursAt(1, "Peer 1")
+	neighbours := store.LookupNeighboursAt(1, "peer 1")
 
 	// Make index
 	index := NeighboursIndex{}

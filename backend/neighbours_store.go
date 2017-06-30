@@ -4,7 +4,6 @@ import (
 	"github.com/ecix/alice-lg/backend/api"
 
 	"log"
-	"strings"
 	"time"
 )
 
@@ -120,7 +119,7 @@ func (self *NeighboursStore) LookupNeighboursAt(
 	neighbours := self.neighboursMap[sourceId]
 
 	for _, neighbour := range neighbours {
-		if !strings.Contains(neighbour.Description, query) {
+		if !ContainsCi(neighbour.Description, query) {
 			continue
 		}
 
