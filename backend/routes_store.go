@@ -135,62 +135,104 @@ func (self *RoutesStore) Stats() RoutesStoreStats {
 	return storeStats
 }
 
+// Lookup routes transform
+func routeToLookupRoute(source SourceConfig, state string, route api.Route) api.LookupRoute {
+
+	// Get neighbour
+	neighbour := AliceNeighboursStore.GetNeighbourAt(source.Id, route.NeighbourId)
+
+	// Make route
+	lookup := api.LookupRoute{
+		Id: route.Id,
+
+		NeighbourId: route.NeighbourId,
+		Neighbour:   neighbour,
+
+		Routeserver: api.Routeserver{
+			Id:   source.Id,
+			Name: source.Name,
+		},
+
+		State: state,
+
+		Network:   route.Network,
+		Interface: route.Interface,
+		Gateway:   route.Gateway,
+		Metric:    route.Metric,
+		Bgp:       route.Bgp,
+		Age:       route.Age,
+		Type:      route.Type,
+	}
+
+	return lookup
+}
+
 // Routes filter
-func filterRoutes(
-	config SourceConfig,
+func filterRoutesByPrefix(
+	source SourceConfig,
 	routes []api.Route,
 	prefix string,
 	state string,
 ) []api.LookupRoute {
 
 	results := []api.LookupRoute{}
-
 	for _, route := range routes {
 		// Naiive filtering:
 		if strings.HasPrefix(route.Network, prefix) {
-			lookup := api.LookupRoute{
-				Id:          route.Id,
-				NeighbourId: route.NeighbourId,
-
-				Routeserver: api.Routeserver{
-					Id:   config.Id,
-					Name: config.Name,
-				},
-
-				State: state,
-
-				Network:   route.Network,
-				Interface: route.Interface,
-				Gateway:   route.Gateway,
-				Metric:    route.Metric,
-				Bgp:       route.Bgp,
-				Age:       route.Age,
-				Type:      route.Type,
-			}
+			lookup := routeToLookupRoute(source, state, route)
 			results = append(results, lookup)
 		}
 	}
 	return results
 }
 
-func addNeighbour(
-	sourceId int,
-	route api.LookupRoute,
-) api.LookupRoute {
-	neighbour := AliceNeighboursStore.GetNeighbourAt(
-		sourceId, route.NeighbourId)
-	route.Neighbour = neighbour
-	return route
+func filterRoutesByNeighbourIds(
+	source SourceConfig,
+	routes []api.Route,
+	neighbourIds []string,
+	state string,
+) []api.LookupRoute {
+
+	results := []api.LookupRoute{}
+	for _, route := range routes {
+		// Filtering:
+		if MemberOf(neighbourIds, route.NeighbourId) == true {
+			lookup := routeToLookupRoute(source, state, route)
+			results = append(results, lookup)
+		}
+	}
+	return results
 }
 
 // Single RS lookup by neighbour id
-func (self *RoutesStore) LookupNeighbourPrefixesAt(
+func (self *RoutesStore) LookupNeighboursPrefixesAt(
 	sourceId int,
-	neighbourId string,
-) []api.LookupRoute {
-	results := []api.LookupRoute{}
+	neighbourIds []string,
+) chan []api.LookupRoute {
+	response := make(chan []api.LookupRoute)
 
-	return results
+	go func() {
+		source := self.configMap[sourceId]
+		routes := self.routesMap[sourceId]
+
+		filtered := filterRoutesByNeighbourIds(
+			source,
+			routes.Filtered,
+			neighbourIds,
+			"filtered")
+		imported := filterRoutesByNeighbourIds(
+			source,
+			routes.Imported,
+			neighbourIds,
+			"imported")
+
+		var result []api.LookupRoute
+		result = append(filtered, imported...)
+
+		response <- result
+	}()
+
+	return response
 }
 
 // Single RS lookup
@@ -200,31 +242,24 @@ func (self *RoutesStore) LookupPrefixAt(
 ) chan []api.LookupRoute {
 
 	response := make(chan []api.LookupRoute)
-	config := self.configMap[sourceId]
-	routes := self.routesMap[sourceId]
 
 	go func() {
-		result := []api.LookupRoute{}
+		config := self.configMap[sourceId]
+		routes := self.routesMap[sourceId]
 
-		filtered := filterRoutes(
+		filtered := filterRoutesByPrefix(
 			config,
 			routes.Filtered,
 			prefix,
 			"filtered")
-		imported := filterRoutes(
+		imported := filterRoutesByPrefix(
 			config,
 			routes.Imported,
 			prefix,
 			"imported")
 
-		// Add Neighbours to results
-		for _, route := range filtered {
-			result = append(result, addNeighbour(sourceId, route))
-		}
-
-		for _, route := range imported {
-			result = append(result, addNeighbour(sourceId, route))
-		}
+		var result []api.LookupRoute
+		result = append(filtered, imported...)
 
 		response <- result
 	}()
@@ -246,6 +281,35 @@ func (self *RoutesStore) LookupPrefix(prefix string) []api.LookupRoute {
 	for _, response := range responses {
 		routes := <-response
 		result = append(result, routes...)
+		close(response)
+	}
+
+	return result
+}
+
+func (self *RoutesStore) LookupPrefixForNeighbours(
+	neighbours api.NeighboursLookupResults,
+) []api.LookupRoute {
+
+	result := []api.LookupRoute{}
+	responses := []chan []api.LookupRoute{}
+
+	// Dispatch
+	for sourceId, locals := range neighbours {
+		lookupNeighbourIds := []string{}
+		for _, n := range locals {
+			lookupNeighbourIds = append(lookupNeighbourIds, n.Id)
+		}
+
+		res := self.LookupNeighboursPrefixesAt(sourceId, lookupNeighbourIds)
+		responses = append(responses, res)
+	}
+
+	// Collect
+	for _, response := range responses {
+		routes := <-response
+		result = append(result, routes...)
+		close(response)
 	}
 
 	return result

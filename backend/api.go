@@ -178,12 +178,12 @@ func apiRoutesList(_req *http.Request, params httprouter.Params) (api.Response, 
 // Handle global lookup
 func apiLookupPrefixGlobal(req *http.Request, params httprouter.Params) (api.Response, error) {
 	// Get prefix to query
-	prefix, err := validateQueryString(req, "q")
+	q, err := validateQueryString(req, "q")
 	if err != nil {
 		return nil, err
 	}
 
-	prefix, err = validatePrefixQuery(prefix)
+	q, err = validatePrefixQuery(q)
 	if err != nil {
 		return nil, err
 	}
@@ -197,10 +197,20 @@ func apiLookupPrefixGlobal(req *http.Request, params httprouter.Params) (api.Res
 	// Check what we want to query
 	//  Prefix -> fetch prefix
 	//       _ -> fetch neighbours and routes
+	lookupPrefix := MaybePrefix(q)
 
-	// Make response
+	// Measure response time
 	t0 := time.Now()
-	routes := AliceRoutesStore.LookupPrefix(prefix)
+
+	// Perform query
+	var routes []api.LookupRoute
+	if lookupPrefix {
+		routes = AliceRoutesStore.LookupPrefix(q)
+
+	} else {
+		neighbours := AliceNeighboursStore.LookupNeighbours(q)
+		routes = AliceRoutesStore.LookupPrefixForNeighbours(neighbours)
+	}
 
 	// Paginate result
 	totalRoutes := len(routes)
