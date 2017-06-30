@@ -43,3 +43,7 @@ clean:
 	rm -f rice-box.go
 	rm -f $(PROG)-osx-$(ARCH)
 	rm -f $(PROG)-linux-$(ARCH)
+
+coverage:
+	go test -coverprofile=coverage.out
+	go tool cover -func=coverage.out

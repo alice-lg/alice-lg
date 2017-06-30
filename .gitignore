@@ -32,3 +32,5 @@ etc/alicelg/alice.conf
 
 .DS_Store
 
+*coverage*
+
