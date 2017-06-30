@@ -183,8 +183,18 @@ func addNeighbour(
 	return route
 }
 
+// Single RS lookup by neighbour id
+func (self *RoutesStore) LookupNeighbourPrefixesAt(
+	sourceId int,
+	neighbourId string,
+) []api.LookupRoute {
+	results := []api.LookupRoute{}
+
+	return results
+}
+
 // Single RS lookup
-func (self *RoutesStore) lookupRs(
+func (self *RoutesStore) LookupPrefixAt(
 	sourceId int,
 	prefix string,
 ) chan []api.LookupRoute {
@@ -222,13 +232,13 @@ func (self *RoutesStore) lookupRs(
 	return response
 }
 
-func (self *RoutesStore) Lookup(prefix string) []api.LookupRoute {
+func (self *RoutesStore) LookupPrefix(prefix string) []api.LookupRoute {
 	result := []api.LookupRoute{}
 	responses := []chan []api.LookupRoute{}
 
 	// Dispatch
 	for sourceId, _ := range self.routesMap {
-		res := self.lookupRs(sourceId, prefix)
+		res := self.LookupPrefixAt(sourceId, prefix)
 		responses = append(responses, res)
 	}
 

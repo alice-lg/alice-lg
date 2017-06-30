@@ -194,9 +194,13 @@ func apiLookupPrefixGlobal(req *http.Request, params httprouter.Params) (api.Res
 		return nil, err
 	}
 
+	// Check what we want to query
+	//  Prefix -> fetch prefix
+	//       _ -> fetch neighbours and routes
+
 	// Make response
 	t0 := time.Now()
-	routes := AliceRoutesStore.Lookup(prefix)
+	routes := AliceRoutesStore.LookupPrefix(prefix)
 
 	// Paginate result
 	totalRoutes := len(routes)
