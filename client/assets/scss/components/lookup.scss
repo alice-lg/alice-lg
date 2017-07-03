@@ -9,8 +9,23 @@
     li {
       padding: 8px;
       padding-left: 15px;
+    }
+}
 
-      cursor: pointer;
+
+.lookup-help {
+    margin: 30px 20px;
+
+    h3 {
+        font-weight: bold;
+        color: #337ab7;
+        margin-top: 15px;
+        font-size: 14px;
+        text-transform: uppercase;
+    }
+
+    b {
+
     }
 }
 
