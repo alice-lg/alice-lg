@@ -6,11 +6,11 @@ import {loadRejectReasonsSuccess,
 
 export const LOAD_CONFIG_SUCCESS = "@birdseye/LOAD_CONFIG_SUCCESS";
 
-function loadConfigSuccess(routes_columns) {
+function loadConfigSuccess(config) {
   return {
     type: LOAD_CONFIG_SUCCESS,
-    routes_columns: routes_columns
-  }
+    payload: config
+  };
 }
 
 export function loadConfig() {
@@ -28,7 +28,7 @@ export function loadConfig() {
                 data.noexport.noexport_id,
                 data.noexport_reasons)
         );
-        dispatch(loadConfigSuccess(data.routes_columns));
+        dispatch(loadConfigSuccess(data));
       })
       .catch(error => dispatch(apiError(error)));
   }
