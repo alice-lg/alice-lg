@@ -39,6 +39,8 @@ bundle:
 	rice embed-go
 
 
+dev: clean all
+
 clean:
 	rm -f rice-box.go
 	rm -f $(PROG)-osx-$(ARCH)
