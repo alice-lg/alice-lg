@@ -30,6 +30,10 @@ export default function reducer(state=initialState, action) {
         isLoading: true
       });
     case LOAD_RESULTS_SUCCESS:
+      if (state.query != action.payload.query) {
+        return state;
+      }
+
       return Object.assign({}, state, {
         isLoading: false,
         query: action.payload.query,
@@ -40,7 +44,12 @@ export default function reducer(state=initialState, action) {
         totalRoutes: action.payload.results.total_routes,
         error: null
       });
+
     case LOAD_RESULTS_ERROR:
+      if (state.query != action.payload.query) {
+        return state;
+      }
+
       return Object.assign({}, state, initialState, {
         query: action.payload.query,
         error: action.payload.error
