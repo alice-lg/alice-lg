@@ -89,8 +89,10 @@ func apiRegisterEndpoints(router *httprouter.Router) error {
 		endpoint(apiRoutesList))
 
 	// Querying
-	router.GET("/api/lookup/prefix",
-		endpoint(apiLookupPrefixGlobal))
+	if AliceConfig.Server.EnablePrefixLookup == true {
+		router.GET("/api/lookup/prefix",
+			endpoint(apiLookupPrefixGlobal))
+	}
 
 	return nil
 }
@@ -114,8 +116,9 @@ func apiConfigShow(_req *http.Request, _params httprouter.Params) (api.Response,
 			Asn:        AliceConfig.Ui.RoutesNoexports.Asn,
 			NoexportId: AliceConfig.Ui.RoutesNoexports.NoexportId,
 		},
-		NoexportReasons: AliceConfig.Ui.RoutesNoexports.Reasons,
-		RoutesColumns:   AliceConfig.Ui.RoutesColumns,
+		NoexportReasons:     AliceConfig.Ui.RoutesNoexports.Reasons,
+		RoutesColumns:       AliceConfig.Ui.RoutesColumns,
+		PrefixLookupEnabled: AliceConfig.Server.EnablePrefixLookup,
 	}
 	return result, nil
 }
