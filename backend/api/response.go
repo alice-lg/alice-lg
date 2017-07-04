@@ -24,6 +24,8 @@ type ConfigResponse struct {
 	NoexportReasons map[int]string `json:"noexport_reasons"`
 
 	RoutesColumns map[string]string `json:"routes_columns"`
+
+	PrefixLookupEnabled bool `json:"prefix_lookup_enabled"`
 }
 
 type Rejection struct {

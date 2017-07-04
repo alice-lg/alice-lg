@@ -36,11 +36,16 @@ func main() {
 
 	// Setup local routes store
 	AliceRoutesStore = NewRoutesStore(AliceConfig)
-	AliceRoutesStore.Start()
+
+	if AliceConfig.Server.EnablePrefixLookup == true {
+		AliceRoutesStore.Start()
+	}
 
 	// Setup local neighbours store
 	AliceNeighboursStore = NewNeighboursStore(AliceConfig)
-	AliceNeighboursStore.Start()
+	if AliceConfig.Server.EnablePrefixLookup == true {
+		AliceNeighboursStore.Start()
+	}
 
 	// Setup request routing
 	router := httprouter.New()

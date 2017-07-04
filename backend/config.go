@@ -17,7 +17,8 @@ const SOURCE_UNKNOWN = 0
 const SOURCE_BIRDWATCHER = 1
 
 type ServerConfig struct {
-	Listen string `ini:"listen_http"`
+	Listen             string `ini:"listen_http"`
+	EnablePrefixLookup bool   `ini:"enable_prefix_lookup"`
 }
 
 type RejectionsConfig struct {
