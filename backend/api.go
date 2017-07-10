@@ -120,12 +120,14 @@ func apiConfigShow(_req *http.Request, _params httprouter.Params) (api.Response,
 			Asn:      AliceConfig.Ui.RoutesRejections.Asn,
 			RejectId: AliceConfig.Ui.RoutesRejections.RejectId,
 		},
-		RejectReasons: AliceConfig.Ui.RoutesRejections.Reasons,
+		RejectReasons: SerializeReasons(
+			AliceConfig.Ui.RoutesRejections.Reasons),
 		Noexport: api.Noexport{
 			Asn:        AliceConfig.Ui.RoutesNoexports.Asn,
 			NoexportId: AliceConfig.Ui.RoutesNoexports.NoexportId,
 		},
-		NoexportReasons:     AliceConfig.Ui.RoutesNoexports.Reasons,
+		NoexportReasons: SerializeReasons(
+			AliceConfig.Ui.RoutesNoexports.Reasons),
 		RoutesColumns:       AliceConfig.Ui.RoutesColumns,
 		PrefixLookupEnabled: AliceConfig.Server.EnablePrefixLookup,
 	}

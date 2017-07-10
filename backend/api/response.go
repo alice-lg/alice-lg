@@ -17,11 +17,11 @@ type ErrorResponse struct {
 
 // Config
 type ConfigResponse struct {
-	Rejection     Rejection      `json:"rejection"`
-	RejectReasons map[int]string `json:"reject_reasons"`
+	Rejection     Rejection         `json:"rejection"`
+	RejectReasons map[string]string `json:"reject_reasons"`
 
-	Noexport        Noexport       `json:"noexport"`
-	NoexportReasons map[int]string `json:"noexport_reasons"`
+	Noexport        Noexport          `json:"noexport"`
+	NoexportReasons map[string]string `json:"noexport_reasons"`
 
 	RoutesColumns map[string]string `json:"routes_columns"`
 

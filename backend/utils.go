@@ -3,6 +3,7 @@ package main
 // Some helper functions
 import (
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -46,4 +47,17 @@ func MaybePrefix(s string) bool {
 	}
 
 	return false
+}
+
+/*
+ Since havin ints as keys in json is
+ acutally undefined behaviour, we keep these interally
+ but provide a string as a key for serialization
+*/
+func SerializeReasons(reasons map[int]string) map[string]string {
+	res := make(map[string]string)
+	for id, reason := range reasons {
+		res[strconv.Itoa(id)] = reason
+	}
+	return res
 }
