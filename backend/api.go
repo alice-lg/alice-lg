@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"log"
 	"strings"
 	"time"
 
@@ -54,6 +55,14 @@ func endpoint(wrapped apiEndpoint) httprouter.Handle {
 
 		// Encode json
 		payload, err := json.Marshal(result)
+		if err != nil {
+			msg := "Could not encode result as json"
+			http.Error(res, msg, http.StatusInternalServerError)
+			log.Println(err)
+			log.Println("This is most likely due to an older version of go.")
+			log.Println("Consider upgrading to golang > 1.8")
+			return
+		}
 
 		// Set response header
 		res.Header().Set("Content-Type", "application/json")
