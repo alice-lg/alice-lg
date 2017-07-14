@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/ecix/alice-lg/backend/api"
-
 	"log"
+	"sync"
 	"time"
+
+	"github.com/ecix/alice-lg/backend/api"
 )
 
 type NeighboursIndex map[string]api.Neighbour
@@ -13,6 +14,8 @@ type NeighboursStore struct {
 	neighboursMap map[int]NeighboursIndex
 	configMap     map[int]SourceConfig
 	statusMap     map[int]StoreStatus
+
+	rwlock *sync.RWMutex
 }
 
 func NewNeighboursStore(config *Config) *NeighboursStore {
@@ -36,6 +39,8 @@ func NewNeighboursStore(config *Config) *NeighboursStore {
 		neighboursMap: neighboursMap,
 		statusMap:     statusMap,
 		configMap:     configMap,
+
+		rwlock: &sync.RWMutex{},
 	}
 	return store
 }
@@ -67,9 +72,11 @@ func (self *NeighboursStore) update() {
 		}
 
 		// Start updating
+		self.rwlock.Lock()
 		self.statusMap[sourceId] = StoreStatus{
 			State: STATE_UPDATING,
 		}
+		self.rwlock.Unlock()
 
 		source := self.configMap[sourceId].getInstance()
 
@@ -77,11 +84,13 @@ func (self *NeighboursStore) update() {
 		neighbours := neighboursRes.Neighbours
 		if err != nil {
 			// That's sad.
+			self.rwlock.Lock()
 			self.statusMap[sourceId] = StoreStatus{
 				State:       STATE_ERROR,
 				LastError:   err,
 				LastRefresh: time.Now(),
 			}
+			self.rwlock.Unlock()
 			continue
 		}
 
@@ -92,12 +101,14 @@ func (self *NeighboursStore) update() {
 			index[neighbour.Id] = neighbour
 		}
 
+		self.rwlock.Lock()
 		self.neighboursMap[sourceId] = index
 		// Update state
 		self.statusMap[sourceId] = StoreStatus{
 			LastRefresh: time.Now(),
 			State:       STATE_READY,
 		}
+		self.rwlock.Unlock()
 	}
 }
 
@@ -106,7 +117,9 @@ func (self *NeighboursStore) GetNeighbourAt(
 	id string,
 ) api.Neighbour {
 	// Lookup neighbour on RS
+	self.rwlock.RLock()
 	neighbours := self.neighboursMap[sourceId]
+	self.rwlock.RUnlock()
 	return neighbours[id]
 }
 
@@ -116,7 +129,9 @@ func (self *NeighboursStore) LookupNeighboursAt(
 ) []api.Neighbour {
 	results := []api.Neighbour{}
 
+	self.rwlock.RLock()
 	neighbours := self.neighboursMap[sourceId]
+	self.rwlock.RUnlock()
 
 	for _, neighbour := range neighbours {
 		if !ContainsCi(neighbour.Description, query) {
@@ -147,6 +162,7 @@ func (self *NeighboursStore) Stats() NeighboursStoreStats {
 	totalNeighbours := 0
 	rsStats := []RouteServerNeighboursStats{}
 
+	self.rwlock.RLock()
 	for sourceId, neighbours := range self.neighboursMap {
 		status := self.statusMap[sourceId]
 		totalNeighbours += len(neighbours)
@@ -158,6 +174,7 @@ func (self *NeighboursStore) Stats() NeighboursStoreStats {
 		}
 		rsStats = append(rsStats, serverStats)
 	}
+	self.rwlock.RUnlock()
 
 	storeStats := NeighboursStoreStats{
 		TotalNeighbours: totalNeighbours,

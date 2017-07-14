@@ -1,17 +1,20 @@
 package main
 
 import (
-	"github.com/ecix/alice-lg/backend/api"
-
 	"log"
 	"strings"
+	"sync"
 	"time"
+
+	"github.com/ecix/alice-lg/backend/api"
 )
 
 type RoutesStore struct {
 	routesMap map[int]api.RoutesResponse
 	statusMap map[int]StoreStatus
 	configMap map[int]SourceConfig
+
+	rwlock *sync.RWMutex
 }
 
 func NewRoutesStore(config *Config) *RoutesStore {
@@ -35,6 +38,8 @@ func NewRoutesStore(config *Config) *RoutesStore {
 		routesMap: routesMap,
 		statusMap: statusMap,
 		configMap: configMap,
+
+		rwlock: &sync.RWMutex{},
 	}
 	return store
 }
@@ -71,21 +76,26 @@ func (self *RoutesStore) update() {
 		}
 
 		// Set update state
+		self.rwlock.Lock()
 		self.statusMap[sourceId] = StoreStatus{
 			State: STATE_UPDATING,
 		}
+		self.rwlock.Unlock()
 
 		routes, err := source.AllRoutes()
 		if err != nil {
+			self.rwlock.Lock()
 			self.statusMap[sourceId] = StoreStatus{
 				State:       STATE_ERROR,
 				LastError:   err,
 				LastRefresh: time.Now(),
 			}
+			self.rwlock.Unlock()
 
 			continue
 		}
 
+		self.rwlock.Lock()
 		// Update data
 		self.routesMap[sourceId] = routes
 		// Update state
@@ -93,6 +103,7 @@ func (self *RoutesStore) update() {
 			LastRefresh: time.Now(),
 			State:       STATE_READY,
 		}
+		self.rwlock.Unlock()
 	}
 }
 
@@ -103,6 +114,7 @@ func (self *RoutesStore) Stats() RoutesStoreStats {
 
 	rsStats := []RouteServerRoutesStats{}
 
+	self.rwlock.RLock()
 	for sourceId, routes := range self.routesMap {
 		status := self.statusMap[sourceId]
 
@@ -123,6 +135,7 @@ func (self *RoutesStore) Stats() RoutesStoreStats {
 
 		rsStats = append(rsStats, serverStats)
 	}
+	self.rwlock.RUnlock()
 
 	// Make stats
 	storeStats := RoutesStoreStats{
@@ -212,8 +225,10 @@ func (self *RoutesStore) LookupNeighboursPrefixesAt(
 	response := make(chan []api.LookupRoute)
 
 	go func() {
+		self.rwlock.RLock()
 		source := self.configMap[sourceId]
 		routes := self.routesMap[sourceId]
+		self.rwlock.RUnlock()
 
 		filtered := filterRoutesByNeighbourIds(
 			source,
@@ -244,8 +259,10 @@ func (self *RoutesStore) LookupPrefixAt(
 	response := make(chan []api.LookupRoute)
 
 	go func() {
+		self.rwlock.RLock()
 		config := self.configMap[sourceId]
 		routes := self.routesMap[sourceId]
+		self.rwlock.RUnlock()
 
 		filtered := filterRoutesByPrefix(
 			config,
@@ -272,10 +289,12 @@ func (self *RoutesStore) LookupPrefix(prefix string) []api.LookupRoute {
 	responses := []chan []api.LookupRoute{}
 
 	// Dispatch
+	self.rwlock.RLock()
 	for sourceId, _ := range self.routesMap {
 		res := self.LookupPrefixAt(sourceId, prefix)
 		responses = append(responses, res)
 	}
+	self.rwlock.RUnlock()
 
 	// Collect
 	for _, response := range responses {
