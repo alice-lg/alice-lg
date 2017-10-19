@@ -11,10 +11,6 @@ import (
 	"github.com/ecix/alice-lg/backend/api"
 )
 
-const SERVER_TIME = time.RFC3339Nano
-const SERVER_TIME_SHORT = "2006-01-02 15:04:05"
-const SERVER_TIME_EXT = "Mon, 2 Jan 2006 15:04:05 +0000"
-
 // Convert server time string to time
 func parseServerTime(value interface{}, layout, timezone string) (time.Time, error) {
 	svalue, ok := value.(string)
@@ -38,7 +34,7 @@ func parseApiStatus(bird ClientResponse, config Config) (api.ApiStatus, error) {
 
 	ttl, err := parseServerTime(
 		bird["ttl"],
-		SERVER_TIME,
+		config.ServerTime,
 		config.Timezone,
 	)
 	if err != nil {
@@ -61,19 +57,19 @@ func parseBirdwatcherStatus(bird ClientResponse, config Config) (api.Status, err
 	// Get special fields
 	serverTime, _ := parseServerTime(
 		birdStatus["current_server"],
-		SERVER_TIME_SHORT,
+		config.ServerTimeShort,
 		config.Timezone,
 	)
 
 	lastReboot, _ := parseServerTime(
 		birdStatus["last_reboot"],
-		SERVER_TIME_SHORT,
+		config.ServerTimeShort,
 		config.Timezone,
 	)
 
 	lastReconfig, _ := parseServerTime(
 		birdStatus["last_reconfig"],
-		SERVER_TIME_EXT,
+		config.ServerTimeExt,
 		config.Timezone,
 	)
 
@@ -93,7 +89,7 @@ func parseBirdwatcherStatus(bird ClientResponse, config Config) (api.Status, err
 
 // Parse neighbour uptime
 func parseRelativeServerTime(uptime interface{}, config Config) time.Duration {
-	serverTime, _ := parseServerTime(uptime, SERVER_TIME_SHORT, config.Timezone)
+	serverTime, _ := parseServerTime(uptime, config.ServerTimeShort, config.Timezone)
 	return time.Since(serverTime)
 }
 
