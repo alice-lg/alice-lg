@@ -62,9 +62,9 @@ class RoutesTable extends React.Component {
       return split;
     }
 
-    let routesView = routes.map((r) => {
+    let routesView = routes.map((r,i) => {
       return (
-        <tr key={r.network} onClick={() => this.showAttributesModal(r)}>
+        <tr key={`${r.network}_${i}`} onClick={() => this.showAttributesModal(r)}>
           <td>
             {r.network}
             {this.props.display_reasons == "filtered" && <FilterReason route={r} />}
