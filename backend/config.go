@@ -222,14 +222,16 @@ func getSources(config *ini.File) ([]SourceConfig, error) {
 		// Set backend
 		switch backendType {
 		case SOURCE_BIRDWATCHER:
-			c = &config.Birdwatcher{
+			c := birdwatcher.Config{
+				Id:   config.Id,
+				Name: config.Name,
+
 				ServerTime:      "2006-01-02T15:04:05.999999999Z07:00",
 				ServerTimeShort: "2006-01-02",
 				ServerTimeExt:   "Mon, 02 Jan 2006 15:04:05 -0700",
 			}
-			backendConfig.MapTo(c)
-			config.Birdwatcher.Id = config.Id
-			config.Birdwatcher.Name = config.Name
+			backendConfig.MapTo(&c)
+			config.Birdwatcher = c
 		}
 
 		// Add to list of sources
