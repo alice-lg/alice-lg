@@ -31,29 +31,32 @@ __These examples include setting up your Go environment, if you already have set
 In case you have trouble with `npm` and `gulp` you can try using `yarn`.
 
 ### CentOS 7:
-First add the following lines at the end of your ~/.bash_profile:
-```
+First add the following lines at the end of your `~/.bash_profile`:
+```bash
 GOPATH=$HOME/go
 export GOPATH
 PATH=$PATH:$GOPATH/bin
 export PATH
 ```
 Now run:
-```
+```bash
 source ~/.bash_profile
+
+# Install frontend build dependencies
 sudo yum install golang npm
 sudo npm install --global gulp-cli
+
 go get github.com/GeertJohan/go.rice
 go get github.com/GeertJohan/go.rice/rice
-mkdir -p ~/go/bin ~/go/pkg ~/go/src
-cd ~/go/src/
-git clone git@github.com:ecix/alice-lg.git
-cd alice-lg/client
-make
-cd ..
+mkdir -p ~/go/bin ~/go/pkg ~/go/src/github.com/ecix/
+
+cd ~/go/src/github.com/ecix
+git clone https://github.com/ecix/alice-lg.git
+
+cd alice-lg
 make
 ```
-Your Alice_LG source will now be located at `~/go/src/alice-lg` and your alice-LG executable should be at `~/go/src/alice-lg/bin/alice-lg-linux-amd64`
+Your Alice-LG source will now be located at `~/go/src/alice-lg` and your alice-LG executable should be at `~/go/src/alice-lg/bin/alice-lg-linux-amd64`
 
 ## Configuration
 
