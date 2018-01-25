@@ -30,7 +30,24 @@ func parseServerTime(value interface{}, layout, timezone string) (time.Time, err
 // Make api status from response:
 // The api status is always included in a birdwatcher response
 func parseApiStatus(bird ClientResponse, config Config) (api.ApiStatus, error) {
-	birdApi := bird["api"].(map[string]interface{})
+	birdApi, ok := bird["api"].(map[string]interface{})
+	if !ok {
+		// Define error status
+		status := api.ApiStatus{
+			Version:         "unknown / error",
+			ResultFromCache: false,
+			Ttl:             time.Now(),
+		}
+
+		// Try to retrieve the real error from server
+		birdErr, ok := bird["error"].(string)
+		if !ok {
+			// Unknown error
+			return status, fmt.Errorf("Invalid API response received from server")
+		}
+
+		return status, fmt.Errorf(birdErr)
+	}
 
 	ttl, err := parseServerTime(
 		bird["ttl"],
