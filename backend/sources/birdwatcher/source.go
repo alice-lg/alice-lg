@@ -2,6 +2,8 @@ package birdwatcher
 
 import (
 	"github.com/ecix/alice-lg/backend/api"
+
+	"log"
 )
 
 type Birdwatcher struct {
@@ -85,15 +87,14 @@ func (self *Birdwatcher) Routes(neighbourId string) (api.RoutesResponse, error) 
 		return api.RoutesResponse{}, err
 	}
 
-	// Filtered
-	bird, err = self.client.GetJson("/routes/filtered/" + neighbourId)
-	if err != nil {
-		return api.RoutesResponse{}, err
-	}
-
+	// Optional: Filtered
+	bird, _ = self.client.GetJson("/routes/filtered/" + neighbourId)
 	filtered, err := parseRoutes(bird, self.config)
 	if err != nil {
-		return api.RoutesResponse{}, err
+		log.Println("WARNING Could not retrieve filtered routes:", err)
+		log.Println("Is the 'routes_filtered' module active in birdwatcher?")
+
+		filtered = api.Routes{}
 	}
 
 	// Optional: NoExport
