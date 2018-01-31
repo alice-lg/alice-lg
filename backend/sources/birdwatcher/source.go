@@ -93,13 +93,15 @@ func (self *Birdwatcher) Routes(neighbourId string) (api.RoutesResponse, error) 
 	if err != nil {
 		log.Println("WARNING Could not retrieve filtered routes:", err)
 		log.Println("Is the 'routes_filtered' module active in birdwatcher?")
-
-		filtered = api.Routes{}
 	}
 
 	// Optional: NoExport
 	bird, _ = self.client.GetJson("/routes/noexport/" + neighbourId)
 	noexport, err := parseRoutes(bird, self.config)
+	if err != nil {
+		log.Println("WARNING Could not retrieve routes not exported:", err)
+		log.Println("Is the 'routes_noexport' module active in birdwatcher?")
+	}
 
 	return api.RoutesResponse{
 		Api:         apiStatus,
