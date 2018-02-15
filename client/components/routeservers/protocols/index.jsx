@@ -67,6 +67,9 @@ class NeighboursTable extends React.Component {
         pipe_filtered_count = n.pipe_filtered_count
       }
 
+      var filtered_count:int = received_count-accepted_count;
+      var filtered_print:string = (filtered_count < 0) ? "0" : filtered_count.toString();
+
       return (
         <tr key={n.id}>
           <td>
@@ -110,7 +113,7 @@ class NeighboursTable extends React.Component {
               <RoutesLink routeserverId={this.props.routeserverId}
                           protocol={n.id}
                           state={n.state}>
-                {received_count - accepted_count}
+                {filtered_print}
               </RoutesLink>
             </td>
             <td>
