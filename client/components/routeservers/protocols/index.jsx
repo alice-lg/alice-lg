@@ -84,13 +84,20 @@ class NeighboursTable extends React.Component {
               {n.routes_received}
             </RoutesLink>
           </td>
-        <td>
+          <td>
             <RoutesLink routeserverId={this.props.routeserverId}
                         protocol={n.id}
                         state={n.state}>
-              {n.routes_filtered}
+              {n.routes_accepted}
             </RoutesLink>
           </td>
+          <td>
+              <RoutesLink routeserverId={this.props.routeserverId}
+                          protocol={n.id}
+                          state={n.state}>
+                {n.routes_filtered}
+              </RoutesLink>
+            </td>
         </tr>
       );
     });
@@ -116,6 +123,7 @@ class NeighboursTable extends React.Component {
               <th>{uptimeTitle}</th>
               <th>Description</th>
               <th>Routes Recv.</th>
+              <th>Routes Acpt.</th>
               <th>Routes Filtered</th>
             </tr>
           </thead>
@@ -229,4 +237,3 @@ export default connect(
     }
   }
 )(Protocols);
-
