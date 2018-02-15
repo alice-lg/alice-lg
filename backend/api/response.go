@@ -91,6 +91,7 @@ type Neighbour struct {
 	RoutesFiltered  int           `json:"routes_filtered"`
 	RoutesExported  int           `json:"routes_exported"`
 	RoutesPreferred int           `json:"routes_preferred"`
+	RoutesAccepted  int           `json:"routes_accepted"`
 	Uptime          time.Duration `json:"uptime"`
 	LastError       string        `json:"last_error"`
 
