@@ -52,6 +52,17 @@ class NeighboursTable extends React.Component {
 
   render() {
     let neighbours = this.props.neighbours.map( (n) => {
+      // plausibility checks
+      var routes_accepted_print:int = 0
+      if (n.routes_accepted > n.routes_received) {
+        // customer has possibly more than one router feeding routes into per customer table
+        // guess router count
+        var rcount:int = Math.round(n.routes_accepted / n.routes_received)
+        routes_accepted_print = Math.round(n.routes_accepted / rcount)
+      } else {
+        routes_accepted_print = n.routes_accepted
+      }
+
       return (
         <tr key={n.id}>
           <td>
@@ -88,14 +99,14 @@ class NeighboursTable extends React.Component {
             <RoutesLink routeserverId={this.props.routeserverId}
                         protocol={n.id}
                         state={n.state}>
-              {n.routes_accepted}
+              {routes_accepted_print}
             </RoutesLink>
           </td>
           <td>
               <RoutesLink routeserverId={this.props.routeserverId}
                           protocol={n.id}
                           state={n.state}>
-                {n.routes_received - n.routes_accepted}
+                {n.routes_received - routes_accepted_print}
               </RoutesLink>
             </td>
         </tr>
