@@ -88,8 +88,7 @@ class NeighboursTable extends React.Component {
           <td>
             <RoutesLink routeserverId={this.props.routeserverId}
                         protocol={n.id}
-                        state={n.state}
-                        nextHop={n.address}>
+                        state={n.state}>
               {n.description}
               {n.state != "up" && n.last_error &&
                 <span className="protocol-state-error">
