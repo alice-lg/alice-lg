@@ -185,7 +185,8 @@ export function loadRouteserverRoutes(routeserverId, protocolId) {
         dispatch(
           loadRouteserverRoutesNoexportSuccess(routeserverId, protocolId, data.not_exported)
         );
-        dispatch(setRoutesFilterValue(""));
+        // dispatch(setRoutesFilterValue(""));
+        // removed, as this would overwrite routesFilterValue set in RoutesPage
       })
       .catch(error => dispatch(apiError(error)));
   }
@@ -234,4 +235,3 @@ export function setRoutesFilterValue(value) {
     }
   }
 }
-

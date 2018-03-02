@@ -40,11 +40,18 @@ class RoutesLink extends React.Component {
     if (this.props.state != 'up') {
       return (<span>{this.props.children}</span>);
     }
-    return (
-      <Link to={url}>
+    if (this.props.nextHop) { // create Link object with nextHop in state
+      return (
+        <Link to={{
+          pathname: url,
+          state: { nextHop: this.props.nextHop }
+         }}> {this.props.children} </Link>
+      );
+    } else { // simple link
+      return (<Link to={url}>
         {this.props.children}
-      </Link>
-    )
+        </Link>)
+    }
   }
 }
 
@@ -68,7 +75,8 @@ class NeighboursTable extends React.Component {
           <td>
             <RoutesLink routeserverId={this.props.routeserverId}
                         protocol={n.id}
-                        state={n.state}>
+                        state={n.state}
+                        nextHop={n.address}>
              {n.address}
             </RoutesLink>
            </td>
@@ -80,7 +88,8 @@ class NeighboursTable extends React.Component {
           <td>
             <RoutesLink routeserverId={this.props.routeserverId}
                         protocol={n.id}
-                        state={n.state}>
+                        state={n.state}
+                        nextHop={n.address}>
               {n.description}
               {n.state != "up" && n.last_error &&
                 <span className="protocol-state-error">
@@ -91,21 +100,24 @@ class NeighboursTable extends React.Component {
           <td>
             <RoutesLink routeserverId={this.props.routeserverId}
                         protocol={n.id}
-                        state={n.state}>
+                        state={n.state}
+                        nextHop={n.address}>
               {n.routes_received}
             </RoutesLink>
           </td>
           <td>
             <RoutesLink routeserverId={this.props.routeserverId}
                         protocol={n.id}
-                        state={n.state}>
+                        state={n.state}
+                        nextHop={n.address}>
               {routes_accepted_print}
             </RoutesLink>
           </td>
           <td>
               <RoutesLink routeserverId={this.props.routeserverId}
                           protocol={n.id}
-                          state={n.state}>
+                          state={n.state}
+                          nextHop={n.address}>
                 {n.routes_received - routes_accepted_print}
               </RoutesLink>
             </td>
