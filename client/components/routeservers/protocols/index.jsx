@@ -64,7 +64,7 @@ class NeighboursTable extends React.Component {
       if (n.routes_accepted > n.routes_received) {
         // customer has possibly more than one router feeding routes into per customer table
         // guess router count
-        var rcount:int = Math.round(n.routes_accepted / n.routes_received)
+        var rcount:int = Math.round(n.routes_accepted / n.routes_received) //TODO do we need to change this also?
         routes_accepted_print = Math.round(n.routes_accepted / rcount)
       } else {
         routes_accepted_print = n.routes_accepted
@@ -101,7 +101,7 @@ class NeighboursTable extends React.Component {
                         protocol={n.id}
                         state={n.state}
                         nextHop={n.address}>
-              {n.routes_received}
+              {n.routes_received + n.routes_filtered}
             </RoutesLink>
           </td>
           <td>
@@ -109,7 +109,7 @@ class NeighboursTable extends React.Component {
                         protocol={n.id}
                         state={n.state}
                         nextHop={n.address}>
-              {routes_accepted_print}
+              {routes_accepted_print}^
             </RoutesLink>
           </td>
           <td>
@@ -117,7 +117,7 @@ class NeighboursTable extends React.Component {
                           protocol={n.id}
                           state={n.state}
                           nextHop={n.address}>
-                {n.routes_received - routes_accepted_print}
+                {(n.routes_received + n.routes_filtered) - routes_accepted_print}
               </RoutesLink>
             </td>
         </tr>
