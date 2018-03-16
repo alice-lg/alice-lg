@@ -59,15 +59,19 @@ class NeighboursTable extends React.Component {
 
   render() {
     let neighbours = this.props.neighbours.map( (n) => {
-      // plausibility checks
-      var routes_accepted_print:int = 0
-      if (n.routes_accepted > n.routes_received) {
-        // customer has possibly more than one router feeding routes into per customer table
-        // guess router count
-        var rcount:int = Math.round(n.routes_accepted / n.routes_received) //TODO do we need to change this also?
-        routes_accepted_print = Math.round(n.routes_accepted / rcount)
-      } else {
-        routes_accepted_print = n.routes_accepted
+      // calculation of route counts
+      // received_count = accepted_count + bogon_count + pipe_filtered_count
+      const received_count = n.routes_received + n.routes_filtered; // routes_received := (accepted + pipe_filtered) + bogons
+      // in case of multiple routers per neighbour we know only the aggregrated count of pipe_filtered and accepted routes.
+      var accepted_count:int = 0
+      var pipe_filtered_count:int = 0
+      if (n.routes_accepted > n.routes_received) { // participant with > 1 routers active => estimate #routers
+        var rcount:int = Math.round(n.routes_accepted / n.routes_received)
+        accepted_count = Math.round(n.routes_accepted / rcount)
+        pipe_filtered_count = Math.round(n.routes_pipe_filtered / rcount)
+      } else { // ~ 1 peering router active
+        accepted_count = n.routes_accepted
+        pipe_filtered_count = n.pipe_filtered_count
       }
 
       return (
@@ -101,7 +105,7 @@ class NeighboursTable extends React.Component {
                         protocol={n.id}
                         state={n.state}
                         nextHop={n.address}>
-              {n.routes_received + n.routes_filtered}
+              {received_count}
             </RoutesLink>
           </td>
           <td>
@@ -109,7 +113,7 @@ class NeighboursTable extends React.Component {
                         protocol={n.id}
                         state={n.state}
                         nextHop={n.address}>
-              {routes_accepted_print}^
+              {accepted_count}
             </RoutesLink>
           </td>
           <td>
@@ -117,7 +121,7 @@ class NeighboursTable extends React.Component {
                           protocol={n.id}
                           state={n.state}
                           nextHop={n.address}>
-                {(n.routes_received + n.routes_filtered) - routes_accepted_print}
+                {received_count - accepted_count}
               </RoutesLink>
             </td>
         </tr>
@@ -144,8 +148,8 @@ class NeighboursTable extends React.Component {
               <th>State</th>
               <th>{uptimeTitle}</th>
               <th>Description</th>
-              <th>Routes Recv.</th>
-              <th>Routes Acpt.</th>
+              <th>Routes Received</th>
+              <th>Routes Accepted</th>
               <th>Routes Filtered</th>
             </tr>
           </thead>
