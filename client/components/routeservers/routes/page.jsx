@@ -37,11 +37,6 @@ class RoutesPage extends React.Component {
     this.props.dispatch(
       loadRouteserverProtocol(parseInt(this.props.params.routeserverId))
     );
-    // When nextHop filter is passed through the Link in RoutesLink, then set it.
-    const {nextHop} = this.props.location.state
-    if (nextHop !== undefined) {
-      this.setFilter(nextHop);
-    }
   }
 
   render() {
@@ -91,3 +86,4 @@ export default connect(
     }
   }
 )(RoutesPage);
+

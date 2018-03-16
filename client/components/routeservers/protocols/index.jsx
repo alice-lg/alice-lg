@@ -40,18 +40,11 @@ class RoutesLink extends React.Component {
     if (this.props.state != 'up') {
       return (<span>{this.props.children}</span>);
     }
-    if (this.props.nextHop) { // create Link object with nextHop in state
-      return (
-        <Link to={{
-          pathname: url,
-          state: { nextHop: this.props.nextHop }
-         }}> {this.props.children} </Link>
-      );
-    } else { // simple link
-      return (<Link to={url}>
+    return (
+      <Link to={url}>
         {this.props.children}
-        </Link>)
-    }
+      </Link>
+    )
   }
 }
 
@@ -79,8 +72,7 @@ class NeighboursTable extends React.Component {
           <td>
             <RoutesLink routeserverId={this.props.routeserverId}
                         protocol={n.id}
-                        state={n.state}
-                        nextHop={n.address}>
+                        state={n.state}>
              {n.address}
             </RoutesLink>
            </td>
