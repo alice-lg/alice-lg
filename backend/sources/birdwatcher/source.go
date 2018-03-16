@@ -4,6 +4,7 @@ import (
 	"github.com/alice-lg/alice-lg/backend/api"
 
 	"log"
+	"sort"
 )
 
 type Birdwatcher struct {
@@ -87,12 +88,40 @@ func (self *Birdwatcher) Routes(neighbourId string) (api.RoutesResponse, error) 
 		return api.RoutesResponse{}, err
 	}
 
+	gateway := ""
+	if len(imported) > 0 { // infer next_hop ip address from imported[0]
+		gateway = imported[0].Gateway
+	}
+
 	// Optional: Filtered
 	bird, _ = self.client.GetJson("/routes/filtered/" + neighbourId)
 	filtered, err := parseRoutes(bird, self.config)
 	if err != nil {
 		log.Println("WARNING Could not retrieve filtered routes:", err)
 		log.Println("Is the 'routes_filtered' module active in birdwatcher?")
+	} else { // we got a filtered routes response => perform routes deduplication
+		result_filtered := make(api.Routes, 0, len(filtered))
+		result_imported := make(api.Routes, 0, len(imported))
+
+		importedMap := make(map[string]api.Route) // for O(1) access
+		for _, route := range imported {
+			importedMap[route.Id] = route
+		}
+		// choose routes with next_hop == gateway of this neighbour
+		for _, route := range filtered {
+			if route.Gateway == gateway {
+				result_filtered = append(result_filtered, route)
+				delete(importedMap, route.Id) // remove routes that are filtered on pipe
+			}
+		}
+		sort.Sort(result_filtered)
+		filtered = result_filtered
+		// map to slice
+		for _, route := range importedMap {
+			result_imported = append(result_imported, route)
+		}
+		sort.Sort(result_imported)
+		imported = result_imported
 	}
 
 	// Optional: NoExport
@@ -101,6 +130,14 @@ func (self *Birdwatcher) Routes(neighbourId string) (api.RoutesResponse, error) 
 	if err != nil {
 		log.Println("WARNING Could not retrieve routes not exported:", err)
 		log.Println("Is the 'routes_noexport' module active in birdwatcher?")
+	} else {
+		result_noexport := make([]api.Route, 0, len(noexport))
+		// choose routes with next_hop == gateway of this neighbour
+		for _, route := range noexport {
+			if route.Gateway == gateway {
+				result_noexport = append(result_noexport, route)
+			}
+		}
 	}
 
 	return api.RoutesResponse{
