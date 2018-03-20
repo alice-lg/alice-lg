@@ -95,32 +95,28 @@ class NeighboursTable extends React.Component {
           <td>
             <RoutesLink routeserverId={this.props.routeserverId}
                         protocol={n.id}
-                        state={n.state}
-                        nextHop={n.address}>
+                        state={n.state}>
               {received_count}
             </RoutesLink>
           </td>
           <td>
             <RoutesLink routeserverId={this.props.routeserverId}
                         protocol={n.id}
-                        state={n.state}
-                        nextHop={n.address}>
+                        state={n.state}>
               {accepted_count}
             </RoutesLink>
           </td>
           <td>
               <RoutesLink routeserverId={this.props.routeserverId}
                           protocol={n.id}
-                          state={n.state}
-                          nextHop={n.address}>
+                          state={n.state}>
                 {received_count - accepted_count}
               </RoutesLink>
             </td>
             <td>
                 <RoutesLink routeserverId={this.props.routeserverId}
                             protocol={n.id}
-                            state={n.state}
-                            nextHop={n.address}>
+                            state={n.state}>
                   {n.routes_exported}
                 </RoutesLink>
             </td>
