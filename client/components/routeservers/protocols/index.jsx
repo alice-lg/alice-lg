@@ -116,6 +116,14 @@ class NeighboursTable extends React.Component {
                 {received_count - accepted_count}
               </RoutesLink>
             </td>
+            <td>
+                <RoutesLink routeserverId={this.props.routeserverId}
+                            protocol={n.id}
+                            state={n.state}
+                            nextHop={n.address}>
+                  {n.routes_exported}
+                </RoutesLink>
+            </td>
         </tr>
       );
     });
@@ -143,6 +151,7 @@ class NeighboursTable extends React.Component {
               <th>Routes Received</th>
               <th>Routes Accepted</th>
               <th>Routes Filtered</th>
+              <th>Routes Exported</th>
             </tr>
           </thead>
           <tbody>
