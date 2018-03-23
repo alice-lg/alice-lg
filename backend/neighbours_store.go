@@ -134,7 +134,7 @@ func (self *NeighboursStore) LookupNeighboursAt(
 	self.RUnlock()
 
 	asn := -1
-	if regex := regexp.MustCompile(`^AS(\d+)`); regex.MatchString(query) {
+	if regex := regexp.MustCompile(`(?i)^AS(\d+)`); regex.MatchString(query) {
 		groups := regex.FindStringSubmatch(query)
 		if a, err := strconv.Atoi(groups[1]); err == nil {
 			asn = a
