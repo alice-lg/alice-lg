@@ -64,13 +64,14 @@ class RoutesTable extends React.Component {
 
     let routesView = routes.map((r,i) => {
       return (
-        <tr key={`${r.network}_${i}`} onClick={() => this.showAttributesModal(r)}>
+        <tr key={`${r.network}_${i}`}>
           <td>
-            {r.network}
+            <a href={`http://irrexplorer.nlnog.net/search/${r.network}`}>{r.network}</a>
             {this.props.display_reasons == "filtered" && <FilterReason route={r} />}
             {this.props.display_reasons == "noexport" && <NoexportReason route={r} />}
           </td>
-          {Object.keys(routes_columns).map(col => <td key={col}>{_lookup(r, col)}</td>)}
+          {Object.keys(routes_columns).map(col => <td key={col}
+           onClick={() => this.showAttributesModal(r)}> {_lookup(r, col)}</td>)}
         </tr>
       );
     });
