@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+	"regexp"
+	"strconv"
 	"sync"
 	"time"
 
@@ -131,12 +133,22 @@ func (self *NeighboursStore) LookupNeighboursAt(
 	neighbours := self.neighboursMap[sourceId]
 	self.RUnlock()
 
+	asn := -1
+	if regex := regexp.MustCompile(`^AS(\d+)`); regex.MatchString(query) {
+		groups := regex.FindStringSubmatch(query)
+		if a, err := strconv.Atoi(groups[1]); err == nil {
+			asn = a
+		}
+	}
+
 	for _, neighbour := range neighbours {
-		if !ContainsCi(neighbour.Description, query) {
+		if asn >= 0 && neighbour.Asn == asn { // only executed if valid AS query is detected
+			results = append(results, neighbour)
+		} else if ContainsCi(neighbour.Description, query) {
+			results = append(results, neighbour)
+		} else {
 			continue
 		}
-
-		results = append(results, neighbour)
 	}
 
 	return results
