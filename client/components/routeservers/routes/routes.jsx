@@ -56,8 +56,12 @@ class RoutesTable extends React.Component {
     const _lookup = (r, path) => {
       const split = path.split(".").reduce((acc, elem) => acc[elem], r);
 
-      if (Array.isArray(split)) {
-        return split.join(" ");
+      if (Array.isArray(split)) { // this is for the ASN column, dirty hack.
+        var baseUrl = "http://irrexplorer.nlnog.net/search/"
+				let asnLinks = split.map((asn, i) => {
+					return (<a key={`${asn}_${i}`} href={baseUrl + asn} target="_blank">{asn} </a>);
+				});
+				return asnLinks;
       }
       return split;
     }
@@ -66,7 +70,8 @@ class RoutesTable extends React.Component {
       return (
         <tr key={`${r.network}_${i}`}>
           <td>
-            <a href={`http://irrexplorer.nlnog.net/search/${r.network}`}>{r.network}</a>
+            <a href={`http://irrexplorer.nlnog.net/search/${r.network}`}
+            target="_blank" >{r.network}</a>
             {this.props.display_reasons == "filtered" && <FilterReason route={r} />}
             {this.props.display_reasons == "noexport" && <NoexportReason route={r} />}
           </td>
