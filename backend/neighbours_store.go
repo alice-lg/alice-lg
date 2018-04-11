@@ -13,9 +13,10 @@ import (
 type NeighboursIndex map[string]api.Neighbour
 
 type NeighboursStore struct {
-	neighboursMap map[int]NeighboursIndex
-	configMap     map[int]SourceConfig
-	statusMap     map[int]StoreStatus
+	neighboursMap   map[int]NeighboursIndex
+	configMap       map[int]SourceConfig
+	statusMap       map[int]StoreStatus
+	refreshInterval int
 
 	sync.RWMutex
 }
@@ -38,15 +39,17 @@ func NewNeighboursStore(config *Config) *NeighboursStore {
 	}
 
 	store := &NeighboursStore{
-		neighboursMap: neighboursMap,
-		statusMap:     statusMap,
-		configMap:     configMap,
+		neighboursMap:   neighboursMap,
+		statusMap:       statusMap,
+		configMap:       configMap,
+		refreshInterval: config.Server.NeighboursStoreRefreshInterval,
 	}
 	return store
 }
 
 func (self *NeighboursStore) Start() {
 	log.Println("Starting local neighbours store")
+	log.Println("Neighbours Store refresh interval set to:", self.refreshInterval, "minutes")
 	go self.init()
 }
 
@@ -59,7 +62,11 @@ func (self *NeighboursStore) init() {
 
 	// Periodically update store
 	for {
-		time.Sleep(5 * time.Minute)
+		if self.refreshInterval > 0 {
+			time.Sleep(time.Duration(self.refreshInterval) * time.Minute)
+		} else {
+			time.Sleep(5 * time.Minute)
+		}
 		self.update()
 	}
 }
