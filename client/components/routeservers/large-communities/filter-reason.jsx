@@ -18,8 +18,8 @@ class FilterReason extends React.Component {
     if (!reason.length) {
       return null;
     }
-
-    return <p className="reject-reason">{this.props.reject_reasons[reason[0][2]]}</p>;
+    const filter_reason = this.props.reject_reasons[reason[0][2]];
+    return <p className="reject-reason"> <a href={`http://irrexplorer.nlnog.net/search/${route.network}`} target="_blank" >{filter_reason}</a> </p>
   }
 }
 
@@ -32,5 +32,3 @@ export default connect(
     }
   }
 )(FilterReason);
-
-
