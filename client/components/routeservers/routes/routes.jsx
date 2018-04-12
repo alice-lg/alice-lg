@@ -70,8 +70,8 @@ class RoutesTable extends React.Component {
       return (
         <tr key={`${r.network}_${i}`}>
           <td>
-					  {r.network}
-						{this.props.display_reasons == "filtered" && <FilterReason route={r} />}
+            <a href="#" onClick={() => this.showAttributesModal(r)}> {r.network}</a>
+            {this.props.display_reasons == "filtered" && <FilterReason route={r} />}
             {this.props.display_reasons == "noexport" && <NoexportReason route={r} />}
           </td>
           {Object.keys(routes_columns).map(col => <td key={col}
