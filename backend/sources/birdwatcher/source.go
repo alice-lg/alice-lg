@@ -90,7 +90,7 @@ func (self *Birdwatcher) Routes(neighbourId string) (api.RoutesResponse, error) 
 
 	gateway := ""
 	if len(imported) > 0 { // infer next_hop ip address from imported[0]
-		gateway = imported[0].Gateway
+		gateway = imported[0].Gateway //TODO: change mechanism to infor gateway when state becomes available elsewhere.
 	}
 
 	// Optional: Filtered
@@ -112,6 +112,8 @@ func (self *Birdwatcher) Routes(neighbourId string) (api.RoutesResponse, error) 
 			if route.Gateway == gateway {
 				result_filtered = append(result_filtered, route)
 				delete(importedMap, route.Id) // remove routes that are filtered on pipe
+			} else if len(imported) == 0 { // in case there are just filtered routes
+				result_filtered = append(result_filtered, route)
 			}
 		}
 		sort.Sort(result_filtered)
@@ -135,6 +137,8 @@ func (self *Birdwatcher) Routes(neighbourId string) (api.RoutesResponse, error) 
 		// choose routes with next_hop == gateway of this neighbour
 		for _, route := range noexport {
 			if route.Gateway == gateway {
+				result_noexport = append(result_noexport, route)
+			} else if len(imported) == 0 { // in case there are just filtered routes
 				result_noexport = append(result_noexport, route)
 			}
 		}
