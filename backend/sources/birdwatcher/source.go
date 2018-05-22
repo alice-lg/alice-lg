@@ -91,9 +91,9 @@ func (self *Birdwatcher) Routes(neighbourId string) (api.RoutesResponse, error) 
 	gateway := ""
 	learnt_from := ""
 	if len(imported) > 0 { // infer next_hop ip address from imported[0]
-		gateway = imported[0].Gateway                                    //TODO: change mechanism to infer gateway when state becomes available elsewhere.
-		learnt_from = mustString(imported[0].Details["learnt_from"], "") // also take learnt_from address into account if present.
-		// ^ learnt_from is regularly present on routes for remote-triggered blackholing.
+		gateway = imported[0].Gateway                                         //TODO: change mechanism to infer gateway when state becomes available elsewhere.
+		learnt_from = mustString(imported[0].Details["learnt_from"], gateway) // also take learnt_from address into account if present.
+		// ^ learnt_from is regularly present on routes for remote-triggered blackholing or on filtered routes (e.g. next_hop not in AS-Set)
 	}
 
 	// Optional: Filtered
@@ -112,7 +112,7 @@ func (self *Birdwatcher) Routes(neighbourId string) (api.RoutesResponse, error) 
 		}
 		// choose routes with next_hop == gateway of this neighbour
 		for _, route := range filtered {
-			if (route.Gateway == gateway) || (route.Gateway == learnt_from) {
+			if (route.Gateway == gateway) || (route.Gateway == learnt_from) || (route.Details["learnt_from"] == gateway) {
 				result_filtered = append(result_filtered, route)
 				delete(importedMap, route.Id) // remove routes that are filtered on pipe
 			} else if len(imported) == 0 { // in case there are just filtered routes
