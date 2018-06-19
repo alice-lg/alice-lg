@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ecix/alice-lg/backend/api"
+	"github.com/alice-lg/alice-lg/backend/api"
 )
 
 // Convert server time string to time

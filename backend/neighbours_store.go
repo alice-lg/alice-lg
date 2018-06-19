@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ecix/alice-lg/backend/api"
+	"github.com/alice-lg/alice-lg/backend/api"
 )
 
 type NeighboursIndex map[string]api.Neighbour

@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ecix/alice-lg/backend/sources"
-	"github.com/ecix/alice-lg/backend/sources/birdwatcher"
+	"github.com/alice-lg/alice-lg/backend/sources"
+	"github.com/alice-lg/alice-lg/backend/sources/birdwatcher"
 
 	"github.com/go-ini/ini"
 	_ "github.com/imdario/mergo"

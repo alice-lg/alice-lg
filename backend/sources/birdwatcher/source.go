@@ -1,7 +1,7 @@
 package birdwatcher
 
 import (
-	"github.com/ecix/alice-lg/backend/api"
+	"github.com/alice-lg/alice-lg/backend/api"
 
 	"log"
 )
