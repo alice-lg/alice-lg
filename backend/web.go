@@ -4,6 +4,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/GeertJohan/go.rice"
@@ -31,9 +32,31 @@ func webPrepareClientHtml(html string) string {
 	return html
 }
 
+func webNewThemeHandler(path string) http.Handler {
+	if path == "" {
+		return nil // Nothing to do here (Null Theme)
+	}
+
+	// Check if the the path is present and readable
+	if _, err := os.Stat(path); err != nil {
+		log.Println("WARNING - Could not read theme path:", path)
+		return nil
+	}
+
+	log.Println("Using theme at:", path)
+
+	// Looks like we are okay
+	// Serve the content using the file server
+	themeFilesHandler := http.StripPrefix(
+		"/theme",
+		http.FileServer(http.Dir(path)))
+
+	return themeFilesHandler
+}
+
 // Register assets handler and index handler
 // at /static and /
-func webRegisterAssets(router *httprouter.Router) error {
+func webRegisterAssets(ui UiConfig, router *httprouter.Router) error {
 	log.Println("Preparing and installing assets")
 
 	// Serve static assets
@@ -42,16 +65,23 @@ func webRegisterAssets(router *httprouter.Router) error {
 		"/static/",
 		http.FileServer(assets.HTTPBox()))
 
-	// Register static assets
-	router.Handler("GET", "/static/*path", assetsHandler)
-
 	// Prepare client html: Rewrite paths
 	indexHtml, err := assets.String("index.html")
 	if err != nil {
 		return err
 	}
 
+	// Update paths
 	indexHtml = webPrepareClientHtml(indexHtml)
+
+	themeHandler := webNewThemeHandler(ui.Theme.Path)
+	if themeHandler != nil {
+		// We have a theme
+		router.Handler("GET", "/theme/*path", themeHandler)
+	}
+
+	// Register static assets
+	router.Handler("GET", "/static/*path", assetsHandler)
 
 	// Rewrite paths
 	// Serve index html as root...
