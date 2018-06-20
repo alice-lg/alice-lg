@@ -191,8 +191,6 @@ func getUiConfig(config *ini.File) (UiConfig, error) {
 	// are found, it will be ignored
 	themeConfig := getThemeConfig(config)
 
-	fmt.Println("THEME COINFIG:", themeConfig)
-
 	// Make config
 	uiConfig = UiConfig{
 		RoutesColumns:    routesColumns,
