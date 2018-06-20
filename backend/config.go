@@ -45,7 +45,8 @@ type UiConfig struct {
 }
 
 type ThemeConfig struct {
-	Path string `ini:"path"`
+	Path     string `ini:"path"`
+	BasePath string `ini:"url_base"` // Optional, default: /theme/
 }
 
 type SourceConfig struct {
@@ -162,6 +163,10 @@ func getThemeConfig(config *ini.File) ThemeConfig {
 
 	themeConfig := ThemeConfig{}
 	baseConfig.MapTo(&themeConfig)
+
+	if themeConfig.BasePath == "" {
+		themeConfig.BasePath = "/theme"
+	}
 
 	return themeConfig
 }
