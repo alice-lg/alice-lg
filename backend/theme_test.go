@@ -2,41 +2,16 @@ package main
 
 import (
 	"io/ioutil"
-	"os"
 	"path/filepath"
+
+	"os"
+	"strings"
 	"testing"
 )
 
 func touchFile(path, filename string) error {
 	target := filepath.Join(path, filename)
 	return ioutil.WriteFile(target, []byte{}, 0644)
-}
-
-func TestThemeLoading(t *testing.T) {
-	themePath, err := ioutil.TempDir("", "alice-lg-tmp-theme")
-	if err != nil {
-		t.Error(err)
-	}
-	defer os.RemoveAll(themePath)
-
-	// This should work aswell, as themes are optional
-	_, err = NewTheme(ThemeConfig{
-		BasePath: "/theme",
-		Path:     themePath,
-	})
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	// This should not:
-	_, err = NewTheme(ThemeConfig{
-		Path: "/1ade5e183fd7b84a1590ad7144dbd6e0caed1b6a",
-	})
-
-	if err == nil {
-		t.Error("Expected the theme loading to fail with unknown path.")
-	}
 }
 
 func TestThemeFiles(t *testing.T) {
@@ -123,5 +98,22 @@ func TestThemeIncludes(t *testing.T) {
 
 	stylesHtml := theme.StylesheetIncludes()
 	scriptsHtml := theme.ScriptIncludes()
+
+	if !strings.HasPrefix(scriptsHtml, "<script") {
+		t.Error("Script include should start with <script")
+	}
+	if strings.Index(scriptsHtml, "script.js") == -1 {
+		t.Error("Scripts include should contain script.js")
+	}
+
+	if !strings.HasPrefix(stylesHtml, "<link") {
+		t.Error("Stylesheet include should start with <link")
+	}
+	if strings.Index(stylesHtml, "extra.css") == -1 {
+		t.Error("Stylesheet include should contain extra.css")
+	}
+	if strings.Index(stylesHtml, "script.js") != -1 {
+		t.Error("Stylesheet include should not contain script.js")
+	}
 
 }
