@@ -34,9 +34,11 @@ osx: deps
 linux: deps
 	GOARCH=$(ARCH) GOOS=linux go build $(LDFLAGS) -o $(PROG)-linux-$(ARCH)
 
-
 bundle:
 	rice embed-go
+
+test:
+	go test -v
 
 
 dev: clean all
