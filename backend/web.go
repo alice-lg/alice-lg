@@ -4,7 +4,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/GeertJohan/go.rice"
@@ -32,28 +31,6 @@ func webPrepareClientHtml(html string) string {
 	return html
 }
 
-func webNewThemeHandler(path string) http.Handler {
-	if path == "" {
-		return nil // Nothing to do here (Null Theme)
-	}
-
-	// Check if the the path is present and readable
-	if _, err := os.Stat(path); err != nil {
-		log.Println("WARNING - Could not read theme path:", path)
-		return nil
-	}
-
-	log.Println("Using theme at:", path)
-
-	// Looks like we are okay
-	// Serve the content using the file server
-	themeFilesHandler := http.StripPrefix(
-		"/theme",
-		http.FileServer(http.Dir(path)))
-
-	return themeFilesHandler
-}
-
 // Register assets handler and index handler
 // at /static and /
 func webRegisterAssets(ui UiConfig, router *httprouter.Router) error {
@@ -71,28 +48,36 @@ func webRegisterAssets(ui UiConfig, router *httprouter.Router) error {
 		return err
 	}
 
+	theme := NewTheme(ui.Theme)
+	err = theme.RegisterThemeAssets(router)
+	if err != nil {
+		log.Println("Warning:", err)
+	}
+
 	// Update paths
 	indexHtml = webPrepareClientHtml(indexHtml)
-
-	themeHandler := webNewThemeHandler(ui.Theme.Path)
-	if themeHandler != nil {
-		// We have a theme
-		router.Handler("GET", "/theme/*path", themeHandler)
-	}
 
 	// Register static assets
 	router.Handler("GET", "/static/*path", assetsHandler)
 
 	// Rewrite paths
 	// Serve index html as root...
-	router.GET("/", func(res http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
-		io.WriteString(res, indexHtml)
-	})
+	router.GET("/",
+		func(res http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
+			// Include theme, we need to update the
+			// hashes on reload, so we can check if the theme has
+			// changed without restarting the app
+			themedHtml := theme.PrepareClientHtml(indexHtml)
+			io.WriteString(res, themedHtml)
+		})
 
 	// ...and as catch all
-	router.GET("/alice/*path", func(res http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
-		io.WriteString(res, indexHtml)
-	})
+	router.GET("/alice/*path",
+		func(res http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
+			// ditto here
+			themedHtml := theme.PrepareClientHtml(indexHtml)
+			io.WriteString(res, themedHtml)
+		})
 
 	return nil
 }
