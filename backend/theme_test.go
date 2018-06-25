@@ -19,7 +19,7 @@ func TestThemeLoading(t *testing.T) {
 	}
 	defer os.RemoveAll(themePath)
 
-	// This should work:
+	// This should work aswell, as themes are optional
 	_, err = NewTheme(ThemeConfig{
 		BasePath: "/theme",
 		Path:     themePath,
@@ -52,7 +52,7 @@ func TestThemeFiles(t *testing.T) {
 	touchFile(themePath, "script.js")
 
 	// Load theme
-	theme, err := NewTheme(ThemeConfig{
+	theme := NewTheme(ThemeConfig{
 		BasePath: "/theme",
 		Path:     themePath,
 	})
@@ -74,7 +74,54 @@ func TestThemeFiles(t *testing.T) {
 
 	// Check uri / path mapping
 	script := scripts[0]
-	if script != "/theme/script.js" {
-		t.Error("Expected script.js mapped to /theme/script.js")
+	if script != "script.js" {
+		t.Error("Expected script.js to be included in scripts")
 	}
+}
+
+func TestThemeIncludeHash(t *testing.T) {
+	themePath, err := ioutil.TempDir("", "alice-lg-tmp-theme")
+	if err != nil {
+		t.Error(err)
+	}
+	defer os.RemoveAll(themePath)
+
+	// Create some "stylesheets" and a "script"
+	touchFile(themePath, "style.css")
+
+	theme := NewTheme(ThemeConfig{
+		BasePath: "/theme",
+		Path:     themePath,
+	})
+
+	hash := theme.HashInclude("style.css")
+	if hash == "" {
+		t.Error("Something went wrong with hashing")
+	}
+
+	t.Log("Filehash:", hash)
+
+}
+
+func TestThemeIncludes(t *testing.T) {
+	themePath, err := ioutil.TempDir("", "alice-lg-tmp-theme")
+	if err != nil {
+		t.Error(err)
+	}
+	defer os.RemoveAll(themePath)
+
+	// Create some "stylesheets" and a "script"
+	touchFile(themePath, "style.css")
+	touchFile(themePath, "extra.css")
+	touchFile(themePath, "script.js")
+
+	// Load theme
+	theme := NewTheme(ThemeConfig{
+		BasePath: "/theme",
+		Path:     themePath,
+	})
+
+	stylesHtml := theme.StylesheetIncludes()
+	scriptsHtml := theme.ScriptIncludes()
+
 }
