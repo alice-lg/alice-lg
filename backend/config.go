@@ -46,7 +46,7 @@ type UiConfig struct {
 
 type ThemeConfig struct {
 	Path     string `ini:"path"`
-	BasePath string `ini:"url_base"` // Optional, default: /theme/
+	BasePath string `ini:"url_base"` // Optional, default: /theme
 }
 
 type SourceConfig struct {
