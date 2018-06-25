@@ -40,6 +40,13 @@ type UiConfig struct {
 
 	RoutesRejections RejectionsConfig
 	RoutesNoexports  NoexportsConfig
+
+	Theme ThemeConfig
+}
+
+type ThemeConfig struct {
+	Path     string `ini:"path"`
+	BasePath string `ini:"url_base"` // Optional, default: /theme
 }
 
 type SourceConfig struct {
@@ -150,6 +157,20 @@ func getRoutesNoexports(config *ini.File) (NoexportsConfig, error) {
 	return noexportsConfig, nil
 }
 
+// Get UI config: Theme settings
+func getThemeConfig(config *ini.File) ThemeConfig {
+	baseConfig := config.Section("theme")
+
+	themeConfig := ThemeConfig{}
+	baseConfig.MapTo(&themeConfig)
+
+	if themeConfig.BasePath == "" {
+		themeConfig.BasePath = "/theme"
+	}
+
+	return themeConfig
+}
+
 // Get the UI configuration from the config file
 func getUiConfig(config *ini.File) (UiConfig, error) {
 	uiConfig := UiConfig{}
@@ -171,11 +192,17 @@ func getUiConfig(config *ini.File) (UiConfig, error) {
 		return uiConfig, err
 	}
 
+	// Theme configuration: Theming is optional, if no settings
+	// are found, it will be ignored
+	themeConfig := getThemeConfig(config)
+
 	// Make config
 	uiConfig = UiConfig{
 		RoutesColumns:    routesColumns,
 		RoutesRejections: rejections,
 		RoutesNoexports:  noexports,
+
+		Theme: themeConfig,
 	}
 
 	return uiConfig, nil
