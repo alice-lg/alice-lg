@@ -1,13 +1,16 @@
 
-import react from 'react'
+import React from 'react'
 import {connect} from 'react-redux'
 
 /*
  * Content Component
  */
-function contentComponent(props) {
-  if (!props.key) {
-    return null;
+function ContentComponent(props) {
+  let key = props.id;
+  let defaultValue = props.children;
+
+  if (!key) {
+    return <span>{defaultValue}</span>;
   }
 
   // Traverse content by key, if content is found
@@ -32,5 +35,5 @@ export default connect(
   (state) => ({
     content: state.content
   })
-)(contentComponent);
+)(ContentComponent);
 
