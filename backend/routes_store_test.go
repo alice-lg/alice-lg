@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 
 	"github.com/alice-lg/alice-lg/backend/api"
+	"github.com/alice-lg/alice-lg/backend/sources/birdwatcher"
 )
 
 //
@@ -45,9 +46,24 @@ func makeTestRoutesStore() *RoutesStore {
 	// Build mapping based on source instances:
 	//   rs : <response>
 	statusMap := make(map[int]StoreStatus)
-	configMap := make(map[int]SourceConfig)
 	routesMap := map[int]api.RoutesResponse{
 		1: rs1RoutesResponse,
+	}
+
+	configMap := map[int]SourceConfig{
+		1: SourceConfig{
+			Id:   1,
+			Name: "rs1.test",
+			Type: SOURCE_BIRDWATCHER,
+
+			Birdwatcher: birdwatcher.Config{
+				Api:             "http://localhost:2342",
+				Timezone:        "UTC",
+				ServerTime:      "2006-01-02T15:04:05",
+				ServerTimeShort: "2006-01-02",
+				ServerTimeExt:   "Mon, 02 Jan 2006 15:04: 05 -0700",
+			},
+		},
 	}
 
 	store := &RoutesStore{
@@ -73,10 +89,18 @@ func TestRoutesStoreStats(t *testing.T) {
 		)
 	}
 
-	if stats.TotalRoutes.Filtered {
+	if stats.TotalRoutes.Filtered != 1 {
 		t.Error(
 			"expected 1 filtered route, got:",
 			stats.TotalRoutes.Filtered,
 		)
 	}
+}
+
+func TestLookupPrefixAt(t *testing.T) {
+	store := makeTestRoutesStore()
+	query := "193.200."
+
+	result := store.LookupPrefix(query)
+	t.Log(result)
 }
