@@ -564,7 +564,105 @@
             }
         }
     ],
-    "filtered": [],
+    "filtered": [
+        {
+            "id": "42.23.0.0/16",
+            "neighbour_id": "ID7254_AS31334",
+            "network": "42.23.0.0/16",
+            "interface": "unknown interface",
+            "gateway": "193.42.155.51",
+            "metric": 100,
+            "bgp": {
+                "origin": "IGP",
+                "as_path": [
+                    31334
+                ],
+                "next_hop": "193.42.155.51",
+                "communities": [
+                    [
+                        64960,
+                        36040
+                    ],
+                    [
+                        65000,
+                        0
+                    ],
+                    [
+                        65011,
+                        1
+                    ],
+                    [
+                        9033,
+                        3102
+                    ]
+                ],
+                "large_communities": [
+                    [
+                        9033,
+                        65667,
+                        5
+                    ]
+                ],
+                "local_pref": 100,
+                "med": 50
+            },
+            "age": 33045868552529527,
+            "type": [
+                "BGP",
+                "unicast",
+                "univ"
+            ],
+            "details": {
+                "age": "2017-06-08 22:25:18",
+                "bgp": {
+                    "as_path": [
+                        "31334"
+                    ],
+                    "communities": [
+                        [
+                            64960,
+                            36040
+                        ],
+                        [
+                            65000,
+                            0
+                        ],
+                        [
+                            65011,
+                            1
+                        ],
+                        [
+                            9033,
+                            3102
+                        ]
+                    ],
+                    "large_communities": [
+                        [
+                            9033,
+                            65667,
+                            5
+                        ]
+                    ],
+                    "local_pref": "100",
+                    "med": "50",
+                    "next_hop": "193.42.155.51",
+                    "origin": "IGP"
+                },
+                "from_protocol": "ID7254_AS31334",
+                "gateway": "193.42.155.51",
+                "interface": null,
+                "learnt_from": "",
+                "metric": 100,
+                "network": "146.52.0.0/16",
+                "primary": true,
+                "type": [
+                    "BGP",
+                    "unicast",
+                    "univ"
+                ]
+            }
+        }
+    ],
     "not_exported": [
         {
             "id": "146.52.0.0/16",
