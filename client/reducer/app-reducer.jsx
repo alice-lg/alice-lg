@@ -18,6 +18,9 @@ import errorsReducer
 import configReducer
   from 'components/config/reducer'
 
+import contentReducer
+  from 'components/content/reducer'
+
 import lookupReducer
 	from 'components/lookup/reducer'
 
@@ -28,5 +31,6 @@ export default combineReducers({
 	lookup:				 lookupReducer,
   errors:        errorsReducer,
   config:        configReducer,
+  content:       contentReducer,
 });
 

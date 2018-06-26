@@ -39,7 +39,7 @@ class RouteserversList extends React.Component {
 
     return (
       <div className="routeservers-list">
-        <h2>Routeservers</h2>
+        <h2>route servers</h2>
         <ul> 
           {routeservers}
         </ul>

@@ -2,6 +2,9 @@
 import React from 'react'
 import {Link} from 'react-router'
 
+import Content from 'components/content'
+
+
 export default class SidebarHeader extends React.Component {
   render() {
     return (
@@ -12,8 +15,12 @@ export default class SidebarHeader extends React.Component {
           </Link>
         </div>
         <div className="title">
-          <h1>Alice</h1>
-          <p>Your friendly bird looking glass</p>
+          <h1><Content id="header.title">Alice</Content></h1>
+          <p>
+            <Content id="header.tagline">
+              Your friendly bird looking glass.
+            </Content>
+          </p>
         </div>
       </div>
     );
