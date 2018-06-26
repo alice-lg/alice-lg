@@ -6,7 +6,8 @@ const initialState = {
     Interface: "interface",
     Metric: "metric",
   },
-  prefix_lookup_enabled: false
+  prefix_lookup_enabled: false,
+  content: {}
 };
 
 
