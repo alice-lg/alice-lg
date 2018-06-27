@@ -125,6 +125,23 @@ func TestRoutesStoreStats(t *testing.T) {
 }
 
 func TestLookupPrefixAt(t *testing.T) {
+	startTestNeighboursStore()
+	store := makeTestRoutesStore()
+
+	query := "193.200."
+	results := store.LookupPrefixAt(1, query)
+
+	prefixes := <-results
+
+	// Check results
+	for _, prefix := range prefixes {
+		if strings.HasPrefix(prefix.Network, query) == false {
+			t.Error(
+				"All network addresses should start with the",
+				"queried prefix",
+			)
+		}
+	}
 
 }
 
