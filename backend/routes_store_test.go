@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"strings"
 	"testing"
 
 	"encoding/json"
@@ -97,10 +98,26 @@ func TestRoutesStoreStats(t *testing.T) {
 	}
 }
 
-func TestLookupPrefixAt(t *testing.T) {
+func TestLookupPrefix(t *testing.T) {
+	startTestNeighboursStore()
 	store := makeTestRoutesStore()
 	query := "193.200."
 
-	result := store.LookupPrefix(query)
-	t.Log(result)
+	results := store.LookupPrefix(query)
+
+	if len(results) == 0 {
+		t.Error("Expected lookup results. None present.")
+		return
+	}
+
+	// Check results
+	for _, route := range results {
+		if strings.HasPrefix(route.Network, query) == false {
+			t.Error(
+				"All network addresses should start with the",
+				"queried prefix",
+			)
+		}
+	}
+
 }
