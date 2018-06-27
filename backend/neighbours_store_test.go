@@ -15,7 +15,6 @@ import (
 func startTestNeighboursStore() {
 	store := makeTestNeighboursStore()
 	AliceNeighboursStore = store
-	log.Println("Started NeighbourStore as service.")
 }
 
 /*
