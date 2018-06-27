@@ -85,8 +85,9 @@ Merged commits:
                             client/components/routeservers/protocols/index.jsx
 
     627569ea94567 - Adapt Alice-API output to a special BIRD API. 
-                    Aka. Route deduplication
-                    Aka. Route sorting
+
+                    Also: Route deduplication
+                    Also: Route sorting
 
                     Issues:
                         Merge conflict in
@@ -96,7 +97,12 @@ Merged commits:
                         Check if this is generalized enough;
                         * Test with own lab
                         * Test with spl / ecix
-                        
+
+    cc0b825e08e9 - Fix deduplication of routes for peer with only filtered routes.
+    65091679a642 - Fix routes deduplication for remote-triggered blackholing.
+    c4d4819937db - Fix deduplication behaviour for filtered routes
+                   
+      
 
 ## Feature: Neighbours Store improvements
 
