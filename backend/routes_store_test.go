@@ -37,6 +37,32 @@ func loadTestRoutesResponse() api.RoutesResponse {
 	return response
 }
 
+/*
+ Check for presence of network in result set
+*/
+func testCheckPrefixesPresence(prefixes, resultset []string, t *testing.T) {
+	// Check prefixes
+	presence := map[string]bool{}
+	for _, prefix := range prefixes {
+		presence[prefix] = false
+	}
+
+	for _, prefix := range resultset {
+		// Check if prefixes are all accounted for
+		for net, _ := range presence {
+			if prefix == net {
+				presence[net] = true
+			}
+		}
+	}
+
+	for net, present := range presence {
+		if present == false {
+			t.Error(net, "not found in result set")
+		}
+	}
+}
+
 //
 // Route Store Tests
 //
@@ -98,6 +124,10 @@ func TestRoutesStoreStats(t *testing.T) {
 	}
 }
 
+func TestLookupPrefixAt(t *testing.T) {
+
+}
+
 func TestLookupPrefix(t *testing.T) {
 	startTestNeighboursStore()
 	store := makeTestRoutesStore()
@@ -121,6 +151,28 @@ func TestLookupPrefix(t *testing.T) {
 	}
 }
 
+func TestLookupNeighboursPrefixesAt(t *testing.T) {
+	startTestNeighboursStore()
+	store := makeTestRoutesStore()
+
+	// Query
+	results := store.LookupNeighboursPrefixesAt(1, []string{
+		"ID163_AS31078",
+	})
+
+	// Check prefixes
+	presence := []string{
+		"193.200.230.0/24", "193.34.24.0/22", "31.220.136.0/21",
+	}
+
+	resultset := []string{}
+	for _, prefix := range <-results {
+		resultset = append(resultset, prefix.Network)
+	}
+
+	testCheckPrefixesPresence(presence, resultset, t)
+}
+
 func TestLookupPrefixForNeighbours(t *testing.T) {
 	// Construct a neighbours lookup result
 	neighbours := api.NeighboursLookupResults{
@@ -142,26 +194,14 @@ func TestLookupPrefixForNeighbours(t *testing.T) {
 		t.Error("Expected result lenght: 8, got:", len(results))
 	}
 
-	// Check prefixes
-	presence := map[string]bool{
-		"193.200.230.0/24": false,
-		"193.34.24.0/22":   false,
-		"31.220.136.0/21":  false,
+	presence := []string{
+		"193.200.230.0/24", "193.34.24.0/22", "31.220.136.0/21",
 	}
 
+	resultset := []string{}
 	for _, prefix := range results {
-		// Check if prefixes are all accounted for
-		for net, _ := range presence {
-			if strings.HasPrefix(prefix.Network, net) {
-				presence[net] = true
-			}
-		}
+		resultset = append(resultset, prefix.Network)
 	}
 
-	for net, present := range presence {
-		if present == false {
-			t.Error(net, "not found in result set")
-		}
-	}
-
+	testCheckPrefixesPresence(presence, resultset, t)
 }
