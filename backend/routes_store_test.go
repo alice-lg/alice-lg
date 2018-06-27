@@ -111,12 +111,56 @@ func TestLookupPrefix(t *testing.T) {
 	}
 
 	// Check results
-	for _, route := range results {
-		if strings.HasPrefix(route.Network, query) == false {
+	for _, prefix := range results {
+		if strings.HasPrefix(prefix.Network, query) == false {
 			t.Error(
 				"All network addresses should start with the",
 				"queried prefix",
 			)
+		}
+	}
+}
+
+func TestLookupPrefixForNeighbours(t *testing.T) {
+	// Construct a neighbours lookup result
+	neighbours := api.NeighboursLookupResults{
+		1: []api.Neighbour{
+			api.Neighbour{
+				Id: "ID163_AS31078",
+			},
+		},
+	}
+
+	startTestNeighboursStore()
+	store := makeTestRoutesStore()
+
+	// Query
+	results := store.LookupPrefixForNeighbours(neighbours)
+
+	// We should have retrived 8 prefixes,
+	if len(results) != 8 {
+		t.Error("Expected result lenght: 8, got:", len(results))
+	}
+
+	// Check prefixes
+	presence := map[string]bool{
+		"193.200.230.0/24": false,
+		"193.34.24.0/22":   false,
+		"31.220.136.0/21":  false,
+	}
+
+	for _, prefix := range results {
+		// Check if prefixes are all accounted for
+		for net, _ := range presence {
+			if strings.HasPrefix(prefix.Network, net) {
+				presence[net] = true
+			}
+		}
+	}
+
+	for net, present := range presence {
+		if present == false {
+			t.Error(net, "not found in result set")
 		}
 	}
 

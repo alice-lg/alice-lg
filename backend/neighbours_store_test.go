@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/alice-lg/alice-lg/backend/api"
 
-	"log"
 	"testing"
 )
 
