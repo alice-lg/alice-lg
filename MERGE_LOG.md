@@ -1,6 +1,8 @@
 
+Frontend
+========
 
-# Feature: Display Routes Filtered
+## Feature: Display Routes Filtered
 
 Merged commits:
     
@@ -25,7 +27,7 @@ Todo:
         - Direct values from Birdwatcher
 
 
-# Feature: Display routes exported
+## Feature: Display routes exported
 
 Merged commits
     
@@ -36,7 +38,7 @@ Todo:
     Configurable columns on Neighbours table
 
 
-# Feature: UI Tweaks / Improvements
+## Feature: UI Tweaks / Improvements
     
 Merged commits:
 
@@ -48,7 +50,7 @@ Merged commits:
     ab104cf43f30 - Show modal dialog when clicking on prefix.
 
 
-# Feature: IRRExplorer Link
+## Feature: IRRExplorer Link
 
 Merged Commits:
 
@@ -62,4 +64,51 @@ Todo:
     we can improve this!
 
 
+Backend
+=======
+
+## Feature: Api Optimization
+
+Merged commits:
+
+    10f548fc2e3d8 - Remove unnecessary fields from JSON served by API.
+                    Comment:
+                        This adds to api/response.go: 
+                            RoutesAccepted     int           `json:"routes_accepted"` 
+                            RoutesPipeFiltered int           `json:"routes_pipe_filtered"` 
+                        This adds to sources/birdwatcher/parsers.go
+                            RoutesAccepted:     mustInt(routes["pipe_imported"], 
+                            RoutesPipeFiltered: mustInt(routes["pipe_filtered"],
+
+                    Issues:
+                        Merge conflict in
+                            client/components/routeservers/protocols/index.jsx
+
+    627569ea94567 - Adapt Alice-API output to a special BIRD API. 
+                    Aka. Route deduplication
+                    Aka. Route sorting
+
+                    Issues:
+                        Merge conflict in
+                            backend/sources/birdwatcher/source.go          
+
+                    Todo:
+                        Check if this is generalized enough;
+                        * Test with own lab
+                        * Test with spl / ecix
+                        
+
+## Feature: Neighbours Store improvements
+
+Merged commits:
+
+    69c89cb44dfa - Fix ASN lookup to use neighbour.Asn attribute.
+    23af3084915d - Make AS search case insensitive.
+
+
+## Feature: Configurable refresh interval
+    
+Merged commits:
+    
+    57e405ed05d3 - Add refresh interval for routes and neighbours store.
 
