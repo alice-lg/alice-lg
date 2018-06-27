@@ -2,11 +2,26 @@ package main
 
 import (
 	"github.com/alice-lg/alice-lg/backend/api"
+
+	"log"
 	"testing"
 )
 
-// Make a store and populate it with data
-func makeNeighboursStore() *NeighboursStore {
+/*
+ Start the global neighbours store,
+ because the route store in the tests have
+ this as a dependency.
+*/
+func startTestNeighboursStore() {
+	store := makeTestNeighboursStore()
+	AliceNeighboursStore = store
+	log.Println("Started NeighbourStore as service.")
+}
+
+/*
+ Make a store and populate it with data
+*/
+func makeTestNeighboursStore() *NeighboursStore {
 
 	// Populate neighbours
 	rs1 := NeighboursIndex{
@@ -47,7 +62,7 @@ func makeNeighboursStore() *NeighboursStore {
 }
 
 func TestGetNeighbourAt(t *testing.T) {
-	store := makeNeighboursStore()
+	store := makeTestNeighboursStore()
 
 	neighbour := store.GetNeighbourAt(1, "ID2233_AS2343")
 	if neighbour.Id != "ID2233_AS2343" {
@@ -57,7 +72,7 @@ func TestGetNeighbourAt(t *testing.T) {
 }
 
 func TestNeighbourLookupAt(t *testing.T) {
-	store := makeNeighboursStore()
+	store := makeTestNeighboursStore()
 
 	expected := []string{
 		"ID2233_AS2342",
@@ -81,7 +96,7 @@ func TestNeighbourLookupAt(t *testing.T) {
 }
 
 func TestNeighbourLookup(t *testing.T) {
-	store := makeNeighboursStore()
+	store := makeTestNeighboursStore()
 
 	// First result set: "Peer 1"
 	_ = store
