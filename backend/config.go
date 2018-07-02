@@ -36,7 +36,11 @@ type NoexportsConfig struct {
 }
 
 type UiConfig struct {
-	RoutesColumns map[string]string
+	RoutesColumns      map[string]string
+	RoutesColumnsOrder []string
+
+	NeighboursColumns      map[string]string
+	NeighboursColumnsOrder []string
 
 	RoutesRejections RejectionsConfig
 	RoutesNoexports  NoexportsConfig

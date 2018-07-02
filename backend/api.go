@@ -129,6 +129,7 @@ func apiConfigShow(_req *http.Request, _params httprouter.Params) (api.Response,
 		NoexportReasons: SerializeReasons(
 			AliceConfig.Ui.RoutesNoexports.Reasons),
 		RoutesColumns:       AliceConfig.Ui.RoutesColumns,
+		RoutesColumnsOrder:  AliceConfig.Ui.RoutesColumnsOrder,
 		PrefixLookupEnabled: AliceConfig.Server.EnablePrefixLookup,
 	}
 	return result, nil
