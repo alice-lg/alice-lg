@@ -97,18 +97,45 @@ func getBackendType(section *ini.Section) int {
 	return SOURCE_UNKNOWN
 }
 
+// Get UI config: Routes Columns Default
+func getRoutesColumnsDefault() (map[string]string, []string) {
+	columns := map[string]string{
+		"Network":     "Network",
+		"bgp.as_path": "AS Path",
+		"gateway":     "Gateway",
+		"interface":   "Interface",
+	}
+
+	order := []string{"Network", "bgp.as_path", "gateway", "interface"}
+
+	return columns, order
+}
+
 // Get UI config: Routes Columns
-// The columns displayed in the frontend
-func getRoutesColumns(config *ini.File) (map[string]string, error) {
+// The columns displayed in the frontend.
+// The columns are ordered as in the config file.
+//
+// In case the configuration is empty, fall back to
+// the defaults as defined in getRoutesColumnsDefault()
+//
+func getRoutesColumns(config *ini.File) (map[string]string, []string, error) {
 	columns := make(map[string]string)
+	order := []string{}
+
 	section := config.Section("routes_columns")
 	keys := section.Keys()
 
-	for _, key := range keys {
-		columns[key.Name()] = section.Key(key.Name()).MustString("")
+	if len(keys) == 0 {
+		defaultColumns, defaultOrder := getRoutesColumnsDefault()
+		return defaultColumns, defaultOrder, nil
 	}
 
-	return columns, nil
+	for _, key := range keys {
+		columns[key.Name()] = section.Key(key.Name()).MustString("")
+		order = append(order, key.Name())
+	}
+
+	return columns, order, nil
 }
 
 // Get UI config: Get rejections
@@ -180,7 +207,15 @@ func getUiConfig(config *ini.File) (UiConfig, error) {
 	uiConfig := UiConfig{}
 
 	// Get route columns
-	routesColumns, err := getRoutesColumns(config)
+	routesColumns, routesColumnsOrder, err := getRoutesColumns(config)
+	if err != nil {
+		return uiConfig, err
+	}
+
+	// Get neighbours table columns
+	neighboursColumns,
+		neighboursColumnsOrder,
+		err := getNeighboursColumns(config)
 	if err != nil {
 		return uiConfig, err
 	}
@@ -202,7 +237,12 @@ func getUiConfig(config *ini.File) (UiConfig, error) {
 
 	// Make config
 	uiConfig = UiConfig{
-		RoutesColumns:    routesColumns,
+		RoutesColumns:      routesColumns,
+		RoutesColumnsOrder: routesColumnsOrder,
+
+		NeighboursColumns:      neighboursColumns,
+		NeighboursColumnsOrder: neighboursColumnsOrder,
+
 		RoutesRejections: rejections,
 		RoutesNoexports:  noexports,
 
