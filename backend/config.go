@@ -100,7 +100,6 @@ func getBackendType(section *ini.Section) int {
 // Get UI config: Routes Columns Default
 func getRoutesColumnsDefault() (map[string]string, []string) {
 	columns := map[string]string{
-		"Network":     "Network",
 		"bgp.as_path": "AS Path",
 		"gateway":     "Gateway",
 		"interface":   "Interface",
@@ -136,6 +135,29 @@ func getRoutesColumns(config *ini.File) (map[string]string, []string, error) {
 	}
 
 	return columns, order, nil
+}
+
+// Get UI config: Get Neighbours Columns Defaults
+func getNeighboursColumnsDefaults(config *ini.File) (
+	map[string]string,
+	[]string,
+) {
+	columns := map[string]string{
+		"Neighbour":       "Neighbour",
+		"asn":             "ASN",
+		"state":           "State",
+		"Uptime":          "Uptime",
+		"Description":     "Description",
+		"routes_received": "Routes Recv.",
+		"routes_filtered": "Routes Filtered",
+	}
+
+	order := []string{
+		"Neighbour", "asn", "state",
+		"Uptime", "Description", "routes_received", "routes_filtered",
+	}
+
+	return columns, order
 }
 
 // Get UI config: Get rejections
