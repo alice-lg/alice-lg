@@ -35,7 +35,7 @@ class Details extends React.Component {
           <li><i className="fa fa-clock-o"></i>
             Last Reconfig: <b><Datetime value={rsStatus.last_reconfig} /></b>
           </li>
-          <li><i className="fa fa-battery-full"></i>
+          <li><i className="fa fa-thumbs-up"></i>
             <b>{rsStatus.message}</b></li>
         </ul>
       </div>
