@@ -25,11 +25,17 @@ func Test_ParseApiStatus(t *testing.T) {
 	bird := parseTestResponse(API_RESPONSE_NEIGHBOURS)
 
 	// mock config
-	config := Config{Timezone: "UTC"} // Or ""
+	config := Config{
+		Timezone:        "UTC",
+		ServerTime:      "2006-01-02T15:04:05.999999999Z07:00",
+		ServerTimeShort: "2006-01-02",
+		ServerTimeExt:   "Mon, 02 Jan 2006 15:04:05 -0700",
+	} // Or ""
 
 	apiStatus, err := parseApiStatus(bird, config)
 	if err != nil {
 		t.Error(err)
+		return
 	}
 
 	// Assertations
