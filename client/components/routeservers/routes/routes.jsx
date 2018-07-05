@@ -46,8 +46,8 @@ class RoutesTable extends React.Component {
 
   render() {
     let routes = this.props.routes;
-    const routes_columns = this.props.routes_columns;
-    const routes_columns_order = this.props.routes_columns_order;
+    const routesColumns = this.props.routesColumns;
+    const routesColumnsOrder = this.props.routesColumnsOrder;
 
     routes = _filteredRoutes(routes, this.props.filter);
     if (!routes || !routes.length) {
@@ -68,10 +68,10 @@ class RoutesTable extends React.Component {
         <tr key={`${r.network}_${i}`} onClick={() => this.showAttributesModal(r)}>
           <td>
             {r.network}
-            {this.props.display_reasons == "filtered" && <FilterReason route={r} />}
-            {this.props.display_reasons == "noexport" && <NoexportReason route={r} />}
+            {this.props.displayReasons == "filtered" && <FilterReason route={r} />}
+            {this.props.displayReasons == "noexport" && <NoexportReason route={r} />}
           </td>
-          {routes_columns_order.map(col => <td key={col}>{_lookup(r, col)}</td>)}
+          {routesColumnsOrder.map(col => <td key={col}>{_lookup(r, col)}</td>)}
         </tr>
       );
     });
@@ -83,7 +83,7 @@ class RoutesTable extends React.Component {
           <thead>
             <tr>
               <th>Network</th>
-              {routes_columns_order.map(col => <th key={col}>{routes_columns[col]}</th>)}
+              {routesColumnsOrder.map(col => <th key={col}>{routesColumns[col]}</th>)}
             </tr>
           </thead>
           <tbody>
@@ -99,10 +99,9 @@ class RoutesTable extends React.Component {
 RoutesTable = connect(
   (state) => {
     return {
-      filter:               state.routeservers.routesFilterValue,
-      reject_reasons:       state.routeservers.reject_reasons,
-      routes_columns:       state.config.routes_columns,
-      routes_columns_order: state.config.routes_columns_order,
+      filter:             state.routeservers.routesFilterValue,
+      routesColumns:      state.config.routes_columns,
+      routesColumnsOrder: state.config.routes_columns_order,
     }
   }
 )(RoutesTable);
@@ -151,9 +150,9 @@ class RoutesTables extends React.Component {
 
     return (
       <div>
-        <RoutesTable header={filtdHeader} routes={filtered} display_reasons="filtered"/>
-        <RoutesTable header={recvdHeader} routes={received} display_reasons={false}/>
-        <RoutesTable header={noexHeader}  routes={noexport} display_reasons="noexport"/>
+        <RoutesTable header={filtdHeader} routes={filtered} displayReasons="filtered"/>
+        <RoutesTable header={recvdHeader} routes={received} displayReasons={false}/>
+        <RoutesTable header={noexHeader}  routes={noexport} displayReasons="noexport"/>
       </div>
     );
 
