@@ -49,4 +49,14 @@ func TestSourceConfigDefaultsOverride(t *testing.T) {
 			"(alice.example.conf)")
 	}
 
+	// Check presence of timezone, default: UTC (rs1)
+	// override: Europe/Bruessels (rs2)
+	if rs1.Birdwatcher.Timezone != "UTC" {
+		t.Error("Expected RS1 Timezone to be default: UTC")
+	}
+
+	if rs2.Birdwatcher.Timezone != "Europe/Brussels" {
+		t.Error("Expected 'Europe/Brussels', got", rs2.Birdwatcher.Timezone)
+	}
+
 }
