@@ -26,3 +26,27 @@ func TestLoadConfigs(t *testing.T) {
 		t.Error("Rejection reasons missing")
 	}
 }
+
+func TestSourceConfigDefaultsOverride(t *testing.T) {
+
+	config, err := loadConfig("../etc/alicelg/alice.example.conf")
+	if err != nil {
+		t.Error("Could not load test config:", err)
+	}
+
+	// Get sources
+
+	rs1 := config.Sources[0]
+	rs2 := config.Sources[1]
+
+	// Source 1 should be on default time
+	// Source 2 should have an override
+	// For now it should be sufficient to test if
+	// the serverTime(rs1) != serverTime(rs2)
+	if rs1.Birdwatcher.ServerTime == rs2.Birdwatcher.ServerTime {
+		t.Error("Server times should be different between",
+			"source 1 and 2 in example configuration",
+			"(alice.example.conf)")
+	}
+
+}
