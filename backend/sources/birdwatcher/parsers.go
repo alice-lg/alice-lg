@@ -24,7 +24,11 @@ func parseServerTime(value interface{}, layout, timezone string) (time.Time, err
 	}
 
 	t, err := time.ParseInLocation(layout, svalue, loc)
-	return t, err
+	if err != nil {
+		return time.Time{}, err
+	}
+
+	return t.UTC(), nil
 }
 
 // Make api status from response:
