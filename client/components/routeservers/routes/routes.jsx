@@ -47,6 +47,7 @@ class RoutesTable extends React.Component {
   render() {
     let routes = this.props.routes;
     const routes_columns = this.props.routes_columns;
+    const routes_columns_order = this.props.routes_columns_order;
 
     routes = _filteredRoutes(routes, this.props.filter);
     if (!routes || !routes.length) {
@@ -70,7 +71,7 @@ class RoutesTable extends React.Component {
             {this.props.display_reasons == "filtered" && <FilterReason route={r} />}
             {this.props.display_reasons == "noexport" && <NoexportReason route={r} />}
           </td>
-          {Object.keys(routes_columns).map(col => <td key={col}>{_lookup(r, col)}</td>)}
+          {routes_columns_order.map(col => <td key={col}>{_lookup(r, col)}</td>)}
         </tr>
       );
     });
@@ -82,7 +83,7 @@ class RoutesTable extends React.Component {
           <thead>
             <tr>
               <th>Network</th>
-              {Object.values(routes_columns).map(col => <th key={col}>{col}</th>)}
+              {routes_columns_order.map(col => <th key={col}>{routes_columns[col]}</th>)}
             </tr>
           </thead>
           <tbody>
@@ -98,9 +99,10 @@ class RoutesTable extends React.Component {
 RoutesTable = connect(
   (state) => {
     return {
-      filter:         state.routeservers.routesFilterValue,
-      reject_reasons: state.routeservers.reject_reasons,
-      routes_columns: state.config.routes_columns,
+      filter:               state.routeservers.routesFilterValue,
+      reject_reasons:       state.routeservers.reject_reasons,
+      routes_columns:       state.config.routes_columns,
+      routes_columns_order: state.config.routes_columns_order,
     }
   }
 )(RoutesTable);
