@@ -36,6 +36,49 @@ function _filteredRoutes(routes, filter) {
   return filtered;
 }
 
+// Helper: Lookup value in route path
+const _lookup = (r, path) => {
+  const split = path.split(".").reduce((acc, elem) => acc[elem], r);
+
+  // Join ASN path (FIXME: This is kind of ugly)
+  if (Array.isArray(split)) {
+    return split.join(" ");
+  }
+
+  return split;
+}
+
+const ColDefault = function(props) {
+  return (
+    <td>{_lookup(props.route, props.column)}</td>
+  )
+}
+
+// Include filter and noexport reason in this column.
+const ColNetwork = function(props) {
+  return (
+    <td>
+      {props.route.network}
+      {props.displayReasons == "filtered" && <FilterReason route={props.route} />}
+      {props.displayReasons == "noexport" && <NoexportReason route={props.route} />}
+    </td>
+  );
+}
+
+
+const RouteColumn = function(props) {
+  const widgets = {
+    "network": ColNetwork,
+  };
+
+  let Widget = widgets[props.column] || ColDefault;
+  return (
+    <Widget column={props.column} route={props.route}
+            displayReasons={props.displayReasons} />
+  );
+}
+
+
 class RoutesTable extends React.Component {
   showAttributesModal(route) {
     this.props.dispatch(
@@ -54,24 +97,15 @@ class RoutesTable extends React.Component {
       return null;
     }
 
-    const _lookup = (r, path) => {
-      const split = path.split(".").reduce((acc, elem) => acc[elem], r);
-
-      if (Array.isArray(split)) {
-        return split.join(" ");
-      }
-      return split;
-    }
 
     let routesView = routes.map((r,i) => {
       return (
         <tr key={`${r.network}_${i}`} onClick={() => this.showAttributesModal(r)}>
-          <td>
-            {r.network}
-            {this.props.displayReasons == "filtered" && <FilterReason route={r} />}
-            {this.props.displayReasons == "noexport" && <NoexportReason route={r} />}
-          </td>
-          {routesColumnsOrder.map(col => <td key={col}>{_lookup(r, col)}</td>)}
+          {routesColumnsOrder.map(col => (<RouteColumn key={col}
+                                                       column={col}
+                                                       route={r}
+                                                       displayReasons={this.props.displayReasons} />)
+          )}
         </tr>
       );
     });
@@ -82,7 +116,6 @@ class RoutesTable extends React.Component {
         <table className="table table-striped table-routes">
           <thead>
             <tr>
-              <th>Network</th>
               {routesColumnsOrder.map(col => <th key={col}>{routesColumns[col]}</th>)}
             </tr>
           </thead>
