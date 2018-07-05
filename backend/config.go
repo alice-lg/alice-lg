@@ -167,7 +167,7 @@ func getNeighboursColumns(config *ini.File) (
 	columns := make(map[string]string)
 	order := []string{}
 
-	section := config.Section("routes_columns")
+	section := config.Section("neighbours_columns")
 	keys := section.Keys()
 
 	if len(keys) == 0 {
