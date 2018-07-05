@@ -159,31 +159,7 @@ class NeighboursTableView extends React.Component {
                                 column={col}
                                 neighbour={n} />
       });
-      return (
-        <tr key={n.id}>
-          {neighbourColumns}
-        </tr>
-      );
-      /*
-      return (
-        <tr key={n.id}>
-          <td>
-            <RoutesLink routeserverId={this.props.routeserverId}
-                        protocol={n.id}
-                        state={n.state}>
-              {n.routes_received}
-            </RoutesLink>
-          </td>
-        <td>
-            <RoutesLink routeserverId={this.props.routeserverId}
-                        protocol={n.id}
-                        state={n.state}>
-              {n.routes_filtered}
-            </RoutesLink>
-          </td>
-        </tr>
-      );
-      */
+      return <tr key={n.id}>{neighbourColumns}</tr>;
     });
 
     let uptimeTitle;
