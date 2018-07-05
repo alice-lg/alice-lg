@@ -9,7 +9,7 @@ import (
 
 func TestLoadConfigs(t *testing.T) {
 
-	config, err := loadConfig("../etc/alicelg/alice.conf")
+	config, err := loadConfig("../etc/alicelg/alice.example.conf")
 	if err != nil {
 		t.Error("Could not load test config:", err)
 	}
