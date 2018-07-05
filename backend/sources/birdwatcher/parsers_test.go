@@ -2,7 +2,9 @@ package birdwatcher
 
 import (
 	"encoding/json"
+
 	"testing"
+	"time"
 )
 
 const API_RESPONSE_NEIGHBOURS = `
@@ -25,11 +27,17 @@ func Test_ParseApiStatus(t *testing.T) {
 	bird := parseTestResponse(API_RESPONSE_NEIGHBOURS)
 
 	// mock config
-	config := Config{Timezone: "UTC"} // Or ""
+	config := Config{
+		Timezone:        "UTC",
+		ServerTime:      "2006-01-02T15:04:05.999999999Z07:00",
+		ServerTimeShort: "2006-01-02",
+		ServerTimeExt:   "Mon, 02 Jan 2006 15:04:05 -0700",
+	} // Or ""
 
 	apiStatus, err := parseApiStatus(bird, config)
 	if err != nil {
 		t.Error(err)
+		return
 	}
 
 	// Assertations
@@ -89,4 +97,43 @@ func Test_RoutesParsing(t *testing.T) {
 	}
 
 	// TODO: addo more tests
+}
+
+func Test_ParseServerTime(t *testing.T) {
+
+	res, err := parseServerTime(
+		"2018-06-05T15:37:42+02:00",
+		time.RFC3339,
+		"Europe/Berlin",
+	)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res.Equal(time.Date(
+		2018, 6, 5,
+		13, 37, 42,
+		0, time.UTC,
+	)) == false {
+		t.Error("Expected 13:37 UTC, got:", res)
+	}
+
+	// Check fallback timezone
+	res, err = parseServerTime(
+		"2018-06-05T15:37:42",
+		"2006-01-02T15:04:05",
+		"UTC",
+	)
+	if err != nil {
+		t.Error(err)
+	}
+
+	expected := time.Date(
+		2018, 6, 5,
+		15, 37, 42,
+		0, time.UTC,
+	)
+	if res.Equal(expected) == false {
+		t.Error("Expected", expected, ", got:", res)
+	}
 }

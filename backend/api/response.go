@@ -23,7 +23,11 @@ type ConfigResponse struct {
 	Noexport        Noexport          `json:"noexport"`
 	NoexportReasons map[string]string `json:"noexport_reasons"`
 
-	RoutesColumns map[string]string `json:"routes_columns"`
+	NeighboursColumns      map[string]string `json:"neighbours_columns"`
+	NeighboursColumnsOrder []string          `json:"neighbours_columns_order"`
+
+	RoutesColumns      map[string]string `json:"routes_columns"`
+	RoutesColumnsOrder []string          `json:"routes_columns_order"`
 
 	PrefixLookupEnabled bool `json:"prefix_lookup_enabled"`
 }

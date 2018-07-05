@@ -36,6 +36,68 @@ function _filteredRoutes(routes, filter) {
   return filtered;
 }
 
+// Helper: Lookup value in route path
+const _lookup = (r, path) => {
+  const split = path.split(".").reduce((acc, elem) => acc[elem], r);
+
+  // Join ASN path (FIXME: This is kind of ugly)
+  if (Array.isArray(split)) {
+    return split.join(" ");
+  }
+
+  return split;
+}
+
+const ColDefault = function(props) {
+  return (
+    <td onClick={props.onClick}>{_lookup(props.route, props.column)}</td>
+  )
+}
+
+// Include filter and noexport reason in this column.
+const ColNetwork = function(props) {
+  return (
+    <td onClick={props.onClick}>
+      {props.route.network}
+      {props.displayReasons == "filtered" && <FilterReason route={props.route} />}
+      {props.displayReasons == "noexport" && <NoexportReason route={props.route} />}
+    </td>
+  );
+}
+
+// Special AS Path Widget
+const ColAsPath = function(props) {
+    const asns = _lookup(props.route, "bgp.as_path");
+    const baseUrl = "http://irrexplorer.nlnog.net/search/"
+
+    let asnLinks = asns.map((asn, i) => {
+      return (<a key={`${asn}_${i}`} href={baseUrl + asn} target="_blank">{asn} </a>);
+    });
+
+    return (
+        <td>
+          {asnLinks}
+        </td>
+    );
+}
+
+const RouteColumn = function(props) {
+  const widgets = {
+    "network": ColNetwork,
+    "bgp.as_path": ColAsPath,
+
+    "ASPath": ColAsPath,
+  };
+
+  let Widget = widgets[props.column] || ColDefault;
+  return (
+    <Widget column={props.column} route={props.route}
+            displayReasons={props.displayReasons}
+            onClick={props.onClick} />
+  );
+}
+
+
 class RoutesTable extends React.Component {
   showAttributesModal(route) {
     this.props.dispatch(
@@ -46,36 +108,23 @@ class RoutesTable extends React.Component {
 
   render() {
     let routes = this.props.routes;
-    const routes_columns = this.props.routes_columns;
+    const routesColumns = this.props.routesColumns;
+    const routesColumnsOrder = this.props.routesColumnsOrder;
 
     routes = _filteredRoutes(routes, this.props.filter);
     if (!routes || !routes.length) {
       return null;
     }
 
-    const _lookup = (r, path) => {
-      const split = path.split(".").reduce((acc, elem) => acc[elem], r);
-
-      if (Array.isArray(split)) { // this is for the ASN column, dirty hack.
-        var baseUrl = "http://irrexplorer.nlnog.net/search/"
-				let asnLinks = split.map((asn, i) => {
-					return (<a key={`${asn}_${i}`} href={baseUrl + asn} target="_blank">{asn} </a>);
-				});
-				return asnLinks;
-      }
-      return split;
-    }
-
     let routesView = routes.map((r,i) => {
       return (
         <tr key={`${r.network}_${i}`}>
-          <td>
-            <a href="#" onClick={() => this.showAttributesModal(r)}> {r.network}</a>
-            {this.props.display_reasons == "filtered" && <FilterReason route={r} />}
-            {this.props.display_reasons == "noexport" && <NoexportReason route={r} />}
-          </td>
-          {Object.keys(routes_columns).map(col => <td key={col}
-           onClick={() => this.showAttributesModal(r)}> {_lookup(r, col)}</td>)}
+          {routesColumnsOrder.map(col => (<RouteColumn key={col}
+                                                       onClick={() => this.showBgpAttributes(r)}
+                                                       column={col}
+                                                       route={r}
+                                                       displayReasons={this.props.displayReasons} />)
+          )}
         </tr>
       );
     });
@@ -86,8 +135,7 @@ class RoutesTable extends React.Component {
         <table className="table table-striped table-routes">
           <thead>
             <tr>
-              <th>Network</th>
-              {Object.values(routes_columns).map(col => <th key={col}>{col}</th>)}
+              {routesColumnsOrder.map(col => <th key={col}>{routesColumns[col]}</th>)}
             </tr>
           </thead>
           <tbody>
@@ -103,9 +151,9 @@ class RoutesTable extends React.Component {
 RoutesTable = connect(
   (state) => {
     return {
-      filter:         state.routeservers.routesFilterValue,
-      reject_reasons: state.routeservers.reject_reasons,
-      routes_columns: state.config.routes_columns,
+      filter:             state.routeservers.routesFilterValue,
+      routesColumns:      state.config.routes_columns,
+      routesColumnsOrder: state.config.routes_columns_order,
     }
   }
 )(RoutesTable);
@@ -154,9 +202,9 @@ class RoutesTables extends React.Component {
 
     return (
       <div>
-        <RoutesTable header={filtdHeader} routes={filtered} display_reasons="filtered"/>
-        <RoutesTable header={recvdHeader} routes={received} display_reasons={false}/>
-        <RoutesTable header={noexHeader}  routes={noexport} display_reasons="noexport"/>
+        <RoutesTable header={filtdHeader} routes={filtered} displayReasons="filtered"/>
+        <RoutesTable header={recvdHeader} routes={received} displayReasons={false}/>
+        <RoutesTable header={noexHeader}  routes={noexport} displayReasons="noexport"/>
       </div>
     );
 
