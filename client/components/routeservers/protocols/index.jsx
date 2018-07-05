@@ -48,51 +48,118 @@ class RoutesLink extends React.Component {
   }
 }
 
-class NeighboursTable extends React.Component {
+
+//
+// Neighbours Columns Components
+// 
+// * Render columums either with direct property
+//   access, or
+// * Use a "widget", a rendering function to which
+//   the neighbour is passed.
+
+// Helper:
+const lookupProperty = function(obj, path) {
+  let property = path.split(".").reduce((acc, part) => acc[part], obj);
+  if (typeof(property) == "undefined") {
+    property = `Property "${path}" not found in object.`;
+  }
+
+  return property;
+}
+
+// Widgets:
+const ColDescription = function(props) {
+  const neighbour = props.neighbour;
+  return (
+    <td>
+      <RoutesLink routeserverId={props.rsId}
+                  protocol={neighbour.id}
+                  state={neighbour.state}>
+        {neighbour.description}
+        {neighbour.state != "up" && neighbour.last_error &&
+          <span className="protocol-state-error">
+              {neighbour.last_error}
+          </span>}
+      </RoutesLink>
+    </td>
+  );
+}
+
+const ColUptime = function(props) {
+  return (
+    <td className="date-since">
+      <RelativeTime value={props.neighbour.details.state_changed}
+                    suffix={true} />
+    </td>
+  );
+}
+
+
+const ColLinked = function(props) {
+  // Access neighbour property by path
+  const property = lookupProperty(props.neighbour, props.column);
+  return (
+    <td>
+      <RoutesLink routeserverId={props.rsId}
+                  protocol={props.neighbour.id}
+                  state={props.neighbour.state}>
+        {property}
+      </RoutesLink>
+    </td>
+  );
+}
+
+const ColPlain = function(props) {
+  // Access neighbour property by path
+  const property = lookupProperty(props.neighbour, props.column);
+  return (
+    <td>{property}</td>
+  );
+}
+
+// Column:
+const NeighbourColumn = function(props) {
+  const neighbour = props.neighbour;
+  const column = props.column;
+
+  const widgets = {
+    // Special cases
+    "asn": ColPlain,
+    "state": ColPlain,
+
+    "Uptime": ColUptime,
+    "Description": ColDescription,
+  };
+
+  // Get render function
+  let Widget = widgets[column] || ColLinked;
+  return (
+    <Widget neighbour={neighbour} column={column} rsId={props.rsId} />
+  );
+}
+
+
+
+class NeighboursTableView extends React.Component {
 
   render() {
-    let neighbours = this.props.neighbours.map( (n) => {
+    const columns = this.props.neighboursColumns;
+    const columnsOrder = this.props.neighboursColumnsOrder;
+
+    let header = columnsOrder.map((col) => {
       return (
-        <tr key={n.id}>
-          <td>
-            <RoutesLink routeserverId={this.props.routeserverId}
-                        protocol={n.id}
-                        state={n.state}>
-             {n.address}
-            </RoutesLink>
-           </td>
-          <td>{n.asn}</td>
-          <td>{n.state}</td>
-          <td className="date-since">
-            <RelativeTime value={n.details.state_changed} suffix={true} />
-          </td>
-          <td>
-            <RoutesLink routeserverId={this.props.routeserverId}
-                        protocol={n.id}
-                        state={n.state}>
-              {n.description}
-              {n.state != "up" && n.last_error &&
-                <span className="protocol-state-error">
-                    {n.last_error}
-                </span>}
-            </RoutesLink>
-          </td>
-          <td>
-            <RoutesLink routeserverId={this.props.routeserverId}
-                        protocol={n.id}
-                        state={n.state}>
-              {n.routes_received}
-            </RoutesLink>
-          </td>
-        <td>
-            <RoutesLink routeserverId={this.props.routeserverId}
-                        protocol={n.id}
-                        state={n.state}>
-              {n.routes_filtered}
-            </RoutesLink>
-          </td>
-        </tr>
+        <th key={col}>{columns[col]}</th>
       );
+    });
+
+    let neighbours = this.props.neighbours.map( (n) => {
+      let neighbourColumns = columnsOrder.map((col) => {
+        return <NeighbourColumn key={col}
+                                rsId={this.props.routeserverId}
+                                column={col}
+                                neighbour={n} />
+      });
+      return <tr key={n.id}>{neighbourColumns}</tr>;
     });
 
     let uptimeTitle;
@@ -110,13 +177,7 @@ class NeighboursTable extends React.Component {
         <table className="table table-striped table-protocols">
           <thead>
             <tr>
-              <th>Neighbour</th>
-              <th>ASN</th>
-              <th>State</th>
-              <th>{uptimeTitle}</th>
-              <th>Description</th>
-              <th>Routes Recv.</th>
-              <th>Routes Filtered</th>
+              {header}
             </tr>
           </thead>
           <tbody>
@@ -127,6 +188,13 @@ class NeighboursTable extends React.Component {
     );
   }
 }
+
+const NeighboursTable = connect(
+  (state) => ({
+    neighboursColumns:      state.config.neighbours_columns,
+    neighboursColumnsOrder: state.config.neighbours_columns_order,
+  })
+)(NeighboursTableView);
 
 
 class Protocols extends React.Component {
