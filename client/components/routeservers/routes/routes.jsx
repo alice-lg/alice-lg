@@ -44,15 +44,17 @@ const _lookup = (r, path) => {
 
 const ColDefault = function(props) {
   return (
-    <td onClick={props.onClick}>{_lookup(props.route, props.column)}</td>
+    <td>
+      <span onClick={props.onClick}>{_lookup(props.route, props.column)}</span>
+    </td>
   )
 }
 
 // Include filter and noexport reason in this column.
 const ColNetwork = function(props) {
   return (
-    <td onClick={props.onClick}>
-      {props.route.network}
+    <td>
+      <span onClick={props.onClick}>{props.route.network}</span>
       {props.displayReasons == "filtered" && <FilterReason route={props.route} />}
       {props.displayReasons == "noexport" && <NoexportReason route={props.route} />}
     </td>
