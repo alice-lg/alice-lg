@@ -39,12 +39,6 @@ function _filteredRoutes(routes, filter) {
 // Helper: Lookup value in route path
 const _lookup = (r, path) => {
   const split = path.split(".").reduce((acc, elem) => acc[elem], r);
-
-  // Join ASN path (FIXME: This is kind of ugly)
-  if (Array.isArray(split)) {
-    return split.join(" ");
-  }
-
   return split;
 }
 
@@ -120,7 +114,7 @@ class RoutesTable extends React.Component {
       return (
         <tr key={`${r.network}_${i}`}>
           {routesColumnsOrder.map(col => (<RouteColumn key={col}
-                                                       onClick={() => this.showBgpAttributes(r)}
+                                                       onClick={() => this.showAttributesModal(r)}
                                                        column={col}
                                                        route={r}
                                                        displayReasons={this.props.displayReasons} />)
