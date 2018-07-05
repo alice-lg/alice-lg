@@ -138,10 +138,7 @@ func getRoutesColumns(config *ini.File) (map[string]string, []string, error) {
 }
 
 // Get UI config: Get Neighbours Columns Defaults
-func getNeighboursColumnsDefaults(config *ini.File) (
-	map[string]string,
-	[]string,
-) {
+func getNeighboursColumnsDefaults() (map[string]string, []string) {
 	columns := map[string]string{
 		"Neighbour":       "Neighbour",
 		"asn":             "ASN",
@@ -158,6 +155,32 @@ func getNeighboursColumnsDefaults(config *ini.File) (
 	}
 
 	return columns, order
+}
+
+// Get UI config: Get Neighbours Columns
+// basically the same as with the routes columns.
+func getNeighboursColumns(config *ini.File) (
+	map[string]string,
+	[]string,
+	error,
+) {
+	columns := make(map[string]string)
+	order := []string{}
+
+	section := config.Section("routes_columns")
+	keys := section.Keys()
+
+	if len(keys) == 0 {
+		defaultColumns, defaultOrder := getNeighboursColumnsDefaults()
+		return defaultColumns, defaultOrder, nil
+	}
+
+	for _, key := range keys {
+		columns[key.Name()] = section.Key(key.Name()).MustString("")
+		order = append(order, key.Name())
+	}
+
+	return columns, order, nil
 }
 
 // Get UI config: Get rejections
