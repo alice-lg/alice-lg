@@ -140,7 +140,7 @@ func getRoutesColumns(config *ini.File) (map[string]string, []string, error) {
 // Get UI config: Get Neighbours Columns Defaults
 func getNeighboursColumnsDefaults() (map[string]string, []string) {
 	columns := map[string]string{
-		"Neighbour":       "Neighbour",
+		"address":         "Neighbour",
 		"asn":             "ASN",
 		"state":           "State",
 		"Uptime":          "Uptime",
@@ -150,7 +150,7 @@ func getNeighboursColumnsDefaults() (map[string]string, []string) {
 	}
 
 	order := []string{
-		"Neighbour", "asn", "state",
+		"address", "asn", "state",
 		"Uptime", "Description", "routes_received", "routes_filtered",
 	}
 
