@@ -253,6 +253,7 @@ func getSources(config *ini.File) ([]SourceConfig, error) {
 				Id:   config.Id,
 				Name: config.Name,
 
+				Timezone:        "UTC",
 				ServerTime:      "2006-01-02T15:04:05.999999999Z07:00",
 				ServerTimeShort: "2006-01-02",
 				ServerTimeExt:   "Mon, 02 Jan 2006 15:04:05 -0700",
