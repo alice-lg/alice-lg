@@ -246,7 +246,7 @@ class Protocols extends React.Component {
 
     for (let id in protocol) {
       let n = protocol[id];
-      switch(n.state) {
+      switch(n.state.toLowerCase()) {
         case 'up':
           neighboursUp.push(n);
           break;
