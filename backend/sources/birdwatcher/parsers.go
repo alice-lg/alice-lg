@@ -115,7 +115,7 @@ func parseRelativeServerTime(uptime interface{}, config Config) time.Duration {
 }
 
 // Parse neighbours response
-func parseNeighbours(bird ClientResponse, config Config) ([]api.Neighbour, error) {
+func parseNeighbours(bird ClientResponse, config Config) ([]*api.Neighbour, error) {
 	neighbours := api.Neighbours{}
 	protocols := bird["protocols"].(map[string]interface{})
 
@@ -127,7 +127,7 @@ func parseNeighbours(bird ClientResponse, config Config) ([]api.Neighbour, error
 		uptime := parseRelativeServerTime(protocol["state_changed"], config)
 		lastError := mustString(protocol["last_error"], "")
 
-		neighbour := api.Neighbour{
+		neighbour := &api.Neighbour{
 			Id: protocolId,
 
 			Address:     mustString(protocol["neighbor_address"], "error"),
@@ -259,7 +259,7 @@ func parseRoutesData(birdRoutes []interface{}, config Config) api.Routes {
 		rtype := mustStringList(rdata["type"])
 		bgpInfo := parseRouteBgpInfo(rdata["bgp"])
 
-		route := api.Route{
+		route := &api.Route{
 			Id:          mustString(rdata["network"], "unknown"),
 			NeighbourId: mustString(rdata["from_protocol"], "unknown neighbour"),
 
@@ -280,10 +280,10 @@ func parseRoutesData(birdRoutes []interface{}, config Config) api.Routes {
 }
 
 // Parse routes response
-func parseRoutes(bird ClientResponse, config Config) ([]api.Route, error) {
+func parseRoutes(bird ClientResponse, config Config) ([]*api.Route, error) {
 	birdRoutes, ok := bird["routes"].([]interface{})
 	if !ok {
-		return []api.Route{}, fmt.Errorf("Routes response missing")
+		return []*api.Route{}, fmt.Errorf("Routes response missing")
 	}
 
 	routes := parseRoutesData(birdRoutes, config)

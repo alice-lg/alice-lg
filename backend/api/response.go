@@ -81,7 +81,7 @@ type RouteserversResponse struct {
 }
 
 // Neighbours
-type Neighbours []Neighbour
+type Neighbours []*Neighbour
 
 type Neighbour struct {
 	Id string `json:"id"`
@@ -122,7 +122,7 @@ type NeighboursResponse struct {
 	Neighbours Neighbours `json:"neighbours"`
 }
 
-type NeighboursLookupResults map[int][]Neighbour
+type NeighboursLookupResults map[int][]*Neighbour
 
 // BGP
 type Community []int
@@ -155,9 +155,9 @@ type Route struct {
 
 // Lookup Prefixes
 type LookupRoute struct {
-	Id          string    `json:"id"`
-	NeighbourId string    `json:"neighbour_id"`
-	Neighbour   Neighbour `json:"neighbour"`
+	Id          string     `json:"id"`
+	NeighbourId string     `json:"neighbour_id"`
+	Neighbour   *Neighbour `json:"neighbour"`
 
 	State string `json:"state"` // Filtered, Imported, ...
 
@@ -174,7 +174,7 @@ type LookupRoute struct {
 	Details Details `json:"details"`
 }
 
-type Routes []Route
+type Routes []*Route
 
 // Implement sorting interface for routes
 func (routes Routes) Len() int {
@@ -191,18 +191,18 @@ func (routes Routes) Swap(i, j int) {
 
 type RoutesResponse struct {
 	Api         ApiStatus `json:"api"`
-	Imported    []Route   `json:"imported"`
-	Filtered    []Route   `json:"filtered"`
-	NotExported []Route   `json:"not_exported"`
+	Imported    []*Route  `json:"imported"`
+	Filtered    []*Route  `json:"filtered"`
+	NotExported []*Route  `json:"not_exported"`
 }
 
 type RoutesLookupResponse struct {
-	Api    ApiStatus     `json:"api"`
-	Routes []LookupRoute `json:"routes"`
+	Api    ApiStatus      `json:"api"`
+	Routes []*LookupRoute `json:"routes"`
 }
 
 type RoutesLookupResponseGlobal struct {
-	Routes []LookupRoute `json:"routes"`
+	Routes []*LookupRoute `json:"routes"`
 
 	// Pagination
 	TotalRoutes int `json:"total_routes"`

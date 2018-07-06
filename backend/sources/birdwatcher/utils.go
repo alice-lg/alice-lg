@@ -11,13 +11,13 @@ Helper functions for dealing with birdwatcher API data
 */
 
 // Get neighbour by protocol id
-func getNeighbourById(neighbours api.Neighbours, id string) (api.Neighbour, error) {
+func getNeighbourById(neighbours api.Neighbours, id string) (*api.Neighbour, error) {
 	for _, n := range neighbours {
 		if n.Id == id {
 			return n, nil
 		}
 	}
-	unknown := api.Neighbour{
+	unknown := &api.Neighbour{
 		Id:          "unknown",
 		Description: "Unknown neighbour",
 	}

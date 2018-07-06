@@ -10,7 +10,7 @@ import (
 	"github.com/alice-lg/alice-lg/backend/api"
 )
 
-type NeighboursIndex map[string]api.Neighbour
+type NeighboursIndex map[string]*api.Neighbour
 
 type NeighboursStore struct {
 	neighboursMap   map[int]NeighboursIndex
@@ -122,7 +122,7 @@ func (self *NeighboursStore) update() {
 func (self *NeighboursStore) GetNeighbourAt(
 	sourceId int,
 	id string,
-) api.Neighbour {
+) *api.Neighbour {
 	// Lookup neighbour on RS
 	self.RLock()
 	neighbours := self.neighboursMap[sourceId]
@@ -133,8 +133,8 @@ func (self *NeighboursStore) GetNeighbourAt(
 func (self *NeighboursStore) LookupNeighboursAt(
 	sourceId int,
 	query string,
-) []api.Neighbour {
-	results := []api.Neighbour{}
+) []*api.Neighbour {
+	results := []*api.Neighbour{}
 
 	self.RLock()
 	neighbours := self.neighboursMap[sourceId]
