@@ -37,7 +37,7 @@ function _filteredProtocols(protocols, filter) {
 class RoutesLink extends React.Component {
   render() {
     let url = `/routeservers/${this.props.routeserverId}/protocols/${this.props.protocol}/routes`;
-    if (this.props.state != 'up') {
+    if (this.props.state.toLowerCase() != 'up') {
       return (<span>{this.props.children}</span>);
     }
     return (
