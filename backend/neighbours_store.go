@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+	"regexp"
+	"strconv"
 	"sync"
 	"time"
 
@@ -11,9 +13,10 @@ import (
 type NeighboursIndex map[string]api.Neighbour
 
 type NeighboursStore struct {
-	neighboursMap map[int]NeighboursIndex
-	configMap     map[int]SourceConfig
-	statusMap     map[int]StoreStatus
+	neighboursMap   map[int]NeighboursIndex
+	configMap       map[int]SourceConfig
+	statusMap       map[int]StoreStatus
+	refreshInterval int
 
 	sync.RWMutex
 }
@@ -36,15 +39,17 @@ func NewNeighboursStore(config *Config) *NeighboursStore {
 	}
 
 	store := &NeighboursStore{
-		neighboursMap: neighboursMap,
-		statusMap:     statusMap,
-		configMap:     configMap,
+		neighboursMap:   neighboursMap,
+		statusMap:       statusMap,
+		configMap:       configMap,
+		refreshInterval: config.Server.NeighboursStoreRefreshInterval,
 	}
 	return store
 }
 
 func (self *NeighboursStore) Start() {
 	log.Println("Starting local neighbours store")
+	log.Println("Neighbours Store refresh interval set to:", self.refreshInterval, "minutes")
 	go self.init()
 }
 
@@ -57,7 +62,11 @@ func (self *NeighboursStore) init() {
 
 	// Periodically update store
 	for {
-		time.Sleep(5 * time.Minute)
+		if self.refreshInterval > 0 {
+			time.Sleep(time.Duration(self.refreshInterval) * time.Minute)
+		} else {
+			time.Sleep(5 * time.Minute)
+		}
 		self.update()
 	}
 }
@@ -131,12 +140,22 @@ func (self *NeighboursStore) LookupNeighboursAt(
 	neighbours := self.neighboursMap[sourceId]
 	self.RUnlock()
 
+	asn := -1
+	if regex := regexp.MustCompile(`(?i)^AS(\d+)`); regex.MatchString(query) {
+		groups := regex.FindStringSubmatch(query)
+		if a, err := strconv.Atoi(groups[1]); err == nil {
+			asn = a
+		}
+	}
+
 	for _, neighbour := range neighbours {
-		if !ContainsCi(neighbour.Description, query) {
+		if asn >= 0 && neighbour.Asn == asn { // only executed if valid AS query is detected
+			results = append(results, neighbour)
+		} else if ContainsCi(neighbour.Description, query) {
+			results = append(results, neighbour)
+		} else {
 			continue
 		}
-
-		results = append(results, neighbour)
 	}
 
 	return results

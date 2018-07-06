@@ -134,11 +134,13 @@ func parseNeighbours(bird ClientResponse, config Config) ([]api.Neighbour, error
 			Asn:         mustInt(protocol["neighbor_as"], 0),
 			State:       mustString(protocol["state"], "unknown"),
 			Description: mustString(protocol["description"], "no description"),
-
-			RoutesReceived:  mustInt(routes["imported"], 0),
-			RoutesExported:  mustInt(routes["exported"], 0),
-			RoutesFiltered:  mustInt(routes["filtered"], 0),
-			RoutesPreferred: mustInt(routes["preferred"], 0),
+			//TODO make these changes configurable
+			RoutesReceived:     mustInt(routes["imported"], 0),
+			RoutesExported:     mustInt(routes["exported"], 0), //TODO protocol_exported?
+			RoutesFiltered:     mustInt(routes["filtered"], 0),
+			RoutesPreferred:    mustInt(routes["preferred"], 0),
+			RoutesAccepted:     mustInt(routes["pipe_imported"], mustInt(routes["imported"], 0)),
+			RoutesPipeFiltered: mustInt(routes["pipe_filtered"], mustInt(routes["filtered"], 0)),
 
 			Uptime:    uptime,
 			LastError: lastError,

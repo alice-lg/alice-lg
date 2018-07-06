@@ -59,7 +59,7 @@ class RoutesPage extends React.Component {
             <div className="card">
               <SearchInput
                 value={this.props.routesFilterValue}
-                placeholder="Filter by Network, Gateway or Interface"
+                placeholder="Filter by Network or BGP next-hop"
                 onChange={(e) => this.setFilter(e.target.value)}  />
             </div>
 

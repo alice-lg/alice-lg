@@ -39,18 +39,14 @@ function _filteredRoutes(routes, filter) {
 // Helper: Lookup value in route path
 const _lookup = (r, path) => {
   const split = path.split(".").reduce((acc, elem) => acc[elem], r);
-
-  // Join ASN path (FIXME: This is kind of ugly)
-  if (Array.isArray(split)) {
-    return split.join(" ");
-  }
-
   return split;
 }
 
 const ColDefault = function(props) {
   return (
-    <td>{_lookup(props.route, props.column)}</td>
+    <td>
+      <span onClick={props.onClick}>{_lookup(props.route, props.column)}</span>
+    </td>
   )
 }
 
@@ -58,23 +54,42 @@ const ColDefault = function(props) {
 const ColNetwork = function(props) {
   return (
     <td>
-      {props.route.network}
+      <span onClick={props.onClick}>{props.route.network}</span>
       {props.displayReasons == "filtered" && <FilterReason route={props.route} />}
       {props.displayReasons == "noexport" && <NoexportReason route={props.route} />}
     </td>
   );
 }
 
+// Special AS Path Widget
+const ColAsPath = function(props) {
+    const asns = _lookup(props.route, "bgp.as_path");
+    const baseUrl = "http://irrexplorer.nlnog.net/search/"
+
+    let asnLinks = asns.map((asn, i) => {
+      return (<a key={`${asn}_${i}`} href={baseUrl + asn} target="_blank">{asn} </a>);
+    });
+
+    return (
+        <td>
+          {asnLinks}
+        </td>
+    );
+}
 
 const RouteColumn = function(props) {
   const widgets = {
     "network": ColNetwork,
+    "bgp.as_path": ColAsPath,
+
+    "ASPath": ColAsPath,
   };
 
   let Widget = widgets[props.column] || ColDefault;
   return (
     <Widget column={props.column} route={props.route}
-            displayReasons={props.displayReasons} />
+            displayReasons={props.displayReasons}
+            onClick={props.onClick} />
   );
 }
 
@@ -97,11 +112,11 @@ class RoutesTable extends React.Component {
       return null;
     }
 
-
     let routesView = routes.map((r,i) => {
       return (
-        <tr key={`${r.network}_${i}`} onClick={() => this.showAttributesModal(r)}>
+        <tr key={`${r.network}_${i}`}>
           {routesColumnsOrder.map(col => (<RouteColumn key={col}
+                                                       onClick={() => this.showAttributesModal(r)}
                                                        column={col}
                                                        route={r}
                                                        displayReasons={this.props.displayReasons} />)

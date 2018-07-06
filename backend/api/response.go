@@ -87,16 +87,18 @@ type Neighbour struct {
 	Id string `json:"id"`
 
 	// Mandatory fields
-	Address         string        `json:"address"`
-	Asn             int           `json:"asn"`
-	State           string        `json:"state"`
-	Description     string        `json:"description"`
-	RoutesReceived  int           `json:"routes_received"`
-	RoutesFiltered  int           `json:"routes_filtered"`
-	RoutesExported  int           `json:"routes_exported"`
-	RoutesPreferred int           `json:"routes_preferred"`
-	Uptime          time.Duration `json:"uptime"`
-	LastError       string        `json:"last_error"`
+	Address            string        `json:"address"`
+	Asn                int           `json:"asn"`
+	State              string        `json:"state"`
+	Description        string        `json:"description"`
+	RoutesReceived     int           `json:"routes_received"`
+	RoutesFiltered     int           `json:"routes_filtered"`
+	RoutesExported     int           `json:"routes_exported"`
+	RoutesPreferred    int           `json:"routes_preferred"`
+	RoutesAccepted     int           `json:"routes_accepted"`
+	RoutesPipeFiltered int           `json:"routes_pipe_filtered"`
+	Uptime             time.Duration `json:"uptime"`
+	LastError          string        `json:"last_error"`
 
 	// Original response
 	Details map[string]interface{} `json:"details"`
