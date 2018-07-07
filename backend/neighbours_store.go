@@ -137,8 +137,8 @@ func (self *NeighboursStore) GetNeighbourAt(
 func (self *NeighboursStore) LookupNeighboursAt(
 	sourceId int,
 	query string,
-) []*api.Neighbour {
-	results := []*api.Neighbour{}
+) api.Neighbours {
+	results := api.Neighbours{}
 
 	self.RLock()
 	neighbours := self.neighboursMap[sourceId]
