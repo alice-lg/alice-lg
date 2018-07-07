@@ -115,7 +115,7 @@ func parseRelativeServerTime(uptime interface{}, config Config) time.Duration {
 }
 
 // Parse neighbours response
-func parseNeighbours(bird ClientResponse, config Config) ([]*api.Neighbour, error) {
+func parseNeighbours(bird ClientResponse, config Config) (api.Neighbours, error) {
 	neighbours := api.Neighbours{}
 	protocols := bird["protocols"].(map[string]interface{})
 
@@ -280,10 +280,10 @@ func parseRoutesData(birdRoutes []interface{}, config Config) api.Routes {
 }
 
 // Parse routes response
-func parseRoutes(bird ClientResponse, config Config) ([]*api.Route, error) {
+func parseRoutes(bird ClientResponse, config Config) (api.Routes, error) {
 	birdRoutes, ok := bird["routes"].([]interface{})
 	if !ok {
-		return []*api.Route{}, fmt.Errorf("Routes response missing")
+		return api.Routes{}, fmt.Errorf("Routes response missing")
 	}
 
 	routes := parseRoutesData(birdRoutes, config)

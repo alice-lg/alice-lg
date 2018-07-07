@@ -220,7 +220,7 @@ func apiLookupPrefixGlobal(req *http.Request, params httprouter.Params) (api.Res
 	t0 := time.Now()
 
 	// Perform query
-	var routes []*api.LookupRoute
+	var routes api.LookupRoutes
 	if lookupPrefix {
 		routes = AliceRoutesStore.LookupPrefix(q)
 

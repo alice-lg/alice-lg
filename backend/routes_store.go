@@ -245,7 +245,7 @@ func (self *RoutesStore) LookupNeighboursPrefixesAt(
 			neighbourIds,
 			"imported")
 
-		var result []*api.LookupRoute
+		var result api.LookupRoutes
 		result = append(filtered, imported...)
 
 		response <- result
@@ -279,7 +279,7 @@ func (self *RoutesStore) LookupPrefixAt(
 			prefix,
 			"imported")
 
-		var result []*api.LookupRoute
+		var result api.LookupRoutes
 		result = append(filtered, imported...)
 
 		response <- result

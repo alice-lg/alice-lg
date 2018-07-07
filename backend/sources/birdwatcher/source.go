@@ -136,7 +136,7 @@ func (self *Birdwatcher) Routes(neighbourId string) (api.RoutesResponse, error) 
 		log.Println("WARNING Could not retrieve routes not exported:", err)
 		log.Println("Is the 'routes_noexport' module active in birdwatcher?")
 	} else {
-		result_noexport := make([]*api.Route, 0, len(noexport))
+		result_noexport := make(api.Routes, 0, len(noexport))
 		// choose routes with next_hop == gateway of this neighbour
 		for _, route := range noexport {
 			if (route.Gateway == gateway) || (route.Gateway == learnt_from) {
@@ -179,7 +179,7 @@ func (self *Birdwatcher) LookupPrefix(prefix string) (api.RoutesLookupResponse, 
 	routes, err := parseRoutes(bird, self.config)
 
 	// Add corresponding neighbour and source rs to result
-	results := []*api.LookupRoute{}
+	results := api.LookupRoutes{}
 	for _, src := range routes {
 		// Okay. This is actually really hacky.
 		// A less bruteforce approach would be highly appreciated
