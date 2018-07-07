@@ -16,7 +16,7 @@ type NeighboursStore struct {
 	neighboursMap   map[int]NeighboursIndex
 	configMap       map[int]SourceConfig
 	statusMap       map[int]StoreStatus
-	refreshInterval int
+	refreshInterval time.Duration
 
 	sync.RWMutex
 }
@@ -38,11 +38,19 @@ func NewNeighboursStore(config *Config) *NeighboursStore {
 		neighboursMap[sourceId] = make(NeighboursIndex)
 	}
 
+	// Set refresh interval, default to 5 minutes when
+	// interval is set to 0
+	refreshInterval := time.Duration(
+		config.Server.NeighboursStoreRefreshInterval) * time.Minute
+	if refreshInterval == 0 {
+		refreshInterval = time.Duration(5) * time.Minute
+	}
+
 	store := &NeighboursStore{
 		neighboursMap:   neighboursMap,
 		statusMap:       statusMap,
 		configMap:       configMap,
-		refreshInterval: config.Server.NeighboursStoreRefreshInterval,
+		refreshInterval: refreshInterval,
 	}
 	return store
 }
@@ -62,11 +70,7 @@ func (self *NeighboursStore) init() {
 
 	// Periodically update store
 	for {
-		if self.refreshInterval > 0 {
-			time.Sleep(time.Duration(self.refreshInterval) * time.Minute)
-		} else {
-			time.Sleep(5 * time.Minute)
-		}
+		time.Sleep(self.refreshInterval)
 		self.update()
 	}
 }
