@@ -122,7 +122,7 @@ type NeighboursResponse struct {
 	Neighbours Neighbours `json:"neighbours"`
 }
 
-type NeighboursLookupResults map[int][]*Neighbour
+type NeighboursLookupResults map[int]Neighbours
 
 // BGP
 type Community []int
@@ -153,6 +153,28 @@ type Route struct {
 	Details Details `json:"details"`
 }
 
+type Routes []*Route
+
+// Implement sorting interface for routes
+func (routes Routes) Len() int {
+	return len(routes)
+}
+
+func (routes Routes) Less(i, j int) bool {
+	return routes[i].Network < routes[j].Network
+}
+
+func (routes Routes) Swap(i, j int) {
+	routes[i], routes[j] = routes[j], routes[i]
+}
+
+type RoutesResponse struct {
+	Api         ApiStatus `json:"api"`
+	Imported    Routes    `json:"imported"`
+	Filtered    Routes    `json:"filtered"`
+	NotExported Routes    `json:"not_exported"`
+}
+
 // Lookup Prefixes
 type LookupRoute struct {
 	Id          string     `json:"id"`
@@ -174,35 +196,15 @@ type LookupRoute struct {
 	Details Details `json:"details"`
 }
 
-type Routes []*Route
-
-// Implement sorting interface for routes
-func (routes Routes) Len() int {
-	return len(routes)
-}
-
-func (routes Routes) Less(i, j int) bool {
-	return routes[i].Network < routes[j].Network
-}
-
-func (routes Routes) Swap(i, j int) {
-	routes[i], routes[j] = routes[j], routes[i]
-}
-
-type RoutesResponse struct {
-	Api         ApiStatus `json:"api"`
-	Imported    []*Route  `json:"imported"`
-	Filtered    []*Route  `json:"filtered"`
-	NotExported []*Route  `json:"not_exported"`
-}
+type LookupRoutes []*LookupRoute
 
 type RoutesLookupResponse struct {
-	Api    ApiStatus      `json:"api"`
-	Routes []*LookupRoute `json:"routes"`
+	Api    ApiStatus    `json:"api"`
+	Routes LookupRoutes `json:"routes"`
 }
 
 type RoutesLookupResponseGlobal struct {
-	Routes []*LookupRoute `json:"routes"`
+	Routes LookupRoutes `json:"routes"`
 
 	// Pagination
 	TotalRoutes int `json:"total_routes"`
