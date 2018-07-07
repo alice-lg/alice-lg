@@ -57,7 +57,7 @@ func NewNeighboursStore(config *Config) *NeighboursStore {
 
 func (self *NeighboursStore) Start() {
 	log.Println("Starting local neighbours store")
-	log.Println("Neighbours Store refresh interval set to:", self.refreshInterval, "minutes")
+	log.Println("Neighbours Store refresh interval set to:", self.refreshInterval)
 	go self.init()
 }
 
