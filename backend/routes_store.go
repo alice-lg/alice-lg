@@ -187,12 +187,12 @@ func routeToLookupRoute(source SourceConfig, state string, route *api.Route) *ap
 // Routes filter
 func filterRoutesByPrefix(
 	source SourceConfig,
-	routes []*api.Route,
+	routes api.Routes,
 	prefix string,
 	state string,
-) []*api.LookupRoute {
+) api.LookupRoutes {
 
-	results := []*api.LookupRoute{}
+	results := api.LookupRoutes{}
 	for _, route := range routes {
 		// Naiive filtering:
 		if strings.HasPrefix(route.Network, prefix) {
@@ -205,12 +205,12 @@ func filterRoutesByPrefix(
 
 func filterRoutesByNeighbourIds(
 	source SourceConfig,
-	routes []*api.Route,
+	routes api.Routes,
 	neighbourIds []string,
 	state string,
-) []*api.LookupRoute {
+) api.LookupRoutes {
 
-	results := []*api.LookupRoute{}
+	results := api.LookupRoutes{}
 	for _, route := range routes {
 		// Filtering:
 		if MemberOf(neighbourIds, route.NeighbourId) == true {
@@ -225,8 +225,8 @@ func filterRoutesByNeighbourIds(
 func (self *RoutesStore) LookupNeighboursPrefixesAt(
 	sourceId int,
 	neighbourIds []string,
-) chan []*api.LookupRoute {
-	response := make(chan []*api.LookupRoute)
+) chan api.LookupRoutes {
+	response := make(chan api.LookupRoutes)
 
 	go func() {
 		self.RLock()
@@ -258,9 +258,9 @@ func (self *RoutesStore) LookupNeighboursPrefixesAt(
 func (self *RoutesStore) LookupPrefixAt(
 	sourceId int,
 	prefix string,
-) chan []*api.LookupRoute {
+) chan api.LookupRoutes {
 
-	response := make(chan []*api.LookupRoute)
+	response := make(chan api.LookupRoutes)
 
 	go func() {
 		self.RLock()
@@ -288,9 +288,9 @@ func (self *RoutesStore) LookupPrefixAt(
 	return response
 }
 
-func (self *RoutesStore) LookupPrefix(prefix string) []*api.LookupRoute {
-	result := []*api.LookupRoute{}
-	responses := []chan []*api.LookupRoute{}
+func (self *RoutesStore) LookupPrefix(prefix string) api.LookupRoutes {
+	result := api.LookupRoutes{}
+	responses := []chan api.LookupRoutes{}
 
 	// Dispatch
 	self.RLock()
@@ -312,10 +312,10 @@ func (self *RoutesStore) LookupPrefix(prefix string) []*api.LookupRoute {
 
 func (self *RoutesStore) LookupPrefixForNeighbours(
 	neighbours api.NeighboursLookupResults,
-) []*api.LookupRoute {
+) api.LookupRoutes {
 
-	result := []*api.LookupRoute{}
-	responses := []chan []*api.LookupRoute{}
+	result := api.LookupRoutes{}
+	responses := []chan api.LookupRoutes{}
 
 	// Dispatch
 	for sourceId, locals := range neighbours {
