@@ -13,7 +13,7 @@ type RoutesStore struct {
 	routesMap       map[int]api.RoutesResponse
 	statusMap       map[int]StoreStatus
 	configMap       map[int]SourceConfig
-	refreshInterval int
+	refreshInterval time.Duration
 
 	sync.RWMutex
 }
@@ -35,18 +35,26 @@ func NewRoutesStore(config *Config) *RoutesStore {
 		}
 	}
 
+	// Set refresh interval as duration, fall back to
+	// five minutes if no interval is set.
+	refreshInterval := time.Duration(
+		config.Server.RoutesStoreRefreshInterval) * time.Minute
+	if refreshInterval == 0 {
+		refreshInterval = time.Duration(5) * time.Minute
+	}
+
 	store := &RoutesStore{
 		routesMap:       routesMap,
 		statusMap:       statusMap,
 		configMap:       configMap,
-		refreshInterval: config.Server.RoutesStoreRefreshInterval,
+		refreshInterval: refreshInterval,
 	}
 	return store
 }
 
 func (self *RoutesStore) Start() {
 	log.Println("Starting local routes store")
-	log.Println("Routes Store refresh interval set to:", self.refreshInterval, "minutes")
+	log.Println("Routes Store refresh interval set to:", self.refreshInterval)
 	go self.init()
 }
 
@@ -60,11 +68,7 @@ func (self *RoutesStore) init() {
 
 	// Periodically update store
 	for {
-		if self.refreshInterval > 0 {
-			time.Sleep(time.Duration(self.refreshInterval) * time.Minute)
-		} else {
-			time.Sleep(5 * time.Minute)
-		}
+		time.Sleep(self.refreshInterval)
 		self.update()
 	}
 }
@@ -153,13 +157,13 @@ func (self *RoutesStore) Stats() RoutesStoreStats {
 }
 
 // Lookup routes transform
-func routeToLookupRoute(source SourceConfig, state string, route api.Route) api.LookupRoute {
+func routeToLookupRoute(source SourceConfig, state string, route *api.Route) *api.LookupRoute {
 
 	// Get neighbour
 	neighbour := AliceNeighboursStore.GetNeighbourAt(source.Id, route.NeighbourId)
 
 	// Make route
-	lookup := api.LookupRoute{
+	lookup := &api.LookupRoute{
 		Id: route.Id,
 
 		NeighbourId: route.NeighbourId,
@@ -187,12 +191,12 @@ func routeToLookupRoute(source SourceConfig, state string, route api.Route) api.
 // Routes filter
 func filterRoutesByPrefix(
 	source SourceConfig,
-	routes []api.Route,
+	routes api.Routes,
 	prefix string,
 	state string,
-) []api.LookupRoute {
+) api.LookupRoutes {
 
-	results := []api.LookupRoute{}
+	results := api.LookupRoutes{}
 	for _, route := range routes {
 		// Naiive filtering:
 		if strings.HasPrefix(route.Network, prefix) {
@@ -205,12 +209,12 @@ func filterRoutesByPrefix(
 
 func filterRoutesByNeighbourIds(
 	source SourceConfig,
-	routes []api.Route,
+	routes api.Routes,
 	neighbourIds []string,
 	state string,
-) []api.LookupRoute {
+) api.LookupRoutes {
 
-	results := []api.LookupRoute{}
+	results := api.LookupRoutes{}
 	for _, route := range routes {
 		// Filtering:
 		if MemberOf(neighbourIds, route.NeighbourId) == true {
@@ -225,8 +229,8 @@ func filterRoutesByNeighbourIds(
 func (self *RoutesStore) LookupNeighboursPrefixesAt(
 	sourceId int,
 	neighbourIds []string,
-) chan []api.LookupRoute {
-	response := make(chan []api.LookupRoute)
+) chan api.LookupRoutes {
+	response := make(chan api.LookupRoutes)
 
 	go func() {
 		self.RLock()
@@ -245,7 +249,7 @@ func (self *RoutesStore) LookupNeighboursPrefixesAt(
 			neighbourIds,
 			"imported")
 
-		var result []api.LookupRoute
+		var result api.LookupRoutes
 		result = append(filtered, imported...)
 
 		response <- result
@@ -258,9 +262,9 @@ func (self *RoutesStore) LookupNeighboursPrefixesAt(
 func (self *RoutesStore) LookupPrefixAt(
 	sourceId int,
 	prefix string,
-) chan []api.LookupRoute {
+) chan api.LookupRoutes {
 
-	response := make(chan []api.LookupRoute)
+	response := make(chan api.LookupRoutes)
 
 	go func() {
 		self.RLock()
@@ -279,7 +283,7 @@ func (self *RoutesStore) LookupPrefixAt(
 			prefix,
 			"imported")
 
-		var result []api.LookupRoute
+		var result api.LookupRoutes
 		result = append(filtered, imported...)
 
 		response <- result
@@ -288,9 +292,9 @@ func (self *RoutesStore) LookupPrefixAt(
 	return response
 }
 
-func (self *RoutesStore) LookupPrefix(prefix string) []api.LookupRoute {
-	result := []api.LookupRoute{}
-	responses := []chan []api.LookupRoute{}
+func (self *RoutesStore) LookupPrefix(prefix string) api.LookupRoutes {
+	result := api.LookupRoutes{}
+	responses := []chan api.LookupRoutes{}
 
 	// Dispatch
 	self.RLock()
@@ -312,10 +316,10 @@ func (self *RoutesStore) LookupPrefix(prefix string) []api.LookupRoute {
 
 func (self *RoutesStore) LookupPrefixForNeighbours(
 	neighbours api.NeighboursLookupResults,
-) []api.LookupRoute {
+) api.LookupRoutes {
 
-	result := []api.LookupRoute{}
-	responses := []chan []api.LookupRoute{}
+	result := api.LookupRoutes{}
+	responses := []chan api.LookupRoutes{}
 
 	// Dispatch
 	for sourceId, locals := range neighbours {

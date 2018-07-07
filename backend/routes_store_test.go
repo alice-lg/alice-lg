@@ -193,8 +193,8 @@ func TestLookupNeighboursPrefixesAt(t *testing.T) {
 func TestLookupPrefixForNeighbours(t *testing.T) {
 	// Construct a neighbours lookup result
 	neighbours := api.NeighboursLookupResults{
-		1: []api.Neighbour{
-			api.Neighbour{
+		1: api.Neighbours{
+			&api.Neighbour{
 				Id: "ID163_AS31078",
 			},
 		},

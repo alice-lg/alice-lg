@@ -23,26 +23,26 @@ func makeTestNeighboursStore() *NeighboursStore {
 
 	// Populate neighbours
 	rs1 := NeighboursIndex{
-		"ID2233_AS2342": api.Neighbour{
+		"ID2233_AS2342": &api.Neighbour{
 			Id:          "ID2233_AS2342",
 			Description: "PEER AS2342 192.9.23.42 Customer Peer 1",
 		},
-		"ID2233_AS2343": api.Neighbour{
+		"ID2233_AS2343": &api.Neighbour{
 			Id:          "ID2233_AS2343",
 			Description: "PEER AS2343 192.9.23.43 Different Peer 1",
 		},
-		"ID2233_AS2344": api.Neighbour{
+		"ID2233_AS2344": &api.Neighbour{
 			Id:          "ID2233_AS2344",
 			Description: "PEER AS2344 192.9.23.44 3rd Peer from the sun",
 		},
 	}
 
 	rs2 := NeighboursIndex{
-		"ID2233_AS2342": api.Neighbour{
+		"ID2233_AS2342": &api.Neighbour{
 			Id:          "ID2233_AS2342",
 			Description: "PEER AS2342 192.9.23.42 Customer Peer 1",
 		},
-		"ID2233_AS4223": api.Neighbour{
+		"ID2233_AS4223": &api.Neighbour{
 			Id:          "ID2233_AS4223",
 			Description: "PEER AS4223 192.9.42.23 Cloudfoo Inc.",
 		},
