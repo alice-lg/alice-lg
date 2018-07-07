@@ -13,7 +13,7 @@ type RoutesStore struct {
 	routesMap       map[int]api.RoutesResponse
 	statusMap       map[int]StoreStatus
 	configMap       map[int]SourceConfig
-	refreshInterval int
+	refreshInterval time.Duration
 
 	sync.RWMutex
 }
@@ -35,18 +35,26 @@ func NewRoutesStore(config *Config) *RoutesStore {
 		}
 	}
 
+	// Set refresh interval as duration, fall back to
+	// five minutes if no interval is set.
+	refreshInterval := time.Duration(
+		config.Server.RoutesStoreRefreshInterval) * time.Minute
+	if refreshInterval == 0 {
+		refreshInterval = time.Duration(5) * time.Minute
+	}
+
 	store := &RoutesStore{
 		routesMap:       routesMap,
 		statusMap:       statusMap,
 		configMap:       configMap,
-		refreshInterval: config.Server.RoutesStoreRefreshInterval,
+		refreshInterval: refreshInterval,
 	}
 	return store
 }
 
 func (self *RoutesStore) Start() {
 	log.Println("Starting local routes store")
-	log.Println("Routes Store refresh interval set to:", self.refreshInterval, "minutes")
+	log.Println("Routes Store refresh interval set to:", self.refreshInterval)
 	go self.init()
 }
 
@@ -60,11 +68,7 @@ func (self *RoutesStore) init() {
 
 	// Periodically update store
 	for {
-		if self.refreshInterval > 0 {
-			time.Sleep(time.Duration(self.refreshInterval) * time.Minute)
-		} else {
-			time.Sleep(5 * time.Minute)
-		}
+		time.Sleep(self.refreshInterval)
 		self.update()
 	}
 }
