@@ -8,16 +8,21 @@ import (
 )
 
 type Birdwatcher struct {
-	config Config
-	client *Client
+	config         Config
+	client         *Client
+	neighborsCache *NeighborsCache
+	// routesCache    *RoutesCache
 }
 
 func NewBirdwatcher(config Config) *Birdwatcher {
 	client := NewClient(config.Api)
 
+	neighborsCache := NewNeighborsCache(false)
+
 	birdwatcher := &Birdwatcher{
-		config: config,
-		client: client,
+		config:         config,
+		client:         client,
+		neighborsCache: neighborsCache,
 	}
 	return birdwatcher
 }
@@ -48,6 +53,14 @@ func (self *Birdwatcher) Status() (api.StatusResponse, error) {
 
 // Get bird BGP protocols
 func (self *Birdwatcher) Neighbours() (api.NeighboursResponse, error) {
+	// Check if we hit the cache
+	response := self.neighborsCache.Get()
+	if response != nil {
+		return *response, nil // dereference for now...
+	}
+	log.Println("Cache miss..")
+
+	// Query birdwatcher
 	bird, err := self.client.GetJson("/protocols/bgp")
 	if err != nil {
 		return api.NeighboursResponse{}, err
@@ -63,10 +76,15 @@ func (self *Birdwatcher) Neighbours() (api.NeighboursResponse, error) {
 		return api.NeighboursResponse{}, err
 	}
 
-	return api.NeighboursResponse{
+	response = &api.NeighboursResponse{
 		Api:        apiStatus,
 		Neighbours: neighbours,
-	}, nil
+	}
+
+	self.neighborsCache.Set(response)
+	log.Println("Cache set!")
+
+	return *response, nil // dereference for now
 }
 
 // Get filtered and exported routes
