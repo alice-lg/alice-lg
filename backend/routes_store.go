@@ -12,7 +12,7 @@ import (
 type RoutesStore struct {
 	routesMap       map[int]api.RoutesResponse
 	statusMap       map[int]StoreStatus
-	configMap       map[int]SourceConfig
+	configMap       map[int]*SourceConfig
 	refreshInterval time.Duration
 
 	sync.RWMutex
@@ -23,7 +23,7 @@ func NewRoutesStore(config *Config) *RoutesStore {
 	// Build mapping based on source instances
 	routesMap := make(map[int]api.RoutesResponse)
 	statusMap := make(map[int]StoreStatus)
-	configMap := make(map[int]SourceConfig)
+	configMap := make(map[int]*SourceConfig)
 
 	for _, source := range config.Sources {
 		id := source.Id
@@ -157,7 +157,11 @@ func (self *RoutesStore) Stats() RoutesStoreStats {
 }
 
 // Lookup routes transform
-func routeToLookupRoute(source SourceConfig, state string, route *api.Route) *api.LookupRoute {
+func routeToLookupRoute(
+	source *SourceConfig,
+	state string,
+	route *api.Route,
+) *api.LookupRoute {
 
 	// Get neighbour
 	neighbour := AliceNeighboursStore.GetNeighbourAt(source.Id, route.NeighbourId)
@@ -190,7 +194,7 @@ func routeToLookupRoute(source SourceConfig, state string, route *api.Route) *ap
 
 // Routes filter
 func filterRoutesByPrefix(
-	source SourceConfig,
+	source *SourceConfig,
 	routes api.Routes,
 	prefix string,
 	state string,
@@ -208,7 +212,7 @@ func filterRoutesByPrefix(
 }
 
 func filterRoutesByNeighbourIds(
-	source SourceConfig,
+	source *SourceConfig,
 	routes api.Routes,
 	neighbourIds []string,
 	state string,

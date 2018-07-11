@@ -14,7 +14,7 @@ type NeighboursIndex map[string]*api.Neighbour
 
 type NeighboursStore struct {
 	neighboursMap   map[int]NeighboursIndex
-	configMap       map[int]SourceConfig
+	configMap       map[int]*SourceConfig
 	statusMap       map[int]StoreStatus
 	refreshInterval time.Duration
 
@@ -25,7 +25,7 @@ func NewNeighboursStore(config *Config) *NeighboursStore {
 
 	// Build source mapping
 	neighboursMap := make(map[int]NeighboursIndex)
-	configMap := make(map[int]SourceConfig)
+	configMap := make(map[int]*SourceConfig)
 	statusMap := make(map[int]StoreStatus)
 
 	for _, source := range config.Sources {
