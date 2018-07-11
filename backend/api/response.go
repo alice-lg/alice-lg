@@ -15,6 +15,11 @@ type ErrorResponse struct {
 	Error string `json:"error"`
 }
 
+// Cache aware api response
+type CacheableResponse interface {
+	CacheTtl() time.Duration
+}
+
 // Config
 type ConfigResponse struct {
 	Rejection     Rejection         `json:"rejection"`
@@ -122,6 +127,12 @@ type NeighboursResponse struct {
 	Neighbours Neighbours `json:"neighbours"`
 }
 
+// Neighbours response is cacheable
+func (self *NeighboursResponse) CacheTtl() time.Duration {
+	now := time.Now().UTC()
+	return self.Api.Ttl.Sub(now)
+}
+
 type NeighboursLookupResults map[int]Neighbours
 
 // BGP
@@ -173,6 +184,11 @@ type RoutesResponse struct {
 	Imported    Routes    `json:"imported"`
 	Filtered    Routes    `json:"filtered"`
 	NotExported Routes    `json:"not_exported"`
+}
+
+func (self *RoutesResponse) CacheTtl() time.Duration {
+	now := time.Now().UTC()
+	return self.Api.Ttl.Sub(now)
 }
 
 // Lookup Prefixes

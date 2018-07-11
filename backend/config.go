@@ -62,15 +62,16 @@ type SourceConfig struct {
 
 	// Source configurations
 	Birdwatcher birdwatcher.Config
+
+	// Source instance
+	instance sources.Source
 }
 
 type Config struct {
 	Server  ServerConfig
 	Ui      UiConfig
-	Sources []SourceConfig
+	Sources []*SourceConfig
 	File    string
-
-	instances map[SourceConfig]sources.Source
 }
 
 // Get sources keys form ini
@@ -299,8 +300,8 @@ func getUiConfig(config *ini.File) (UiConfig, error) {
 	return uiConfig, nil
 }
 
-func getSources(config *ini.File) ([]SourceConfig, error) {
-	sources := []SourceConfig{}
+func getSources(config *ini.File) ([]*SourceConfig, error) {
+	sources := []*SourceConfig{}
 
 	sourceSections := config.ChildSections("source")
 	sourceId := 0
@@ -331,7 +332,7 @@ func getSources(config *ini.File) ([]SourceConfig, error) {
 		}
 
 		// Make config
-		config := SourceConfig{
+		config := &SourceConfig{
 			Id:   sourceId,
 			Name: section.Key("name").MustString("Unknown Source"),
 			Type: backendType,
@@ -409,13 +410,19 @@ func loadConfig(file string) (*Config, error) {
 }
 
 // Get source instance from config
-func (source SourceConfig) getInstance() sources.Source {
-	switch source.Type {
-	case SOURCE_BIRDWATCHER:
-		return birdwatcher.NewBirdwatcher(source.Birdwatcher)
+func (self *SourceConfig) getInstance() sources.Source {
+	if self.instance != nil {
+		return self.instance
 	}
 
-	return nil
+	var instance sources.Source
+	switch self.Type {
+	case SOURCE_BIRDWATCHER:
+		instance = birdwatcher.NewBirdwatcher(self.Birdwatcher)
+	}
+
+	self.instance = instance
+	return instance
 }
 
 // Get configuration file with fallbacks

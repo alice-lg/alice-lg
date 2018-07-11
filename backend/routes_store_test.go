@@ -77,8 +77,8 @@ func makeTestRoutesStore() *RoutesStore {
 		1: rs1RoutesResponse,
 	}
 
-	configMap := map[int]SourceConfig{
-		1: SourceConfig{
+	configMap := map[int]*SourceConfig{
+		1: &SourceConfig{
 			Id:   1,
 			Name: "rs1.test",
 			Type: SOURCE_BIRDWATCHER,

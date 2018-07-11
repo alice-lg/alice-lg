@@ -2,22 +2,31 @@ package birdwatcher
 
 import (
 	"github.com/alice-lg/alice-lg/backend/api"
+	"github.com/alice-lg/alice-lg/backend/caches"
 
 	"log"
 	"sort"
 )
 
 type Birdwatcher struct {
-	config Config
-	client *Client
+	config         Config
+	client         *Client
+	neighborsCache *caches.NeighborsCache
+	routesCache    *caches.RoutesCache
 }
 
 func NewBirdwatcher(config Config) *Birdwatcher {
 	client := NewClient(config.Api)
 
+	neighborsCache := caches.NewNeighborsCache(false)
+	routesCache := caches.NewRoutesCache(false, 128)
+	// TODO: Make LRU routes cache max size configurable
+
 	birdwatcher := &Birdwatcher{
-		config: config,
-		client: client,
+		config:         config,
+		client:         client,
+		neighborsCache: neighborsCache,
+		routesCache:    routesCache,
 	}
 	return birdwatcher
 }
@@ -48,6 +57,13 @@ func (self *Birdwatcher) Status() (api.StatusResponse, error) {
 
 // Get bird BGP protocols
 func (self *Birdwatcher) Neighbours() (api.NeighboursResponse, error) {
+	// Check if we hit the cache
+	response := self.neighborsCache.Get()
+	if response != nil {
+		return *response, nil // dereference for now...
+	}
+
+	// Query birdwatcher
 	bird, err := self.client.GetJson("/protocols/bgp")
 	if err != nil {
 		return api.NeighboursResponse{}, err
@@ -63,14 +79,24 @@ func (self *Birdwatcher) Neighbours() (api.NeighboursResponse, error) {
 		return api.NeighboursResponse{}, err
 	}
 
-	return api.NeighboursResponse{
+	response = &api.NeighboursResponse{
 		Api:        apiStatus,
 		Neighbours: neighbours,
-	}, nil
+	}
+
+	self.neighborsCache.Set(response)
+
+	return *response, nil // dereference for now
 }
 
 // Get filtered and exported routes
 func (self *Birdwatcher) Routes(neighbourId string) (api.RoutesResponse, error) {
+	// Check if we have a cache hit
+	response := self.routesCache.Get("all:" + neighbourId)
+	if response != nil {
+		return *response, nil
+	}
+
 	// Exported
 	bird, err := self.client.GetJson("/routes/protocol/" + neighbourId)
 	if err != nil {
@@ -147,12 +173,16 @@ func (self *Birdwatcher) Routes(neighbourId string) (api.RoutesResponse, error) 
 		}
 	}
 
-	return api.RoutesResponse{
+	response = &api.RoutesResponse{
 		Api:         apiStatus,
 		Imported:    imported,
 		Filtered:    filtered,
 		NotExported: noexport,
-	}, nil
+	}
+
+	self.routesCache.Set("all:"+neighbourId, response)
+
+	return *response, nil
 }
 
 // Make routes lookup
