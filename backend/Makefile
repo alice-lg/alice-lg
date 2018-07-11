@@ -39,6 +39,8 @@ bundle:
 
 test:
 	go test -v
+	cd caches/ && go test -v
+	cd sources/birdwatcher && go test -v
 
 
 dev: clean all
