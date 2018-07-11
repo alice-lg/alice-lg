@@ -31,23 +31,23 @@ func NewBirdwatcher(config Config) *Birdwatcher {
 	return birdwatcher
 }
 
-func (self *Birdwatcher) Status() (api.StatusResponse, error) {
+func (self *Birdwatcher) Status() (*api.StatusResponse, error) {
 	bird, err := self.client.GetJson("/status")
 	if err != nil {
-		return api.StatusResponse{}, err
+		return nil, err
 	}
 
 	apiStatus, err := parseApiStatus(bird, self.config)
 	if err != nil {
-		return api.StatusResponse{}, err
+		return nil, err
 	}
 
 	birdStatus, err := parseBirdwatcherStatus(bird, self.config)
 	if err != nil {
-		return api.StatusResponse{}, err
+		return nil, err
 	}
 
-	response := api.StatusResponse{
+	response := &api.StatusResponse{
 		Api:    apiStatus,
 		Status: birdStatus,
 	}
@@ -56,27 +56,27 @@ func (self *Birdwatcher) Status() (api.StatusResponse, error) {
 }
 
 // Get bird BGP protocols
-func (self *Birdwatcher) Neighbours() (api.NeighboursResponse, error) {
+func (self *Birdwatcher) Neighbours() (*api.NeighboursResponse, error) {
 	// Check if we hit the cache
 	response := self.neighborsCache.Get()
 	if response != nil {
-		return *response, nil // dereference for now...
+		return response, nil // dereference for now...
 	}
 
 	// Query birdwatcher
 	bird, err := self.client.GetJson("/protocols/bgp")
 	if err != nil {
-		return api.NeighboursResponse{}, err
+		return nil, err
 	}
 
 	apiStatus, err := parseApiStatus(bird, self.config)
 	if err != nil {
-		return api.NeighboursResponse{}, err
+		return nil, err
 	}
 
 	neighbours, err := parseNeighbours(bird, self.config)
 	if err != nil {
-		return api.NeighboursResponse{}, err
+		return nil, err
 	}
 
 	response = &api.NeighboursResponse{
@@ -86,32 +86,32 @@ func (self *Birdwatcher) Neighbours() (api.NeighboursResponse, error) {
 
 	self.neighborsCache.Set(response)
 
-	return *response, nil // dereference for now
+	return response, nil // dereference for now
 }
 
 // Get filtered and exported routes
-func (self *Birdwatcher) Routes(neighbourId string) (api.RoutesResponse, error) {
+func (self *Birdwatcher) Routes(neighbourId string) (*api.RoutesResponse, error) {
 	// Check if we have a cache hit
 	response := self.routesCache.Get("all:" + neighbourId)
 	if response != nil {
-		return *response, nil
+		return response, nil
 	}
 
 	// Exported
 	bird, err := self.client.GetJson("/routes/protocol/" + neighbourId)
 	if err != nil {
-		return api.RoutesResponse{}, err
+		return nil, err
 	}
 
 	// Use api status from first request
 	apiStatus, err := parseApiStatus(bird, self.config)
 	if err != nil {
-		return api.RoutesResponse{}, err
+		return nil, err
 	}
 
 	imported, err := parseRoutes(bird, self.config)
 	if err != nil {
-		return api.RoutesResponse{}, err
+		return nil, err
 	}
 
 	gateway := ""
@@ -182,11 +182,11 @@ func (self *Birdwatcher) Routes(neighbourId string) (api.RoutesResponse, error) 
 
 	self.routesCache.Set("all:"+neighbourId, response)
 
-	return *response, nil
+	return response, nil
 }
 
 // Make routes lookup
-func (self *Birdwatcher) LookupPrefix(prefix string) (api.RoutesLookupResponse, error) {
+func (self *Birdwatcher) LookupPrefix(prefix string) (*api.RoutesLookupResponse, error) {
 	// Get RS info
 	rs := api.Routeserver{
 		Id:   self.config.Id,
@@ -196,13 +196,13 @@ func (self *Birdwatcher) LookupPrefix(prefix string) (api.RoutesLookupResponse, 
 	// Query prefix on RS
 	bird, err := self.client.GetJson("/routes/prefix?prefix=" + prefix)
 	if err != nil {
-		return api.RoutesLookupResponse{}, err
+		return nil, err
 	}
 
 	// Parse API status
 	apiStatus, err := parseApiStatus(bird, self.config)
 	if err != nil {
-		return api.RoutesLookupResponse{}, err
+		return nil, err
 	}
 
 	// Parse routes
@@ -234,17 +234,17 @@ func (self *Birdwatcher) LookupPrefix(prefix string) (api.RoutesLookupResponse, 
 	}
 
 	// Make result
-	response := api.RoutesLookupResponse{
+	response := &api.RoutesLookupResponse{
 		Api:    apiStatus,
 		Routes: results,
 	}
 	return response, nil
 }
 
-func (self *Birdwatcher) AllRoutes() (api.RoutesResponse, error) {
+func (self *Birdwatcher) AllRoutes() (*api.RoutesResponse, error) {
 	bird, err := self.client.GetJson("/routes/dump")
 	if err != nil {
-		return api.RoutesResponse{}, err
+		return nil, err
 	}
 	result, err := parseRoutesDump(bird, self.config)
 	return result, err

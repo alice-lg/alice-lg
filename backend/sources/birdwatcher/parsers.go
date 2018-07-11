@@ -293,8 +293,8 @@ func parseRoutes(bird ClientResponse, config Config) (api.Routes, error) {
 	return routes, nil
 }
 
-func parseRoutesDump(bird ClientResponse, config Config) (api.RoutesResponse, error) {
-	result := api.RoutesResponse{}
+func parseRoutesDump(bird ClientResponse, config Config) (*api.RoutesResponse, error) {
+	result := &api.RoutesResponse{}
 
 	apiStatus, err := parseApiStatus(bird, config)
 	if err != nil {

@@ -16,7 +16,7 @@ import (
 //
 // Api Tets Helpers
 //
-func loadTestRoutesResponse() api.RoutesResponse {
+func loadTestRoutesResponse() *api.RoutesResponse {
 	file, err := os.Open("testdata/api/routes_response.json")
 	if err != nil {
 		log.Panic("could not load test data:", err)
@@ -28,7 +28,7 @@ func loadTestRoutesResponse() api.RoutesResponse {
 		log.Panic("could not read test data:", err)
 	}
 
-	response := api.RoutesResponse{}
+	response := &api.RoutesResponse{}
 	err = json.Unmarshal(data, &response)
 	if err != nil {
 		log.Panic("could not unmarshal response test data:", err)
@@ -73,7 +73,7 @@ func makeTestRoutesStore() *RoutesStore {
 	// Build mapping based on source instances:
 	//   rs : <response>
 	statusMap := make(map[int]StoreStatus)
-	routesMap := map[int]api.RoutesResponse{
+	routesMap := map[int]*api.RoutesResponse{
 		1: rs1RoutesResponse,
 	}
 
