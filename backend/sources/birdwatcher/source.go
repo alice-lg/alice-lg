@@ -2,6 +2,7 @@ package birdwatcher
 
 import (
 	"github.com/alice-lg/alice-lg/backend/api"
+	"github.com/alice-lg/alice-lg/backend/caches"
 
 	"log"
 	"sort"
@@ -10,14 +11,14 @@ import (
 type Birdwatcher struct {
 	config         Config
 	client         *Client
-	neighborsCache *NeighborsCache
+	neighborsCache *caches.NeighborsCache
 	// routesCache    *RoutesCache
 }
 
 func NewBirdwatcher(config Config) *Birdwatcher {
 	client := NewClient(config.Api)
 
-	neighborsCache := NewNeighborsCache(false)
+	neighborsCache := caches.NewNeighborsCache(false)
 
 	birdwatcher := &Birdwatcher{
 		config:         config,

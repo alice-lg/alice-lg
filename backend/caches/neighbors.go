@@ -1,8 +1,7 @@
-package birdwatcher
+package caches
 
 import (
 	"github.com/alice-lg/alice-lg/backend/api"
-	"log"
 )
 
 /*
@@ -26,8 +25,6 @@ func NewNeighborsCache(disabled bool) *NeighborsCache {
 		disabled: disabled,
 	}
 
-	log.Println("NEW NN CACHE!!")
-
 	return cache
 }
 
@@ -39,9 +36,6 @@ func (self *NeighborsCache) Get() *api.NeighboursResponse {
 	if self.response == nil {
 		return nil
 	}
-
-	log.Println("Response present, check ttl:")
-	log.Println(self.response.CacheTtl())
 
 	if self.response.CacheTtl() < 0 {
 		return nil
