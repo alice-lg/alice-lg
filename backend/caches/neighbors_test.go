@@ -16,7 +16,7 @@ func TestNeighborsCacheSetGet(t *testing.T) {
 
 	response := &api.NeighboursResponse{
 		Api: api.ApiStatus{
-			Ttl: time.Now().UTC().Add(300 * time.Millisecond),
+			Ttl: time.Now().UTC().Add(23 * time.Millisecond),
 		},
 	}
 
@@ -32,7 +32,7 @@ func TestNeighborsCacheSetGet(t *testing.T) {
 	}
 
 	// Wait a bit
-	time.Sleep(333 * time.Millisecond)
+	time.Sleep(33 * time.Millisecond)
 
 	fromCache = cache.Get()
 	if fromCache != nil {
