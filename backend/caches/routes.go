@@ -40,6 +40,8 @@ func (self *RoutesCache) Get(neighborId string) *api.RoutesResponse {
 	}
 
 	self.Lock()
+	defer self.Unlock()
+
 	response, ok := self.responses[neighborId]
 	if !ok {
 		return nil
@@ -50,13 +52,14 @@ func (self *RoutesCache) Get(neighborId string) *api.RoutesResponse {
 	}
 
 	self.accessedAt[neighborId] = time.Now()
-	self.Unlock()
 
 	return response
 }
 
 func (self *RoutesCache) Set(neighborId string, response *api.RoutesResponse) {
 	self.Lock()
+	defer self.Unlock()
+
 	if len(self.responses) > self.size {
 		// delete LRU
 		lru := self.accessedAt.LRU()
@@ -66,5 +69,4 @@ func (self *RoutesCache) Set(neighborId string, response *api.RoutesResponse) {
 
 	self.accessedAt[neighborId] = time.Now()
 	self.responses[neighborId] = response
-	self.Unlock()
 }
