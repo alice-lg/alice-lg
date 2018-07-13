@@ -96,6 +96,12 @@ func apiRegisterEndpoints(router *httprouter.Router) error {
 		endpoint(apiNeighboursList))
 	router.GET("/api/routeservers/:id/neighbours/:neighbourId/routes",
 		endpoint(apiRoutesList))
+	router.GET("/api/routeservers/:id/neighbours/:neighbourId/routes/received",
+		endpoint(apiRoutesListReceived))
+	router.GET("/api/routeservers/:id/neighbours/:neighbourId/routes/filtered",
+		endpoint(apiRoutesListFiltered))
+	router.GET("/api/routeservers/:id/neighbours/:neighbourId/routes/not-exported",
+		endpoint(apiRoutesListNotExported))
 
 	// Querying
 	if AliceConfig.Server.EnablePrefixLookup == true {
@@ -192,6 +198,109 @@ func apiRoutesList(_req *http.Request, params httprouter.Params) (api.Response, 
 	return result, err
 }
 
+// Paginated Routes Respponse: Received routes
+func apiRoutesListReceived(
+	req *http.Request,
+	params httprouter.Params,
+) (api.Response, error) {
+	rsId, err := validateSourceId(params.ByName("id"))
+	if err != nil {
+		return nil, err
+	}
+
+	neighbourId := params.ByName("neighbourId")
+	source := AliceConfig.Sources[rsId].getInstance()
+	result, err := source.RoutesReceived(neighbourId)
+	if err != nil {
+		return nil, err
+	}
+
+	// Paginate results
+	// TODO: get pageSize from config
+	page := apiQueryMustInt(req, "page", 0)
+	pageSize := 200
+
+	// Make paginated response
+	routes, pagination := apiPaginateRoutes(result.Imported, page, pageSize)
+	response := api.PaginatedRoutesResponse{
+		RoutesResponse: &api.RoutesResponse{
+			Api:      result.Api,
+			Imported: routes,
+		},
+		Pagination: pagination,
+	}
+
+	return response, nil
+}
+
+func apiRoutesListFiltered(
+	req *http.Request,
+	params httprouter.Params,
+) (api.Response, error) {
+	rsId, err := validateSourceId(params.ByName("id"))
+	if err != nil {
+		return nil, err
+	}
+
+	neighbourId := params.ByName("neighbourId")
+	source := AliceConfig.Sources[rsId].getInstance()
+	result, err := source.RoutesFiltered(neighbourId)
+	if err != nil {
+		return nil, err
+	}
+
+	// Paginate results
+	// TODO: get pageSize from config
+	page := apiQueryMustInt(req, "page", 0)
+	pageSize := 200
+
+	// Make response
+	routes, pagination := apiPaginateRoutes(result.Filtered, page, pageSize)
+	response := api.PaginatedRoutesResponse{
+		RoutesResponse: &api.RoutesResponse{
+			Api:      result.Api,
+			Filtered: routes,
+		},
+		Pagination: pagination,
+	}
+
+	return response, nil
+}
+
+func apiRoutesListNotExported(
+	req *http.Request,
+	params httprouter.Params,
+) (api.Response, error) {
+	rsId, err := validateSourceId(params.ByName("id"))
+	if err != nil {
+		return nil, err
+	}
+
+	neighbourId := params.ByName("neighbourId")
+	source := AliceConfig.Sources[rsId].getInstance()
+	result, err := source.RoutesNotExported(neighbourId)
+	if err != nil {
+		return nil, err
+	}
+
+	// Paginate results
+	// TODO: get pageSize from config
+	page := apiQueryMustInt(req, "page", 0)
+	pageSize := 200
+
+	// Make response
+	routes, pagination := apiPaginateRoutes(result.NotExported, page, pageSize)
+	response := api.PaginatedRoutesResponse{
+		RoutesResponse: &api.RoutesResponse{
+			Api:         result.Api,
+			NotExported: routes,
+		},
+		Pagination: pagination,
+	}
+
+	return response, nil
+}
+
 // Handle global lookup
 func apiLookupPrefixGlobal(req *http.Request, params httprouter.Params) (api.Response, error) {
 	// Get prefix to query
@@ -204,7 +313,6 @@ func apiLookupPrefixGlobal(req *http.Request, params httprouter.Params) (api.Res
 	if err != nil {
 		return nil, err
 	}
-
 	// Get pagination params
 	limit, offset, err := validatePaginationParams(req, 50, 0)
 	if err != nil {
