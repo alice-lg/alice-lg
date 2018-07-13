@@ -6,6 +6,7 @@ import (
 
 	"log"
 	"sort"
+	"sync"
 )
 
 type Birdwatcher struct {
@@ -20,6 +21,9 @@ type Birdwatcher struct {
 	routesReceivedCache    *caches.RoutesCache
 	routesFilteredCache    *caches.RoutesCache
 	routesNotExportedCache *caches.RoutesCache
+
+	// Mutices:
+	routesFetchMutex map[string]*sync.Mutex
 }
 
 func NewBirdwatcher(config Config) *Birdwatcher {
@@ -54,6 +58,8 @@ func NewBirdwatcher(config Config) *Birdwatcher {
 		routesReceivedCache:    routesReceivedCache,
 		routesFilteredCache:    routesFilteredCache,
 		routesNotExportedCache: routesNotExportedCache,
+
+		routesFetchMutex: map[string]*sync.Mutex{},
 	}
 	return birdwatcher
 }
@@ -221,6 +227,14 @@ A route deduplication is applied.
 func (self *Birdwatcher) RoutesRequired(
 	neighborId string,
 ) (*api.RoutesResponse, error) {
+	// Allow only one concurrent request for this neighbor
+	// to our backend server.
+	_, ok := self.routesFetchMutex[neighborId]
+	if !ok {
+		self.routesFetchMutex[neighborId] = &sync.Mutex{}
+	}
+	self.routesFetchMutex[neighborId].Lock()
+	defer self.routesFetchMutex[neighborId].Unlock()
 
 	// Check if we have a cache hit
 	response := self.routesRequiredCache.Get(neighborId)
