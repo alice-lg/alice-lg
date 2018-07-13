@@ -9,24 +9,51 @@ import (
 )
 
 type Birdwatcher struct {
-	config         Config
-	client         *Client
+	config Config
+	client *Client
+
+	// Caches: Neighbors
 	neighborsCache *caches.NeighborsCache
-	routesCache    *caches.RoutesCache
+
+	// Caches: Routes
+	routesCache            *caches.RoutesCache
+	routesReceivedCache    *caches.RoutesCache
+	routesFilteredCache    *caches.RoutesCache
+	routesNotExportedCache *caches.RoutesCache
 }
 
 func NewBirdwatcher(config Config) *Birdwatcher {
 	client := NewClient(config.Api)
 
-	neighborsCache := caches.NewNeighborsCache(false)
-	routesCache := caches.NewRoutesCache(false, 128)
-	// TODO: Make LRU routes cache max size configurable
+	// Cache settings:
+	// TODO: Maybe read from config file
+	neighborsCacheDisable := false
 
+	routesCacheDisabled := false
+	routesCacheMaxSize := 128
+
+	// Initialize caches
+	neighborsCache := caches.NewNeighborsCache(neighborsCacheDisable)
+	routesCache := caches.NewRoutesCache(
+		routesCacheDisabled, routesCacheMaxSize)
+	routesReceivedCache := caches.NewRoutesCache(
+		routesCacheDisabled, routesCacheMaxSize)
+	routesFilteredCache := caches.NewRoutesCache(
+		routesCacheDisabled, routesCacheMaxSize)
+	routesNotExportedCache := caches.NewRoutesCache(
+		routesCacheDisabled, routesCacheMaxSize)
+
+	// Make source
 	birdwatcher := &Birdwatcher{
-		config:         config,
-		client:         client,
+		config: config,
+		client: client,
+
 		neighborsCache: neighborsCache,
-		routesCache:    routesCache,
+
+		routesCache:            routesCache,
+		routesReceivedCache:    routesReceivedCache,
+		routesFilteredCache:    routesFilteredCache,
+		routesNotExportedCache: routesNotExportedCache,
 	}
 	return birdwatcher
 }
@@ -92,7 +119,7 @@ func (self *Birdwatcher) Neighbours() (*api.NeighboursResponse, error) {
 // Get filtered and exported routes
 func (self *Birdwatcher) Routes(neighbourId string) (*api.RoutesResponse, error) {
 	// Check if we have a cache hit
-	response := self.routesCache.Get("all:" + neighbourId)
+	response := self.routesCache.Get(neighbourId)
 	if response != nil {
 		return response, nil
 	}
@@ -180,7 +207,130 @@ func (self *Birdwatcher) Routes(neighbourId string) (*api.RoutesResponse, error)
 		NotExported: noexport,
 	}
 
-	self.routesCache.Set("all:"+neighbourId, response)
+	self.routesCache.Set(neighbourId, response)
+
+	return response, nil
+}
+
+// Get all received routes
+func (self *Birdwatcher) RoutesReceived(
+	neighborId string,
+) (*api.RoutesResponse, error) {
+	// Check if we have a cache hit
+	response := self.routesReceivedCache.Get(neighborId)
+	if response != nil {
+		return response, nil
+	}
+
+	// Routes received
+	bird, err := self.client.GetJson("/routes/protocol/" + neighborId)
+	if err != nil {
+		return nil, err
+	}
+
+	// Use api status from first request
+	apiStatus, err := parseApiStatus(bird, self.config)
+	if err != nil {
+		return nil, err
+	}
+
+	routes, err := parseRoutes(bird, self.config)
+	if err != nil {
+		return nil, err
+	}
+
+	response = &api.RoutesResponse{
+		Api:         apiStatus,
+		Imported:    routes,
+		Filtered:    nil,
+		NotExported: nil,
+	}
+
+	self.routesReceivedCache.Set(neighborId, response)
+
+	return response, nil
+}
+
+// Get all filtered routes
+func (self *Birdwatcher) RoutesFiltered(
+	neighborId string,
+) (*api.RoutesResponse, error) {
+	// Check if we have a cache hit
+	response := self.routesFilteredCache.Get(neighborId)
+	if response != nil {
+		return response, nil
+	}
+
+	// Routes received
+	bird, err := self.client.GetJson("/routes/filtered/" + neighborId)
+	if err != nil {
+		log.Println("WARNING Could not retrieve routes filtered:", err)
+		log.Println("Is the 'routes_filtered' module active in birdwatcher?")
+
+		return nil, err
+	}
+
+	// Use api status from first request
+	apiStatus, err := parseApiStatus(bird, self.config)
+	if err != nil {
+		return nil, err
+	}
+
+	routes, err := parseRoutes(bird, self.config)
+	if err != nil {
+		return nil, err
+	}
+
+	response = &api.RoutesResponse{
+		Api:         apiStatus,
+		Imported:    nil,
+		Filtered:    routes,
+		NotExported: nil,
+	}
+
+	self.routesFilteredCache.Set(neighborId, response)
+
+	return response, nil
+}
+
+// Get all not exported routes
+func (self *Birdwatcher) RoutesNotExported(
+	neighborId string,
+) (*api.RoutesResponse, error) {
+	// Check if we have a cache hit
+	response := self.routesNotExportedCache.Get(neighborId)
+	if response != nil {
+		return response, nil
+	}
+
+	// Routes received
+	bird, err := self.client.GetJson("/routes/noexport/" + neighborId)
+	if err != nil {
+		log.Println("WARNING Could not retrieve routes not exported:", err)
+		log.Println("Is the 'routes_noexport' module active in birdwatcher?")
+
+		return nil, err
+	}
+
+	// Use api status from first request
+	apiStatus, err := parseApiStatus(bird, self.config)
+	if err != nil {
+		return nil, err
+	}
+
+	routes, err := parseRoutes(bird, self.config)
+	if err != nil {
+		return nil, err
+	}
+
+	response = &api.RoutesResponse{
+		Api:         apiStatus,
+		Imported:    nil,
+		Filtered:    nil,
+		NotExported: routes,
+	}
+
+	self.routesNotExportedCache.Set(neighborId, response)
 
 	return response, nil
 }
