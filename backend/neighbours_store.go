@@ -92,7 +92,6 @@ func (self *NeighboursStore) update() {
 		source := self.configMap[sourceId].getInstance()
 
 		neighboursRes, err := source.Neighbours()
-		neighbours := neighboursRes.Neighbours
 		if err != nil {
 			// That's sad.
 			self.Lock()
@@ -104,6 +103,8 @@ func (self *NeighboursStore) update() {
 			self.Unlock()
 			continue
 		}
+
+		neighbours := neighboursRes.Neighbours
 
 		// Update data
 		// Make neighbours index
