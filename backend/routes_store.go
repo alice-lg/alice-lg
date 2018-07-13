@@ -83,27 +83,25 @@ func (self *RoutesStore) update() {
 			continue // nothing to do here
 		}
 
-		// Set update state
 		self.Lock()
+		defer self.Unlock()
+
+		// Set update state
 		self.statusMap[sourceId] = StoreStatus{
 			State: STATE_UPDATING,
 		}
-		self.Unlock()
 
 		routes, err := source.AllRoutes()
+
 		if err != nil {
-			self.Lock()
 			self.statusMap[sourceId] = StoreStatus{
 				State:       STATE_ERROR,
 				LastError:   err,
 				LastRefresh: time.Now(),
 			}
-			self.Unlock()
-
 			continue
 		}
 
-		self.Lock()
 		// Update data
 		self.routesMap[sourceId] = routes
 		// Update state
@@ -111,7 +109,6 @@ func (self *RoutesStore) update() {
 			LastRefresh: time.Now(),
 			State:       STATE_READY,
 		}
-		self.Unlock()
 	}
 }
 
