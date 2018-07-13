@@ -24,6 +24,9 @@ func apiPaginateRoutes(
 	if rindex > totalResults {
 		rindex = totalResults
 	}
+	if offset < 0 {
+		offset = 0
+	}
 
 	pagination := api.Pagination{
 		Page:         page,
