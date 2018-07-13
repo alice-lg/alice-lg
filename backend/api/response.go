@@ -191,6 +191,17 @@ func (self *RoutesResponse) CacheTtl() time.Duration {
 	return self.Api.Ttl.Sub(now)
 }
 
+type PaginatedRoutesResponse struct {
+	*RoutesResponse
+	Pagination Pagination `json:"pagination"`
+}
+
+type Pagination struct {
+	Page         int `json:"page"`
+	TotalPages   int `json:"total_pages"`
+	TotalResults int `json:"total_results"`
+}
+
 // Lookup Prefixes
 type LookupRoute struct {
 	Id          string     `json:"id"`
