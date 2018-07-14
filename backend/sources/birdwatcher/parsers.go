@@ -156,6 +156,38 @@ func parseNeighbours(bird ClientResponse, config Config) (api.Neighbours, error)
 	return neighbours, nil
 }
 
+// Get neighbors from summary endpoint
+func parseNeighborSummary(
+	bird ClientResponse, config Config,
+) (api.Neighbours, error) {
+	birdNeighbors := bird["neighbours"].([]interface{})
+
+	neighbors := make(api.Neighbours, 0, len(birdNeighbors))
+
+	for _, b := range birdNeighbors {
+		n := b.(map[string]interface{})
+		// Parse neighbor from response
+		neighbor := &api.Neighbour{
+			Id:             mustString(n["id"], "unknown"),
+			Address:        mustString(n["neighbour"], "unknown"),
+			Asn:            mustInt(n["asn"], 0),
+			State:          mustString(n["state"], "unknown"),
+			Uptime:         time.Duration(mustInt(n["uptime"], 0)),
+			Description:    mustString(n["description"], "unknown"),
+			RoutesReceived: mustInt(n["routes_received"], -1),
+			RoutesAccepted: mustInt(n["routes_accepted"], -1),
+			RoutesFiltered: mustInt(n["routes_filtered"], -1),
+			RoutesExported: mustInt(n["routes_exported"], -1),
+		}
+
+		neighbors = append(neighbors, neighbor)
+	}
+
+	sort.Sort(neighbors)
+
+	return neighbors, nil
+}
+
 // Parse route bgp info
 func parseRouteBgpInfo(data interface{}) api.BgpInfo {
 	bgpData, ok := data.(map[string]interface{})

@@ -8,11 +8,17 @@ import (
 	"sort"
 )
 
+const (
+	NEIGHBOR_SUMMARY_ENDPOINT = "/neighbor-summary"
+)
+
 type Birdwatcher struct {
 	config         Config
 	client         *Client
 	neighborsCache *caches.NeighborsCache
 	routesCache    *caches.RoutesCache
+
+	hasNeighborSummary bool
 }
 
 func NewBirdwatcher(config Config) *Birdwatcher {
@@ -22,11 +28,22 @@ func NewBirdwatcher(config Config) *Birdwatcher {
 	routesCache := caches.NewRoutesCache(false, 128)
 	// TODO: Make LRU routes cache max size configurable
 
+	// Check if we have a neighbor summary endpoint:
+	hasNeighborSummary := true
+	_, err := client.GetJson(NEIGHBOR_SUMMARY_ENDPOINT)
+	if err != nil {
+		hasNeighborSummary = false
+	} else {
+		log.Println("Using neighbor-summary capabilities on:", config.Name)
+	}
+
 	birdwatcher := &Birdwatcher{
 		config:         config,
 		client:         client,
 		neighborsCache: neighborsCache,
 		routesCache:    routesCache,
+
+		hasNeighborSummary: hasNeighborSummary,
 	}
 	return birdwatcher
 }
@@ -55,13 +72,62 @@ func (self *Birdwatcher) Status() (api.StatusResponse, error) {
 	return response, nil
 }
 
-// Get bird BGP protocols
+// Get neighbors
 func (self *Birdwatcher) Neighbours() (api.NeighboursResponse, error) {
 	// Check if we hit the cache
-	response := self.neighborsCache.Get()
-	if response != nil {
-		return *response, nil // dereference for now...
+	cachedResponse := self.neighborsCache.Get()
+	if cachedResponse != nil {
+		return *cachedResponse, nil // dereference for now...
 	}
+
+	var (
+		response api.NeighboursResponse
+		err      error
+	)
+
+	if self.hasNeighborSummary {
+		response, err = self.summaryNeighbors()
+	} else {
+		response, err = self.bgpProtocolsNeighbors()
+	}
+
+	if err != nil {
+		return api.NeighboursResponse{}, err
+	}
+
+	self.neighborsCache.Set(&response)
+
+	return response, nil
+}
+
+// Get neighbors from neighbors summary
+func (self *Birdwatcher) summaryNeighbors() (api.NeighboursResponse, error) {
+	// Query birdwatcher
+	bird, err := self.client.GetJson(NEIGHBOR_SUMMARY_ENDPOINT)
+	if err != nil {
+		return api.NeighboursResponse{}, err
+	}
+
+	apiStatus, err := parseApiStatus(bird, self.config)
+	if err != nil {
+		return api.NeighboursResponse{}, err
+	}
+
+	neighbors, err := parseNeighborSummary(bird, self.config)
+	if err != nil {
+		return api.NeighboursResponse{}, err
+	}
+
+	response := api.NeighboursResponse{
+		Api:        apiStatus,
+		Neighbours: neighbors,
+	}
+
+	return response, nil
+}
+
+// Get neighbors from protocols
+func (self *Birdwatcher) bgpProtocolsNeighbors() (api.NeighboursResponse, error) {
 
 	// Query birdwatcher
 	bird, err := self.client.GetJson("/protocols/bgp")
@@ -79,14 +145,12 @@ func (self *Birdwatcher) Neighbours() (api.NeighboursResponse, error) {
 		return api.NeighboursResponse{}, err
 	}
 
-	response = &api.NeighboursResponse{
+	response := api.NeighboursResponse{
 		Api:        apiStatus,
 		Neighbours: neighbours,
 	}
 
-	self.neighborsCache.Set(response)
-
-	return *response, nil // dereference for now
+	return response, nil // dereference for now
 }
 
 // Get filtered and exported routes

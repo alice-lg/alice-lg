@@ -2,6 +2,7 @@ package birdwatcher
 
 import (
 	"encoding/json"
+	"io/ioutil"
 
 	"testing"
 	"time"
@@ -16,15 +17,24 @@ const API_RESPONSE_ROUTES = `
 const API_RESPONSE_ROUTES_FILTERED = `
 {"api":{"Version":"1.7.11","result_from_cache":true,"cache_status":{"orig_ttl":0,"cached_at":{"date":"","timezone_type":"","timezone":""}}},"routes":[{"age":"2017-05-17 03:20:31","bgp":{"as_path":["25074","15368"],"communities":[[25074,123],[25074,333],[25074,2070],[25074,20702],[65000,29208]],"large_communities":[[9033,65666,9]],"local_pref":"100","med":"1","next_hop":"194.9.117.1","origin":"IGP"},"from_protocol":"ID103_AS25074_194.9.117.1","gateway":"194.9.117.1","interface":"eno7","learnt_from":"","metric":100,"network":"192.111.47.0/24","primary":true,"type":["BGP","unicast","univ"]}], "ttl":"2017-05-22T10:22:39.732071843Z"}`
 
+// Load testdata from file
+func loadTestResponse(filename string) (ClientResponse, error) {
+	data, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return ClientResponse{}, err
+	}
+	return parseTestResponse(string(data))
+}
+
 // Load test response json
-func parseTestResponse(payload string) ClientResponse {
+func parseTestResponse(payload string) (ClientResponse, error) {
 	result := make(ClientResponse)
-	_ = json.Unmarshal([]byte(payload), &result)
-	return result
+	err := json.Unmarshal([]byte(payload), &result)
+	return result, err
 }
 
 func Test_ParseApiStatus(t *testing.T) {
-	bird := parseTestResponse(API_RESPONSE_NEIGHBOURS)
+	bird, _ := parseTestResponse(API_RESPONSE_NEIGHBOURS)
 
 	// mock config
 	config := Config{
@@ -55,7 +65,7 @@ func Test_ParseApiStatus(t *testing.T) {
 
 func Test_NeighboursParsing(t *testing.T) {
 	config := Config{Timezone: "UTC"} // Or ""
-	bird := parseTestResponse(API_RESPONSE_NEIGHBOURS)
+	bird, _ := parseTestResponse(API_RESPONSE_NEIGHBOURS)
 
 	neighbours, err := parseNeighbours(bird, config)
 	if err != nil {
@@ -80,12 +90,69 @@ func Test_NeighboursParsing(t *testing.T) {
 	if neighbour.Description == "" {
 		t.Error("Expected description to be set")
 	}
+}
+
+func Test_NeighborSummaryParsing(t *testing.T) {
+	config := Config{Timezone: "UTC"} // Or ""
+	bird, err := loadTestResponse("../../testdata/api/neighbor_summary.json")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	neighbors, err := parseNeighborSummary(bird, config)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(neighbors) != 2 {
+		t.Error("There should be two neighbors in the test set, got:",
+			len(neighbors))
+	}
+
+	// Check first, Expected sorted by ASN ascending, ASN 23 should be 1st.
+	n := neighbors[0]
+	if n.Asn != 23 {
+		t.Error("Expected first ASN to be 23, got:", n.Asn)
+	}
+
+	if n.Id != "R002a_0_1" {
+		t.Error("Expected ID R002a_0_1, got:", n.Id)
+	}
+
+	if n.State != "start" {
+		t.Error("Unexpected state:", n.State)
+	}
+
+	if n.Description != "Test Peer 2000" {
+		t.Error("Unexpected description:", n.Description)
+	}
+
+	if n.Uptime != 7038818900526 {
+		t.Error("Unexpected uptime:", n.Uptime)
+	}
+
+	if n.RoutesReceived != 154 {
+		t.Error("Unexpected routes received:", n.RoutesReceived)
+	}
+
+	if n.RoutesAccepted != 152 {
+		t.Error("Unexpected routes accepted:", n.RoutesAccepted)
+	}
+
+	if n.RoutesFiltered != 0 {
+		t.Error("Unexpected routes filtered:", n.RoutesFiltered)
+	}
+
+	if n.RoutesExported != 2342 {
+		t.Error("Unexpected routes exported:", n.RoutesExported)
+	}
 
 }
 
 func Test_RoutesParsing(t *testing.T) {
 	config := Config{Timezone: "UTC"} // Or ""
-	bird := parseTestResponse(API_RESPONSE_ROUTES)
+	bird, _ := parseTestResponse(API_RESPONSE_ROUTES)
 
 	routes, err := parseRoutes(bird, config)
 	if err != nil {
