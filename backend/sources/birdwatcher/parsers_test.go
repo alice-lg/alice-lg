@@ -93,12 +93,61 @@ func Test_NeighboursParsing(t *testing.T) {
 }
 
 func Test_NeighborSummaryParsing(t *testing.T) {
+	config := Config{Timezone: "UTC"} // Or ""
 	bird, err := loadTestResponse("../../testdata/api/neighbor_summary.json")
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	t.Log("bird", bird)
+
+	neighbors, err := parseNeighborSummary(bird, config)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(neighbors) != 2 {
+		t.Error("There should be two neighbors in the test set, got:",
+			len(neighbors))
+	}
+
+	// Check first, Expected sorted by ASN ascending, ASN 23 should be 1st.
+	n := neighbors[0]
+	if n.Asn != 23 {
+		t.Error("Expected first ASN to be 23, got:", n.Asn)
+	}
+
+	if n.Id != "R002a_0_1" {
+		t.Error("Expected ID R002a_0_1, got:", n.Id)
+	}
+
+	if n.State != "start" {
+		t.Error("Unexpected state:", n.State)
+	}
+
+	if n.Description != "Test Peer 2000" {
+		t.Error("Unexpected description:", n.Description)
+	}
+
+	if n.Uptime != 7038818900526 {
+		t.Error("Unexpected uptime:", n.Uptime)
+	}
+
+	if n.RoutesReceived != 154 {
+		t.Error("Unexpected routes received:", n.RoutesReceived)
+	}
+
+	if n.RoutesAccepted != 152 {
+		t.Error("Unexpected routes accepted:", n.RoutesAccepted)
+	}
+
+	if n.RoutesFiltered != 0 {
+		t.Error("Unexpected routes filtered:", n.RoutesFiltered)
+	}
+
+	if n.RoutesExported != 2342 {
+		t.Error("Unexpected routes exported:", n.RoutesExported)
+	}
+
 }
 
 func Test_RoutesParsing(t *testing.T) {
