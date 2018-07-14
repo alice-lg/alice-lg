@@ -156,6 +156,15 @@ func parseNeighbours(bird ClientResponse, config Config) (api.Neighbours, error)
 	return neighbours, nil
 }
 
+// Get neighbors from summary endpoint
+func parseNeighborSummary(
+	bird ClientResponse, config Config,
+) (api.Neighbours, error) {
+	neighbors := api.Neighbours{}
+
+	return neighbors, nil
+}
+
 // Parse route bgp info
 func parseRouteBgpInfo(data interface{}) api.BgpInfo {
 	bgpData, ok := data.(map[string]interface{})
