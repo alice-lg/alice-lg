@@ -17,8 +17,8 @@
 			"neighbour": "185.1.58.29",
 			"asn": 42,
 			"state": "up",
-			"uptime": 9223372040000000000,
-			"description": "Packet Clearing House",
+			"uptime": 5033318900526,
+			"description": "Test Peer 2001",
 			"routes_received": 161,
 			"routes_accepted": 161,
 			"routes_filtered": 0,
@@ -27,14 +27,14 @@
 		{
 			"id": "R002a_0_1",
 			"neighbour": "2001:7f8:9e::2a:0:1",
-			"asn": 42,
-			"state": "up",
-			"uptime": 9223372040000000000,
-			"description": "Packet Clearing House",
+			"asn": 23,
+			"state": "start",
+			"uptime": 7038818900526,
+			"description": "Test Peer 2000",
 			"routes_received": 154,
-			"routes_accepted": 154,
+			"routes_accepted": 152,
 			"routes_filtered": 0,
-			"routes_exported": 21369
+			"routes_exported": 2342 
 		}
 	]
 }
