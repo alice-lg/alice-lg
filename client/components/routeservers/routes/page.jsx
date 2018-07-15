@@ -11,7 +11,7 @@ import PageHeader from 'components/page-header'
 import ProtocolName
   from 'components/routeservers/protocols/name'
 
-import Routes     from './routes'
+import RoutesView  from './view'
 
 import SearchInput from 'components/search-input'
 
@@ -33,7 +33,7 @@ class RoutesPage extends React.Component {
   }
 
   componentDidMount() {
-    // Assert protocols for RS are loaded
+    // Assert neighbors for RS are loaded
     this.props.dispatch(
       loadRouteserverProtocol(parseInt(this.props.params.routeserverId))
     );
@@ -63,8 +63,21 @@ class RoutesPage extends React.Component {
                 onChange={(e) => this.setFilter(e.target.value)}  />
             </div>
 
-            <Routes routeserverId={this.props.params.routeserverId}
-                    protocolId={this.props.params.protocolId} />
+            <RoutesView
+                routes="received"
+                routeserverId={this.props.params.routeserverId}
+                protocolId={this.props.params.protocolId} />
+
+            <RoutesView
+                routes="filtered"
+                routeserverId={this.props.params.routeserverId}
+                protocolId={this.props.params.protocolId} />
+
+            <RoutesView
+                routes="not-exported"
+                routeserverId={this.props.params.routeserverId}
+                protocolId={this.props.params.protocolId} />
+
           </div>
           <div className="col-md-4">
             <div className="card">
