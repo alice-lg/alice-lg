@@ -3,6 +3,9 @@ package main
 import (
 	"net/http"
 	"strconv"
+	"strings"
+
+	"github.com/alice-lg/alice-lg/backend/api"
 )
 
 /*
@@ -26,4 +29,28 @@ func apiQueryMustInt(req *http.Request, param string, defaultValue int) int {
 	}
 
 	return value
+}
+
+/*
+Filter response to match query criteria
+*/
+
+func apiQueryFilterNextHopGateway(
+	req *http.Request, param string, routes api.Routes,
+) api.Routes {
+	query := req.URL.Query()
+	q, ok := query[param]
+	if !ok {
+		return routes
+	}
+
+	results := make(api.Routes, 0, len(routes))
+	for _, r := range routes {
+		if strings.HasPrefix(r.Network, q[0]) ||
+			strings.HasPrefix(r.Gateway, q[0]) {
+			results = append(results, r)
+		}
+	}
+
+	return results
 }

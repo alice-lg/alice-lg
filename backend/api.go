@@ -215,13 +215,16 @@ func apiRoutesListReceived(
 		return nil, err
 	}
 
+	// Filter routes based on criteria if present
+	routes := apiQueryFilterNextHopGateway(req, "q", result.Imported)
+
 	// Paginate results
 	// TODO: get pageSize from config
 	page := apiQueryMustInt(req, "page", 0)
 	pageSize := 200
+	routes, pagination := apiPaginateRoutes(routes, page, pageSize)
 
 	// Make paginated response
-	routes, pagination := apiPaginateRoutes(result.Imported, page, pageSize)
 	response := api.PaginatedRoutesResponse{
 		RoutesResponse: &api.RoutesResponse{
 			Api:      result.Api,
@@ -249,13 +252,16 @@ func apiRoutesListFiltered(
 		return nil, err
 	}
 
+	// Filter routes based on criteria if present
+	routes := apiQueryFilterNextHopGateway(req, "q", result.Filtered)
+
 	// Paginate results
 	// TODO: get pageSize from config
 	page := apiQueryMustInt(req, "page", 0)
 	pageSize := 200
+	routes, pagination := apiPaginateRoutes(routes, page, pageSize)
 
 	// Make response
-	routes, pagination := apiPaginateRoutes(result.Filtered, page, pageSize)
 	response := api.PaginatedRoutesResponse{
 		RoutesResponse: &api.RoutesResponse{
 			Api:      result.Api,
@@ -283,13 +289,15 @@ func apiRoutesListNotExported(
 		return nil, err
 	}
 
+	routes := apiQueryFilterNextHopGateway(req, "q", result.NotExported)
+
 	// Paginate results
 	// TODO: get pageSize from config
 	page := apiQueryMustInt(req, "page", 0)
 	pageSize := 200
+	routes, pagination := apiPaginateRoutes(routes, page, pageSize)
 
 	// Make response
-	routes, pagination := apiPaginateRoutes(result.NotExported, page, pageSize)
 	response := api.PaginatedRoutesResponse{
 		RoutesResponse: &api.RoutesResponse{
 			Api:         result.Api,
