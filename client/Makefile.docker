@@ -12,17 +12,17 @@ image:
 	docker build . -t $(DOCKER_IMAGE) 
 
 deps: image
-	$(DOCKER_EXEC) npm install
-	$(DOCKER_EXEC) npm install -g gulp
-	$(DOCKER_EXEC) npm install -g gulp-cli
+	$(DOCKER_EXEC) "npm install"
+	$(DOCKER_EXEC) "npm install -g gulp"
+	$(DOCKER_EXEC) "npm install -g gulp-cli"
 
 client: deps
 	@echo "Building alice UI"
-	$(DOCKER_EXEC) ./node_modules/.bin/gulp
+	$(DOCKER_EXEC) "./node_modules/.bin/gulp"
 
 client_prod: deps
 	@echo "Building alice UI (production)"
-	$(DOCKER_EXEC) DISABLE_LOGGING=1 NODE_ENV=production ./node_modules/.bin/gulp
+	$(DOCKER_EXEC) "DISABLE_LOGGING=1 NODE_ENV=production ./node_modules/.bin/gulp"
 
 
 watch:
