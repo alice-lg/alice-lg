@@ -160,19 +160,22 @@ func parseNeighbours(bird ClientResponse, config Config) (api.Neighbours, error)
 func parseNeighborSummary(
 	bird ClientResponse, config Config,
 ) (api.Neighbours, error) {
-	birdNeighbors := bird["neighbours"].([]interface{})
+	birdNeighbors := bird["neighbors"].([]interface{})
 
 	neighbors := make(api.Neighbours, 0, len(birdNeighbors))
 
 	for _, b := range birdNeighbors {
 		n := b.(map[string]interface{})
+
+		uptime := parseRelativeServerTime(n["state_changed"], config)
+
 		// Parse neighbor from response
 		neighbor := &api.Neighbour{
 			Id:             mustString(n["id"], "unknown"),
-			Address:        mustString(n["neighbour"], "unknown"),
+			Address:        mustString(n["neighbor"], "unknown"),
 			Asn:            mustInt(n["asn"], 0),
 			State:          mustString(n["state"], "unknown"),
-			Uptime:         time.Duration(mustInt(n["uptime"], 0)),
+			Uptime:         uptime,
 			Description:    mustString(n["description"], "unknown"),
 			RoutesReceived: mustInt(n["routes_received"], -1),
 			RoutesAccepted: mustInt(n["routes_accepted"], -1),

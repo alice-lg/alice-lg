@@ -11,13 +11,13 @@
          "orig_ttl" : 0
       }
    },
-   "neighbours": [
+   "neighbors": [
 		{
 			"id": "R58_29",
-			"neighbour": "185.1.58.29",
+			"neighbor": "185.1.58.29",
 			"asn": 42,
 			"state": "up",
-			"uptime": 5033318900526,
+			"state_changed": "2018-07-14 15:08:30",
 			"description": "Test Peer 2001",
 			"routes_received": 161,
 			"routes_accepted": 161,
@@ -26,10 +26,10 @@
 		},
 		{
 			"id": "R002a_0_1",
-			"neighbour": "2001:7f8:9e::2a:0:1",
+			"neighbor": "2001:7f8:9e::2a:0:1",
 			"asn": 23,
 			"state": "start",
-			"uptime": 7038818900526,
+			"state_changed": "2018-07-14 15:08:30",
 			"description": "Test Peer 2000",
 			"routes_received": 154,
 			"routes_accepted": 152,
