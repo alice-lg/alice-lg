@@ -30,11 +30,18 @@ func NewBirdwatcher(config Config) *Birdwatcher {
 
 	// Check if we have a neighbor summary endpoint:
 	hasNeighborSummary := true
+	if config.DisableNeighborSummary {
+		hasNeighborSummary = false
+		log.Println("Config override: Disable neighbor summary; using `show protocols all`")
+	}
+
 	_, err := client.GetJson(NEIGHBOR_SUMMARY_ENDPOINT)
 	if err != nil {
 		hasNeighborSummary = false
 	} else {
-		log.Println("Using neighbor-summary capabilities on:", config.Name)
+		if !config.DisableNeighborSummary {
+			log.Println("Using neighbor-summary capabilities on:", config.Name)
+		}
 	}
 
 	birdwatcher := &Birdwatcher{
