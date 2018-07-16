@@ -4,6 +4,8 @@ import {connect} from 'react-redux'
 
 import {Link} from 'react-router'
 
+import RoutesTable from './table'
+
 import {fetchRoutesReceived,
         fetchRoutesFiltered,
         fetchRoutesNotExported} from './actions'
@@ -65,12 +67,20 @@ class RoutesView extends React.Component {
 
   render() {
     const type = this.props.type;
+    const state = this.props.routes[type];
+
+    if (state.loading) {
+      return null;
+    }
+
+    if (state.totalResults == 0) {
+      return null;
+    }
 
     return (
       <div className="card routes-view">
         <RoutesHeader type={type} />
-
-        [Paginator]
+        <RoutesTable routes={state.routes} />
       </div>
     );
   }

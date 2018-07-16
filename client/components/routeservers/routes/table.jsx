@@ -8,7 +8,7 @@ import {loadRouteserverRoutes, loadRouteserverRoutesFiltered} from '../actions'
 import {showBgpAttributes} from './bgp-attributes-modal-actions'
 
 import LoadingIndicator
-	from 'components/loading-indicator/small'
+	from './loading-indicator'
 
 
 import FilterReason
@@ -107,7 +107,8 @@ class RoutesTable extends React.Component {
     const routesColumns = this.props.routesColumns;
     const routesColumnsOrder = this.props.routesColumnsOrder;
 
-    routes = _filteredRoutes(routes, this.props.filter);
+
+    // routes = _filteredRoutes(routes, this.props.filter);
     if (!routes || !routes.length) {
       return null;
     }
@@ -140,6 +141,12 @@ class RoutesTable extends React.Component {
   }
 }
 
+export default connect(
+  (state) => ({
+    routesColumns:      state.config.routes_columns,
+    routesColumnsOrder: state.config.routes_columns_order,
+  })
+)(RoutesTable);
 
 
 /*
@@ -150,8 +157,6 @@ export default RoutesTable = connect(
   (state) => {
     return {
       filter:             state.routeservers.routesFilterValue,
-      routesColumns:      state.config.routes_columns,
-      routesColumnsOrder: state.config.routes_columns_order,
     }
   }
 )(RoutesTable);

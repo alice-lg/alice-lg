@@ -18,6 +18,9 @@ import SearchInput from 'components/search-input'
 import BgpAttributesModal
   from './bgp-attributes-modal'
 
+
+import RoutesLoadingIndicator from './loading-indicator'
+
 // Actions
 import {setRoutesFilterValue}
   from '../actions'
@@ -71,12 +74,12 @@ class RoutesPage extends React.Component {
             </div>
 
             <RoutesView
-                type={ROUTES_RECEIVED}
+                type={ROUTES_FILTERED}
                 routeserverId={this.props.params.routeserverId}
                 protocolId={this.props.params.protocolId} />
 
             <RoutesView
-                type={ROUTES_FILTERED}
+                type={ROUTES_RECEIVED}
                 routeserverId={this.props.params.routeserverId}
                 protocolId={this.props.params.protocolId} />
 
@@ -84,6 +87,8 @@ class RoutesPage extends React.Component {
                 type={ROUTES_NOT_EXPORTED}
                 routeserverId={this.props.params.routeserverId}
                 protocolId={this.props.params.protocolId} />
+
+            <RoutesLoadingIndicator />
 
           </div>
           <div className="col-md-4">
