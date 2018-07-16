@@ -24,8 +24,12 @@ import contentReducer
 import lookupReducer
 	from 'components/lookup/reducer'
 
+import routesReducer
+  from 'components/routeservers/routes/reducer'
+
 export default combineReducers({
   routeservers:  routeserversReducer,
+  routes:        routesReducer,
   modals:        modalsReducer,
   routing:       routerReducer,
 	lookup:				 lookupReducer,

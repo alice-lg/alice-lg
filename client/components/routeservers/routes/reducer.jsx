@@ -3,25 +3,24 @@
 const LOCATION_CHANGE = '@@router/LOCATION_CHANGE'
 
 const initialState = {
-  received: [],
-  filtered: [],
-  notExported: [],
 
+  received: [],
+  receivedLoading: false,
   receivedPage: 0,
   receivedTotalPages: 0,
   receivedTotalResults: 0,
 
+  filtered: [],
+  filteredLoading: false,
   filteredPage: 0,
   filteredTotalPages: 0,
   filteredTotalResults: 0,
 
+  notExported: [],
+  notExportedLoading: false,
   notExportedPage: 0,
   notExportedTotalPages: 0,
   notExportedTotalResults: 0,
-
-  receivedLoading: false,
-  filteredLoading: false,
-  notExportedLoading: false,
 
   filterQuery: "",
 }
