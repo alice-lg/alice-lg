@@ -13,8 +13,6 @@ image:
 
 deps: image
 	$(DOCKER_EXEC) "npm install"
-	$(DOCKER_EXEC) "npm install -g gulp"
-	$(DOCKER_EXEC) "npm install -g gulp-cli"
 
 client: deps
 	@echo "Building alice UI"
