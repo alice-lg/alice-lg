@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	NEIGHBOR_SUMMARY_ENDPOINT = "/neighbor-summary"
+	NEIGHBOR_SUMMARY_ENDPOINT = "/neighbors/summary"
 )
 
 type Birdwatcher struct {
