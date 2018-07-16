@@ -1,6 +1,9 @@
 
 DOCKER_IMAGE := alice-lg-node:latest
-DOCKER_EXEC := docker run -t -v `pwd`:/client/ -i $(DOCKER_IMAGE)
+DOCKER_EXEC := docker run -t -i \
+	-a stdin -a stdout -a stderr \
+	-v `pwd`:/client/ \
+	$(DOCKER_IMAGE) /bin/bash -c
 
 all: client
 	@echo "Built alice-lg client"
@@ -22,8 +25,7 @@ client_prod: deps
 	$(DOCKER_EXEC) DISABLE_LOGGING=1 NODE_ENV=production ./node_modules/.bin/gulp
 
 
-watch: deps
-	$(DOCKER_EXEC) ./node_modules/.bin/gulp watch
-
+watch:
+	$(DOCKER_EXEC) "./node_modules/.bin/gulp watch"
 
 
