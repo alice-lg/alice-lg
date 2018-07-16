@@ -4,6 +4,16 @@ import {connect} from 'react-redux'
 
 import {Link} from 'react-router'
 
+import {fetchRoutesReceived,
+        fetchRoutesFiltered,
+        fetchRoutesNotExported} from './actions'
+
+// Constants
+import {ROUTES_RECEIVED,
+        ROUTES_FILTERED,
+        ROUTES_NOT_EXPORTED} from './actions';
+
+
 /*
  * Render a RoutesView:
  * The routes view is a composit of:
@@ -15,7 +25,28 @@ import {Link} from 'react-router'
 class RoutesView extends React.Component {
 
   componentDidMount() {
+    const type = this.props.type;
+    console.log("TTYUPWER:", type);
+    console.log("EWDF:", ROUTES_RECEIVED);
+    console.log("dsf:", fetchRoutesReceived);
 
+    // Depending on the component's configuration, dispatch
+    // routes fetching
+    const fetchRoutes = ({
+      ROUTES_RECEIVED:     fetchRoutesReceived,
+      ROUTES_FILTERED:     fetchRoutesFiltered,
+      ROUTES_NOT_EXPORTED: fetchRoutesNotExported,
+    })[type];
+
+    // Gather required params
+    const params = this.props.routes[type];
+    const rsId = this.props.routeserverId;
+    const pId = this.props.protocolId;
+    const query = this.props.filterQuery;
+
+    console.log("REC: FETCH_ROUTES:", fetchRoutes);
+    // Make request
+    this.props.dispatch(fetchRoutes(rsId, pId, params.page, query));
 
   }
 
@@ -35,9 +66,39 @@ class RoutesView extends React.Component {
 }
 
 
+
+
 export default connect(
-  (state) => ({
-      routesFilterValue: state.routeservers.routesFilterValue
-  })
+  (state) => {
+    let received = {
+      routes:       state.routes.received,
+      loading:      state.routes.receivedLoading,
+      page:         state.routes.receivedPage,
+      totalPages:   state.routes.receivedTotalPages,
+      totalResults: state.routes.receivedTotalResults,
+    };
+    let filtered = {
+      routes:       state.routes.filtered,
+      loading:      state.routes.filteredLoading,
+      page:         state.routes.filteredPage,
+      totalPages:   state.routes.filteredTotalPages,
+      totalResults: state.routes.filteredTotalResults,
+    };
+    let notExported = {
+      routes:       state.routes.notExported,
+      loading:      state.routes.notExportedLoading,
+      page:         state.routes.notExportedPage,
+      totalPages:   state.routes.notExportedTotalPages,
+      totalResults: state.routes.notExportedTotalResults,
+    };
+    return({
+      filterQuery: state.routes.filterQuery,
+      routes: {
+          received:    received,
+          filtered:    filtered,
+          notExported: notExported
+      },
+    });
+  }
 )(RoutesView);
 

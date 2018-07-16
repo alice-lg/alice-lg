@@ -2,6 +2,19 @@
 
 const LOCATION_CHANGE = '@@router/LOCATION_CHANGE'
 
+import {FETCH_ROUTES_RECEIVED_REQUEST,
+        FETCH_ROUTES_RECEIVED_SUCCESS,
+        FETCH_ROUTES_RECEIVED_ERROR,
+
+        FETCH_ROUTES_FILTERED_REQUEST,
+        FETCH_ROUTES_FILTERED_SUCCESS,
+        FETCH_ROUTES_FILTERED_ERROR,
+
+        FETCH_ROUTES_NOT_EXPORTED_REQUEST,
+        FETCH_ROUTES_NOT_EXPORTED_SUCCESS,
+        FETCH_ROUTES_NOT_EXPORTED_ERROR} from './actions'
+
+
 const initialState = {
 
   received: [],
@@ -9,18 +22,21 @@ const initialState = {
   receivedPage: 0,
   receivedTotalPages: 0,
   receivedTotalResults: 0,
+  receivedApiStatus: {},
 
   filtered: [],
   filteredLoading: false,
   filteredPage: 0,
   filteredTotalPages: 0,
   filteredTotalResults: 0,
+  filteredApiStatus: {},
 
   notExported: [],
   notExportedLoading: false,
   notExportedPage: 0,
   notExportedTotalPages: 0,
   notExportedTotalResults: 0,
+  notExportedApiStatus: {},
 
   filterQuery: "",
 }

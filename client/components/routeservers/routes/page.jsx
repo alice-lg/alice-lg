@@ -24,6 +24,13 @@ import {setRoutesFilterValue}
 import {loadRouteserverProtocol}
   from 'components/routeservers/actions'
 
+
+// Constants
+import {ROUTES_RECEIVED,
+        ROUTES_FILTERED,
+        ROUTES_NOT_EXPORTED} from './actions';
+
+
 class RoutesPage extends React.Component {
 
   setFilter(value) {
@@ -58,23 +65,23 @@ class RoutesPage extends React.Component {
 
             <div className="card">
               <SearchInput
-                value={this.props.routesFilterValue}
+                value={this.props.filterQuery}
                 placeholder="Filter by Network or BGP next-hop"
                 onChange={(e) => this.setFilter(e.target.value)}  />
             </div>
 
             <RoutesView
-                routes="received"
+                type={ROUTES_RECEIVED}
                 routeserverId={this.props.params.routeserverId}
                 protocolId={this.props.params.protocolId} />
 
             <RoutesView
-                routes="filtered"
+                type={ROUTES_FILTERED}
                 routeserverId={this.props.params.routeserverId}
                 protocolId={this.props.params.protocolId} />
 
             <RoutesView
-                routes="not-exported"
+                type={ROUTES_NOT_EXPORTED}
                 routeserverId={this.props.params.routeserverId}
                 protocolId={this.props.params.protocolId} />
 
@@ -94,9 +101,35 @@ class RoutesPage extends React.Component {
 
 export default connect(
   (state) => {
-    return {
-      routesFilterValue: state.routeservers.routesFilterValue
-    }
+    let received = {
+      routes:       state.routes.received,
+      loading:      state.routes.receivedLoading,
+      page:         state.routes.receivedPage,
+      totalPages:   state.routes.receivedTotalPages,
+      totalResults: state.routes.receivedTotalResults,
+    };
+    let filtered = {
+      routes:       state.routes.filtered,
+      loading:      state.routes.filteredLoading,
+      page:         state.routes.filteredPage,
+      totalPages:   state.routes.filteredTotalPages,
+      totalResults: state.routes.filteredTotalResults,
+    };
+    let notExported = {
+      routes:       state.routes.notExported,
+      loading:      state.routes.notExportedLoading,
+      page:         state.routes.notExportedPage,
+      totalPages:   state.routes.notExportedTotalPages,
+      totalResults: state.routes.notExportedTotalResults,
+    };
+    return({
+      filterQuery: state.routes.filterQuery,
+      routes: {
+          received:    received,
+          filtered:    filtered,
+          notExported: notExported
+      }
+    });
   }
 )(RoutesPage);
 
