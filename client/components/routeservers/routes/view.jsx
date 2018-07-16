@@ -14,6 +14,24 @@ import {ROUTES_RECEIVED,
         ROUTES_NOT_EXPORTED} from './actions';
 
 
+
+const RoutesHeader = (props) => {
+  const type = props.type;
+  const color = {
+    [ROUTES_RECEIVED]: "green",
+    [ROUTES_FILTERED]: "orange",
+    [ROUTES_NOT_EXPORTED]: "red"
+  }[type];
+  const rtype = {
+    [ROUTES_RECEIVED]: "accepted",
+    [ROUTES_FILTERED]: "filtered",
+    [ROUTES_NOT_EXPORTED]: "not exported"
+  }[type];
+  return (<p style={{"color": color, "textTransform": "uppercase"}}>
+            Routes {rtype}
+          </p>);
+};
+
 /*
  * Render a RoutesView:
  * The routes view is a composit of:
@@ -46,12 +64,11 @@ class RoutesView extends React.Component {
   }
 
   render() {
+    const type = this.props.type;
 
     return (
-      <div className="routes-view">
-        [HEADER]<br />
-
-        [TABLE]<br />
+      <div className="card routes-view">
+        <RoutesHeader type={type} />
 
         [Paginator]
       </div>

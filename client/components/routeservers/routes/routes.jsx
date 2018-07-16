@@ -126,27 +126,25 @@ class RoutesTable extends React.Component {
     });
 
     return (
-      <table className="table table-striped table-routes">
-        <thead>
-          <tr>
-            {routesColumnsOrder.map(col => <th key={col}>{routesColumns[col]}</th>)}
-          </tr>
-        </thead>
-        <tbody>
-          {routesView}
-        </tbody>
-      </table>
+      <div className="card">
+        {this.props.header}
+        <table className="table table-striped table-routes">
+          <thead>
+            <tr>
+              {routesColumnsOrder.map(col => <th key={col}>{routesColumns[col]}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {routesView}
+          </tbody>
+        </table>
+      </div>
     );
   }
 }
 
 
-
-/*
-OLD ROUTES VIEW.
-
-
-export default RoutesTable = connect(
+RoutesTable = connect(
   (state) => {
     return {
       filter:             state.routeservers.routesFilterValue,
@@ -220,5 +218,3 @@ export default connect(
     }
   }
 )(RoutesTables);
-
-*/
