@@ -10,8 +10,8 @@ import {loadRouteserverProtocol}
 
 import {Link} from 'react-router'
 
-import RelativeTime
-	from 'components/relativetime'
+import RelativeTimestamp
+	from 'components/relativetime/timestamp'
 
 import LoadingIndicator
 	from 'components/loading-indicator/small'
@@ -51,7 +51,7 @@ class RoutesLink extends React.Component {
 
 //
 // Neighbours Columns Components
-// 
+//
 // * Render columums either with direct property
 //   access, or
 // * Use a "widget", a rendering function to which
@@ -88,8 +88,7 @@ const ColDescription = function(props) {
 const ColUptime = function(props) {
   return (
     <td className="date-since">
-      <RelativeTime value={props.neighbour.details.state_changed}
-                    suffix={true} />
+      <RelativeTimestamp value={props.neighbour.uptime} suffix={true} />
     </td>
   );
 }

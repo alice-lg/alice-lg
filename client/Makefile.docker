@@ -1,0 +1,29 @@
+
+DOCKER_IMAGE := alice-lg-node:latest
+DOCKER_EXEC := docker run -t -v `pwd`:/client/ -i $(DOCKER_IMAGE)
+
+all: client
+	@echo "Built alice-lg client"
+
+image:
+	docker build . -t $(DOCKER_IMAGE) 
+
+deps: image
+	$(DOCKER_EXEC) npm install
+	$(DOCKER_EXEC) npm install -g gulp
+	$(DOCKER_EXEC) npm install -g gulp-cli
+
+client: deps
+	@echo "Building alice UI"
+	$(DOCKER_EXEC) ./node_modules/.bin/gulp
+
+client_prod: deps
+	@echo "Building alice UI (production)"
+	$(DOCKER_EXEC) DISABLE_LOGGING=1 NODE_ENV=production ./node_modules/.bin/gulp
+
+
+watch: deps
+	$(DOCKER_EXEC) ./node_modules/.bin/gulp watch
+
+
+
