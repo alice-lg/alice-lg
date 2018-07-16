@@ -59,21 +59,27 @@ function routesError(type) {
 
 function fetchRoutes(type) {
   const requestAction = {
-    ROUTES_RECEIVED:     fetchRoutesReceivedRequest,
-    ROUTES_FILTERED:     fetchRoutesFilteredRequest,
-    ROUTES_NOT_EXPORTED: fetchRoutesNotExportedRequest
+    [ROUTES_RECEIVED]:     fetchRoutesReceivedRequest,
+    [ROUTES_FILTERED]:     fetchRoutesFilteredRequest,
+    [ROUTES_NOT_EXPORTED]: fetchRoutesNotExportedRequest
   }[type];
 
   const successAction = {
-    ROUTES_RECEIVED:     fetchRoutesReceivedSuccess,
-    ROUTES_FILTERED:     fetchRoutesFilteredSuccess,
-    ROUTES_NOT_EXPORTED: fetchRoutesNotExportedSuccess
+    [ROUTES_RECEIVED]:     fetchRoutesReceivedSuccess,
+    [ROUTES_FILTERED]:     fetchRoutesFilteredSuccess,
+    [ROUTES_NOT_EXPORTED]: fetchRoutesNotExportedSuccess
   }[type];
 
   const errorAction = {
-    ROUTES_RECEIVED:     fetchRoutesReceivedError,
-    ROUTES_FILTERED:     fetchRoutesFilteredError,
-    ROUTES_NOT_EXPORTED: fetchRoutesNotExportedError
+    [ROUTES_RECEIVED]:     fetchRoutesReceivedError,
+    [ROUTES_FILTERED]:     fetchRoutesFilteredError,
+    [ROUTES_NOT_EXPORTED]: fetchRoutesNotExportedError
+  }[type];
+
+  const rtype = {
+    [ROUTES_RECEIVED]: 'imported',
+    [ROUTES_FILTERED]: 'filtered',
+    [ROUTES_NOT_EXPORTED]: 'not_exported',
   }[type];
 
   return (rsId, pId, page, query) => {
@@ -83,7 +89,7 @@ function fetchRoutes(type) {
       axios.get(routesUrl(type, rsId, pId, page, query))
         .then(({data}) => {
           dispatch(successAction(
-            data.imported,
+            data[rtype],
             data.pagination,
             data.api));
         })

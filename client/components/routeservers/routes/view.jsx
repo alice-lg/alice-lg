@@ -26,17 +26,14 @@ class RoutesView extends React.Component {
 
   componentDidMount() {
     const type = this.props.type;
-    console.log("TTYUPWER:", type);
-    console.log("EWDF:", ROUTES_RECEIVED);
-    console.log("dsf:", fetchRoutesReceived);
 
     // Depending on the component's configuration, dispatch
     // routes fetching
-    const fetchRoutes = ({
-      ROUTES_RECEIVED:     fetchRoutesReceived,
-      ROUTES_FILTERED:     fetchRoutesFiltered,
-      ROUTES_NOT_EXPORTED: fetchRoutesNotExported,
-    })[type];
+    const fetchRoutes = {
+      [ROUTES_RECEIVED]:     fetchRoutesReceived,
+      [ROUTES_FILTERED]:     fetchRoutesFiltered,
+      [ROUTES_NOT_EXPORTED]: fetchRoutesNotExported,
+    }[type];
 
     // Gather required params
     const params = this.props.routes[type];
@@ -44,10 +41,8 @@ class RoutesView extends React.Component {
     const pId = this.props.protocolId;
     const query = this.props.filterQuery;
 
-    console.log("REC: FETCH_ROUTES:", fetchRoutes);
     // Make request
     this.props.dispatch(fetchRoutes(rsId, pId, params.page, query));
-
   }
 
   render() {
@@ -94,9 +89,9 @@ export default connect(
     return({
       filterQuery: state.routes.filterQuery,
       routes: {
-          received:    received,
-          filtered:    filtered,
-          notExported: notExported
+          [ROUTES_RECEIVED]:     received,
+          [ROUTES_FILTERED]:     filtered,
+          [ROUTES_NOT_EXPORTED]: notExported
       },
     });
   }

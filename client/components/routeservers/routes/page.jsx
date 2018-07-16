@@ -102,32 +102,23 @@ class RoutesPage extends React.Component {
 export default connect(
   (state) => {
     let received = {
-      routes:       state.routes.received,
       loading:      state.routes.receivedLoading,
-      page:         state.routes.receivedPage,
-      totalPages:   state.routes.receivedTotalPages,
       totalResults: state.routes.receivedTotalResults,
     };
     let filtered = {
-      routes:       state.routes.filtered,
       loading:      state.routes.filteredLoading,
-      page:         state.routes.filteredPage,
-      totalPages:   state.routes.filteredTotalPages,
       totalResults: state.routes.filteredTotalResults,
     };
     let notExported = {
-      routes:       state.routes.notExported,
       loading:      state.routes.notExportedLoading,
-      page:         state.routes.notExportedPage,
-      totalPages:   state.routes.notExportedTotalPages,
       totalResults: state.routes.notExportedTotalResults,
     };
     return({
       filterQuery: state.routes.filterQuery,
       routes: {
-          received:    received,
-          filtered:    filtered,
-          notExported: notExported
+          [ROUTES_RECEIVED]:     received,
+          [ROUTES_FILTERED]:     filtered,
+          [ROUTES_NOT_EXPORTED]: notExported
       }
     });
   }
