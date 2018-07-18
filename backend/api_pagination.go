@@ -30,6 +30,7 @@ func apiPaginateRoutes(
 
 	pagination := api.Pagination{
 		Page:         page,
+		PageSize:     pageSize,
 		TotalPages:   totalPages,
 		TotalResults: totalResults,
 	}
