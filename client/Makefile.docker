@@ -1,8 +1,10 @@
 
+DOCKER_CONTAINER := alice-lg-node-build
 DOCKER_IMAGE := alice-lg-node:latest
 DOCKER_EXEC := docker run -t -i \
 	-a stdin -a stdout -a stderr \
 	-v `pwd`:/client/ \
+	--name $(DOCKER_CONTAINER) \
 	$(DOCKER_IMAGE) /bin/bash -c
 
 all: client
@@ -22,8 +24,12 @@ client_prod: deps
 	@echo "Building alice UI (production)"
 	$(DOCKER_EXEC) "DISABLE_LOGGING=1 NODE_ENV=production ./node_modules/.bin/gulp"
 
-
 watch:
 	$(DOCKER_EXEC) "while true; do ./node_modules/.bin/gulp watch; done"
 
+stop:
+	docker stop $(DOCKER_CONTAINER)
+
+kill:
+	docker kill $(DOCKER_CONTAINER)
 
