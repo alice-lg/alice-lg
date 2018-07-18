@@ -1,7 +1,7 @@
 
 DOCKER_CONTAINER := alice-lg-node-build
 DOCKER_IMAGE := alice-lg-node:latest
-DOCKER_EXEC := docker run -t -i \
+DOCKER_EXEC := docker run --rm -t -i \
 	-a stdin -a stdout -a stderr \
 	-v `pwd`:/client/ \
 	--name $(DOCKER_CONTAINER) \
@@ -16,11 +16,11 @@ image:
 deps: image
 	$(DOCKER_EXEC) "npm install"
 
-client: deps
+client: stop deps
 	@echo "Building alice UI"
 	$(DOCKER_EXEC) "./node_modules/.bin/gulp"
 
-client_prod: deps
+client_prod: stop deps
 	@echo "Building alice UI (production)"
 	$(DOCKER_EXEC) "DISABLE_LOGGING=1 NODE_ENV=production ./node_modules/.bin/gulp"
 
@@ -28,8 +28,10 @@ watch:
 	$(DOCKER_EXEC) "while true; do ./node_modules/.bin/gulp watch; done"
 
 stop:
-	docker stop $(DOCKER_CONTAINER)
+	@echo "Stopping docker container: $(DOCKER_CONTAINER)"
+	-docker stop $(DOCKER_CONTAINER)
 
 kill:
-	docker kill $(DOCKER_CONTAINER)
+	@echo "Killing docker container: $(DOCKER_CONTAINER)"
+	-docker kill $(DOCKER_CONTAINER)
 
