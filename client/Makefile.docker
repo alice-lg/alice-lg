@@ -24,6 +24,6 @@ client_prod: deps
 
 
 watch:
-	$(DOCKER_EXEC) "./node_modules/.bin/gulp watch"
+	$(DOCKER_EXEC) "while true; do ./node_modules/.bin/gulp watch; done"
 
 
