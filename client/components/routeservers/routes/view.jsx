@@ -5,6 +5,8 @@ import {connect} from 'react-redux'
 import {Link} from 'react-router'
 
 import RoutesTable from './table'
+import {RoutesPaginator,
+        RoutesPaginationInfo} from './pagination'
 
 import {fetchRoutesReceived,
         fetchRoutesFiltered,
@@ -68,6 +70,16 @@ class RoutesView extends React.Component {
   render() {
     const type = this.props.type;
     const state = this.props.routes[type];
+    const queryParam = {
+      [ROUTES_RECEIVED]:     "pr",
+      [ROUTES_FILTERED]:     "pf",
+      [ROUTES_NOT_EXPORTED]: "pn",
+    }[type];
+    const name = {
+      [ROUTES_RECEIVED]:     "routes-received",
+      [ROUTES_FILTERED]:     "routes-filtered",
+      [ROUTES_NOT_EXPORTED]: "routes-not-exported",
+    }[type];
 
     if (state.loading) {
       return null;
@@ -78,17 +90,33 @@ class RoutesView extends React.Component {
     }
 
     return (
-      <div className="card routes-view">
-        <RoutesHeader type={type} />
+      <div className={`card routes-view ${name}`}>
+        <a name={name} />
+        <div className="row">
+          <div className="col-md-6">
+            <RoutesHeader type={type} />
+          </div>
+          <div className="col-md-6">
+            <RoutesPaginationInfo page={state.page}
+                                  pageSize={state.pageSize}
+                                  totalPages={state.totalPages}
+                                  totalResults={state.totalResults} />
+
+          </div>
+        </div>
         <RoutesTable routes={state.routes} />
+
+        <center>
+            <RoutesPaginator page={state.page}
+                             totalPages={state.totalPages}
+                             queryParam={queryParam}
+                             anchor={name} />
+        </center>
       </div>
     );
   }
 
 }
-
-
-
 
 export default connect(
   (state) => {
@@ -96,6 +124,7 @@ export default connect(
       routes:       state.routes.received,
       loading:      state.routes.receivedLoading,
       page:         state.routes.receivedPage,
+      pageSize:     state.routes.receivedPageSize,
       totalPages:   state.routes.receivedTotalPages,
       totalResults: state.routes.receivedTotalResults,
     };
@@ -103,6 +132,7 @@ export default connect(
       routes:       state.routes.filtered,
       loading:      state.routes.filteredLoading,
       page:         state.routes.filteredPage,
+      pageSize:     state.routes.filteredPageSize,
       totalPages:   state.routes.filteredTotalPages,
       totalResults: state.routes.filteredTotalResults,
     };
@@ -110,6 +140,7 @@ export default connect(
       routes:       state.routes.notExported,
       loading:      state.routes.notExportedLoading,
       page:         state.routes.notExportedPage,
+      pageSize:     state.routes.notExportedPageSize,
       totalPages:   state.routes.notExportedTotalPages,
       totalResults: state.routes.notExportedTotalResults,
     };

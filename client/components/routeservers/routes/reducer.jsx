@@ -24,6 +24,7 @@ const initialState = {
   receivedLoading: false,
   receivedError: null,
   receivedPage: 0,
+  receivedPageSize: 0,
   receivedTotalPages: 0,
   receivedTotalResults: 0,
   receivedApiStatus: {},
@@ -32,6 +33,7 @@ const initialState = {
   filteredLoading: false,
   filteredError: null,
   filteredPage: 0,
+  filteredPageSize: 0,
   filteredTotalPages: 0,
   filteredTotalResults: 0,
   filteredApiStatus: {},
@@ -40,6 +42,7 @@ const initialState = {
   notExportedLoading: false,
   notExportedError: null,
   notExportedPage: 0,
+  notExportedPageSize: 0,
   notExportedTotalPages: 0,
   notExportedTotalResults: 0,
   notExportedApiStatus: {},
@@ -104,10 +107,11 @@ function _handleFetchRoutesSuccess(type, state, payload) {
     [stype]: payload.routes,
 
     [stype+'Page']:         pagination.page,
+    [stype+'PageSize']:     pagination.page_size,
     [stype+'TotalPages']:   pagination.total_pages,
     [stype+'TotalResults']: pagination.total_results,
 
-    [stype+'ApiStatus']:    apiStatus,
+    [stype+'ApiStatus']: apiStatus,
 
     [stype+'Loading']: false,
   });
