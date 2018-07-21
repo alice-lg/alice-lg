@@ -5,8 +5,8 @@ import {connect} from 'react-redux'
 import {Link} from 'react-router'
 
 
+
 const PageLink = function(props) {
-/*
   const linkPage = parseInt(props.page);
 
   let pr = props.pageReceived;
@@ -29,16 +29,15 @@ const PageLink = function(props) {
   const search = `?pr=${pr}&pf=${pf}&pn=${pn}`;
   const hash   = `#${props.anchor}`;
   const linkTo = {
-    pathname: routing.pathname,
+    pathname: props.routing.pathname,
     hash:     hash,
+    search:   search,
   };
 
   return (
     <Link to={linkTo}>{linkPage + 1}</Link>
   );
-  */
-  return (<p>23</p>);
-};
+}
 
 
 class RoutesPaginatorView extends React.Component {
@@ -48,14 +47,16 @@ class RoutesPaginatorView extends React.Component {
       return null; // Nothing to paginate
     }
 
+
     const pageLinks = Array.from(Array(this.props.totalPages), (_, i) => {
-        /*
-               <pagelink page={i}
-                              anchor={this.props.anchor} />
-          */
       return (
         <li key={i}>
-            {i + 1}
+          <PageLink page={i}
+                    routing={this.props.routing}
+                    anchor={this.props.anchor}
+                    pageReceived={this.props.pageReceived}
+                    pageFiltered={this.props.pageFiltered}
+                    pageNotExported={this.props.pageNotExported} />
         </li>
       );
     });
@@ -70,7 +71,6 @@ class RoutesPaginatorView extends React.Component {
               </a>
           </li>
           <li>
-            <PageLink page={0} anchor={this.props.anchor} />
           </li>
 
           {pageLinks}
@@ -85,7 +85,8 @@ class RoutesPaginatorView extends React.Component {
   }
 }
 
-export const RoutesPagniator = connect(
+
+export const RoutesPaginator = connect(
   (state) => ({
       pageReceived:    state.routes.receivedPage,
       pageFiltered:    state.routes.filteredPage,

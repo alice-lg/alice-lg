@@ -18,7 +18,6 @@ import {ROUTES_RECEIVED,
         ROUTES_NOT_EXPORTED} from './actions';
 
 
-
 const RoutesHeader = (props) => {
   const type = props.type;
   const color = {
@@ -46,7 +45,7 @@ const RoutesHeader = (props) => {
 
 class RoutesView extends React.Component {
 
-  componentDidMount() {
+  dispatchFetchRoutes() {
     const type = this.props.type;
 
     // Depending on the component's configuration, dispatch
@@ -65,6 +64,14 @@ class RoutesView extends React.Component {
 
     // Make request
     this.props.dispatch(fetchRoutes(rsId, pId, params.page, query));
+  }
+
+  componentDidMount() {
+    this.dispatchFetchRoutes();
+  }
+
+  componentDidUpdate(prevProps) {
+    console.log("Component did update -- this.props:", this.props, "prevProps:", prevProps);
   }
 
   render() {
@@ -90,8 +97,7 @@ class RoutesView extends React.Component {
     }
 
     return (
-      <div className={`card routes-view ${name}`}>
-        <a name={name} />
+      <div className={`card routes-view ${name}`} id={name}>
         <div className="row">
           <div className="col-md-6">
             <RoutesHeader type={type} />
@@ -107,8 +113,7 @@ class RoutesView extends React.Component {
         <RoutesTable routes={state.routes} />
 
         <center>
-            <RoutesPaginator page={state.page}
-                             totalPages={state.totalPages}
+            <RoutesPaginator page={state.page} totalPages={state.totalPages}
                              queryParam={queryParam}
                              anchor={name} />
         </center>
