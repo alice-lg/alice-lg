@@ -1,0 +1,19 @@
+
+/*
+ Pagination is handled pretty well by bootstrap.
+ We add some minor extensions, like a breakable pagionator.
+*/
+
+.pagination {
+    li.break {
+        a {
+            border: none;
+            border-left: 1px solid #ddd;
+
+            &:hover {
+                background: none;
+            }
+        }
+    }
+}
+
