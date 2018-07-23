@@ -1,6 +1,11 @@
 
+DOCKER_CONTAINER := alice-lg-node-build
 DOCKER_IMAGE := alice-lg-node:latest
-DOCKER_EXEC := docker run -t -v `pwd`:/client/ -i $(DOCKER_IMAGE)
+DOCKER_EXEC := docker run --rm -t -i \
+	-a stdin -a stdout -a stderr \
+	-v `pwd`:/client/ \
+	--name $(DOCKER_CONTAINER) \
+	$(DOCKER_IMAGE) /bin/bash -c
 
 all: client
 	@echo "Built alice-lg client"
@@ -9,21 +14,24 @@ image:
 	docker build . -t $(DOCKER_IMAGE) 
 
 deps: image
-	$(DOCKER_EXEC) npm install
-	$(DOCKER_EXEC) npm install -g gulp
-	$(DOCKER_EXEC) npm install -g gulp-cli
+	$(DOCKER_EXEC) "npm install"
 
-client: deps
+client: stop deps
 	@echo "Building alice UI"
-	$(DOCKER_EXEC) ./node_modules/.bin/gulp
+	$(DOCKER_EXEC) "./node_modules/.bin/gulp"
 
-client_prod: deps
+client_prod: stop deps
 	@echo "Building alice UI (production)"
-	$(DOCKER_EXEC) DISABLE_LOGGING=1 NODE_ENV=production ./node_modules/.bin/gulp
+	$(DOCKER_EXEC) "DISABLE_LOGGING=1 NODE_ENV=production ./node_modules/.bin/gulp"
 
+watch:
+	$(DOCKER_EXEC) "while true; do ./node_modules/.bin/gulp watch; done"
 
-watch: deps
-	$(DOCKER_EXEC) ./node_modules/.bin/gulp watch
+stop:
+	@echo "Stopping docker container: $(DOCKER_CONTAINER)"
+	-docker stop $(DOCKER_CONTAINER)
 
-
+kill:
+	@echo "Killing docker container: $(DOCKER_CONTAINER)"
+	-docker kill $(DOCKER_CONTAINER)
 

@@ -93,7 +93,10 @@ func Test_NeighboursParsing(t *testing.T) {
 }
 
 func Test_NeighborSummaryParsing(t *testing.T) {
-	config := Config{Timezone: "UTC"} // Or ""
+
+	config := Config{
+		Timezone:        "UTC",
+		ServerTimeShort: "2006-01-02 15:04:05"} // Or ""
 	bird, err := loadTestResponse("../../testdata/api/neighbor_summary.json")
 	if err != nil {
 		t.Error(err)
@@ -128,8 +131,17 @@ func Test_NeighborSummaryParsing(t *testing.T) {
 		t.Error("Unexpected description:", n.Description)
 	}
 
-	if n.Uptime != 7038818900526 {
-		t.Error("Unexpected uptime:", n.Uptime)
+	// Uptime is relative to the last_change timestamp,
+	// so the value is shifting. Calculate the expected value first:
+	lastChange := time.Date(2018, 7, 14, 15, 8, 30, 0, time.UTC)
+	expectedUptime := time.Since(lastChange)
+	uptimeDiff := expectedUptime - n.Uptime
+
+	if uptimeDiff > 1*time.Second {
+		t.Error(
+			"Unexpected uptime:", n.Uptime,
+			"diverges more than 1 s from expected value",
+		)
 	}
 
 	if n.RoutesReceived != 154 {

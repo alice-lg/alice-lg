@@ -10,7 +10,7 @@ import (
 )
 
 type RoutesStore struct {
-	routesMap       map[int]api.RoutesResponse
+	routesMap       map[int]*api.RoutesResponse
 	statusMap       map[int]StoreStatus
 	configMap       map[int]*SourceConfig
 	refreshInterval time.Duration
@@ -21,7 +21,7 @@ type RoutesStore struct {
 func NewRoutesStore(config *Config) *RoutesStore {
 
 	// Build mapping based on source instances
-	routesMap := make(map[int]api.RoutesResponse)
+	routesMap := make(map[int]*api.RoutesResponse)
 	statusMap := make(map[int]StoreStatus)
 	configMap := make(map[int]*SourceConfig)
 
@@ -29,7 +29,7 @@ func NewRoutesStore(config *Config) *RoutesStore {
 		id := source.Id
 
 		configMap[id] = source
-		routesMap[id] = api.RoutesResponse{}
+		routesMap[id] = &api.RoutesResponse{}
 		statusMap[id] = StoreStatus{
 			State: STATE_INIT,
 		}

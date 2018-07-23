@@ -6,6 +6,10 @@
 
 FROM node:10
 
+RUN npm install -g gulp
+RUN npm install -g gulp-cli
+
+
 WORKDIR /client
 VOLUME ["/client"]
 

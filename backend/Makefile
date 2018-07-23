@@ -26,7 +26,7 @@ all: $(TARGET)
 	@echo "Built $(VERSION) @ $(TARGET)"
 
 deps:
-	go get .
+	go get -v .
 
 osx: deps
 	GOARCH=$(ARCH) GOOS=darwin go build $(LDFLAGS) -o $(PROG)-osx-$(ARCH)
@@ -44,6 +44,10 @@ test:
 
 
 dev: clean all
+
+prod: clean bundle $(TARGET)
+	@echo "Build $(VERSION) [production] @ $(TARGET)"
+
 
 clean:
 	rm -f rice-box.go
