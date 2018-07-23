@@ -22,21 +22,39 @@ class Indicator extends React.Component {
             props.notExportedLoading);
   }
 
+  startTimer() {
+    if (!this.timer) {
+      this.timer = setInterval(
+        () => this.tickMessages(), 1000
+      );
+    }
+  }
+
+  stopTimer() {
+    if (this.timer) {
+      clearInterval(this.timer);
+    }
+    this.timer = null;
+  }
+
   componentDidMount() {
-    this.timeoutTimer = setInterval(
-      () => this.tickMessages(), 1000
-    );
+    this.startTimer();
   }
 
   componentWillUnmount() {
-    clearInterval(this.timeoutTimer);
+    this.stopTimer();
   }
 
   componentDidUpdate(prevProps) {
-    if (!this.isLoading(this.props) &&
-        this.isLoading(this.props) != this.isLoading(prevProps)) {
-      // Stop timer
-      this.setState({displayMessages: 0});
+    if (this.isLoading(this.props) != this.isLoading(prevProps)) {
+      if (!this.isLoading(this.props)) {
+        // Stop timer
+        this.setState({displayMessages: 0});
+        this.stopTimer();
+      } else { 
+        this.setState({displayMessages: 0});
+        this.startTimer();
+      }
     }
   }
 
