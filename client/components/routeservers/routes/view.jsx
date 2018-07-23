@@ -45,6 +45,10 @@ const RoutesHeader = (props) => {
 
 class RoutesView extends React.Component {
 
+  constructor(props) {
+    super(props);
+  }
+
   dispatchFetchRoutes() {
     const type = this.props.type;
 
@@ -89,6 +93,10 @@ class RoutesView extends React.Component {
   componentDidUpdate(prevProps) {
     if (this.routesNeedFetch(prevProps)) {
       this.dispatchFetchRoutes();
+      this.refs.scrollAnchor.scrollIntoView({
+        behaviour: "smooth",
+        block: "start",
+      });
     }
   }
 
@@ -115,7 +123,8 @@ class RoutesView extends React.Component {
     }
 
     return (
-      <div className={`card routes-view ${name}`} id={name}>
+      <div className={`card routes-view ${name}`}>
+        <a name={name} id={name} ref="scrollAnchor" />
         <div className="row">
           <div className="col-md-6">
             <RoutesHeader type={type} />
