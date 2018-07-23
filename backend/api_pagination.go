@@ -13,8 +13,21 @@ import (
 func apiPaginateRoutes(
 	routes api.Routes, page, pageSize int,
 ) (api.Routes, api.Pagination) {
-
 	totalResults := len(routes)
+
+	// In case pageSize is 0, we assume pagination
+	// is disabled.
+	if pageSize == 0 {
+		pagination := api.Pagination{
+			Page:         page,
+			PageSize:     pageSize,
+			TotalPages:   0,
+			TotalResults: totalResults,
+		}
+		return routes, pagination
+	}
+
+	// Calculate the number of pages we get
 	totalPages := int(math.Ceil(float64(totalResults) / float64(pageSize)))
 
 	offset := page * pageSize

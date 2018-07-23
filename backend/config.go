@@ -48,11 +48,17 @@ type UiConfig struct {
 	RoutesNoexports  NoexportsConfig
 
 	Theme ThemeConfig
+
+	Pagination PaginationConfig
 }
 
 type ThemeConfig struct {
 	Path     string `ini:"path"`
 	BasePath string `ini:"url_base"` // Optional, default: /theme
+}
+
+type PaginationConfig struct {
+	RoutesPageSize int `ini:"routes_page_size"`
 }
 
 type SourceConfig struct {
@@ -250,6 +256,16 @@ func getThemeConfig(config *ini.File) ThemeConfig {
 	return themeConfig
 }
 
+// Get UI config: Pagination settings
+func getPaginationConfig(config *ini.File) PaginationConfig {
+	baseConfig := config.Section("pagination")
+
+	paginationConfig := PaginationConfig{}
+	baseConfig.MapTo(&paginationConfig)
+
+	return paginationConfig
+}
+
 // Get the UI configuration from the config file
 func getUiConfig(config *ini.File) (UiConfig, error) {
 	uiConfig := UiConfig{}
@@ -283,6 +299,9 @@ func getUiConfig(config *ini.File) (UiConfig, error) {
 	// are found, it will be ignored
 	themeConfig := getThemeConfig(config)
 
+	// Pagination
+	paginationConfig := getPaginationConfig(config)
+
 	// Make config
 	uiConfig = UiConfig{
 		RoutesColumns:      routesColumns,
@@ -295,6 +314,8 @@ func getUiConfig(config *ini.File) (UiConfig, error) {
 		RoutesNoexports:  noexports,
 
 		Theme: themeConfig,
+
+		Pagination: paginationConfig,
 	}
 
 	return uiConfig, nil
