@@ -88,7 +88,6 @@ class RoutesView extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (this.routesNeedFetch(prevProps)) {
-      console.log("Component needs fetch!"); 
       this.dispatchFetchRoutes();
     }
   }

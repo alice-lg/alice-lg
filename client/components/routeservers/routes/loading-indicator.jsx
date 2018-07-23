@@ -56,8 +56,8 @@ class Indicator extends React.Component {
         <LoadingIndicator show={true} />
 
         {this.state.displayMessages >= 5 &&
-          <p>&gt; Still loading routes, please be patient.</p>}
-        {this.state.displayMessages >= 10 &&
+          <p><br />&gt; Still loading routes, please be patient.</p>}
+        {this.state.displayMessages >= 15 &&
           <p>&gt; This seems to take a while...</p>}
         {this.state.displayMessages >= 20 &&
           <p>&gt; This usually only happens when there are really many routes!<br />

@@ -8,6 +8,11 @@ import {Link} from 'react-router'
 
 const PageLink = function(props) {
   const linkPage = parseInt(props.page);
+  const label = props.label || (linkPage + 1);
+
+  if (props.disabled) {
+    return <span>{label}</span>;
+  }
 
   let pr = props.pageReceived;
   let pf = props.pageFiltered;
@@ -34,8 +39,9 @@ const PageLink = function(props) {
     search:   search,
   };
 
+
   return (
-    <Link to={linkTo}>{linkPage + 1}</Link>
+    <Link to={linkTo}>{label}</Link>
   );
 }
 
@@ -49,8 +55,13 @@ class RoutesPaginatorView extends React.Component {
 
 
     const pageLinks = Array.from(Array(this.props.totalPages), (_, i) => {
+      let className = "";
+      if (i == this.props.page) {
+        className = "active";
+      }
+
       return (
-        <li key={i}>
+        <li key={i} className={className}>
           <PageLink page={i}
                     routing={this.props.routing}
                     anchor={this.props.anchor}
@@ -61,24 +72,40 @@ class RoutesPaginatorView extends React.Component {
       );
     });
 
+    let prevLinkClass = "";
+    if (this.props.page == 0) {
+      prevLinkClass = "disabled";
+    }
+
+    let nextLinkClass = "";
+    if (this.props.page + 1 == this.props.totalPages) {
+      nextLinkClass = "disabled";
+    }
 
     return (
       <nav aria-label="Routes Pagination">
         <ul className="pagination">
-          <li>
-              <a href="#" aria-label="Previous">
-                <span aria-hidden="true">&laquo;</span>
-              </a>
+          <li className={prevLinkClass}>
+            <PageLink page={this.props.page - 1}
+                      label="&laquo;"
+                      disabled={this.props.page == 0}
+                      routing={this.props.routing}
+                      anchor={this.props.anchor}
+                      pageReceived={this.props.pageReceived}
+                      pageFiltered={this.props.pageFiltered}
+                      pageNotExported={this.props.pageNotExported} />
           </li>
-          <li>
-          </li>
-
           {pageLinks}
-          <li>
-              <a href="#" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-              </a>
-           </li>
+          <li className={nextLinkClass}>
+            <PageLink page={this.props.page + 1}
+                      disabled={this.props.page + 1 == this.props.totalPages}
+                      label="&raquo;"
+                      routing={this.props.routing}
+                      anchor={this.props.anchor}
+                      pageReceived={this.props.pageReceived}
+                      pageFiltered={this.props.pageFiltered}
+                      pageNotExported={this.props.pageNotExported} />
+          </li>
         </ul>
       </nav>
     );
