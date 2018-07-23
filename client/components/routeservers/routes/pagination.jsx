@@ -72,7 +72,7 @@ const PageSelect = (props) => {
   
   return (
     <li className={itemClassName}>
-      <select className="pagination-select"
+      <select className="form-control pagination-select"
               value={props.page}
               onChange={(e) => props.onChange(e.target.value) }>
         { props.page < pages[0] && <option value={pages[0]}>more...</option> }
