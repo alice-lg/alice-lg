@@ -5,7 +5,7 @@ import {apiError} from 'components/errors/actions'
 
 export const ROUTES_RECEIVED = "received";
 export const ROUTES_FILTERED = "filtered";
-export const ROUTES_NOT_EXPORTED = "not-exported";
+export const ROUTES_NOT_EXPORTED = "notExported";
 
 
 export const FETCH_ROUTES_RECEIVED_REQUEST = "@routes/FETCH_ROUTES_RECEIVED_REQUEST";
@@ -23,7 +23,12 @@ export const FETCH_ROUTES_NOT_EXPORTED_ERROR   = "@routes/FETCH_ROUTES_NOT_EXPOR
 
 // Url helper
 function routesUrl(type, rsId, pId, page, query) {
-    let base = `/api/routeservers/${rsId}/neighbours/${pId}/routes/${type}`
+    let rtype = type;
+    if (type == ROUTES_NOT_EXPORTED) {
+      rtype = "not-exported"; // This is a bit ugly
+    }
+
+    let base = `/api/routeservers/${rsId}/neighbours/${pId}/routes/${rtype}`
     let params = `?page=${page}&q=${query}`
     return base + params;
 };

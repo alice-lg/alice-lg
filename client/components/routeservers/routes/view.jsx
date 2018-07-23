@@ -66,12 +66,31 @@ class RoutesView extends React.Component {
     this.props.dispatch(fetchRoutes(rsId, pId, params.page, query));
   }
 
+  /*
+   * Diff props and this.props to check if we need to 
+   * dispatch another fetch routes
+   */
+  routesNeedFetch(props) {
+    const type = this.props.type;
+    const params = this.props.routes[type];
+    const nextParams = props.routes[type];
+
+    if (this.props.filterQuery != props.filterQuery ||
+        params.page != nextParams.page) {
+      return true;
+    }
+    return false;
+  }
+
   componentDidMount() {
     this.dispatchFetchRoutes();
   }
 
   componentDidUpdate(prevProps) {
-    console.log("Component did update -- this.props:", this.props, "prevProps:", prevProps);
+    if (this.routesNeedFetch(prevProps)) {
+      console.log("Component needs fetch!"); 
+      this.dispatchFetchRoutes();
+    }
   }
 
   render() {
