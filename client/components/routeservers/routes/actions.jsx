@@ -7,7 +7,6 @@ export const ROUTES_RECEIVED = "received";
 export const ROUTES_FILTERED = "filtered";
 export const ROUTES_NOT_EXPORTED = "notExported";
 
-
 export const FETCH_ROUTES_RECEIVED_REQUEST = "@routes/FETCH_ROUTES_RECEIVED_REQUEST";
 export const FETCH_ROUTES_RECEIVED_SUCCESS = "@routes/FETCH_ROUTES_RECEIVED_SUCCESS";
 export const FETCH_ROUTES_RECEIVED_ERROR   = "@routes/FETCH_ROUTES_RECEIVED_ERROR";
@@ -20,6 +19,7 @@ export const FETCH_ROUTES_NOT_EXPORTED_REQUEST = "@routes/FETCH_ROUTES_NOT_EXPOR
 export const FETCH_ROUTES_NOT_EXPORTED_SUCCESS = "@routes/FETCH_ROUTES_NOT_EXPORTED_SUCCESS";
 export const FETCH_ROUTES_NOT_EXPORTED_ERROR   = "@routes/FETCH_ROUTES_NOT_EXPORTED_ERROR";
 
+export const SET_FILTER_QUERY_VALUE = "@routes/SET_FILTER_QUERY_VALUE";
 
 // Url helper
 function routesUrl(type, rsId, pId, page, query) {
@@ -123,4 +123,14 @@ export const fetchRoutesNotExportedRequest = routesRequest(FETCH_ROUTES_NOT_EXPO
 export const fetchRoutesNotExportedSuccess = routesSuccess(FETCH_ROUTES_NOT_EXPORTED_SUCCESS);
 export const fetchRoutesNotExportedError   = routesError(FETCH_ROUTES_NOT_EXPORTED_ERROR);
 export const fetchRoutesNotExported        = fetchRoutes(ROUTES_NOT_EXPORTED);
+
+// Action Creators: Set Filter Query
+export function setFilterQueryValue(value) {
+  return {
+    type: SET_FILTER_QUERY_VALUE,
+    payload: {
+      value: value
+    }
+  }
+}
 

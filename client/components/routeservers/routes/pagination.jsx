@@ -26,7 +26,9 @@ const makeLinkProps = function(props) {
       break;
   }
 
-  const search = `?pr=${pr}&pf=${pf}&pn=${pn}`;
+  const query = props.routing.query.q || "";
+
+  const search = `?pr=${pr}&pf=${pf}&pn=${pn}&q=${query}`;
   const hash   = `#${props.anchor}`;
   const linkTo = {
     pathname: props.routing.pathname,

@@ -16,7 +16,9 @@ import {FETCH_ROUTES_RECEIVED_REQUEST,
 
 import {ROUTES_RECEIVED,
         ROUTES_FILTERED,
-        ROUTES_NOT_EXPORTED} from './actions';
+        ROUTES_NOT_EXPORTED} from './actions'
+
+import {SET_FILTER_QUERY_VALUE} from './actions'
 
 const initialState = {
 
@@ -47,6 +49,7 @@ const initialState = {
   notExportedTotalResults: 0,
   notExportedApiStatus: {},
 
+  filterValue: "",
   filterQuery: "",
 }
 
@@ -79,6 +82,7 @@ function _handleLocationChange(state, payload) {
 
   let nextState = Object.assign({}, state, {
     filterQuery: filterQuery,
+    filterValue: filterQuery, // location overrides form
 
     receivedPage:    receivedPage,
     filteredPage:    filteredPage,
@@ -129,11 +133,21 @@ function _handleFetchRoutesError(type, state, payload) {
   return nextState;
 }
 
+function _handleFilterQueryValueChange(state, payload) {
+  return Object.assign({}, state, {
+    filterValue: payload.value
+  });
+}
+
+
 export default function reducer(state=initialState, action) {
 
   switch(action.type) {
     case LOCATION_CHANGE:
       return _handleLocationChange(state, action.payload);
+
+    case SET_FILTER_QUERY_VALUE:
+      return _handleFilterQueryValueChange(state, action.payload);
 
     // Routes Received
     case FETCH_ROUTES_RECEIVED_REQUEST:
