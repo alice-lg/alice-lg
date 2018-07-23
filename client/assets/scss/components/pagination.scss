@@ -1,7 +1,7 @@
 
 /*
  Pagination is handled pretty well by bootstrap.
- We add some minor extensions, like a breakable pagionator.
+ We add some minor extensions, like a breakable paginator.
 */
 
 .pagination {
@@ -13,6 +13,30 @@
             &:hover {
                 background: none;
             }
+        }
+    }
+
+    .pagination-select {
+        width: auto;
+        position: relative;
+        float: left;
+        padding: 6px 12px;
+        margin-left: -1px;
+        line-height: 1.42857143;
+        color: #337ab7;
+        text-decoration: none;
+
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        border-top-left-radius: 0px;
+        border-bottom-left-radius: 0px;
+    }
+
+    li.active {
+        .pagination-select {
+            background-color: #337ab7;
+            color: #fff;
         }
     }
 }
