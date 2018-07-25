@@ -30,8 +30,11 @@ watch:
 stop:
 	@echo "Stopping docker container: $(DOCKER_CONTAINER)"
 	-docker stop $(DOCKER_CONTAINER)
+	@sleep 1
 
 kill:
 	@echo "Killing docker container: $(DOCKER_CONTAINER)"
 	-docker kill $(DOCKER_CONTAINER)
+	@sleep 1
+
 
