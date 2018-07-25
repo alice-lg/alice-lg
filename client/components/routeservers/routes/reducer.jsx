@@ -105,7 +105,7 @@ function _handleFetchRoutesRequest(type, state, payload) {
 function _handleFetchRoutesSuccess(type, state, payload) {
   const stype = _stateType(type);
   const pagination = payload.pagination;
-  const apiStatus = payload.api;
+  const apiStatus = payload.apiStatus;
 
   let nextState = Object.assign({}, state, {
     [stype]: payload.routes,
