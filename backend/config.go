@@ -58,7 +58,9 @@ type ThemeConfig struct {
 }
 
 type PaginationConfig struct {
-	RoutesPageSize int `ini:"routes_page_size"`
+	RoutesFilteredPageSize    int `ini:"routes_filtered_page_size"`
+	RoutesAcceptedPageSize    int `ini:"routes_accpted_page_size"`
+	RoutesNotExportedPageSize int `ini:"routes_not_exported_page_size"`
 }
 
 type SourceConfig struct {

@@ -220,7 +220,7 @@ func apiRoutesListReceived(
 
 	// Paginate results
 	page := apiQueryMustInt(req, "page", 0)
-	pageSize := AliceConfig.Ui.Pagination.RoutesPageSize
+	pageSize := AliceConfig.Ui.Pagination.RoutesAcceptedPageSize
 	routes, pagination := apiPaginateRoutes(routes, page, pageSize)
 
 	// Make paginated response
@@ -256,7 +256,7 @@ func apiRoutesListFiltered(
 
 	// Paginate results
 	page := apiQueryMustInt(req, "page", 0)
-	pageSize := AliceConfig.Ui.Pagination.RoutesPageSize
+	pageSize := AliceConfig.Ui.Pagination.RoutesFilteredPageSize
 	routes, pagination := apiPaginateRoutes(routes, page, pageSize)
 
 	// Make response
@@ -291,7 +291,7 @@ func apiRoutesListNotExported(
 
 	// Paginate results
 	page := apiQueryMustInt(req, "page", 0)
-	pageSize := AliceConfig.Ui.Pagination.RoutesPageSize
+	pageSize := AliceConfig.Ui.Pagination.RoutesNotExportedPageSize
 	routes, pagination := apiPaginateRoutes(routes, page, pageSize)
 
 	// Make response
