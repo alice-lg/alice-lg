@@ -137,7 +137,7 @@ class RoutesView extends React.Component {
 
           </div>
         </div>
-        <RoutesTable routes={state.routes} />
+        <RoutesTable type={type} routes={state.routes} />
 
         <center>
             <RoutesPaginator page={state.page} totalPages={state.totalPages}

@@ -17,6 +17,9 @@ import FilterReason
 import NoexportReason
   from 'components/routeservers/large-communities/noexport-reason'
 
+import {ROUTES_RECEIVED,
+        ROUTES_FILTERED,
+        ROUTES_NOT_EXPORTED} from './actions';
 
 function _filteredRoutes(routes, filter) {
   let filtered = [];
@@ -55,8 +58,8 @@ const ColNetwork = function(props) {
   return (
     <td>
       <span onClick={props.onClick}>{props.route.network}</span>
-      {props.displayReasons == "filtered" && <FilterReason route={props.route} />}
-      {props.displayReasons == "noexport" && <NoexportReason route={props.route} />}
+      {props.displayReasons == ROUTES_FILTERED && <FilterReason route={props.route} />}
+      {props.displayReasons == ROUTES_NOT_EXPORTED && <NoexportReason route={props.route} />}
     </td>
   );
 }
@@ -107,8 +110,6 @@ class RoutesTable extends React.Component {
     const routesColumns = this.props.routesColumns;
     const routesColumnsOrder = this.props.routesColumnsOrder;
 
-
-    // routes = _filteredRoutes(routes, this.props.filter);
     if (!routes || !routes.length) {
       return null;
     }
@@ -120,7 +121,7 @@ class RoutesTable extends React.Component {
                                                        onClick={() => this.showAttributesModal(r)}
                                                        column={col}
                                                        route={r}
-                                                       displayReasons={this.props.displayReasons} />)
+                                                       displayReasons={this.props.type} />)
           )}
         </tr>
       );

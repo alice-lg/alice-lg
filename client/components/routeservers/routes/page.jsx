@@ -106,7 +106,6 @@ class RoutesPage extends React.Component {
   }
 
   render() {
-    console.log("render props filter value:", this.props.filterValue);
     return(
       <div className="routeservers-page">
         <PageHeader>
