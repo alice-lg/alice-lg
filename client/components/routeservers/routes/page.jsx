@@ -11,6 +11,8 @@ import Details    from '../details'
 import Status     from '../status'
 import PageHeader from 'components/page-header'
 
+import {apiCacheStatus} from 'components/api-status/cache'
+
 import ProtocolName
   from 'components/routeservers/protocols/name'
 
@@ -106,6 +108,11 @@ class RoutesPage extends React.Component {
   }
 
   render() {
+    let cacheStatus = apiCacheStatus(this.props.routes.received.apiStatus);
+    if (this.props.anyLoading) {
+      cacheStatus = null;
+    }
+
     return(
       <div className="routeservers-page">
         <PageHeader>
@@ -151,7 +158,8 @@ class RoutesPage extends React.Component {
           </div>
           <div className="col-md-4">
             <div className="card">
-              <Status routeserverId={this.props.params.routeserverId} />
+              <Status routeserverId={this.props.params.routeserverId}
+                      cacheStatus={cacheStatus} />
             </div>
           </div>
         </div>
@@ -167,15 +175,21 @@ export default connect(
     let received = {
       loading:      state.routes.receivedLoading,
       totalResults: state.routes.receivedTotalResults,
+      apiStatus:    state.routes.receivedApiStatus
     };
     let filtered = {
       loading:      state.routes.filteredLoading,
       totalResults: state.routes.filteredTotalResults,
+      apiStatus:    state.routes.filteredApiStatus
     };
     let notExported = {
       loading:      state.routes.notExportedLoading,
       totalResults: state.routes.notExportedTotalResults,
+      apiStatus:    state.routes.notExportedApiStatus
     };
+    let anyLoading = state.routes.receivedLoading ||
+                     state.routes.filteredLoading ||
+                     state.routes.notExportedLoading;
     return({
       filterValue: state.routes.filterValue,
       routes: {
@@ -183,7 +197,8 @@ export default connect(
           [ROUTES_FILTERED]:     filtered,
           [ROUTES_NOT_EXPORTED]: notExported
       },
-      routing: state.routing.locationBeforeTransitions
+      routing: state.routing.locationBeforeTransitions,
+      anyLoading: anyLoading
     });
   }
 )(RoutesPage);

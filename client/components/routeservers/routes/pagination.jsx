@@ -204,7 +204,7 @@ export class RoutesPaginationInfo extends React.Component {
     const perPage = this.props.pageSize;
     const start = this.props.page * perPage + 1;
     const end = Math.min(start + perPage - 1, totalResults);
-    if (this.props.totalPages == 1) {
+    if (this.props.totalPages <= 1) {
       let routes = "route";
       if (totalResults > 1) {
         routes = "routes";
