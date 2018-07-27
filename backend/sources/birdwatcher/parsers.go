@@ -53,6 +53,7 @@ func parseApiStatus(bird ClientResponse, config Config) (api.ApiStatus, error) {
 		return status, fmt.Errorf(birdErr)
 	}
 
+	// Parse TTL
 	ttl, err := parseServerTime(
 		bird["ttl"],
 		config.ServerTime,
@@ -62,10 +63,42 @@ func parseApiStatus(bird ClientResponse, config Config) (api.ApiStatus, error) {
 		return api.ApiStatus{}, err
 	}
 
+	// Parse Cache Status
+	cacheStatus, err := parseCacheStatus(birdApi, config)
+	if err != nil {
+		return api.ApiStatus{}, err
+	}
+
 	status := api.ApiStatus{
 		Version:         birdApi["Version"].(string),
 		ResultFromCache: birdApi["result_from_cache"].(bool),
 		Ttl:             ttl,
+		CacheStatus:     cacheStatus,
+	}
+
+	return status, nil
+}
+
+// Parse cache status from api response
+func parseCacheStatus(cacheStatus map[string]interface{}, config Config) (api.CacheStatus, error) {
+	cache, ok := cacheStatus["cache_status"].(map[string]interface{})
+	if !ok {
+		return api.CacheStatus{}, fmt.Errorf("Invalid Cache Status")
+	}
+
+	cachedAt, ok := cache["cached_at"].(map[string]interface{})
+	if !ok {
+		return api.CacheStatus{}, fmt.Errorf("Invalid Cache Status")
+	}
+
+	cachedAtTime, err := parseServerTime(cachedAt["date"], config.ServerTime, config.Timezone)
+	if err != nil {
+		return api.CacheStatus{}, err
+	}
+
+	status := api.CacheStatus{
+		CachedAt: cachedAtTime,
+		// We ommit OrigTTL for now...
 	}
 
 	return status, nil
