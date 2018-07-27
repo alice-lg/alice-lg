@@ -64,10 +64,7 @@ func parseApiStatus(bird ClientResponse, config Config) (api.ApiStatus, error) {
 	}
 
 	// Parse Cache Status
-	cacheStatus, err := parseCacheStatus(birdApi, config)
-	if err != nil {
-		return api.ApiStatus{}, err
-	}
+	cacheStatus, _ := parseCacheStatus(birdApi, config)
 
 	status := api.ApiStatus{
 		Version:         birdApi["Version"].(string),
