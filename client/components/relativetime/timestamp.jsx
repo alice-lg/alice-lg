@@ -7,9 +7,9 @@ window.momnet = moment;
 
 export default class RelativeTimestamp extends React.Component {
   render() {
-
-    let now = moment.utc()
-    let rel = moment(now._d.getTime() - (this.props.value / 1000.0 / 1000.0))
+    const tsMs = this.props.value / 1000.0 / 1000.0; // nano -> micro -> milli
+    const now = moment.utc()
+    const rel = now.subtract(tsMs, 'ms');
 
     return (
       <span>{rel.fromNow(this.props.suffix)}</span>

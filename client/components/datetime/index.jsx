@@ -10,6 +10,8 @@ import React from 'react'
 
 import moment from 'moment'
 
+import {parseServerTime} from './parse'
+
 
 export default class Datetime extends React.Component {
   render() {
@@ -18,7 +20,7 @@ export default class Datetime extends React.Component {
       timefmt = 'LLLL';
     }
 
-    let time = moment(this.props.value);
+    let time = parseServerTime(this.props.value);
     return (
       <span>{time.format(timefmt)}</span>
     );
