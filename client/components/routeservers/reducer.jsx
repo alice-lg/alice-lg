@@ -15,6 +15,8 @@ import {LOAD_ROUTESERVERS_REQUEST,
         LOAD_ROUTESERVER_ROUTES_NOEXPORT_SUCCESS,
 
         SET_PROTOCOLS_FILTER_VALUE,
+        SET_PROTOCOLS_FILTER,
+
         SET_ROUTES_FILTER_VALUE}
   from './actions'
 
@@ -40,6 +42,8 @@ const initialState = {
   noexport_asn: 0,
 
   protocolsFilterValue: "",
+  protocolsFilter: "",
+
   routesFilterValue: "",
 
   isLoading: false,
@@ -120,6 +124,15 @@ export default function reducer(state = initialState, action) {
       });
 
     case SET_PROTOCOLS_FILTER_VALUE:
+      return Object.assign({}, state, {
+        protocolsFilterValue: action.payload.value
+      });
+
+    case SET_PROTOCOLS_FILTER:
+      return Object.assign({}, state, {
+        protocolsFilter: action.payload.value
+      });
+
     case SET_ROUTES_FILTER_VALUE:
       return Object.assign({}, state, action.payload);
 

@@ -1,4 +1,6 @@
 
+import {debounce} from 'underscore'
+
 import React from 'react'
 import {connect} from 'react-redux'
 
@@ -10,15 +12,33 @@ import SearchInput from 'components/search-input'
 
 import Protocols from './protocols'
 
-import {setProtocolsFilterValue} from './actions'
+import {setProtocolsFilterValue,
+        setProtocolsFilter} from './actions'
 
 class RouteserversPage extends React.Component {
 
-  setFilter(value) {
-    this.props.dispatch(
-      setProtocolsFilterValue(value)
-    );
+  constructor(props) {
+    super(props);
+    this.dispatchDebounced = debounce(this.props.dispatch, 350);
   }
+
+
+  setFilter(value) {
+    // Set filter value (for input rendering)
+    this.props.dispatch(setProtocolsFilterValue(value));
+
+    // Set filter delayed
+    this.dispatchDebounced(setProtocolsFilter(value));
+
+  }
+
+  
+  componentDidMount() {
+    // Reset Filters
+    this.props.dispatch(setProtocolsFilterValue(""));
+    this.props.dispatch(setProtocolsFilter(""));
+  }
+
 
   render() {
     return(

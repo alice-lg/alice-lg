@@ -27,6 +27,8 @@ export const LOAD_ROUTESERVER_ROUTES_FILTERED_SUCCESS = '@birdseye/LOAD_ROUTESER
 export const LOAD_ROUTESERVER_ROUTES_NOEXPORT_SUCCESS = '@birdseye/LOAD_ROUTESERVER_ROUTES_NOEXPORT_SUCCESS';
 
 export const SET_PROTOCOLS_FILTER_VALUE = '@birdseye/SET_PROTOCOLS_FILTER_VALUE';
+export const SET_PROTOCOLS_FILTER = '@birdseye/SET_PROTOCOLS_FILTER';
+
 export const SET_ROUTES_FILTER_VALUE = '@birdseye/SET_ROUTES_FILTER_VALUE';
 
 
@@ -220,7 +222,17 @@ export function setProtocolsFilterValue(value) {
   return {
     type: SET_PROTOCOLS_FILTER_VALUE,
     payload: {
-      protocolsFilterValue: value
+      value: value
+    }
+  }
+}
+
+
+export function setProtocolsFilter(value) {
+  return {
+    type: SET_PROTOCOLS_FILTER,
+    payload: {
+      value: value, 
     }
   }
 }

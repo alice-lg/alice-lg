@@ -16,6 +16,8 @@ import RelativeTimestamp
 import LoadingIndicator
 	from 'components/loading-indicator/small'
 
+
+
 function _filteredProtocols(protocols, filter) {
   let filtered = [];
   if(filter == "") {
@@ -26,7 +28,8 @@ function _filteredProtocols(protocols, filter) {
 
   // Filter protocols
   filtered = _.filter(protocols, (p) => {
-    return (p.address.toLowerCase().indexOf(filter) != -1 ||
+    return (p.asn == filter ||
+            p.address.toLowerCase().indexOf(filter) != -1 ||
             p.description.toLowerCase().indexOf(filter) != -1);
   });
 
@@ -292,7 +295,7 @@ export default connect(
     return {
       isLoading: state.routeservers.protocolsAreLoading,
       protocols: state.routeservers.protocols,
-      filter: state.routeservers.protocolsFilterValue
+      filter: state.routeservers.protocolsFilter,
     }
   }
 )(Protocols);
