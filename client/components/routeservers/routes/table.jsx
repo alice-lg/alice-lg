@@ -45,6 +45,30 @@ const _lookup = (r, path) => {
   return split;
 }
 
+
+
+/*
+ * Rendering Components
+ * ====================
+ */
+
+const PrimaryIndicator = function(props) {
+  if (props.route.details && props.route.details.primary) {
+    return(
+      <span className="primary-route is-primary-route">&gt;
+        <div>Best Route</div>
+      </span>  
+    );
+  }
+
+  // Default
+  return (
+    <span className="primary-route not-primary-route"></span>  
+  )
+}
+
+
+
 const ColDefault = function(props) {
   return (
     <td>
@@ -56,8 +80,11 @@ const ColDefault = function(props) {
 // Include filter and noexport reason in this column.
 const ColNetwork = function(props) {
   return (
-    <td>
-      <span onClick={props.onClick}>{props.route.network}</span>
+    <td className="col-route-network">
+      <span className="route-network" onClick={props.onClick}>
+        <PrimaryIndicator route={props.route} />
+        {props.route.network}
+      </span>
       {props.displayReasons == ROUTES_FILTERED && <FilterReason route={props.route} />}
       {props.displayReasons == ROUTES_NOT_EXPORTED && <NoexportReason route={props.route} />}
     </td>
