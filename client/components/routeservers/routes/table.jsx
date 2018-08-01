@@ -57,13 +57,13 @@ const PrimaryIndicator = function(props) {
     return(
       <span className="primary-route is-primary-route">&gt;
         <div>Best Route</div>
-      </span>  
+      </span>
     );
   }
 
   // Default
   return (
-    <span className="primary-route not-primary-route"></span>  
+    <span className="primary-route not-primary-route"></span>
   )
 }
 
