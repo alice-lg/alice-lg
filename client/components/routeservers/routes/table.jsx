@@ -7,17 +7,15 @@ import {connect} from 'react-redux'
 import {loadRouteserverRoutes, loadRouteserverRoutesFiltered} from '../actions'
 import {showBgpAttributes} from './bgp-attributes-modal-actions'
 
-import LoadingIndicator
-	from './loading-indicator'
-
-import PrimaryIndicator
-  from './primary-indicator'
+import LoadingIndicator from './loading-indicator'
 
 import FilterReason
   from 'components/routeservers/large-communities/filter-reason'
 
 import NoexportReason
   from 'components/routeservers/large-communities/noexport-reason'
+
+import RouteColumn from './column'
 
 import {ROUTES_RECEIVED,
         ROUTES_FILTERED,
@@ -45,67 +43,6 @@ function _filteredRoutes(routes, filter) {
 const _lookup = (r, path) => {
   const split = path.split(".").reduce((acc, elem) => acc[elem], r);
   return split;
-}
-
-
-
-/*
- * Rendering Components
- * ====================
- */
-
-const ColDefault = function(props) {
-  return (
-    <td>
-      <span onClick={props.onClick}>{_lookup(props.route, props.column)}</span>
-    </td>
-  )
-}
-
-// Include filter and noexport reason in this column.
-const ColNetwork = function(props) {
-  return (
-    <td className="col-route-network">
-      <span className="route-network" onClick={props.onClick}>
-        <PrimaryIndicator route={props.route} />
-        {props.route.network}
-      </span>
-      {props.displayReasons == ROUTES_FILTERED && <FilterReason route={props.route} />}
-      {props.displayReasons == ROUTES_NOT_EXPORTED && <NoexportReason route={props.route} />}
-    </td>
-  );
-}
-
-// Special AS Path Widget
-const ColAsPath = function(props) {
-    const asns = _lookup(props.route, "bgp.as_path");
-    const baseUrl = "http://irrexplorer.nlnog.net/search/"
-
-    let asnLinks = asns.map((asn, i) => {
-      return (<a key={`${asn}_${i}`} href={baseUrl + asn} target="_blank">{asn} </a>);
-    });
-
-    return (
-        <td>
-          {asnLinks}
-        </td>
-    );
-}
-
-const RouteColumn = function(props) {
-  const widgets = {
-    "network": ColNetwork,
-    "bgp.as_path": ColAsPath,
-
-    "ASPath": ColAsPath,
-  };
-
-  let Widget = widgets[props.column] || ColDefault;
-  return (
-    <Widget column={props.column} route={props.route}
-            displayReasons={props.displayReasons}
-            onClick={props.onClick} />
-  );
 }
 
 
