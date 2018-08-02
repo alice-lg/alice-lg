@@ -187,6 +187,7 @@ func routeToLookupRoute(
 		Bgp:       route.Bgp,
 		Age:       route.Age,
 		Type:      route.Type,
+		Primary:   route.Primary,
 	}
 
 	return lookup

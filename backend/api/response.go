@@ -221,6 +221,7 @@ type LookupRoute struct {
 	Bgp       BgpInfo       `json:"bgp"`
 	Age       time.Duration `json:"age"`
 	Type      []string      `json:"type"` // [BGP, unicast, univ]
+	Primary   bool          `json:"primary"`
 
 	Details Details `json:"details"`
 }
