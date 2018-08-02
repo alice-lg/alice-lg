@@ -10,6 +10,8 @@ import {showBgpAttributes} from './bgp-attributes-modal-actions'
 import LoadingIndicator
 	from './loading-indicator'
 
+import PrimaryIndicator
+  from './primary-indicator'
 
 import FilterReason
   from 'components/routeservers/large-communities/filter-reason'
@@ -51,23 +53,6 @@ const _lookup = (r, path) => {
  * Rendering Components
  * ====================
  */
-
-const PrimaryIndicator = function(props) {
-  if (props.route.details && props.route.details.primary) {
-    return(
-      <span className="primary-route is-primary-route">&gt;
-        <div>Best Route</div>
-      </span>
-    );
-  }
-
-  // Default
-  return (
-    <span className="primary-route not-primary-route"></span>
-  )
-}
-
-
 
 const ColDefault = function(props) {
   return (
