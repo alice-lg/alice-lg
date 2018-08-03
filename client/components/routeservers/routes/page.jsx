@@ -64,6 +64,10 @@ const RoutesViewEmpty = (props) => {
   if (isLoading) {
     return null; // We are not a loading indicator.
   }
+
+  if (!props.loadNotExported) {
+    return null; // There may be routes matching the query in there!
+  }
   
   const hasContent = props.routes.received.totalResults > 0 ||
                      props.routes.filtered.totalResults > 0 ||
@@ -139,7 +143,8 @@ class RoutesPage extends React.Component {
                 onChange={(e) => this.setFilter(e.target.value)}  />
             </div>
 
-            <RoutesViewEmpty routes={this.props.routes} />
+            <RoutesViewEmpty routes={this.props.routes} 
+                             loadNotExported={this.props.loadNotExported} />
 
             <RoutesView
                 type={ROUTES_FILTERED}
@@ -201,7 +206,9 @@ export default connect(
           [ROUTES_NOT_EXPORTED]: notExported
       },
       routing: state.routing.locationBeforeTransitions,
-      loadNotExported: state.routes.loadNotExported,
+      loadNotExported: state.routes.loadNotExported ||
+                       !state.config.noexport_load_on_demand,
+       
       anyLoading: anyLoading
     });
   }

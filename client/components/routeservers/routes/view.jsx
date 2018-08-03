@@ -70,7 +70,7 @@ class RoutesView extends React.Component {
 
     // Make request
 
-    // Handle special NotExported case, when on demand loading is enabled,
+    // Handle special case, when on demand loading is enabled,
     // we defer this dispatch, until an user interaction.
     if (!params.loadRoutes) {
       return; // We are done here.
