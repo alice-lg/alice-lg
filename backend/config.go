@@ -213,9 +213,9 @@ func getLookupColumnsDefaults() (map[string]string, []string, error) {
 	order := []string{
 		"network",
 		"gateway",
+		"bgp.as_path",
 		"neighbour.asn",
 		"neighbour.description",
-		"bgp.as_path",
 		"routeserver.name",
 	}
 
