@@ -24,6 +24,7 @@ const initialState = {
 
   received: [],
   receivedLoading: false,
+  receivedRequested: false,
   receivedError: null,
   receivedPage: 0,
   receivedPageSize: 0,
@@ -33,6 +34,7 @@ const initialState = {
 
   filtered: [],
   filteredLoading: false,
+  filteredRequested: false,
   filteredError: null,
   filteredPage: 0,
   filteredPageSize: 0,
@@ -42,12 +44,16 @@ const initialState = {
 
   notExported: [],
   notExportedLoading: false,
+  notExportedRequested: false,
   notExportedError: null,
   notExportedPage: 0,
   notExportedPageSize: 0,
   notExportedTotalPages: 0,
   notExportedTotalResults: 0,
   notExportedApiStatus: {},
+
+  // Derived state from location
+  loadNotExported: false,
 
   filterValue: "",
   filterQuery: "",
@@ -67,35 +73,37 @@ function _stateType(type) {
 // Handlers:
 function _handleLocationChange(state, payload) {
   // Check query payload
-  let query = payload.query;
+  const query = payload.query;
 
-  let filterQuery = query["q"] || "";
+  const filterQuery = query["q"] || "";
 
-  let receivedPage    = query["pr"] || 0;
-  let filteredPage    = query["pf"] || 0;
-  let notExportedPage = query["pn"] || 0;
+  const receivedPage    = parseInt(query["pr"] || 0, 10);
+  const filteredPage    = parseInt(query["pf"] || 0, 10);
+  const notExportedPage = parseInt(query["pn"] || 0, 10);
 
-  // Assert numeric
-  receivedPage    = parseInt(receivedPage);
-  filteredPage    = parseInt(filteredPage);
-  notExportedPage = parseInt(notExportedPage);
+  // Determine on demand loading state
+  const loadNotExported = parseInt(query["ne"] || 0, 10) === 1 ? true : false;
 
-  let nextState = Object.assign({}, state, {
+  const nextState = Object.assign({}, state, {
     filterQuery: filterQuery,
     filterValue: filterQuery, // location overrides form
 
     receivedPage:    receivedPage,
     filteredPage:    filteredPage,
     notExportedPage: notExportedPage,
+
+    loadNotExported: loadNotExported,
   });
 
   return nextState;
 }
 
+
 function _handleFetchRoutesRequest(type, state, payload) {
   const stype = _stateType(type);
-  let nextState = Object.assign({}, state, {
+  const nextState = Object.assign({}, state, {
     [stype+'Loading']: true,
+    [stype+'Requested']: true,
   });
 
   return nextState;
@@ -117,7 +125,7 @@ function _handleFetchRoutesSuccess(type, state, payload) {
 
     [stype+'ApiStatus']: apiStatus,
 
-    [stype+'Loading']: false,
+    [stype+'Loading']: false
   });
 
   return nextState;
@@ -127,6 +135,7 @@ function _handleFetchRoutesError(type, state, payload) {
   const stype = _stateType(type);
   let nextState = Object.assign({}, state, {
     [stype+'Loading']: false,
+    [stype+'Requested']: false,
     [stype+'Error']: payload.error
   });
 

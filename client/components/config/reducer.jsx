@@ -8,7 +8,9 @@ const initialState = {
   lookup_columns: {},
   lookup_columns_order: [],
   prefix_lookup_enabled: false,
-  content: {}
+  content: {},
+  noexport_load_on_demand: true, // we have to assume this
+  // otherwise fetch will start.
 };
 
 
@@ -25,7 +27,9 @@ export default function reducer(state = initialState, action) {
         lookup_columns: action.payload.lookup_columns,
         lookup_columns_order: action.payload.lookup_columns_order,
 
-        prefix_lookup_enabled: action.payload.prefix_lookup_enabled
+        prefix_lookup_enabled: action.payload.prefix_lookup_enabled,
+
+        noexport_load_on_demand: action.payload.noexport.load_on_demand
        });
   }
   return state;

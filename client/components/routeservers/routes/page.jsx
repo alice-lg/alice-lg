@@ -39,12 +39,15 @@ import {ROUTES_RECEIVED,
         ROUTES_NOT_EXPORTED} from './actions';
 
 
-const makeQueryLinkProps = function(routing, query) {
+const makeQueryLinkProps = function(routing, query, loadNotExported) {
+  // Load not exported routes flag
+  const ne = loadNotExported ? 1 : 0;
+
   // As we need to reset the pagination, we can just
-  // ommit these parameters and just use pathname + query
+  // ommit these other parameters and just use pathname + query + ne
   return {
     pathname: routing.pathname,
-    search: `?q=${query}`
+    search: `?ne=${ne}&q=${query}`
   };
 }
 
@@ -60,6 +63,10 @@ const RoutesViewEmpty = (props) => {
 
   if (isLoading) {
     return null; // We are not a loading indicator.
+  }
+
+  if (!props.loadNotExported) {
+    return null; // There may be routes matching the query in there!
   }
   
   const hasContent = props.routes.received.totalResults > 0 ||
@@ -96,7 +103,7 @@ class RoutesPage extends React.Component {
     );
 
     this.debouncedDispatch(push(makeQueryLinkProps(
-      this.props.routing, value
+      this.props.routing, value, this.props.loadNotExported
     )));
   }
 
@@ -136,7 +143,8 @@ class RoutesPage extends React.Component {
                 onChange={(e) => this.setFilter(e.target.value)}  />
             </div>
 
-            <RoutesViewEmpty routes={this.props.routes} />
+            <RoutesViewEmpty routes={this.props.routes} 
+                             loadNotExported={this.props.loadNotExported} />
 
             <RoutesView
                 type={ROUTES_FILTERED}
@@ -198,6 +206,9 @@ export default connect(
           [ROUTES_NOT_EXPORTED]: notExported
       },
       routing: state.routing.locationBeforeTransitions,
+      loadNotExported: state.routes.loadNotExported ||
+                       !state.config.noexport_load_on_demand,
+       
       anyLoading: anyLoading
     });
   }

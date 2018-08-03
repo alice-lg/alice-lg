@@ -6,12 +6,16 @@ import {Link} from 'react-router'
 import {push} from 'react-router-redux'
 
 
-const makeLinkProps = function(props) {
+export const makeLinkProps = function(props) {
   const linkPage = parseInt(props.page);
 
   let pr = props.pageReceived;
   let pf = props.pageFiltered;
   let pn = props.pageNotExported;
+  let ne = props.loadNotExported;
+
+  // Numeric flags
+  ne = ne ? 1 : 0;
 
   // This here can be surely more elegant.
   switch(props.anchor) {
@@ -28,7 +32,7 @@ const makeLinkProps = function(props) {
 
   const query = props.routing.query.q || "";
 
-  const search = `?pr=${pr}&pf=${pf}&pn=${pn}&q=${query}`;
+  const search = `?ne=${ne}&pr=${pr}&pf=${pf}&pn=${pn}&q=${query}`;
   const hash   = `#${props.anchor}`;
   const linkTo = {
     pathname: props.routing.pathname,
@@ -133,6 +137,7 @@ class RoutesPaginatorView extends React.Component {
           <PageLink page={p}
                     routing={this.props.routing}
                     anchor={this.props.anchor}
+                    loadNotExported={this.props.loadNotExported}
                     pageReceived={this.props.pageReceived}
                     pageFiltered={this.props.pageFiltered}
                     pageNotExported={this.props.pageNotExported} />
@@ -160,6 +165,7 @@ class RoutesPaginatorView extends React.Component {
                       disabled={this.props.page == 0}
                       routing={this.props.routing}
                       anchor={this.props.anchor}
+                      loadNotExported={this.props.loadNotExported}
                       pageReceived={this.props.pageReceived}
                       pageFiltered={this.props.pageFiltered}
                       pageNotExported={this.props.pageNotExported} />
@@ -176,6 +182,7 @@ class RoutesPaginatorView extends React.Component {
                         label="&raquo;"
                         routing={this.props.routing}
                         anchor={this.props.anchor}
+                        loadNotExported={this.props.loadNotExported}
                         pageReceived={this.props.pageReceived}
                         pageFiltered={this.props.pageFiltered}
                         pageNotExported={this.props.pageNotExported} />
@@ -192,6 +199,8 @@ export const RoutesPaginator = connect(
       pageReceived:    state.routes.receivedPage,
       pageFiltered:    state.routes.filteredPage,
       pageNotExported: state.routes.notExportedPage,
+
+      loadNotExported: state.routes.loadNotExported,
 
       routing: state.routing.locationBeforeTransitions
   })

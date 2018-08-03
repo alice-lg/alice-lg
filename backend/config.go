@@ -35,6 +35,8 @@ type NoexportsConfig struct {
 	NoexportId int `ini:"noexport_id"`
 
 	Reasons map[int]string
+
+	LoadOnDemand bool `ini:"load_on_demand"`
 }
 
 type UiConfig struct {
