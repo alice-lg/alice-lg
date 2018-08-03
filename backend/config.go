@@ -210,7 +210,14 @@ func getLookupColumnsDefaults() (map[string]string, []string, error) {
 		"routeserver.name":      "RS",
 	}
 
-	order := []string{"network", "bgp.as_path", "gateway", "interface"}
+	order := []string{
+		"network",
+		"gateway",
+		"neighbour.asn",
+		"neighbour.description",
+		"bgp.as_path",
+		"routeserver.name",
+	}
 
 	return columns, order, nil
 }
