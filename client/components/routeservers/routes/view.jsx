@@ -67,6 +67,16 @@ class RoutesView extends React.Component {
     const query = this.props.filterQuery;
 
     // Make request
+
+    // Handle special NotExported case, when on demand loading is enabled,
+    // we defer this dispatch, until an user interaction.
+    if (type === ROUTES_NOT_EXPORTED &&
+        params.loadOnDemand &&
+        !params.requested) {
+      return; // We are done here.
+    }
+
+    // Otherwise, just dispatch the request:
     this.props.dispatch(fetchRoutes(rsId, pId, params.page, query));
   }
 
@@ -104,6 +114,7 @@ class RoutesView extends React.Component {
     }
   }
 
+
   render() {
     const type = this.props.type;
     const state = this.props.routes[type];
@@ -118,6 +129,14 @@ class RoutesView extends React.Component {
       [ROUTES_NOT_EXPORTED]: "routes-not-exported",
     }[type];
 
+
+    if (state.loadOnDemand && !state.requested) {
+      // In case it was not yet requested, render a trigger
+      // and defer routesFetching until a user interaction has
+      // occured.
+      return this.renderLoadTrigger();
+    }
+
     if (state.loading) {
       return null;
     }
@@ -125,34 +144,77 @@ class RoutesView extends React.Component {
     if (state.totalResults == 0) {
       return null;
     }
-
+    
+    // Render the routes card
     return (
       <div className={`card routes-view ${name}`}>
-          <div className="row">
-            <div className="col-md-6">
-              <a name={name} id={name} ref="scrollAnchor">
-                <RoutesHeader type={type} />
-              </a>
-            </div>
-            <div className="col-md-6">
-              <RoutesPaginationInfo page={state.page}
-                                    pageSize={state.pageSize}
-                                    totalPages={state.totalPages}
-                                    totalResults={state.totalResults} />
-
-            </div>
+        <div className="row">
+          <div className="col-md-6">
+            <a name={name} id={name} ref="scrollAnchor">
+              <RoutesHeader type={type} />
+            </a>
           </div>
+          <div className="col-md-6">
+            <RoutesPaginationInfo page={state.page}
+                                  pageSize={state.pageSize}
+                                  totalPages={state.totalPages}
+                                  totalResults={state.totalResults} />
+           </div>
+        </div>
+
         <RoutesTable type={type} routes={state.routes} />
 
         <center>
-            <RoutesPaginator page={state.page} totalPages={state.totalPages}
-                             queryParam={queryParam}
-                             anchor={name} />
+          <RoutesPaginator page={state.page} totalPages={state.totalPages}
+                           queryParam={queryParam}
+                           anchor={name} />
         </center>
 
       </div>
     );
   }
+
+
+  renderLoadTrigger() {
+    const type = this.props.type;
+    const state = this.props.routes[type];
+    const queryParam = {
+      [ROUTES_RECEIVED]:     "pr",
+      [ROUTES_FILTERED]:     "pf",
+      [ROUTES_NOT_EXPORTED]: "pn",
+    }[type];
+    const name = {
+      [ROUTES_RECEIVED]:     "routes-received",
+      [ROUTES_FILTERED]:     "routes-filtered",
+      [ROUTES_NOT_EXPORTED]: "routes-not-exported",
+    }[type];
+
+
+    // This is an artificial delay, to make the user wait until
+    // filtered and recieved routes are fetched
+    if (!state.otherLoaded) {
+      return null;
+    }
+
+    return (
+      <div className={`card routes-view ${name}`}>
+        <div className="row">
+          <div className="col-md-6">
+            <a name={name} id={name} ref="scrollAnchor">
+              <RoutesHeader type={type} />
+            </a>
+          </div>
+        </div>
+        <p className="help">
+          Due to the high amount of routes not exported, 
+          they are only fetched them on demand:
+        </p>
+        <button className="btn btn-danger btn-block">Load Routes Not Exported</button>
+      </div>
+    );
+
+  }
+
 
 }
 
@@ -160,27 +222,37 @@ export default connect(
   (state) => {
     let received = {
       routes:       state.routes.received,
+      requested:    state.routes.receivedRequested,
       loading:      state.routes.receivedLoading,
       page:         state.routes.receivedPage,
       pageSize:     state.routes.receivedPageSize,
       totalPages:   state.routes.receivedTotalPages,
       totalResults: state.routes.receivedTotalResults,
+      loadOnDemand: false,
     };
     let filtered = {
       routes:       state.routes.filtered,
       loading:      state.routes.filteredLoading,
+      requested:    state.routes.filteredRequested,
       page:         state.routes.filteredPage,
       pageSize:     state.routes.filteredPageSize,
       totalPages:   state.routes.filteredTotalPages,
       totalResults: state.routes.filteredTotalResults,
+      loadOnDemand: false,
     };
     let notExported = {
       routes:       state.routes.notExported,
+      requested:    state.routes.notExported.notExportedRequested,
       loading:      state.routes.notExportedLoading,
       page:         state.routes.notExportedPage,
       pageSize:     state.routes.notExportedPageSize,
       totalPages:   state.routes.notExportedTotalPages,
       totalResults: state.routes.notExportedTotalResults,
+      loadOnDemand: state.config.noexport_load_on_demand,
+      otherLoaded:  state.routes.receivedRequested &&
+                    !state.routes.receivedLoading  &&
+                    state.routes.filteredRequested &&
+                    !state.routes.filteredLoading
     };
     return({
       filterQuery: state.routes.filterQuery,

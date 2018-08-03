@@ -24,6 +24,7 @@ const initialState = {
 
   received: [],
   receivedLoading: false,
+  receivedRequested: false,
   receivedError: null,
   receivedPage: 0,
   receivedPageSize: 0,
@@ -33,6 +34,7 @@ const initialState = {
 
   filtered: [],
   filteredLoading: false,
+  filteredRequested: false,
   filteredError: null,
   filteredPage: 0,
   filteredPageSize: 0,
@@ -42,6 +44,7 @@ const initialState = {
 
   notExported: [],
   notExportedLoading: false,
+  notExportedRequested: false,
   notExportedError: null,
   notExportedPage: 0,
   notExportedPageSize: 0,
@@ -96,6 +99,7 @@ function _handleFetchRoutesRequest(type, state, payload) {
   const stype = _stateType(type);
   let nextState = Object.assign({}, state, {
     [stype+'Loading']: true,
+    [stype+'Requested']: true,
   });
 
   return nextState;
@@ -117,7 +121,7 @@ function _handleFetchRoutesSuccess(type, state, payload) {
 
     [stype+'ApiStatus']: apiStatus,
 
-    [stype+'Loading']: false,
+    [stype+'Loading']: false
   });
 
   return nextState;
@@ -127,6 +131,7 @@ function _handleFetchRoutesError(type, state, payload) {
   const stype = _stateType(type);
   let nextState = Object.assign({}, state, {
     [stype+'Loading']: false,
+    [stype+'Requested']: false,
     [stype+'Error']: payload.error
   });
 

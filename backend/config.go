@@ -36,7 +36,7 @@ type NoexportsConfig struct {
 
 	Reasons map[int]string
 
-	LoadOnDemand bool
+	LoadOnDemand bool `ini:"load_on_demand"`
 }
 
 type UiConfig struct {
