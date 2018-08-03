@@ -46,8 +46,9 @@ type Rejection struct {
 }
 
 type Noexport struct {
-	Asn        int `json:"asn"`
-	NoexportId int `json:"noexport_id"`
+	Asn          int  `json:"asn"`
+	NoexportId   int  `json:"noexport_id"`
+	LoadOnDemand bool `json:"load_on_demand"`
 }
 
 // Status

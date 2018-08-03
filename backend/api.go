@@ -129,8 +129,9 @@ func apiConfigShow(_req *http.Request, _params httprouter.Params) (api.Response,
 		RejectReasons: SerializeReasons(
 			AliceConfig.Ui.RoutesRejections.Reasons),
 		Noexport: api.Noexport{
-			Asn:        AliceConfig.Ui.RoutesNoexports.Asn,
-			NoexportId: AliceConfig.Ui.RoutesNoexports.NoexportId,
+			Asn:          AliceConfig.Ui.RoutesNoexports.Asn,
+			NoexportId:   AliceConfig.Ui.RoutesNoexports.NoexportId,
+			LoadOnDemand: AliceConfig.Ui.RoutesNoexports.LoadOnDemand,
 		},
 		NoexportReasons: SerializeReasons(
 			AliceConfig.Ui.RoutesNoexports.Reasons),
