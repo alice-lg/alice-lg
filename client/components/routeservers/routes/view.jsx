@@ -12,6 +12,8 @@ import {fetchRoutesReceived,
         fetchRoutesFiltered,
         fetchRoutesNotExported} from './actions'
 
+import {makeLinkProps} from './pagination'
+
 // Constants
 import {ROUTES_RECEIVED,
         ROUTES_FILTERED,
@@ -86,13 +88,15 @@ class RoutesView extends React.Component {
    */
   routesNeedFetch(props) {
     const type = this.props.type;
-    const params = this.props.routes[type];
-    const nextParams = props.routes[type];
+    const nextParams = this.props.routes[type];
+    const params = props.routes[type]; // Previous props
 
-    if (this.props.filterQuery != props.filterQuery ||
-        params.page != nextParams.page) {
-      return true;
+    if (this.props.filterQuery != props.filterQuery || // Pagination
+        params.page != nextParams.page || // Query
+        params.loadRoutes != nextParams.loadRoutes) {
+          return true;
     }
+
     return false;
   }
 
@@ -180,11 +184,6 @@ class RoutesView extends React.Component {
   renderLoadTrigger() {
     const type = this.props.type;
     const state = this.props.routes[type];
-    const queryParam = {
-      [ROUTES_RECEIVED]:     "pr",
-      [ROUTES_FILTERED]:     "pf",
-      [ROUTES_NOT_EXPORTED]: "pn",
-    }[type];
     const name = {
       [ROUTES_RECEIVED]:     "routes-received",
       [ROUTES_FILTERED]:     "routes-filtered",
@@ -198,6 +197,19 @@ class RoutesView extends React.Component {
       return null;
     }
 
+    const linkProps = makeLinkProps({
+      loadNotExported: true,
+
+      anchor: "routes-not-exported",
+      page: this.props.routes.notExported.page,
+      
+      pageReceived:    this.props.routes.received.page,
+      pageFiltered:    this.props.routes.filtered.page,
+      pageNotExported: this.props.routes.notExported.page,
+
+      routing: this.props.routing
+    });
+
     return (
       <div className={`card routes-view ${name}`}>
         <div className="row">
@@ -209,20 +221,15 @@ class RoutesView extends React.Component {
         </div>
         <p className="help">
           Due to the high amount of routes not exported, 
-          they are only fetched them on demand:
+          they are only fetched on demand.
         </p>
 
-        Link to: 
-
-        <button className="btn btn-danger btn-block"
-                onClick={() => this.triggerFetchRoutes()}
-                >Load Routes Not Exported</button>
+        <Link to={linkProps} className="btn btn-block btn-danger">
+           Load Routes Not Exported
+        </Link>
       </div>
     );
-
   }
-
-
 }
 
 export default connect(
@@ -273,6 +280,7 @@ export default connect(
           [ROUTES_FILTERED]:     filtered,
           [ROUTES_NOT_EXPORTED]: notExported
       },
+      routing: state.routing.locationBeforeTransitions
     });
   }
 )(RoutesView);

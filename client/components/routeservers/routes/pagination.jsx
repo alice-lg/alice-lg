@@ -6,7 +6,7 @@ import {Link} from 'react-router'
 import {push} from 'react-router-redux'
 
 
-const makeLinkProps = function(props) {
+export const makeLinkProps = function(props) {
   const linkPage = parseInt(props.page);
 
   let pr = props.pageReceived;
