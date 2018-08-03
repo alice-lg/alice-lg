@@ -5,6 +5,8 @@ const initialState = {
   routes_columns_order: [],
   neighbours_columns: {},
   neighbours_columns_order: [],
+  lookup_columns: {},
+  lookup_columns_order: [],
   prefix_lookup_enabled: false,
   content: {}
 };
@@ -19,6 +21,9 @@ export default function reducer(state = initialState, action) {
 
         neighbours_columns:       action.payload.neighbours_columns,
         neighbours_columns_order: action.payload.neighbours_columns_order,
+
+        lookup_columns: action.payload.lookup_columns,
+        lookup_columns_order: action.payload.lookup_columns_order,
 
         prefix_lookup_enabled: action.payload.prefix_lookup_enabled
        });

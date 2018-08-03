@@ -5,10 +5,19 @@
 
 import React from 'react'
 
+import FilterReason
+  from 'components/routeservers/large-communities/filter-reason'
+
+import NoexportReason
+  from 'components/routeservers/large-communities/noexport-reason'
+
+import {ROUTES_RECEIVED,
+        ROUTES_FILTERED,
+        ROUTES_NOT_EXPORTED} from './actions';
 
 // Helper:
 export const PrimaryIndicator = function(props) {
-  if (props.route.details && props.route.primary) {
+  if (props.route.primary) {
     return(
       <span className="primary-route is-primary-route">&gt;
         <div>Best Route</div>
@@ -22,13 +31,18 @@ export const PrimaryIndicator = function(props) {
   )
 }
 
+// Helper: Lookup value in route path
+export const _lookup = (r, path) => {
+  return path.split(".").reduce((acc, elem) => acc[elem], r);
+}
+
 
 export const ColDefault = function(props) {
   return (
     <td>
       <span onClick={props.onClick}>{_lookup(props.route, props.column)}</span>
     </td>
-  )
+  );
 }
 
 // Include filter and noexport reason in this column.
@@ -65,7 +79,7 @@ export const ColAsPath = function(props) {
 
 // Meta component, decides what to render based on on 
 // prop 'column'.
-export default RouteColumn = function(props) {
+export default function(props) {
   const widgets = {
     "network": ColNetwork,
     "bgp.as_path": ColAsPath,

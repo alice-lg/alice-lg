@@ -9,41 +9,7 @@ import {showBgpAttributes} from './bgp-attributes-modal-actions'
 
 import LoadingIndicator from './loading-indicator'
 
-import FilterReason
-  from 'components/routeservers/large-communities/filter-reason'
-
-import NoexportReason
-  from 'components/routeservers/large-communities/noexport-reason'
-
 import RouteColumn from './column'
-
-import {ROUTES_RECEIVED,
-        ROUTES_FILTERED,
-        ROUTES_NOT_EXPORTED} from './actions';
-
-function _filteredRoutes(routes, filter) {
-  let filtered = [];
-  if(filter == "") {
-    return routes; // nothing to do here
-  }
-
-  filter = filter.toLowerCase();
-
-  // Filter protocols
-  filtered = _.filter(routes, (r) => {
-    return (r.network.toLowerCase().indexOf(filter) != -1 ||
-            r.gateway.toLowerCase().indexOf(filter) != -1 ||
-            r.interface.toLowerCase().indexOf(filter) != -1);
-  });
-
-  return filtered;
-}
-
-// Helper: Lookup value in route path
-const _lookup = (r, path) => {
-  const split = path.split(".").reduce((acc, elem) => acc[elem], r);
-  return split;
-}
 
 
 class RoutesTable extends React.Component {
