@@ -91,12 +91,16 @@ class RoutesView extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
+    const scrollAnchor = this.refs.scrollAnchor;
+
     if (this.routesNeedFetch(prevProps)) {
       this.dispatchFetchRoutes();
-      this.refs.scrollAnchor.scrollIntoView({
-        behaviour: "smooth",
-        block: "start",
-      });
+      if (scrollAnchor) {
+        scrollAnchor.scrollIntoView({
+          behaviour: "smooth",
+          block: "start",
+        });
+      }
     }
   }
 
@@ -124,19 +128,20 @@ class RoutesView extends React.Component {
 
     return (
       <div className={`card routes-view ${name}`}>
-        <a name={name} id={name} ref="scrollAnchor" />
-        <div className="row">
-          <div className="col-md-6">
-            <RoutesHeader type={type} />
-          </div>
-          <div className="col-md-6">
-            <RoutesPaginationInfo page={state.page}
-                                  pageSize={state.pageSize}
-                                  totalPages={state.totalPages}
-                                  totalResults={state.totalResults} />
+          <div className="row">
+            <div className="col-md-6">
+              <a name={name} id={name} ref="scrollAnchor">
+                <RoutesHeader type={type} />
+              </a>
+            </div>
+            <div className="col-md-6">
+              <RoutesPaginationInfo page={state.page}
+                                    pageSize={state.pageSize}
+                                    totalPages={state.totalPages}
+                                    totalResults={state.totalResults} />
 
+            </div>
           </div>
-        </div>
         <RoutesTable type={type} routes={state.routes} />
 
         <center>
