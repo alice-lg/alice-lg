@@ -138,6 +138,8 @@ func apiConfigShow(_req *http.Request, _params httprouter.Params) (api.Response,
 		RoutesColumnsOrder:     AliceConfig.Ui.RoutesColumnsOrder,
 		NeighboursColumns:      AliceConfig.Ui.NeighboursColumns,
 		NeighboursColumnsOrder: AliceConfig.Ui.NeighboursColumnsOrder,
+		LookupColumns:          AliceConfig.Ui.LookupColumns,
+		LookupColumnsOrder:     AliceConfig.Ui.LookupColumnsOrder,
 		PrefixLookupEnabled:    AliceConfig.Server.EnablePrefixLookup,
 	}
 	return result, nil
