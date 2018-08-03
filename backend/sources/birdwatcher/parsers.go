@@ -229,7 +229,7 @@ func parseRouteBgpInfo(data interface{}) api.BgpInfo {
 		return api.BgpInfo{}
 	}
 
-	asPath := parseIntList(bgpData["as_path"])
+	asPath := mustIntList(bgpData["as_path"])
 	communities := parseBgpCommunities(bgpData["communities"])
 	largeCommunities := parseBgpCommunities(bgpData["large_communities"])
 
@@ -269,50 +269,6 @@ func parseBgpCommunities(data interface{}) []api.Community {
 	return communities
 }
 
-// Assert string, provide default
-func mustString(value interface{}, fallback string) string {
-	sval, ok := value.(string)
-	if !ok {
-		return fallback
-	}
-	return sval
-}
-
-// Assert list of strings
-func mustStringList(data interface{}) []string {
-	list := []string{}
-	ldata, ok := data.([]interface{})
-	if !ok {
-		return []string{}
-	}
-	for _, e := range ldata {
-		s, ok := e.(string)
-		if ok {
-			list = append(list, s)
-		}
-	}
-	return list
-}
-
-// Convert list of strings to int
-func parseIntList(data interface{}) []int {
-	list := []int{}
-	sdata := mustStringList(data)
-	for _, e := range sdata {
-		val, _ := strconv.Atoi(e)
-		list = append(list, val)
-	}
-	return list
-}
-
-func mustInt(value interface{}, fallback int) int {
-	fval, ok := value.(float64)
-	if !ok {
-		return fallback
-	}
-	return int(fval)
-}
-
 // Parse partial routes response
 func parseRoutesData(birdRoutes []interface{}, config Config) api.Routes {
 	routes := api.Routes{}
@@ -332,6 +288,7 @@ func parseRoutesData(birdRoutes []interface{}, config Config) api.Routes {
 			Interface: mustString(rdata["interface"], "unknown interface"),
 			Gateway:   mustString(rdata["gateway"], "unknown gateway"),
 			Metric:    mustInt(rdata["metric"], -1),
+			Primary:   mustBool(rdata["primary"], false),
 			Age:       age,
 			Type:      rtype,
 			Bgp:       bgpInfo,

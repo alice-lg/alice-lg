@@ -34,6 +34,9 @@ type ConfigResponse struct {
 	RoutesColumns      map[string]string `json:"routes_columns"`
 	RoutesColumnsOrder []string          `json:"routes_columns_order"`
 
+	LookupColumns      map[string]string `json:"lookup_columns"`
+	LookupColumnsOrder []string          `json:"lookup_columns_order"`
+
 	PrefixLookupEnabled bool `json:"prefix_lookup_enabled"`
 }
 
@@ -160,6 +163,7 @@ type Route struct {
 	Bgp       BgpInfo       `json:"bgp"`
 	Age       time.Duration `json:"age"`
 	Type      []string      `json:"type"` // [BGP, unicast, univ]
+	Primary   bool          `json:"primary"`
 
 	Details Details `json:"details"`
 }
@@ -220,6 +224,7 @@ type LookupRoute struct {
 	Bgp       BgpInfo       `json:"bgp"`
 	Age       time.Duration `json:"age"`
 	Type      []string      `json:"type"` // [BGP, unicast, univ]
+	Primary   bool          `json:"primary"`
 
 	Details Details `json:"details"`
 }

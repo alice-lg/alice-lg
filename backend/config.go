@@ -44,6 +44,9 @@ type UiConfig struct {
 	NeighboursColumns      map[string]string
 	NeighboursColumnsOrder []string
 
+	LookupColumns      map[string]string
+	LookupColumnsOrder []string
+
 	RoutesRejections RejectionsConfig
 	RoutesNoexports  NoexportsConfig
 
@@ -109,16 +112,17 @@ func getBackendType(section *ini.Section) int {
 }
 
 // Get UI config: Routes Columns Default
-func getRoutesColumnsDefault() (map[string]string, []string) {
+func getRoutesColumnsDefaults() (map[string]string, []string, error) {
 	columns := map[string]string{
+		"network":     "Network",
 		"bgp.as_path": "AS Path",
 		"gateway":     "Gateway",
 		"interface":   "Interface",
 	}
 
-	order := []string{"Network", "bgp.as_path", "gateway", "interface"}
+	order := []string{"network", "bgp.as_path", "gateway", "interface"}
 
-	return columns, order
+	return columns, order, nil
 }
 
 // Get UI config: Routes Columns
@@ -136,8 +140,7 @@ func getRoutesColumns(config *ini.File) (map[string]string, []string, error) {
 	keys := section.Keys()
 
 	if len(keys) == 0 {
-		defaultColumns, defaultOrder := getRoutesColumnsDefault()
-		return defaultColumns, defaultOrder, nil
+		return getRoutesColumnsDefaults()
 	}
 
 	for _, key := range keys {
@@ -149,7 +152,7 @@ func getRoutesColumns(config *ini.File) (map[string]string, []string, error) {
 }
 
 // Get UI config: Get Neighbours Columns Defaults
-func getNeighboursColumnsDefaults() (map[string]string, []string) {
+func getNeighboursColumnsDefaults() (map[string]string, []string, error) {
 	columns := map[string]string{
 		"address":         "Neighbour",
 		"asn":             "ASN",
@@ -165,7 +168,7 @@ func getNeighboursColumnsDefaults() (map[string]string, []string) {
 		"Uptime", "Description", "routes_received", "routes_filtered",
 	}
 
-	return columns, order
+	return columns, order, nil
 }
 
 // Get UI config: Get Neighbours Columns
@@ -182,8 +185,56 @@ func getNeighboursColumns(config *ini.File) (
 	keys := section.Keys()
 
 	if len(keys) == 0 {
-		defaultColumns, defaultOrder := getNeighboursColumnsDefaults()
-		return defaultColumns, defaultOrder, nil
+		return getNeighboursColumnsDefaults()
+	}
+
+	for _, key := range keys {
+		columns[key.Name()] = section.Key(key.Name()).MustString("")
+		order = append(order, key.Name())
+	}
+
+	return columns, order, nil
+}
+
+// Get UI config: Get Prefix search / Routes lookup columns
+// As these differ slightly from our routes in the response
+// (e.g. the neighbor and source rs is referenced as a nested object)
+// we provide an additional configuration for this
+func getLookupColumnsDefaults() (map[string]string, []string, error) {
+	columns := map[string]string{
+		"network":               "Network",
+		"gateway":               "Gateway",
+		"neighbour.asn":         "ASN",
+		"neighbour.description": "Neighbor",
+		"bgp.as_path":           "AS Path",
+		"routeserver.name":      "RS",
+	}
+
+	order := []string{
+		"network",
+		"gateway",
+		"bgp.as_path",
+		"neighbour.asn",
+		"neighbour.description",
+		"routeserver.name",
+	}
+
+	return columns, order, nil
+}
+
+func getLookupColumns(config *ini.File) (
+	map[string]string,
+	[]string,
+	error,
+) {
+	columns := make(map[string]string)
+	order := []string{}
+
+	section := config.Section("lookup_columns")
+	keys := section.Keys()
+
+	if len(keys) == 0 {
+		return getLookupColumnsDefaults()
 	}
 
 	for _, key := range keys {
@@ -286,6 +337,12 @@ func getUiConfig(config *ini.File) (UiConfig, error) {
 		return uiConfig, err
 	}
 
+	// Lookup table columns
+	lookupColumns, lookupColumnsOrder, err := getLookupColumns(config)
+	if err != nil {
+		return uiConfig, err
+	}
+
 	// Get rejections and reasons
 	rejections, err := getRoutesRejections(config)
 	if err != nil {
@@ -311,6 +368,9 @@ func getUiConfig(config *ini.File) (UiConfig, error) {
 
 		NeighboursColumns:      neighboursColumns,
 		NeighboursColumnsOrder: neighboursColumnsOrder,
+
+		LookupColumns:      lookupColumns,
+		LookupColumnsOrder: lookupColumnsOrder,
 
 		RoutesRejections: rejections,
 		RoutesNoexports:  noexports,
