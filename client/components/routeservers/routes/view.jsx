@@ -131,9 +131,6 @@ class RoutesView extends React.Component {
       [ROUTES_NOT_EXPORTED]: "routes-not-exported",
     }[type];
 
-    console.log("state:", state);
-
-
     if (!state.loadRoutes) {
       // In case it was not yet requested, render a trigger
       // and defer routesFetching until a user interaction has
