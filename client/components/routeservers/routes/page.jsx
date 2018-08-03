@@ -39,12 +39,15 @@ import {ROUTES_RECEIVED,
         ROUTES_NOT_EXPORTED} from './actions';
 
 
-const makeQueryLinkProps = function(routing, query) {
+const makeQueryLinkProps = function(routing, query, loadNotExported) {
+  // Load not exported routes flag
+  const ne = loadNotExported ? 1 : 0;
+
   // As we need to reset the pagination, we can just
-  // ommit these parameters and just use pathname + query
+  // ommit these other parameters and just use pathname + query + ne
   return {
     pathname: routing.pathname,
-    search: `?q=${query}`
+    search: `?ne=${ne}&q=${query}`
   };
 }
 
@@ -96,7 +99,7 @@ class RoutesPage extends React.Component {
     );
 
     this.debouncedDispatch(push(makeQueryLinkProps(
-      this.props.routing, value
+      this.props.routing, value, this.props.loadNotExported
     )));
   }
 
@@ -198,6 +201,7 @@ export default connect(
           [ROUTES_NOT_EXPORTED]: notExported
       },
       routing: state.routing.locationBeforeTransitions,
+      loadNotExported: state.routes.loadNotExported,
       anyLoading: anyLoading
     });
   }

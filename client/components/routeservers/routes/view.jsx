@@ -71,8 +71,8 @@ class RoutesView extends React.Component {
     // Handle special NotExported case, when on demand loading is enabled,
     // we defer this dispatch, until an user interaction.
     if (type === ROUTES_NOT_EXPORTED &&
-        params.loadOnDemand &&
-        !params.requested) {
+        params.loadOnDemand && 
+        !params.loadRoutes) {
       return; // We are done here.
     }
 
@@ -129,8 +129,10 @@ class RoutesView extends React.Component {
       [ROUTES_NOT_EXPORTED]: "routes-not-exported",
     }[type];
 
+    console.log("state:", state);
 
-    if (state.loadOnDemand && !state.requested) {
+
+    if (state.loadOnDemand && !state.loadRoutes) {
       // In case it was not yet requested, render a trigger
       // and defer routesFetching until a user interaction has
       // occured.
@@ -209,7 +211,12 @@ class RoutesView extends React.Component {
           Due to the high amount of routes not exported, 
           they are only fetched them on demand:
         </p>
-        <button className="btn btn-danger btn-block">Load Routes Not Exported</button>
+
+        Link to: 
+
+        <button className="btn btn-danger btn-block"
+                onClick={() => this.triggerFetchRoutes()}
+                >Load Routes Not Exported</button>
       </div>
     );
 
@@ -229,6 +236,7 @@ export default connect(
       totalPages:   state.routes.receivedTotalPages,
       totalResults: state.routes.receivedTotalResults,
       loadOnDemand: false,
+      loadRoutes:   true,
     };
     let filtered = {
       routes:       state.routes.filtered,
@@ -239,16 +247,20 @@ export default connect(
       totalPages:   state.routes.filteredTotalPages,
       totalResults: state.routes.filteredTotalResults,
       loadOnDemand: false,
+      loadRoutes:   true,
     };
     let notExported = {
       routes:       state.routes.notExported,
-      requested:    state.routes.notExported.notExportedRequested,
+      requested:    state.routes.notExportedRequested,
       loading:      state.routes.notExportedLoading,
       page:         state.routes.notExportedPage,
       pageSize:     state.routes.notExportedPageSize,
       totalPages:   state.routes.notExportedTotalPages,
       totalResults: state.routes.notExportedTotalResults,
-      loadOnDemand: state.config.noexport_load_on_demand,
+
+      loadOnDemand:  state.config.noexport_load_on_demand,
+      loadRoutes:    state.routes.loadNotExported,
+
       otherLoaded:  state.routes.receivedRequested &&
                     !state.routes.receivedLoading  &&
                     state.routes.filteredRequested &&
