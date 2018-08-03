@@ -72,9 +72,7 @@ class RoutesView extends React.Component {
 
     // Handle special NotExported case, when on demand loading is enabled,
     // we defer this dispatch, until an user interaction.
-    if (type === ROUTES_NOT_EXPORTED &&
-        params.loadOnDemand && 
-        !params.loadRoutes) {
+    if (!params.loadRoutes) {
       return; // We are done here.
     }
 
@@ -136,7 +134,7 @@ class RoutesView extends React.Component {
     console.log("state:", state);
 
 
-    if (state.loadOnDemand && !state.loadRoutes) {
+    if (!state.loadRoutes) {
       // In case it was not yet requested, render a trigger
       // and defer routesFetching until a user interaction has
       // occured.
@@ -242,7 +240,6 @@ export default connect(
       pageSize:     state.routes.receivedPageSize,
       totalPages:   state.routes.receivedTotalPages,
       totalResults: state.routes.receivedTotalResults,
-      loadOnDemand: false,
       loadRoutes:   true,
     };
     let filtered = {
@@ -253,7 +250,6 @@ export default connect(
       pageSize:     state.routes.filteredPageSize,
       totalPages:   state.routes.filteredTotalPages,
       totalResults: state.routes.filteredTotalResults,
-      loadOnDemand: false,
       loadRoutes:   true,
     };
     let notExported = {
@@ -265,8 +261,8 @@ export default connect(
       totalPages:   state.routes.notExportedTotalPages,
       totalResults: state.routes.notExportedTotalResults,
 
-      loadOnDemand:  state.config.noexport_load_on_demand,
-      loadRoutes:    state.routes.loadNotExported,
+      loadRoutes:    state.routes.loadNotExported ||
+                     !state.config.noexport_load_on_demand,
 
       otherLoaded:  state.routes.receivedRequested &&
                     !state.routes.receivedLoading  &&
