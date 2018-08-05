@@ -18,16 +18,38 @@ class Status extends React.Component {
   }
 
   render() {
+    let statusInfo = [];
+
     let rsStatus = this.props.details[this.props.routeserverId];
-    if (!rsStatus) {
-      return null;
+    if (rsStatus) {
+      statusInfo.push(
+        <div className="bird-version" key="status-version">
+          Bird {rsStatus.version}
+        </div>
+      );
+    }
+
+    // Check for errors
+    let rsError = this.props.errors[this.props.routeserverId];
+    if (rsError) {
+      if (rsError.code >= 100 && rsError.code < 200) {
+        statusInfo.push(
+          <div className="api-error" key="status-error">
+            Unreachable
+          </div>
+        );
+      } else {
+        statusInfo.push(
+          <div className="api-error" key="status-error">
+            {rsError.tag}
+          </div>
+        );
+      }
     }
 
     return (
       <div className="routeserver-status">
-        <div className="bird-version">
-          Bird {rsStatus.version}
-        </div>
+        {statusInfo}
       </div>
     );
   }
@@ -36,7 +58,8 @@ class Status extends React.Component {
 export default connect(
   (state) => {
     return {
-      details: state.routeservers.details
+      details: state.routeservers.details,
+      errors: state.routeservers.statusErrors
     }
   }
 )(Status);

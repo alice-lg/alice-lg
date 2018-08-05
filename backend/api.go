@@ -45,9 +45,14 @@ func endpoint(wrapped apiEndpoint) httprouter.Handle {
 		// Get result from handler
 		result, err := wrapped(req, params)
 		if err != nil {
-			result = api.ErrorResponse{
-				Error: err.Error(),
+			// Get affected rs id
+			rsId, paramErr := validateSourceId(params.ByName("id"))
+			if paramErr != nil {
+				rsId = -1
 			}
+
+			// Make error response
+			result = apiErrorResponse(rsId, err)
 			payload, _ := json.Marshal(result)
 			http.Error(res, string(payload), http.StatusInternalServerError)
 			return
