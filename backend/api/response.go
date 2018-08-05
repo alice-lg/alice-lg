@@ -12,7 +12,10 @@ type Details map[string]interface{}
 
 // Error Handling
 type ErrorResponse struct {
-	Error string `json:"error"`
+	Message       string `json:"message"`
+	Code          int    `json:"code"`
+	Tag           string `json:"tag"`
+	RouteserverId int    `json:"routeserver_id"`
 }
 
 // Cache aware api response
