@@ -20,7 +20,10 @@ class ErrorsPage extends React.Component {
     let status = null;
     if (this.props.error.response) {
       status = this.props.error.response.status;
+    } else {
+      status = 600;
     }
+
 
     if (!status || (status != 429 && status < 500)) {
       return null;
@@ -30,11 +33,13 @@ class ErrorsPage extends React.Component {
 
 
     // Find affected routeserver
-    const errorInfo = infoFromError(this.props.error);
-    const rsId = errorInfo.routeserver_id; 
     let rs = null;
-    if (rsId !== null) {
-      rs = _.findWhere(this.props.routeservers, { id: rsId });
+    const errorInfo = infoFromError(this.props.error);
+    if (errorInfo) {
+      const rsId = errorInfo.routeserver_id; 
+      if (rsId !== null) {
+        rs = _.findWhere(this.props.routeservers, { id: rsId });
+      }
     }
 
     if (status == 429) {
