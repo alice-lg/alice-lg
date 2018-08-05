@@ -108,6 +108,52 @@
 .routes-loading.card {
     p {
         font-family: monospace;
+        font-size: 12px;
     }
+}
+
+.routes-header-container {
+    text-decoration: none;
+
+    a:hover {
+        text-decoration: none;
+    }
+}
+
+
+.routes-quick-links {
+    margin-bottom: 0.75em; 
+    margin-top: -0.5em;
+
+    text-align: right;
+    span {
+      color: #888;
+    }
+
+    ul {
+        padding: 0px;
+        margin: 0px;
+        display: inline-block;
+    }
+    li {
+        display: inline-block;
+        padding: 0px 4px;
+        margin: 0px 0px 0px 8px;
+        background: white;
+        border-radius: 3px;
+
+        &.filtered a {
+          color: orange;
+        }
+
+        &.received a {
+          color: green;
+        }
+
+        &.not-exported a {
+          color: red;
+        }
+    }
+
 }
 
