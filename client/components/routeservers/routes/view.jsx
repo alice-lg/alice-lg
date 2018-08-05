@@ -92,7 +92,9 @@ class RoutesView extends React.Component {
 
     if (this.props.filterQuery != props.filterQuery || // Pagination
         params.page != nextParams.page || // Query
-        params.loadRoutes != nextParams.loadRoutes) {
+        params.loadRoutes != nextParams.loadRoutes || // Defered loading
+        props.protocolId != this.props.protocolId // Switch related peers
+        ) {
           return true;
     }
 
@@ -108,6 +110,7 @@ class RoutesView extends React.Component {
 
     if (this.routesNeedFetch(prevProps)) {
       this.dispatchFetchRoutes();
+
       if (scrollAnchor) {
         scrollAnchor.scrollIntoView({
           behaviour: "smooth",

@@ -36,3 +36,12 @@ export const makeLinkProps = function(props) {
   return linkTo;
 }
 
+
+export const makePeerLinkProps = function(rsId, protocolId) {
+  const linkTo = {
+    pathname: `/routeservers/${rsId}/protocols/${protocolId}/routes`,
+  };
+
+  return linkTo;
+}
+

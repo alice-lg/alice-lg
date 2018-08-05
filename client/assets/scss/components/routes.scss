@@ -157,3 +157,58 @@
 
 }
 
+
+/*
+ * Related Peers
+ */
+.related-peers {
+    $tabHeight: 23px;
+    $shadowOffset: 3px;
+
+    display: block;
+    position: absolute; 
+    overflow: hidden;
+
+    padding: $shadowOffset $shadowOffset 0px $shadowOffset;
+    margin: 0px;
+    
+    list-style: none;
+
+    top: -$tabHeight - $shadowOffset;
+
+    li {
+        height: $tabHeight;
+        line-height: $tabHeight;
+
+        display: inline-block;
+
+        padding: 0px 5px;
+        margin: 0px 10px 0px 0px;
+        
+        border-bottom: 1px solid #ffffff;
+        background: #ffffff;
+        border-top-left-radius: 2px;
+        border-top-right-radius: 2px;
+
+        box-shadow: 0px 1px 3px #aaa;
+
+        &.active {
+            font-weight: bold;
+            a {
+                color: #222;
+            }
+        }
+
+        a, a:hover {
+            text-decoration: none;     
+        }
+    }
+}
+
+.has-related-peers {
+    .details-main {
+        padding-top: 21px;
+    }
+}
+
+
