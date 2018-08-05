@@ -12,7 +12,7 @@ import {fetchRoutesReceived,
         fetchRoutesFiltered,
         fetchRoutesNotExported} from './actions'
 
-import {makeLinkProps} from './pagination'
+import {makeLinkProps} from './urls'
 
 // Constants
 import {ROUTES_RECEIVED,
