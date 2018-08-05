@@ -25,9 +25,9 @@ const initialState = {
 
   all: [],
 
-  errors: {},
   details: {},
   protocols: {},
+  statusErrors: {},
 
   reject_reasons: {},
   reject_id: 0,
@@ -82,13 +82,34 @@ export default function reducer(state = initialState, action) {
       var details = Object.assign({}, state.details, {
         [action.payload.routeserverId]: action.payload.status
       });
+      var errors = Object.assign({}, state.statusErrors, {
+        [action.payload.routeserverId]: null,
+      });
       return Object.assign({}, state, {
-        details: details
+        details: details,
+        statusErrors: errors 
       });
 
     case LOAD_ROUTESERVER_STATUS_ERROR:
-      console.log("ROUTESERVER STATUS ERROR:", action);
+      var info = {
+        code: 42,
+        tag: "UNKNOWN_ERROR",
+        message: "Unknown error"
+      };
+
+      if (action.payload.error &&
+          action.payload.error.response && 
+          action.payload.error.response.data &&
+          action.payload.error.response.data.code) {
+            info = action.payload.error.response.data;
+      }
       
+      var errors = Object.assign({}, state.statusErrors, {
+        [action.payload.routeserverId]: info
+      });
+      return Object.assign({}, state, {
+        statusErrors: errors 
+      });
       return state;
 
     case SET_PROTOCOLS_FILTER_VALUE:
