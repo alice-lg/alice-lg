@@ -20,6 +20,8 @@ import RoutesView  from './view'
 
 import SearchInput from 'components/search-input'
 
+import QuickLinks from './quick-links'
+
 import BgpAttributesModal
   from './bgp-attributes-modal'
 
@@ -142,6 +144,8 @@ class RoutesPage extends React.Component {
                 placeholder="Filter by Network or BGP next-hop"
                 onChange={(e) => this.setFilter(e.target.value)}  />
             </div>
+
+            <QuickLinks routes={this.props.routes} />
 
             <RoutesViewEmpty routes={this.props.routes} 
                              loadNotExported={this.props.loadNotExported} />

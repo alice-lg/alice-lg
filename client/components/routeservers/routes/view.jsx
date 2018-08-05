@@ -12,7 +12,7 @@ import {fetchRoutesReceived,
         fetchRoutesFiltered,
         fetchRoutesNotExported} from './actions'
 
-import {makeLinkProps} from './pagination'
+import {makeLinkProps} from './urls'
 
 // Constants
 import {ROUTES_RECEIVED,
@@ -32,7 +32,8 @@ const RoutesHeader = (props) => {
     [ROUTES_FILTERED]: "filtered",
     [ROUTES_NOT_EXPORTED]: "not exported"
   }[type];
-  return (<p style={{"color": color, "textTransform": "uppercase"}}>
+  return (<p className="routes-header"
+             style={{"color": color, "textTransform": "uppercase"}}>
             Routes {rtype}
           </p>);
 };
@@ -150,7 +151,7 @@ class RoutesView extends React.Component {
     return (
       <div className={`card routes-view ${name}`}>
         <div className="row">
-          <div className="col-md-6">
+          <div className="col-md-6 routes-header-container">
             <a name={name} id={name} ref="scrollAnchor">
               <RoutesHeader type={type} />
             </a>
