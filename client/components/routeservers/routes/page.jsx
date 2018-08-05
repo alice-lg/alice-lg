@@ -1,4 +1,5 @@
 
+import _ from 'underscore'
 import {debounce} from "underscore"
 
 import React from 'react'
@@ -16,11 +17,12 @@ import {apiCacheStatus} from 'components/api-status/cache'
 import ProtocolName
   from 'components/routeservers/protocols/name'
 
-import RoutesView  from './view'
 
 import SearchInput from 'components/search-input'
 
-import QuickLinks from './quick-links'
+import RoutesView   from './view'
+import QuickLinks   from './quick-links'
+import RelatedPeers from './related-peers'
 
 import BgpAttributesModal
   from './bgp-attributes-modal'
@@ -122,8 +124,15 @@ class RoutesPage extends React.Component {
       cacheStatus = null;
     }
 
+    // We have to shift the layout a bit, to make room for 
+    // the related peers tabs
+    let pageClass = "routeservers-page";
+    if (this.props.relatedPeers.length > 1) {
+      pageClass += " has-related-peers";
+    }
+
     return(
-      <div className="routeservers-page">
+      <div className={pageClass}>
         <PageHeader>
           <Link to={`/routeservers/${this.props.params.routeserverId}`}>
             <Details routeserverId={this.props.params.routeserverId} />
@@ -139,6 +148,9 @@ class RoutesPage extends React.Component {
           <div className="col-md-8">
 
             <div className="card">
+              <RelatedPeers peers={this.props.relatedPeers}
+                            protocolId={this.props.params.protocolId}
+                            routeserverId={this.props.params.routeserverId} />
               <SearchInput
                 value={this.props.filterValue}
                 placeholder="Filter by Network or BGP next-hop"
@@ -183,7 +195,18 @@ class RoutesPage extends React.Component {
 
 
 export default connect(
-  (state) => {
+  (state, props) => {
+    const protocolId = props.params.protocolId;
+    const rsId = parseInt(props.params.routeserverId, 10);
+    const neighbors = state.routeservers.protocols[rsId];
+    const neighbor = _.findWhere(neighbors, {id: protocolId});
+
+    // Find related peers. Peers belonging to the same AS.
+    let relatedPeers = [];
+    if (neighbor) {
+      relatedPeers = _.where(neighbors, {asn: neighbor.asn});
+    }
+
     let received = {
       loading:      state.routes.receivedLoading,
       totalResults: state.routes.receivedTotalResults,
@@ -213,7 +236,9 @@ export default connect(
       loadNotExported: state.routes.loadNotExported ||
                        !state.config.noexport_load_on_demand,
        
-      anyLoading: anyLoading
+      anyLoading: anyLoading,
+
+      relatedPeers: relatedPeers
     });
   }
 )(RoutesPage);
