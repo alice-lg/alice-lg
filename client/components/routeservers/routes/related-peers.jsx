@@ -9,6 +9,9 @@ import {makePeerLinkProps} from './urls'
  * Render related peers as tabs
  */
 export default function RelatedPeers(props) {
+  if (props.peers.length < 2) {
+    return null; // Nothing to do here.
+  }
 
   const peers = props.peers.map((p) => (
     <li key={p.id} 

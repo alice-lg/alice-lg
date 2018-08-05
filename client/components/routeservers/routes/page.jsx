@@ -204,7 +204,8 @@ export default connect(
     // Find related peers. Peers belonging to the same AS.
     let relatedPeers = [];
     if (neighbor) {
-      relatedPeers = _.where(neighbors, {asn: neighbor.asn});
+      relatedPeers = _.where(neighbors, {asn: neighbor.asn,
+                                         state: "up"});
     }
 
     let received = {
