@@ -83,6 +83,12 @@ class BgpAttributesModal extends React.Component {
                 <tr>
                   <th>Large Communities:</th>
                   <td>{large_communities.join(' ')}</td>
+                </tr>
+                <tr>
+                  <th></th>
+                  <td>
+                    {large_communities.map((c) => <BgpCommunitiyLabel community={c} key={c} />)}
+                  </td>
                 </tr>}
            </tbody>
           </table>
