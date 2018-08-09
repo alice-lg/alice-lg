@@ -138,6 +138,7 @@ func apiConfigShow(_req *http.Request, _params httprouter.Params) (api.Response,
 			NoexportId:   AliceConfig.Ui.RoutesNoexports.NoexportId,
 			LoadOnDemand: AliceConfig.Ui.RoutesNoexports.LoadOnDemand,
 		},
+		BgpCommunities: AliceConfig.Ui.BgpCommunities,
 		NoexportReasons: SerializeReasons(
 			AliceConfig.Ui.RoutesNoexports.Reasons),
 		RoutesColumns:          AliceConfig.Ui.RoutesColumns,

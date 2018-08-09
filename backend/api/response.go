@@ -31,6 +31,8 @@ type ConfigResponse struct {
 	Noexport        Noexport          `json:"noexport"`
 	NoexportReasons map[string]string `json:"noexport_reasons"`
 
+	BgpCommunities map[string]string `json:"bgp_communities"`
+
 	NeighboursColumns      map[string]string `json:"neighbours_columns"`
 	NeighboursColumnsOrder []string          `json:"neighbours_columns_order"`
 

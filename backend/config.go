@@ -51,6 +51,7 @@ type UiConfig struct {
 
 	RoutesRejections RejectionsConfig
 	RoutesNoexports  NoexportsConfig
+	BgpCommunities   BgpCommunities
 
 	Theme ThemeConfig
 
@@ -297,6 +298,25 @@ func getRoutesNoexports(config *ini.File) (NoexportsConfig, error) {
 	return noexportsConfig, nil
 }
 
+// Get UI config: Bgp Communities
+func getBgpCommunities(config *ini.File) BgpCommunities {
+	// Load defaults
+	communities := MakeWellKnownBgpCommunities()
+	communitiesConfig := config.Section("bgp_communities")
+	if communitiesConfig == nil {
+		return communities // nothing else to do here, go with the default
+	}
+
+	keys := communitiesConfig.Keys()
+	// Merge communities
+	for _, key := range keys {
+		community := strings.Replace(key.Name(), "_", ":", -1)
+		communities[community] = communitiesConfig.Key(key.Name()).MustString("")
+	}
+
+	return communities
+}
+
 // Get UI config: Theme settings
 func getThemeConfig(config *ini.File) ThemeConfig {
 	baseConfig := config.Section("theme")
@@ -376,6 +396,7 @@ func getUiConfig(config *ini.File) (UiConfig, error) {
 
 		RoutesRejections: rejections,
 		RoutesNoexports:  noexports,
+		BgpCommunities:   getBgpCommunities(config),
 
 		Theme: themeConfig,
 
