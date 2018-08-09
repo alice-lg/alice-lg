@@ -9,6 +9,8 @@ import {connect} from 'react-redux'
 
 import Modal, {Header, Body, Footer} from 'components/modals/modal'
 
+import BgpCommunitiyLabel from 'components/bgp-communities/label'
+
 import {hideBgpAttributesModal}
   from './bgp-attributes-modal-actions'
 
@@ -70,6 +72,12 @@ class BgpAttributesModal extends React.Component {
             <tr>
               <th>Communities:</th>
               <td>{communities.join(' ')}</td>
+            </tr>
+            <tr>
+              <th></th>
+              <td>
+                {communities.map((c) => <BgpCommunitiyLabel community={c} key={c} />)}
+              </td>
             </tr>
             {large_communities.length > 0 &&
                 <tr>
