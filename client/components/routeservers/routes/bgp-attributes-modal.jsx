@@ -69,21 +69,24 @@ class BgpAttributesModal extends React.Component {
                 <tr>
                   <th>AS Path:</th><td>{attrs.bgp.as_path.join(' ')}</td>
                 </tr>}
-            <tr>
-              <th>Communities:</th>
-              <td>{communities.join(' ')}</td>
-            </tr>
-            <tr>
-              <th></th>
-              <td>
-                {communities.map((c) => <BgpCommunitiyLabel community={c} key={c} />)}
-              </td>
-            </tr>
+            {communities.length > 0 &&
+                <tr>
+                  <th>Communities:</th>
+                  <td>{communities.join(' ')}</td>
+                </tr>}
+            {communities.length > 0 &&
+                <tr>
+                  <th></th>
+                  <td>
+                    {communities.map((c) => <BgpCommunitiyLabel community={c} key={c} />)}
+                  </td>
+                </tr>}
             {large_communities.length > 0 &&
                 <tr>
                   <th>Large Communities:</th>
                   <td>{large_communities.join(' ')}</td>
-                </tr>
+                </tr>}
+            {large_communities.length > 0 &&
                 <tr>
                   <th></th>
                   <td>
