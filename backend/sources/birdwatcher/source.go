@@ -30,6 +30,8 @@ type Birdwatcher struct {
 	routesFetchMutex map[string]*sync.Mutex
 
 	hasNeighborSummary bool
+
+	sync.Mutex
 }
 
 func NewBirdwatcher(config Config) *Birdwatcher {
@@ -304,7 +306,9 @@ func (self *Birdwatcher) RoutesRequired(
 	// to our backend server.
 	_, ok := self.routesFetchMutex[neighborId]
 	if !ok {
+		self.Lock() // Guard write access
 		self.routesFetchMutex[neighborId] = &sync.Mutex{}
+		self.Unlock()
 	}
 	self.routesFetchMutex[neighborId].Lock()
 	defer self.routesFetchMutex[neighborId].Unlock()
