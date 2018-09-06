@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -307,11 +308,19 @@ func getBgpCommunities(config *ini.File) BgpCommunities {
 		return communities // nothing else to do here, go with the default
 	}
 
-	keys := communitiesConfig.Keys()
-	// Merge communities
-	for _, key := range keys {
-		community := strings.Replace(key.Name(), "_", ":", -1)
-		communities[community] = communitiesConfig.Key(key.Name()).MustString("")
+	// Parse and merge communities
+	lines := strings.Split(communitiesConfig.Body(), "\n")
+	for _, line := range lines {
+		kv := strings.SplitN(line, "=", 2)
+		if len(kv) != 2 {
+			log.Println("Skipping malformed BGP community:", line)
+			continue
+		}
+
+		community := strings.TrimSpace(kv[0])
+		label := strings.TrimSpace(kv[1])
+
+		communities[community] = label
 	}
 
 	return communities
@@ -484,7 +493,11 @@ func loadConfig(file string) (*Config, error) {
 		return nil, err
 	}
 
-	parsedConfig, err := ini.LooseLoad(file)
+	// Load configuration, but handle bgp communities section
+	// with our own parser
+	parsedConfig, err := ini.LoadSources(ini.LoadOptions{
+		UnparseableSections: []string{"bgp_communities"},
+	}, file)
 	if err != nil {
 		return nil, err
 	}
