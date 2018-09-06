@@ -12,7 +12,7 @@ class Label extends React.Component {
       return null;
     }
 
-    let cls = 'label label-success ';
+    let cls = 'label label-success label-bgp-community ';
     return (<span className={cls}>{readableCommunity}</span>);
   }
 }
