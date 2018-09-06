@@ -1,5 +1,10 @@
 package main
 
+import (
+	"fmt"
+	"strings"
+)
+
 /*
 Implement BGP Communities Lookup Base
 
@@ -72,4 +77,66 @@ func (self BgpCommunities) Merge(communities BgpCommunities) BgpCommunities {
 	}
 
 	return merged
+}
+
+type NgBgpCommunities map[string]interface{}
+
+func NgMakeWellKnownBgpCommunities() NgBgpCommunities {
+	c := NgBgpCommunities{
+		"65535": NgBgpCommunities{
+			"0": "graceful shutdown",
+			"1": "accept own",
+			"2": "route filter translated v4",
+			"3": "route filter v4",
+			"4": "route filter translated v6",
+			"5": "route filter v6",
+			"6": "llgr stale",
+			"7": "no llgr",
+			"8": "accept-own-nexthop",
+
+			"666": "blackhole",
+
+			"1048321": "no export",
+			"1048322": "no advertise",
+			"1048323": "no export subconfed",
+			"1048324": "nopeer",
+		},
+	}
+
+	return c
+}
+
+func (self NgBgpCommunities) Lookup(community string) (string, error) {
+	path := strings.Split(community, ":")
+	var lookup interface{} // This is all much too dynamic...
+	lookup = self
+
+	for _, key := range path {
+		clookup, ok := lookup.(NgBgpCommunities)
+		if !ok {
+			break
+		}
+
+		res, ok := clookup[key]
+		if !ok {
+			// Try to fall back to wildcard key
+			res, ok = clookup["*"]
+			if !ok {
+				break // we did everything we could.
+			}
+		}
+
+		lookup = res
+	}
+
+	label, ok := lookup.(string)
+	if !ok {
+		return "", fmt.Errorf("community not found")
+	}
+
+	return label, nil
+}
+
+func (self NgBgpCommunities) Set(community string, label string) {
+
 }

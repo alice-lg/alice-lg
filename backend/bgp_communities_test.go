@@ -21,3 +21,28 @@ func TestMergeCommunities(t *testing.T) {
 		t.Error("new values should be present")
 	}
 }
+
+func TestCommunityLookup(t *testing.T) {
+
+	c := NgMakeWellKnownBgpCommunities()
+
+	label, err := c.Lookup("65535:666")
+	if err != nil {
+		t.Error(err)
+	}
+	if label != "blackhole" {
+		t.Error("Label should have been: blackhole, got:", label)
+	}
+
+	// Okay now try some fails
+	label, err = c.Lookup("65535")
+	if err == nil {
+		t.Error("Expected error!")
+	}
+
+	label, err = c.Lookup("65535:23:42")
+	if err == nil {
+		t.Error("Expected not found error!")
+	}
+
+}
