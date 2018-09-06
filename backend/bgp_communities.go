@@ -138,5 +138,32 @@ func (self NgBgpCommunities) Lookup(community string) (string, error) {
 }
 
 func (self NgBgpCommunities) Set(community string, label string) {
+	path := strings.Split(community, ":")
+	var lookup interface{} // This is all much too dynamic...
+	lookup = self
 
+	for _, key := range path {
+		clookup, ok := lookup.(NgBgpCommunities)
+		if !ok {
+			break
+		}
+
+		res, ok := clookup[key]
+		if !ok {
+			// Try to fall back to wildcard key
+			res, ok = clookup["*"]
+			if !ok {
+				break // we did everything we could.
+			}
+		}
+
+		lookup = res
+	}
+
+	label, ok := lookup.(string)
+	if !ok {
+		return "", fmt.Errorf("community not found")
+	}
+
+	return label, nil
 }
