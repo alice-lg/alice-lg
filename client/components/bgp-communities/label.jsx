@@ -5,15 +5,20 @@ import {connect} from 'react-redux'
 
 class Label extends React.Component {
   render() {
-    console.log(this.props.communities, this.props.community);
     // Lookup communities
     const readableCommunity = this.props.communities[this.props.community];
+    let cls = 'label label-bgp-community ';
     if (!readableCommunity) {
-      return null;
+      cls += "label-bgp-unknown";
+      // Default label
+      return (
+        <span className={cls}>{this.props.community}</span>
+      );
     }
 
-    let cls = 'label label-success label-bgp-community ';
-    return (<span className={cls}>{readableCommunity}</span>);
+    cls += "label-success ";
+    // Split community into components
+    return (<span className={cls}>{readableCommunity} ({this.props.community})</span>);
   }
 }
 
