@@ -114,7 +114,8 @@ func (self NgBgpCommunities) Lookup(community string) (string, error) {
 	for _, key := range path {
 		clookup, ok := lookup.(NgBgpCommunities)
 		if !ok {
-			break
+			// This happens if path.len > depth
+			return "", fmt.Errorf("community not found")
 		}
 
 		res, ok := clookup[key]
@@ -139,10 +140,10 @@ func (self NgBgpCommunities) Lookup(community string) (string, error) {
 
 func (self NgBgpCommunities) Set(community string, label string) {
 	path := strings.Split(community, ":")
-	var lookup interface{} // This is all much too dynamic...
+	var lookup interface{} // Again, this is all much too dynamic...
 	lookup = self
 
-	for _, key := range path {
+	for _, key := range path[:len(path)-1] {
 		clookup, ok := lookup.(NgBgpCommunities)
 		if !ok {
 			break
@@ -150,20 +151,14 @@ func (self NgBgpCommunities) Set(community string, label string) {
 
 		res, ok := clookup[key]
 		if !ok {
-			// Try to fall back to wildcard key
-			res, ok = clookup["*"]
-			if !ok {
-				break // we did everything we could.
-			}
+			// The key does not exist, create it!
+			clookup[key] = NgBgpCommunities{}
+			res = clookup[key]
 		}
 
 		lookup = res
 	}
 
-	label, ok := lookup.(string)
-	if !ok {
-		return "", fmt.Errorf("community not found")
-	}
-
-	return label, nil
+	slookup := lookup.(NgBgpCommunities)
+	slookup[path[len(path)-1]] = label
 }
