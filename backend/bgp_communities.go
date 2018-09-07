@@ -39,51 +39,11 @@ From: https://www.iana.org/assignments/bgp-well-known-communities/bgp-well-known
     0xFFFFFF05-0xFFFFFFFF   Unassigned
 */
 
-type BgpCommunities map[string]string
+type BgpCommunities map[string]interface{}
 
 func MakeWellKnownBgpCommunities() BgpCommunities {
 	c := BgpCommunities{
-		"65535:0": "graceful shutdown",
-		"65535:1": "accept own",
-		"65535:2": "route filter translated v4",
-		"65535:3": "route filter v4",
-		"65535:4": "route filter translated v6",
-		"65535:5": "route filter v6",
-		"65535:6": "llgr stale",
-		"65535:7": "no llgr",
-		"65535:8": "accept-own-nexthop",
-
-		"65535:666": "blackhole",
-
-		"65535:1048321": "no export",
-		"65535:1048322": "no advertise",
-		"65535:1048323": "no export subconfed",
-		"65535:1048324": "nopeer",
-	}
-
-	return c
-}
-
-func (self BgpCommunities) Merge(communities BgpCommunities) BgpCommunities {
-	merged := BgpCommunities{}
-
-	// Make copy, don't mutate
-	for k, v := range self {
-		merged[k] = v
-	}
-
-	for k, v := range communities {
-		merged[k] = v
-	}
-
-	return merged
-}
-
-type NgBgpCommunities map[string]interface{}
-
-func NgMakeWellKnownBgpCommunities() NgBgpCommunities {
-	c := NgBgpCommunities{
-		"65535": NgBgpCommunities{
+		"65535": BgpCommunities{
 			"0": "graceful shutdown",
 			"1": "accept own",
 			"2": "route filter translated v4",
@@ -106,13 +66,13 @@ func NgMakeWellKnownBgpCommunities() NgBgpCommunities {
 	return c
 }
 
-func (self NgBgpCommunities) Lookup(community string) (string, error) {
+func (self BgpCommunities) Lookup(community string) (string, error) {
 	path := strings.Split(community, ":")
 	var lookup interface{} // This is all much too dynamic...
 	lookup = self
 
 	for _, key := range path {
-		clookup, ok := lookup.(NgBgpCommunities)
+		clookup, ok := lookup.(BgpCommunities)
 		if !ok {
 			// This happens if path.len > depth
 			return "", fmt.Errorf("community not found")
@@ -138,13 +98,13 @@ func (self NgBgpCommunities) Lookup(community string) (string, error) {
 	return label, nil
 }
 
-func (self NgBgpCommunities) Set(community string, label string) {
+func (self BgpCommunities) Set(community string, label string) {
 	path := strings.Split(community, ":")
 	var lookup interface{} // Again, this is all much too dynamic...
 	lookup = self
 
 	for _, key := range path[:len(path)-1] {
-		clookup, ok := lookup.(NgBgpCommunities)
+		clookup, ok := lookup.(BgpCommunities)
 		if !ok {
 			break
 		}
@@ -152,13 +112,13 @@ func (self NgBgpCommunities) Set(community string, label string) {
 		res, ok := clookup[key]
 		if !ok {
 			// The key does not exist, create it!
-			clookup[key] = NgBgpCommunities{}
+			clookup[key] = BgpCommunities{}
 			res = clookup[key]
 		}
 
 		lookup = res
 	}
 
-	slookup := lookup.(NgBgpCommunities)
+	slookup := lookup.(BgpCommunities)
 	slookup[path[len(path)-1]] = label
 }

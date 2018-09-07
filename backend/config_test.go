@@ -27,9 +27,13 @@ func TestLoadConfigs(t *testing.T) {
 	}
 
 	// Check communities
-	if config.Ui.BgpCommunities["1:23"] != "some tag" {
+	label, err := config.Ui.BgpCommunities.Lookup("1:23")
+	if err != nil {
+		t.Error(err)
+	}
+	if label != "some tag" {
 		t.Error("expcted to find example community 1:23 with 'some tag'",
-			"but got:", config.Ui.BgpCommunities["1:23"])
+			"but got:", label)
 	}
 }
 

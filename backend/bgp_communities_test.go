@@ -4,27 +4,9 @@ import (
 	"testing"
 )
 
-func TestMergeCommunities(t *testing.T) {
-
-	c := MakeWellKnownBgpCommunities()
-
-	merged := c.Merge(BgpCommunities{
-		"2342:0":   "foo",
-		"2342:123": "bar",
-	})
-
-	if merged["65535:666"] != "blackhole" {
-		t.Error("old values should be present")
-	}
-
-	if merged["2342:123"] != "bar" {
-		t.Error("new values should be present")
-	}
-}
-
 func TestCommunityLookup(t *testing.T) {
 
-	c := NgMakeWellKnownBgpCommunities()
+	c := MakeWellKnownBgpCommunities()
 
 	label, err := c.Lookup("65535:666")
 	if err != nil {
@@ -47,7 +29,7 @@ func TestCommunityLookup(t *testing.T) {
 }
 
 func TestSetCommunity(t *testing.T) {
-	c := NgMakeWellKnownBgpCommunities()
+	c := MakeWellKnownBgpCommunities()
 
 	c.Set("2342:10", "foo")
 	c.Set("2342:42:23", "bar")
@@ -71,7 +53,7 @@ func TestSetCommunity(t *testing.T) {
 }
 
 func TestWildcardLookup(t *testing.T) {
-	c := NgMakeWellKnownBgpCommunities()
+	c := MakeWellKnownBgpCommunities()
 
 	c.Set("2342:*", "foobar $0")
 	c.Set("42:*:1", "baz")

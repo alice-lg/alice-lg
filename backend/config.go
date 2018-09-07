@@ -319,8 +319,7 @@ func getBgpCommunities(config *ini.File) BgpCommunities {
 
 		community := strings.TrimSpace(kv[0])
 		label := strings.TrimSpace(kv[1])
-
-		communities[community] = label
+		communities.Set(community, label)
 	}
 
 	return communities
