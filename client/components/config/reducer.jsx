@@ -10,8 +10,8 @@ const initialState = {
   prefix_lookup_enabled: false,
   content: {},
   noexport_load_on_demand: true, // we have to assume this
+                                 // otherwise fetch will start.
   bgp_communities: {},
-  // otherwise fetch will start.
 };
 
 

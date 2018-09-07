@@ -29,15 +29,8 @@ class BgpAttributesModal extends React.Component {
       return null;
     }
 
-    let communities = [];
-    if (attrs.bgp.communities) {
-      communities = attrs.bgp.communities.map((c) => c.join(':'));
-    }
-
-    let large_communities = [];
-    if (attrs.bgp.large_communities) {
-      large_communities = attrs.bgp.large_communities.map((c) => c.join(':'));
-    }
+    const communities = attrs.bgp.communities;
+    const large_communities = attrs.bgp.large_communities;
 
     return (
       <Modal className="bgp-attributes-modal"
@@ -79,11 +72,6 @@ class BgpAttributesModal extends React.Component {
             {large_communities.length > 0 &&
                 <tr>
                   <th>Large Communities:</th>
-                  <td>{large_communities.join(' ')}</td>
-                </tr>}
-            {large_communities.length > 0 &&
-                <tr>
-                  <th></th>
                   <td>
                     {large_communities.map((c) => <BgpCommunitiyLabel community={c} key={c} />)}
                   </td>
