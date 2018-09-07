@@ -1,24 +1,28 @@
 
+$labelOffsetStart: -10px;
+$labelOffsetEnd:   -30px;
+
+
 @-webkit-keyframes fadeSmooth {
     from {
         opacity: 0;
-        left: -60px;
+        left: $labelOffsetStart;
     }
 
     to {
         opacity: 1;
-        left: -87px;
+        left: $labelOffsetEnd;
     }
 }
 @keyframes fadeSmooth {
     from {
         opacity: 0;
-        left: -60px;
+        left: $labelOffsetStart;
     }
 
     to {
         opacity: 1;
-        left: -87px;
+        left: $labelOffsetEnd;
     }
 }
                                    
@@ -27,7 +31,10 @@
 
 
 .table-routes {
-  // Make pseudo links
+  tr {
+    position: relative; // anchor
+  }
+
   td {
     color: #337ab7;
     text-decoration: none;
@@ -42,6 +49,7 @@
 
   }
 
+
   .noexport-reason,
   .reject-reason {
     font-size: 90%;
@@ -53,24 +61,48 @@
     }
   }
 
+  .col-route-flags {
+    padding: 7px 0px;
+    padding-left: 4px;
+    width: 35px;
+  }
 
-  .primary-route {
-    position: relative;
-    
+  .col-route-network {
+    // padding: 8px 0px;
+    // padding-left: 3px;
+
+  }
+
+  .route-prefix-flags {
+    .primary-route {
+       color: #efb208; 
+    }
+  }
+
+  .route-prefix-flags {
+  }
+
+  .route-prefix-flag {
     color: #555;
-    width: 1.5ex;
-    display: inline-block;
     text-decoration: none;
     border: none;
 
+    font-size: 10px;
+
+    cursor: default;
+
+    padding-left: 3px;
+
     div {
+        font-size: 12px;
         display: none;
-        top: -5px;
-        left: -87px;
+        // top: -5px;
+        left: $labelOffsetStart;
         background: rgba(0, 0, 0, 0.45);
         color: white;
         position: absolute;
         padding: 5px;
+        margin-top: -22px;
         border-radius: 3px;
         font-weight: bold;
 
@@ -79,6 +111,7 @@
     }
 
     &:hover {
+        text-decoration: none;
         div {
             display: block;
 
@@ -88,10 +121,13 @@
             animation-fill-mode: both;
         }
     }
+
   }
 
   .route-network {
     display: inline-block;
+    position: relative;
+    width: 100%;
     white-space: nowrap;
   }
 }

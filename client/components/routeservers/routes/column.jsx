@@ -21,7 +21,7 @@ import {ROUTES_RECEIVED,
 export const PrimaryIndicator = function(props) {
   if (props.route.primary) {
     return(
-      <span className="route-prefix-flag primary-route is-primary-route">&gt;
+      <span className="route-prefix-flag primary-route is-primary-route"><i className="fa fa-star"></i>
         <div>Best Route</div>
       </span>
     );
@@ -46,8 +46,8 @@ export const BlackholeIndicator = function(props) {
 
   if (isBlackhole) {
     return(
-      <span className="route-prefix-flag blackhole-route is-blackhole-route">B
-        <div>Blackhole Route</div>
+      <span className="route-prefix-flag blackhole-route is-blackhole-route"><i className="fa fa-circle"></i>
+        <div>Blackhole</div>
       </span>
     );
   }
@@ -76,9 +76,8 @@ export const ColNetwork = function(props) {
   return (
     <td className="col-route-network">
       <span className="route-network" onClick={props.onClick}>
-        <BlackholeIndicator route={props.route} />
-        <PrimaryIndicator route={props.route} />
         {props.route.network}
+
       </span>
       {props.displayReasons == ROUTES_FILTERED && <FilterReason route={props.route} />}
       {props.displayReasons == ROUTES_NOT_EXPORTED && <NoexportReason route={props.route} />}
@@ -103,12 +102,24 @@ export const ColAsPath = function(props) {
 }
 
 
+export const ColFlags = function(props) {
+  return (
+    <td className="col-route-flags">
+      <span className="route-prefix-flags">
+        <PrimaryIndicator route={props.route} />
+        <BlackholeIndicator route={props.route} />
+      </span>
+    </td>
+  );
+}
+
 
 // Meta component, decides what to render based on on 
 // prop 'column'.
 export default function(props) {
   const widgets = {
     "network": ColNetwork,
+    "flags": ColFlags,
     "bgp.as_path": ColAsPath,
 
     "ASPath": ColAsPath,
