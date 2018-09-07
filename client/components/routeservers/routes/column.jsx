@@ -2,6 +2,8 @@
 /*
  * Routes Rendering Columns
  */
+import _ from 'underscore'
+window._ = _;
 
 import React from 'react'
 
@@ -19,7 +21,7 @@ import {ROUTES_RECEIVED,
 export const PrimaryIndicator = function(props) {
   if (props.route.primary) {
     return(
-      <span className="primary-route is-primary-route">&gt;
+      <span className="route-prefix-flag primary-route is-primary-route">&gt;
         <div>Best Route</div>
       </span>
     );
@@ -27,8 +29,32 @@ export const PrimaryIndicator = function(props) {
 
   // Default
   return (
-    <span className="primary-route not-primary-route"></span>
-  )
+    <span className="route-prefix-flag primary-route not-primary-route"></span>
+  );
+}
+
+export const BlackholeIndicator = function(props) {
+  // Check if BGP community 65535:666 is set
+  const communities = props.route.bgp.communities;
+  let isBlackhole = false;
+  for (let c of communities) {
+    if (c[0] == 65535 && c[1] == 666) {
+      isBlackhole = true;
+      break;
+    }
+  }
+
+  if (isBlackhole) {
+    return(
+      <span className="route-prefix-flag blackhole-route is-blackhole-route">B
+        <div>Blackhole Route</div>
+      </span>
+    );
+  }
+
+  return (
+    <span className="route-prefix-flag blackhole-route not-blackhole-route"></span>
+  );
 }
 
 // Helper: Lookup value in route path
@@ -50,6 +76,7 @@ export const ColNetwork = function(props) {
   return (
     <td className="col-route-network">
       <span className="route-network" onClick={props.onClick}>
+        <BlackholeIndicator route={props.route} />
         <PrimaryIndicator route={props.route} />
         {props.route.network}
       </span>
