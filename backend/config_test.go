@@ -25,6 +25,16 @@ func TestLoadConfigs(t *testing.T) {
 	if len(config.Ui.RoutesRejections.Reasons) == 0 {
 		t.Error("Rejection reasons missing")
 	}
+
+	// Check communities
+	label, err := config.Ui.BgpCommunities.Lookup("1:23")
+	if err != nil {
+		t.Error(err)
+	}
+	if label != "some tag" {
+		t.Error("expcted to find example community 1:23 with 'some tag'",
+			"but got:", label)
+	}
 }
 
 func TestSourceConfigDefaultsOverride(t *testing.T) {
@@ -58,5 +68,4 @@ func TestSourceConfigDefaultsOverride(t *testing.T) {
 	if rs2.Birdwatcher.Timezone != "Europe/Brussels" {
 		t.Error("Expected 'Europe/Brussels', got", rs2.Birdwatcher.Timezone)
 	}
-
 }

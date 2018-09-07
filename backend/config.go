@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -51,6 +52,7 @@ type UiConfig struct {
 
 	RoutesRejections RejectionsConfig
 	RoutesNoexports  NoexportsConfig
+	BgpCommunities   BgpCommunities
 
 	Theme ThemeConfig
 
@@ -297,6 +299,32 @@ func getRoutesNoexports(config *ini.File) (NoexportsConfig, error) {
 	return noexportsConfig, nil
 }
 
+// Get UI config: Bgp Communities
+func getBgpCommunities(config *ini.File) BgpCommunities {
+	// Load defaults
+	communities := MakeWellKnownBgpCommunities()
+	communitiesConfig := config.Section("bgp_communities")
+	if communitiesConfig == nil {
+		return communities // nothing else to do here, go with the default
+	}
+
+	// Parse and merge communities
+	lines := strings.Split(communitiesConfig.Body(), "\n")
+	for _, line := range lines {
+		kv := strings.SplitN(line, "=", 2)
+		if len(kv) != 2 {
+			log.Println("Skipping malformed BGP community:", line)
+			continue
+		}
+
+		community := strings.TrimSpace(kv[0])
+		label := strings.TrimSpace(kv[1])
+		communities.Set(community, label)
+	}
+
+	return communities
+}
+
 // Get UI config: Theme settings
 func getThemeConfig(config *ini.File) ThemeConfig {
 	baseConfig := config.Section("theme")
@@ -376,6 +404,7 @@ func getUiConfig(config *ini.File) (UiConfig, error) {
 
 		RoutesRejections: rejections,
 		RoutesNoexports:  noexports,
+		BgpCommunities:   getBgpCommunities(config),
 
 		Theme: themeConfig,
 
@@ -463,7 +492,11 @@ func loadConfig(file string) (*Config, error) {
 		return nil, err
 	}
 
-	parsedConfig, err := ini.LooseLoad(file)
+	// Load configuration, but handle bgp communities section
+	// with our own parser
+	parsedConfig, err := ini.LoadSources(ini.LoadOptions{
+		UnparseableSections: []string{"bgp_communities"},
+	}, file)
 	if err != nil {
 		return nil, err
 	}

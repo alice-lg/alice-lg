@@ -9,6 +9,8 @@ import {connect} from 'react-redux'
 
 import Modal, {Header, Body, Footer} from 'components/modals/modal'
 
+import BgpCommunitiyLabel from 'components/bgp-communities/label'
+
 import {hideBgpAttributesModal}
   from './bgp-attributes-modal-actions'
 
@@ -27,15 +29,8 @@ class BgpAttributesModal extends React.Component {
       return null;
     }
 
-    let communities = [];
-    if (attrs.bgp.communities) {
-      communities = attrs.bgp.communities.map((c) => c.join(':'));
-    }
-
-    let large_communities = [];
-    if (attrs.bgp.large_communities) {
-      large_communities = attrs.bgp.large_communities.map((c) => c.join(':'));
-    }
+    const communities = attrs.bgp.communities;
+    const large_communities = attrs.bgp.large_communities;
 
     return (
       <Modal className="bgp-attributes-modal"
@@ -67,14 +62,19 @@ class BgpAttributesModal extends React.Component {
                 <tr>
                   <th>AS Path:</th><td>{attrs.bgp.as_path.join(' ')}</td>
                 </tr>}
-            <tr>
-              <th>Communities:</th>
-              <td>{communities.join(' ')}</td>
-            </tr>
+            {communities.length > 0 &&
+                <tr>
+                  <th>Communities:</th>
+                  <td>
+                    {communities.map((c) => <BgpCommunitiyLabel community={c} key={c} />)}
+                  </td>
+                </tr>}
             {large_communities.length > 0 &&
                 <tr>
                   <th>Large Communities:</th>
-                  <td>{large_communities.join(' ')}</td>
+                  <td>
+                    {large_communities.map((c) => <BgpCommunitiyLabel community={c} key={c} />)}
+                  </td>
                 </tr>}
            </tbody>
           </table>

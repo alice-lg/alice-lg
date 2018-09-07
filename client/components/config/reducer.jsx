@@ -10,7 +10,8 @@ const initialState = {
   prefix_lookup_enabled: false,
   content: {},
   noexport_load_on_demand: true, // we have to assume this
-  // otherwise fetch will start.
+                                 // otherwise fetch will start.
+  bgp_communities: {},
 };
 
 
@@ -29,6 +30,7 @@ export default function reducer(state = initialState, action) {
 
         prefix_lookup_enabled: action.payload.prefix_lookup_enabled,
 
+        bgp_communities: action.payload.bgp_communities,
         noexport_load_on_demand: action.payload.noexport.load_on_demand
        });
   }
