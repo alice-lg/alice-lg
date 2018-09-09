@@ -27,8 +27,12 @@ import lookupReducer
 import routesReducer
   from 'components/routeservers/routes/reducer'
 
+import neighborsReducer
+  from 'components/routeservers/protocols/reducer'
+
 export default combineReducers({
   routeservers:  routeserversReducer,
+  neighbors:     neighborsReducer,
   routes:        routesReducer,
   modals:        modalsReducer,
   routing:       routerReducer,

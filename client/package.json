@@ -17,6 +17,7 @@
     "babel-preset-es2016": "^6.16.0",
     "babel-preset-react": "^6.16.0",
     "babelify": "^7.3.0",
+    "big-integer": "^1.6.36",
     "bootstrap": "^3.3.7",
     "browserify": "^13.1.0",
     "cssify": "^1.0.3",

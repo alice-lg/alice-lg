@@ -1,14 +1,15 @@
 
 
 import _ from 'underscore'
+import bigInt from 'big-integer';
 
 import React from 'react'
 import {connect} from 'react-redux'
+import {Link} from 'react-router'
+import {push} from 'react-router-redux'
 
 import {loadRouteserverProtocol}
   from 'components/routeservers/actions'
-
-import {Link} from 'react-router'
 
 import RelativeTimestamp
 	from 'components/relativetime/timestamp'
@@ -16,6 +17,7 @@ import RelativeTimestamp
 import LoadingIndicator
 	from 'components/loading-indicator/small'
 
+import {ipToNumeric} from 'components/utils/ip'
 
 
 function _filteredProtocols(protocols, filter) {
@@ -37,6 +39,52 @@ function _filteredProtocols(protocols, filter) {
 }
 
 
+function _sortAnum(sort) {
+  return (a, b) => {
+    const va = a[sort];
+    const vb = b[sort];
+    if (va < vb ) { return -1; }
+    if (va > vb ) { return 1;  }
+    return 0;
+  }
+}
+
+function _sortIpAddr(sort) {
+  return (a, b) => {
+    const va = ipToNumeric(a[sort]);
+    const vb = ipToNumeric(b[sort]);
+
+    // Handle ipv6 case
+    if (va instanceof bigInt) {
+      return va.compareTo(vb);
+    }
+
+    if (va < vb ) { return -1; }
+    if (va > vb ) { return 1;  }
+    return 0;
+  }
+}
+
+function _sortOrder(cmp, order) {
+  return (a, b) => {
+    const res = cmp(a, b);
+    if (order == 'desc') {
+      return res * -1;
+    }
+    return res;
+  }
+}
+
+function _sortNeighbors(neighbors, sort, order) {
+  // Make compare function
+  let cmp = _sortAnum(sort);
+  if (sort == "address") {
+    cmp = _sortIpAddr(sort);
+  }
+  return neighbors.sort(_sortOrder(cmp, order));
+}
+
+
 class RoutesLink extends React.Component {
   render() {
     let url = `/routeservers/${this.props.routeserverId}/protocols/${this.props.protocol}/routes`;
@@ -50,6 +98,43 @@ class RoutesLink extends React.Component {
     )
   }
 }
+
+class NeighborColumnHeader extends React.Component {
+  render() {
+    const baseUrl = `/routeservers/${this.props.rsId}`;
+    const name = this.props.columns[this.props.column];
+    const sortColumn = this.props.column.toLowerCase();
+    const active = sortColumn == this.props.sort;
+    let cls = `col-neighbor-attr col-neighbor-${this.props.column} `;
+
+    // Render link with sorting indicator
+    if (active) {
+      const nextOrder = (this.props.order == 'asc') ? 'desc' : 'asc';
+      const url = `${baseUrl}?s=${sortColumn}&o=${nextOrder}`;
+      let indicator = <i className="fa fa-arrow-circle-up"></i>;
+
+      cls += 'col-neighbor-active ';
+
+      if (this.props.order == 'desc') {
+        indicator = <i className="fa fa-arrow-circle-down"></i>;
+      }
+      return (
+        <th className={cls}>
+          <Link to={url}>{name} {indicator}</Link>
+        </th>
+      );
+    }
+    
+    // Column is not active, just present a link:
+    const url = `${baseUrl}?s=${sortColumn}&o=${this.props.order}`
+    return(
+      <th className={cls}>
+        <Link to={url}>{name}</Link>
+      </th>
+    );
+  }
+}
+
 
 
 //
@@ -148,13 +233,21 @@ class NeighboursTableView extends React.Component {
     const columns = this.props.neighboursColumns;
     const columnsOrder = this.props.neighboursColumnsOrder;
 
+    const sortedNeighbors = _sortNeighbors(this.props.neighbours,
+                                           this.props.sortColumn,
+                                           this.props.sortOrder);
+
     let header = columnsOrder.map((col) => {
       return (
-        <th key={col}>{columns[col]}</th>
+        <NeighborColumnHeader key={col}
+                              rsId={this.props.routeserverId}
+                              columns={columns} column={col}
+                              sort={this.props.sortColumn}
+                              order={this.props.sortOrder} />
       );
     });
 
-    let neighbours = this.props.neighbours.map( (n) => {
+    let neighbours = sortedNeighbors.map((n) => {
       let neighbourColumns = columnsOrder.map((col) => {
         return <NeighbourColumn key={col}
                                 rsId={this.props.routeserverId}
@@ -195,6 +288,9 @@ const NeighboursTable = connect(
   (state) => ({
     neighboursColumns:      state.config.neighbours_columns,
     neighboursColumnsOrder: state.config.neighbours_columns_order,
+
+    sortColumn: state.neighbors.sortColumn,
+    sortOrder:  state.neighbors.sortOrder,
   })
 )(NeighboursTableView);
 
