@@ -1,6 +1,5 @@
 
 
-const LOCATION_CHANGE = '@@router/LOCATION_CHANGE'
 
 import {FETCH_ROUTES_RECEIVED_REQUEST,
         FETCH_ROUTES_RECEIVED_SUCCESS,
@@ -19,6 +18,8 @@ import {ROUTES_RECEIVED,
         ROUTES_NOT_EXPORTED} from './actions'
 
 import {SET_FILTER_QUERY_VALUE} from './actions'
+
+const LOCATION_CHANGE = '@@router/LOCATION_CHANGE'
 
 const initialState = {
 
