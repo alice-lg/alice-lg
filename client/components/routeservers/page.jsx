@@ -11,6 +11,7 @@ import Status from './status'
 import SearchInput from 'components/search-input'
 
 import Protocols from './protocols'
+import QuickLinks from './protocols/quick-links'
 
 import {setProtocolsFilterValue,
         setProtocolsFilter} from './actions'
@@ -56,6 +57,7 @@ class RouteserversPage extends React.Component {
                 onChange={(e) => this.setFilter(e.target.value)}
               />
             </div>
+            <QuickLinks />
 
             <Protocols protocol="bgp" routeserverId={this.props.params.routeserverId} />
           </div>

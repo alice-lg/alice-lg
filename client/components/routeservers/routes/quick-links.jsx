@@ -29,7 +29,7 @@ const QuickLinks = function(props) {
   }
 
   return (
-    <div className="routes-quick-links">
+    <div className="quick-links routes-quick-links">
       <span>Go to:</span>
       <ul>
         {(!props.routes.filtered.loading && 
