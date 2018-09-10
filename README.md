@@ -59,7 +59,7 @@ git clone https://github.com/alice-lg/alice-lg.git
 cd alice-lg
 make
 ```
-Your Alice-LG source will now be located at `~/go/src/alice-lg` and your alice-LG executable should be at `~/go/src/alice-lg/bin/alice-lg-linux-amd64`
+Your Alice-LG source will now be located at `~/go/src/github.com/alice-lg/alice-lg` and your alice-LG executable should be at `~/go/src/github.com/alice-lg/alice-lg/bin/alice-lg-linux-amd64`
 
 ## Configuration
 
