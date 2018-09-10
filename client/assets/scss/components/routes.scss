@@ -247,4 +247,16 @@ $labelOffsetEnd:   -30px;
     }
 }
 
+.card-header-routes {
+    &.received {
+        color: green;
+    }
+    &.filtered {
+        color: orange;
+    }
+    &.notexported {
+        color: red;
+    }
+}
+
 

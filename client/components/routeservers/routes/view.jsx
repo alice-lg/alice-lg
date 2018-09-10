@@ -22,20 +22,13 @@ import {ROUTES_RECEIVED,
 
 const RoutesHeader = (props) => {
   const type = props.type;
-  const color = {
-    [ROUTES_RECEIVED]: "green",
-    [ROUTES_FILTERED]: "orange",
-    [ROUTES_NOT_EXPORTED]: "red"
-  }[type];
   const rtype = {
     [ROUTES_RECEIVED]: "accepted",
     [ROUTES_FILTERED]: "filtered",
     [ROUTES_NOT_EXPORTED]: "not exported"
   }[type];
-  return (<p className="routes-header"
-             style={{"color": color, "textTransform": "uppercase"}}>
-            Routes {rtype}
-          </p>);
+  const cls = `card-header card-header-routes ${type.toLowerCase()}`;
+  return (<p className={cls}>Routes {rtype}</p>);
 };
 
 /*
