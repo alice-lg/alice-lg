@@ -17,6 +17,7 @@
     "babel-preset-es2016": "^6.16.0",
     "babel-preset-react": "^6.16.0",
     "babelify": "^7.3.0",
+    "big-integer": "^1.6.36",
     "bootstrap": "^3.3.7",
     "browserify": "^13.1.0",
     "cssify": "^1.0.3",
@@ -36,7 +37,7 @@
     "jquery": "^3.1.1",
     "jshint": "^2.9.5",
     "moment": "^2.15.1",
-    "node-sass": "^3.10.1",
+    "node-sass": "^3.13.1",
     "react": "^15.6.1",
     "react-debounce-input": "^3.0.0",
     "react-dom": "^15.3.2",
@@ -51,5 +52,6 @@
     "underscore": "^1.8.3",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
-  }
+  },
+  "dependencies": {}
 }

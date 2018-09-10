@@ -26,7 +26,7 @@ all: $(TARGET)
 	@echo "Built $(VERSION) @ $(TARGET)"
 
 deps:
-	go get .
+	go get -v .
 
 osx: deps
 	GOARCH=$(ARCH) GOOS=darwin go build $(LDFLAGS) -o $(PROG)-osx-$(ARCH)
@@ -34,12 +34,20 @@ osx: deps
 linux: deps
 	GOARCH=$(ARCH) GOOS=linux go build $(LDFLAGS) -o $(PROG)-linux-$(ARCH)
 
-
 bundle:
 	rice embed-go
 
+test:
+	go test -v
+	cd caches/ && go test -v
+	cd sources/birdwatcher && go test -v
+
 
 dev: clean all
+
+prod: clean bundle $(TARGET)
+	@echo "Build $(VERSION) [production] @ $(TARGET)"
+
 
 clean:
 	rm -f rice-box.go

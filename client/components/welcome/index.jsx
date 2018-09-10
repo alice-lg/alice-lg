@@ -7,6 +7,8 @@ import PageHeader from 'components/page-header'
 import Lookup from 'components/lookup'
 import LookupSummary from 'components/lookup/results-summary'
 
+import Content from 'components/content'
+
 class LookupView extends React.Component {
   render() {
     if (this.props.enabled == false) {
@@ -42,8 +44,8 @@ export default class Welcome extends React.Component {
        <PageHeader></PageHeader>
 
        <div className="jumbotron">
-         <h1>Welcome to Alice!</h1>
-         <p>Your friendly bird looking glass</p>
+         <h1><Content id="welcome.title">Welcome to Alice!</Content></h1>
+         <p><Content id="welcome.tagline">Your friendly bird looking glass</Content></p>
        </div>
 
        <LookupPage />

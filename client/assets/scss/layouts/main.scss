@@ -2,7 +2,7 @@
  * Main Layout Scss File 
  */
 
-@import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro:700,400,300);
+@import url('../fonts/source-sans-pro.css');
 
 body, html {
   font-family: "Source Sans Pro";
@@ -51,7 +51,7 @@ body,
 }
 
 .page-sidebar {
-  flex: 0 0 255px;
+  flex: 0 0 220px;
   background: #272634;
   // border-left: 1px solid #ccc;
 }

@@ -23,7 +23,7 @@ class LookupHelp extends React.Component {
         <h3>Did you know?</h3>
         <p>You can search for</p>
         <ul>
-          <li><b>Network Addresses</b>,</li>
+          <li><b>Prefixes</b>,</li>
           <li><b>Peers</b> by entering their name and</li>
           <li><b>ASNs</b> by prefixing them with 'AS'</li>
         </ul>
@@ -52,7 +52,7 @@ class Lookup extends React.Component {
         <div className="card">
           <SearchInput
             id="lookup-search-input"
-            placeholder="Search for prefixes on all routeservers"
+            placeholder="Search for prefixes, peers or ASNs on all route servers"
             onChange={(e) => this.doLookup(e.target.value)}  />
         </div>
 

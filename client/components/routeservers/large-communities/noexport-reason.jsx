@@ -16,8 +16,12 @@ class NoExportReason extends React.Component {
     if (!reason.length) {
       return null;
     }
-
-    return <p className="noexport-reason">{this.props.noexport_reasons[reason[0][2]]}</p>;
+    const noexport_reason = this.props.noexport_reasons[reason[0][2]];
+    return (
+      <p className="noexport-reason">
+        <a href={`http://irrexplorer.nlnog.net/search/${route.network}`}
+           target="_blank" >{noexport_reason}</a>
+      </p>);
   }
 }
 
@@ -30,5 +34,3 @@ export default connect(
     }
   }
 )(NoExportReason);
-
-

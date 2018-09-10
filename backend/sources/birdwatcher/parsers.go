@@ -24,7 +24,11 @@ func parseServerTime(value interface{}, layout, timezone string) (time.Time, err
 	}
 
 	t, err := time.ParseInLocation(layout, svalue, loc)
-	return t, err
+	if err != nil {
+		return time.Time{}, err
+	}
+
+	return t.UTC(), nil
 }
 
 // Make api status from response:
@@ -49,6 +53,7 @@ func parseApiStatus(bird ClientResponse, config Config) (api.ApiStatus, error) {
 		return status, fmt.Errorf(birdErr)
 	}
 
+	// Parse TTL
 	ttl, err := parseServerTime(
 		bird["ttl"],
 		config.ServerTime,
@@ -58,10 +63,39 @@ func parseApiStatus(bird ClientResponse, config Config) (api.ApiStatus, error) {
 		return api.ApiStatus{}, err
 	}
 
+	// Parse Cache Status
+	cacheStatus, _ := parseCacheStatus(birdApi, config)
+
 	status := api.ApiStatus{
 		Version:         birdApi["Version"].(string),
 		ResultFromCache: birdApi["result_from_cache"].(bool),
 		Ttl:             ttl,
+		CacheStatus:     cacheStatus,
+	}
+
+	return status, nil
+}
+
+// Parse cache status from api response
+func parseCacheStatus(cacheStatus map[string]interface{}, config Config) (api.CacheStatus, error) {
+	cache, ok := cacheStatus["cache_status"].(map[string]interface{})
+	if !ok {
+		return api.CacheStatus{}, fmt.Errorf("Invalid Cache Status")
+	}
+
+	cachedAt, ok := cache["cached_at"].(map[string]interface{})
+	if !ok {
+		return api.CacheStatus{}, fmt.Errorf("Invalid Cache Status")
+	}
+
+	cachedAtTime, err := parseServerTime(cachedAt["date"], config.ServerTime, config.Timezone)
+	if err != nil {
+		return api.CacheStatus{}, err
+	}
+
+	status := api.CacheStatus{
+		CachedAt: cachedAtTime,
+		// We ommit OrigTTL for now...
 	}
 
 	return status, nil
@@ -111,7 +145,7 @@ func parseRelativeServerTime(uptime interface{}, config Config) time.Duration {
 }
 
 // Parse neighbours response
-func parseNeighbours(bird ClientResponse, config Config) ([]api.Neighbour, error) {
+func parseNeighbours(bird ClientResponse, config Config) (api.Neighbours, error) {
 	neighbours := api.Neighbours{}
 	protocols := bird["protocols"].(map[string]interface{})
 
@@ -123,18 +157,20 @@ func parseNeighbours(bird ClientResponse, config Config) ([]api.Neighbour, error
 		uptime := parseRelativeServerTime(protocol["state_changed"], config)
 		lastError := mustString(protocol["last_error"], "")
 
-		neighbour := api.Neighbour{
+		neighbour := &api.Neighbour{
 			Id: protocolId,
 
 			Address:     mustString(protocol["neighbor_address"], "error"),
 			Asn:         mustInt(protocol["neighbor_as"], 0),
 			State:       mustString(protocol["state"], "unknown"),
 			Description: mustString(protocol["description"], "no description"),
-
-			RoutesReceived:  mustInt(routes["imported"], 0),
-			RoutesExported:  mustInt(routes["exported"], 0),
-			RoutesFiltered:  mustInt(routes["filtered"], 0),
-			RoutesPreferred: mustInt(routes["preferred"], 0),
+			//TODO make these changes configurable
+			RoutesReceived:     mustInt(routes["imported"], 0),
+			RoutesExported:     mustInt(routes["exported"], 0), //TODO protocol_exported?
+			RoutesFiltered:     mustInt(routes["filtered"], 0),
+			RoutesPreferred:    mustInt(routes["preferred"], 0),
+			RoutesAccepted:     mustInt(routes["pipe_imported"], mustInt(routes["imported"], 0)),
+			RoutesPipeFiltered: mustInt(routes["pipe_filtered"], mustInt(routes["filtered"], 0)),
 
 			Uptime:    uptime,
 			LastError: lastError,
@@ -150,6 +186,41 @@ func parseNeighbours(bird ClientResponse, config Config) ([]api.Neighbour, error
 	return neighbours, nil
 }
 
+// Get neighbors from summary endpoint
+func parseNeighborSummary(
+	bird ClientResponse, config Config,
+) (api.Neighbours, error) {
+	birdNeighbors := bird["neighbors"].([]interface{})
+
+	neighbors := make(api.Neighbours, 0, len(birdNeighbors))
+
+	for _, b := range birdNeighbors {
+		n := b.(map[string]interface{})
+
+		uptime := parseRelativeServerTime(n["state_changed"], config)
+
+		// Parse neighbor from response
+		neighbor := &api.Neighbour{
+			Id:             mustString(n["id"], "unknown"),
+			Address:        mustString(n["neighbor"], "unknown"),
+			Asn:            mustInt(n["asn"], 0),
+			State:          mustString(n["state"], "unknown"),
+			Uptime:         uptime,
+			Description:    mustString(n["description"], "unknown"),
+			RoutesReceived: mustInt(n["routes_received"], -1),
+			RoutesAccepted: mustInt(n["routes_accepted"], -1),
+			RoutesFiltered: mustInt(n["routes_filtered"], -1),
+			RoutesExported: mustInt(n["routes_exported"], -1),
+		}
+
+		neighbors = append(neighbors, neighbor)
+	}
+
+	sort.Sort(neighbors)
+
+	return neighbors, nil
+}
+
 // Parse route bgp info
 func parseRouteBgpInfo(data interface{}) api.BgpInfo {
 	bgpData, ok := data.(map[string]interface{})
@@ -158,7 +229,7 @@ func parseRouteBgpInfo(data interface{}) api.BgpInfo {
 		return api.BgpInfo{}
 	}
 
-	asPath := parseIntList(bgpData["as_path"])
+	asPath := mustIntList(bgpData["as_path"])
 	communities := parseBgpCommunities(bgpData["communities"])
 	largeCommunities := parseBgpCommunities(bgpData["large_communities"])
 
@@ -198,50 +269,6 @@ func parseBgpCommunities(data interface{}) []api.Community {
 	return communities
 }
 
-// Assert string, provide default
-func mustString(value interface{}, fallback string) string {
-	sval, ok := value.(string)
-	if !ok {
-		return fallback
-	}
-	return sval
-}
-
-// Assert list of strings
-func mustStringList(data interface{}) []string {
-	list := []string{}
-	ldata, ok := data.([]interface{})
-	if !ok {
-		return []string{}
-	}
-	for _, e := range ldata {
-		s, ok := e.(string)
-		if ok {
-			list = append(list, s)
-		}
-	}
-	return list
-}
-
-// Convert list of strings to int
-func parseIntList(data interface{}) []int {
-	list := []int{}
-	sdata := mustStringList(data)
-	for _, e := range sdata {
-		val, _ := strconv.Atoi(e)
-		list = append(list, val)
-	}
-	return list
-}
-
-func mustInt(value interface{}, fallback int) int {
-	fval, ok := value.(float64)
-	if !ok {
-		return fallback
-	}
-	return int(fval)
-}
-
 // Parse partial routes response
 func parseRoutesData(birdRoutes []interface{}, config Config) api.Routes {
 	routes := api.Routes{}
@@ -253,7 +280,7 @@ func parseRoutesData(birdRoutes []interface{}, config Config) api.Routes {
 		rtype := mustStringList(rdata["type"])
 		bgpInfo := parseRouteBgpInfo(rdata["bgp"])
 
-		route := api.Route{
+		route := &api.Route{
 			Id:          mustString(rdata["network"], "unknown"),
 			NeighbourId: mustString(rdata["from_protocol"], "unknown neighbour"),
 
@@ -261,6 +288,7 @@ func parseRoutesData(birdRoutes []interface{}, config Config) api.Routes {
 			Interface: mustString(rdata["interface"], "unknown interface"),
 			Gateway:   mustString(rdata["gateway"], "unknown gateway"),
 			Metric:    mustInt(rdata["metric"], -1),
+			Primary:   mustBool(rdata["primary"], false),
 			Age:       age,
 			Type:      rtype,
 			Bgp:       bgpInfo,
@@ -274,10 +302,10 @@ func parseRoutesData(birdRoutes []interface{}, config Config) api.Routes {
 }
 
 // Parse routes response
-func parseRoutes(bird ClientResponse, config Config) ([]api.Route, error) {
+func parseRoutes(bird ClientResponse, config Config) (api.Routes, error) {
 	birdRoutes, ok := bird["routes"].([]interface{})
 	if !ok {
-		return []api.Route{}, fmt.Errorf("Routes response missing")
+		return api.Routes{}, fmt.Errorf("Routes response missing")
 	}
 
 	routes := parseRoutesData(birdRoutes, config)
@@ -287,8 +315,8 @@ func parseRoutes(bird ClientResponse, config Config) ([]api.Route, error) {
 	return routes, nil
 }
 
-func parseRoutesDump(bird ClientResponse, config Config) (api.RoutesResponse, error) {
-	result := api.RoutesResponse{}
+func parseRoutesDump(bird ClientResponse, config Config) (*api.RoutesResponse, error) {
+	result := &api.RoutesResponse{}
 
 	apiStatus, err := parseApiStatus(bird, config)
 	if err != nil {

@@ -1,4 +1,6 @@
 
+import {debounce} from 'underscore'
+
 import React from 'react'
 import {connect} from 'react-redux'
 
@@ -9,16 +11,35 @@ import Status from './status'
 import SearchInput from 'components/search-input'
 
 import Protocols from './protocols'
+import QuickLinks from './protocols/quick-links'
 
-import {setProtocolsFilterValue} from './actions'
+import {setProtocolsFilterValue,
+        setProtocolsFilter} from './actions'
 
 class RouteserversPage extends React.Component {
 
-  setFilter(value) {
-    this.props.dispatch(
-      setProtocolsFilterValue(value)
-    );
+  constructor(props) {
+    super(props);
+    this.dispatchDebounced = debounce(this.props.dispatch, 350);
   }
+
+
+  setFilter(value) {
+    // Set filter value (for input rendering)
+    this.props.dispatch(setProtocolsFilterValue(value));
+
+    // Set filter delayed
+    this.dispatchDebounced(setProtocolsFilter(value));
+
+  }
+
+  
+  componentDidMount() {
+    // Reset Filters
+    this.props.dispatch(setProtocolsFilterValue(""));
+    this.props.dispatch(setProtocolsFilter(""));
+  }
+
 
   render() {
     return(
@@ -28,7 +49,7 @@ class RouteserversPage extends React.Component {
         </PageHeader>
 
         <div className="row details-main">
-          <div className="col-md-8">
+          <div className="col-lg-9 col-xs-12 col-md-8">
             <div className="card">
               <SearchInput
                 value={this.props.protocolsFilterValue}
@@ -36,10 +57,11 @@ class RouteserversPage extends React.Component {
                 onChange={(e) => this.setFilter(e.target.value)}
               />
             </div>
+            <QuickLinks />
 
             <Protocols protocol="bgp" routeserverId={this.props.params.routeserverId} />
           </div>
-          <div className="col-md-4">
+          <div className="col-lg-3 col-md-4 col-xs-12">
             <div className="card">
               <Status routeserverId={this.props.params.routeserverId} />
             </div>

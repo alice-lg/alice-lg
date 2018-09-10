@@ -12,7 +12,15 @@ type Details map[string]interface{}
 
 // Error Handling
 type ErrorResponse struct {
-	Error string `json:"error"`
+	Message       string `json:"message"`
+	Code          int    `json:"code"`
+	Tag           string `json:"tag"`
+	RouteserverId int    `json:"routeserver_id"`
+}
+
+// Cache aware api response
+type CacheableResponse interface {
+	CacheTtl() time.Duration
 }
 
 // Config
@@ -23,7 +31,16 @@ type ConfigResponse struct {
 	Noexport        Noexport          `json:"noexport"`
 	NoexportReasons map[string]string `json:"noexport_reasons"`
 
-	RoutesColumns map[string]string `json:"routes_columns"`
+	BgpCommunities map[string]interface{} `json:"bgp_communities"`
+
+	NeighboursColumns      map[string]string `json:"neighbours_columns"`
+	NeighboursColumnsOrder []string          `json:"neighbours_columns_order"`
+
+	RoutesColumns      map[string]string `json:"routes_columns"`
+	RoutesColumnsOrder []string          `json:"routes_columns_order"`
+
+	LookupColumns      map[string]string `json:"lookup_columns"`
+	LookupColumnsOrder []string          `json:"lookup_columns_order"`
 
 	PrefixLookupEnabled bool `json:"prefix_lookup_enabled"`
 }
@@ -34,8 +51,9 @@ type Rejection struct {
 }
 
 type Noexport struct {
-	Asn        int `json:"asn"`
-	NoexportId int `json:"noexport_id"`
+	Asn          int  `json:"asn"`
+	NoexportId   int  `json:"noexport_id"`
+	LoadOnDemand bool `json:"load_on_demand"`
 }
 
 // Status
@@ -77,22 +95,24 @@ type RouteserversResponse struct {
 }
 
 // Neighbours
-type Neighbours []Neighbour
+type Neighbours []*Neighbour
 
 type Neighbour struct {
 	Id string `json:"id"`
 
 	// Mandatory fields
-	Address         string        `json:"address"`
-	Asn             int           `json:"asn"`
-	State           string        `json:"state"`
-	Description     string        `json:"description"`
-	RoutesReceived  int           `json:"routes_received"`
-	RoutesFiltered  int           `json:"routes_filtered"`
-	RoutesExported  int           `json:"routes_exported"`
-	RoutesPreferred int           `json:"routes_preferred"`
-	Uptime          time.Duration `json:"uptime"`
-	LastError       string        `json:"last_error"`
+	Address            string        `json:"address"`
+	Asn                int           `json:"asn"`
+	State              string        `json:"state"`
+	Description        string        `json:"description"`
+	RoutesReceived     int           `json:"routes_received"`
+	RoutesFiltered     int           `json:"routes_filtered"`
+	RoutesExported     int           `json:"routes_exported"`
+	RoutesPreferred    int           `json:"routes_preferred"`
+	RoutesAccepted     int           `json:"routes_accepted"`
+	RoutesPipeFiltered int           `json:"routes_pipe_filtered"`
+	Uptime             time.Duration `json:"uptime"`
+	LastError          string        `json:"last_error"`
 
 	// Original response
 	Details map[string]interface{} `json:"details"`
@@ -116,7 +136,13 @@ type NeighboursResponse struct {
 	Neighbours Neighbours `json:"neighbours"`
 }
 
-type NeighboursLookupResults map[int][]Neighbour
+// Neighbours response is cacheable
+func (self *NeighboursResponse) CacheTtl() time.Duration {
+	now := time.Now().UTC()
+	return self.Api.Ttl.Sub(now)
+}
+
+type NeighboursLookupResults map[int]Neighbours
 
 // BGP
 type Community []int
@@ -143,32 +169,12 @@ type Route struct {
 	Bgp       BgpInfo       `json:"bgp"`
 	Age       time.Duration `json:"age"`
 	Type      []string      `json:"type"` // [BGP, unicast, univ]
+	Primary   bool          `json:"primary"`
 
 	Details Details `json:"details"`
 }
 
-// Lookup Prefixes
-type LookupRoute struct {
-	Id          string    `json:"id"`
-	NeighbourId string    `json:"neighbour_id"`
-	Neighbour   Neighbour `json:"neighbour"`
-
-	State string `json:"state"` // Filtered, Imported, ...
-
-	Routeserver Routeserver `json:"routeserver"`
-
-	Network   string        `json:"network"`
-	Interface string        `json:"interface"`
-	Gateway   string        `json:"gateway"`
-	Metric    int           `json:"metric"`
-	Bgp       BgpInfo       `json:"bgp"`
-	Age       time.Duration `json:"age"`
-	Type      []string      `json:"type"` // [BGP, unicast, univ]
-
-	Details Details `json:"details"`
-}
-
-type Routes []Route
+type Routes []*Route
 
 // Implement sorting interface for routes
 func (routes Routes) Len() int {
@@ -185,18 +191,59 @@ func (routes Routes) Swap(i, j int) {
 
 type RoutesResponse struct {
 	Api         ApiStatus `json:"api"`
-	Imported    []Route   `json:"imported"`
-	Filtered    []Route   `json:"filtered"`
-	NotExported []Route   `json:"not_exported"`
+	Imported    Routes    `json:"imported"`
+	Filtered    Routes    `json:"filtered"`
+	NotExported Routes    `json:"not_exported"`
 }
 
+func (self *RoutesResponse) CacheTtl() time.Duration {
+	now := time.Now().UTC()
+	return self.Api.Ttl.Sub(now)
+}
+
+type PaginatedRoutesResponse struct {
+	*RoutesResponse
+	Pagination Pagination `json:"pagination"`
+}
+
+type Pagination struct {
+	Page         int `json:"page"`
+	PageSize     int `json:"page_size"`
+	TotalPages   int `json:"total_pages"`
+	TotalResults int `json:"total_results"`
+}
+
+// Lookup Prefixes
+type LookupRoute struct {
+	Id          string     `json:"id"`
+	NeighbourId string     `json:"neighbour_id"`
+	Neighbour   *Neighbour `json:"neighbour"`
+
+	State string `json:"state"` // Filtered, Imported, ...
+
+	Routeserver Routeserver `json:"routeserver"`
+
+	Network   string        `json:"network"`
+	Interface string        `json:"interface"`
+	Gateway   string        `json:"gateway"`
+	Metric    int           `json:"metric"`
+	Bgp       BgpInfo       `json:"bgp"`
+	Age       time.Duration `json:"age"`
+	Type      []string      `json:"type"` // [BGP, unicast, univ]
+	Primary   bool          `json:"primary"`
+
+	Details Details `json:"details"`
+}
+
+type LookupRoutes []*LookupRoute
+
 type RoutesLookupResponse struct {
-	Api    ApiStatus     `json:"api"`
-	Routes []LookupRoute `json:"routes"`
+	Api    ApiStatus    `json:"api"`
+	Routes LookupRoutes `json:"routes"`
 }
 
 type RoutesLookupResponseGlobal struct {
-	Routes []LookupRoute `json:"routes"`
+	Routes LookupRoutes `json:"routes"`
 
 	// Pagination
 	TotalRoutes int `json:"total_routes"`

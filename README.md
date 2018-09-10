@@ -11,7 +11,7 @@ Take a look at an Alice-LG production example:
 - https://lg.ecix.net/api/routeservers/0/neighbours/ID109_AS31078/routes
 - https://lg.ecix.net/api/lookup/prefix?q=217.115.0.0
 
-# Explanations
+## Explanations
 Alice-LG is a BGP looking glass which gets its data from external APIs.
 
 Currently Alice-LG supports the following APIs:
@@ -113,6 +113,39 @@ prior to building the RPM.
     make remote_rpm BUILD_SERVER=rpmbuild.example.com SYSTEM_INIT=upstart
 
 
+## Customization
+
+Alice now supports custom themes!
+In your alice.conf, you now can specify a theme by setting:
+
+    [theme]
+    path = /path/to/my/alice-theme
+
+with the optional parameter (the "mountpoint" of the theme)
+    url_base = /theme
+    
+
+You can put assets (images, fonts, javscript, css) in 
+this folder.
+
+Stylesheets and Javascripts are automatically included in
+the client's html and are served from the backend.
+
+Alice provides early stages of an extension API, which is for now 
+only used to modify the content of the welcome screen,
+by providing a javascript in your theme containing:
+
+```javascript
+Alice.updateContent({
+    welcome: {
+        title: "My Awesome Looking Glass",
+        tagline: "powered by Alice"
+    }
+});
+    
+```
+
+For an example check out: https://github.com/alice-lg/alice-theme-example
 
 ## Hacking
 

@@ -51,7 +51,7 @@ func main() {
 	router := httprouter.New()
 
 	// Serve static content
-	err = webRegisterAssets(router)
+	err = webRegisterAssets(AliceConfig.Ui, router)
 	if err != nil {
 		log.Fatal(err)
 	}

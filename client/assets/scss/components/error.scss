@@ -1,6 +1,5 @@
 .error-notify {
-    min-width: 250px;
-    margin-left: -125px;
+    width: 420px;
     border-bottom: 7px solid #7c0002;
     background-color: rgba(255,0,0,0.8);
     color: #fff;
@@ -8,19 +7,19 @@
     padding: 16px;
     position: fixed;
     display: table;
-    z-index: 2;
+    z-index: 999;
     right: 30px;
     top: 20px;
 
     .error-icon {
       display: table-cell;
       width: 60px;
-      padding: 10px 10px 0 10px;
+      padding: 8px 10px 0 10px;
       text-align: center;
       vertical-align: top;
 
       > i {
-        font-size: 2em;
+        font-size: 3em;
         border-radius: 100%;
       }
     }
@@ -32,5 +31,12 @@
         line-height: 1.2;
         margin-top: 6px;
       }
+    }
+
+    .error-dismiss {
+        position: absolute;
+        right: 5px;
+        top: 0px;
+        cursor: pointer;
     }
 }

@@ -24,7 +24,7 @@ all: client
 
 deps:
 	@echo "Installing dependencies"
-	yarn install
+	# yarn install
 
 client: deps
 	@echo "Building alice UI"
@@ -32,7 +32,7 @@ client: deps
 
 client_prod: deps
 	@echo "Building alice UI (production)"
-	DISABLE_LOGGING=1 gulp
+	DISABLE_LOGGING=1 NODE_ENV=production gulp
 
 watch:
 	while true; do gulp watch; done

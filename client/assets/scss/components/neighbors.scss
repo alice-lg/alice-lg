@@ -1,0 +1,49 @@
+
+.col-neighbor-attr {
+    white-space: nowrap;
+    a, a:link, a:active {
+        color: #333;
+    }
+
+    i.fa {
+        color: #333;
+    }
+}
+
+.col-neighbor-active {
+    font-weight: bold;
+    color: #2e6da4;
+}
+
+.neighbors-quick-links {
+    margin-bottom: 0.75em; 
+    margin-top: -0.5em;
+
+    text-align: right;
+    span {
+      color: #888;
+    }
+
+    ul {
+        padding: 0px;
+        margin: 0px;
+        display: inline-block;
+    }
+    li {
+        display: inline-block;
+        padding: 0px 4px;
+        margin: 0px 0px 0px 8px;
+        background: white;
+        border-radius: 3px;
+
+        &.established a {
+          color: green;
+        }
+
+        &.down a {
+          color: red;
+        }
+    }
+
+}
+

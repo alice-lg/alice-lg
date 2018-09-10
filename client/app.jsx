@@ -16,6 +16,9 @@ import { Component } from 'react'
 // Config
 import { configureAxios } from './config'
 
+// Content
+import { contentUpdate } from './components/content/actions'
+
 // Redux
 import { createStore, applyMiddleware } from 'redux'
 import { Provider } from 'react-redux'
@@ -56,6 +59,7 @@ const browserHistory = useRouterHistory(createHistory)({
   basename: '/alice'
 });
 
+
 // Setup application
 let store;
 const routerMiddleware = createRouterMiddleware(browserHistory);
@@ -72,6 +76,14 @@ if (window.NO_LOG) {
     loggerMiddleware
   ));
 }
+
+
+// Create extension endpoint:
+window.Alice = {
+  updateContent: (content) => {
+    store.dispatch(contentUpdate(content));    
+  }
+};
 
 const history = syncHistoryWithStore(browserHistory, store);
 

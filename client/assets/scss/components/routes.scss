@@ -1,22 +1,134 @@
 
-.table-routes {
-  // Make pseudo links
-  td {
-    cursor: pointer;
+$labelOffsetStart: -10px;
+$labelOffsetEnd:   -30px;
 
+
+@-webkit-keyframes fadeSmooth {
+    from {
+        opacity: 0;
+        left: $labelOffsetStart;
+    }
+
+    to {
+        opacity: 1;
+        left: $labelOffsetEnd;
+    }
+}
+@keyframes fadeSmooth {
+    from {
+        opacity: 0;
+        left: $labelOffsetStart;
+    }
+
+    to {
+        opacity: 1;
+        left: $labelOffsetEnd;
+    }
+}
+                                   
+.fadeIn {
+}
+
+
+.table-routes {
+  tr {
+    position: relative; // anchor
+  }
+
+  td {
     color: #337ab7;
     text-decoration: none;
 
-    &:hover {
+    span:hover {
       text-decoration: underline;
     }
+
+    span {
+        cursor: pointer;
+    }
+
   }
+
 
   .noexport-reason,
   .reject-reason {
     font-size: 90%;
     color: #333;
     margin-bottom: 1px;
+
+    a {
+      color: #aa0000;
+    }
+  }
+
+  .col-route-flags {
+    padding: 7px 0px;
+    padding-left: 4px;
+    width: 35px;
+  }
+
+  .col-route-network {
+    // padding: 8px 0px;
+    // padding-left: 3px;
+
+  }
+
+  .route-prefix-flags {
+    .primary-route {
+       color: #efb208; 
+    }
+  }
+
+  .route-prefix-flags {
+  }
+
+  .route-prefix-flag {
+    color: #555;
+    text-decoration: none;
+    border: none;
+
+    font-size: 10px;
+
+    cursor: default;
+
+    padding-left: 3px;
+
+    div {
+        font-size: 12px;
+        display: none;
+        // top: -5px;
+        left: $labelOffsetStart;
+        background: rgba(0, 0, 0, 0.45);
+        color: white;
+        position: absolute;
+        padding: 5px;
+        margin-top: -22px;
+        border-radius: 3px;
+        font-weight: bold;
+
+        -webkit-animation-name: fadeSmooth;
+        animation-name: fadeSmooth;
+    }
+
+    &:hover {
+        text-decoration: none;
+        div {
+            display: block;
+
+            -webkit-animation-duration: 0.5s;
+            animation-duration: 0.5s;
+            -webkit-animation-fill-mode: both;
+            animation-fill-mode: both;
+        }
+    }
+
+  }
+
+  .route-network {
+    display: inline-block;
+    position: relative;
+    width: 100%;
+    white-space: nowrap;
   }
 }
 
@@ -25,5 +137,114 @@
   .date-since {
     white-space: nowrap;
   }
+  background: white;
 }
+
+
+.routes-loading.card {
+    p {
+        font-family: monospace;
+        font-size: 12px;
+    }
+}
+
+.routes-header-container {
+    text-decoration: none;
+
+    a:hover {
+        text-decoration: none;
+    }
+}
+
+
+.routes-quick-links {
+    margin-bottom: 0.75em; 
+    margin-top: -0.5em;
+
+    text-align: right;
+    span {
+      color: #888;
+    }
+
+    ul {
+        padding: 0px;
+        margin: 0px;
+        display: inline-block;
+    }
+    li {
+        display: inline-block;
+        padding: 0px 4px;
+        margin: 0px 0px 0px 8px;
+        background: white;
+        border-radius: 3px;
+
+        &.filtered a {
+          color: orange;
+        }
+
+        &.received a {
+          color: green;
+        }
+
+        &.not-exported a {
+          color: red;
+        }
+    }
+
+}
+
+
+/*
+ * Related Peers
+ */
+.related-peers {
+    $tabHeight: 23px;
+    $shadowOffset: 3px;
+
+    display: block;
+    position: absolute; 
+    overflow: hidden;
+
+    padding: $shadowOffset $shadowOffset 0px $shadowOffset;
+    margin: 0px;
+    
+    list-style: none;
+
+    top: -$tabHeight - $shadowOffset;
+
+    li {
+        height: $tabHeight;
+        line-height: $tabHeight;
+
+        display: inline-block;
+
+        padding: 0px 5px;
+        margin: 0px 10px 0px 0px;
+        
+        border-bottom: 1px solid #ffffff;
+        background: #ffffff;
+        border-top-left-radius: 2px;
+        border-top-right-radius: 2px;
+
+        box-shadow: 0px 1px 3px #aaa;
+
+        &.active {
+            font-weight: bold;
+            a {
+                color: #222;
+            }
+        }
+
+        a, a:hover {
+            text-decoration: none;     
+        }
+    }
+}
+
+.has-related-peers {
+    .details-main {
+        padding-top: 21px;
+    }
+}
+
 

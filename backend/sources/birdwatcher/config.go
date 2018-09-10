@@ -10,4 +10,6 @@ type Config struct {
 	ServerTimeShort string `ini:"servertime_short"`
 	ServerTimeExt   string `ini:"servertime_ext"`
 	ShowLastReboot  bool   `ini:"show_last_reboot"`
+
+	DisableNeighborSummary bool `ini:"disable_neighbor_summary"`
 }

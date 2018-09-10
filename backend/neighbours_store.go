@@ -2,27 +2,30 @@ package main
 
 import (
 	"log"
+	"regexp"
+	"strconv"
 	"sync"
 	"time"
 
 	"github.com/alice-lg/alice-lg/backend/api"
 )
 
-type NeighboursIndex map[string]api.Neighbour
+type NeighboursIndex map[string]*api.Neighbour
 
 type NeighboursStore struct {
-	neighboursMap map[int]NeighboursIndex
-	configMap     map[int]SourceConfig
-	statusMap     map[int]StoreStatus
+	neighboursMap   map[int]NeighboursIndex
+	configMap       map[int]*SourceConfig
+	statusMap       map[int]StoreStatus
+	refreshInterval time.Duration
 
-	rwlock *sync.RWMutex
+	sync.RWMutex
 }
 
 func NewNeighboursStore(config *Config) *NeighboursStore {
 
 	// Build source mapping
 	neighboursMap := make(map[int]NeighboursIndex)
-	configMap := make(map[int]SourceConfig)
+	configMap := make(map[int]*SourceConfig)
 	statusMap := make(map[int]StoreStatus)
 
 	for _, source := range config.Sources {
@@ -35,18 +38,26 @@ func NewNeighboursStore(config *Config) *NeighboursStore {
 		neighboursMap[sourceId] = make(NeighboursIndex)
 	}
 
-	store := &NeighboursStore{
-		neighboursMap: neighboursMap,
-		statusMap:     statusMap,
-		configMap:     configMap,
+	// Set refresh interval, default to 5 minutes when
+	// interval is set to 0
+	refreshInterval := time.Duration(
+		config.Server.NeighboursStoreRefreshInterval) * time.Minute
+	if refreshInterval == 0 {
+		refreshInterval = time.Duration(5) * time.Minute
+	}
 
-		rwlock: &sync.RWMutex{},
+	store := &NeighboursStore{
+		neighboursMap:   neighboursMap,
+		statusMap:       statusMap,
+		configMap:       configMap,
+		refreshInterval: refreshInterval,
 	}
 	return store
 }
 
 func (self *NeighboursStore) Start() {
 	log.Println("Starting local neighbours store")
+	log.Println("Neighbours Store refresh interval set to:", self.refreshInterval)
 	go self.init()
 }
 
@@ -59,7 +70,7 @@ func (self *NeighboursStore) init() {
 
 	// Periodically update store
 	for {
-		time.Sleep(5 * time.Minute)
+		time.Sleep(self.refreshInterval)
 		self.update()
 	}
 }
@@ -72,27 +83,28 @@ func (self *NeighboursStore) update() {
 		}
 
 		// Start updating
-		self.rwlock.Lock()
+		self.Lock()
 		self.statusMap[sourceId] = StoreStatus{
 			State: STATE_UPDATING,
 		}
-		self.rwlock.Unlock()
+		self.Unlock()
 
 		source := self.configMap[sourceId].getInstance()
 
 		neighboursRes, err := source.Neighbours()
-		neighbours := neighboursRes.Neighbours
 		if err != nil {
 			// That's sad.
-			self.rwlock.Lock()
+			self.Lock()
 			self.statusMap[sourceId] = StoreStatus{
 				State:       STATE_ERROR,
 				LastError:   err,
 				LastRefresh: time.Now(),
 			}
-			self.rwlock.Unlock()
+			self.Unlock()
 			continue
 		}
+
+		neighbours := neighboursRes.Neighbours
 
 		// Update data
 		// Make neighbours index
@@ -101,44 +113,54 @@ func (self *NeighboursStore) update() {
 			index[neighbour.Id] = neighbour
 		}
 
-		self.rwlock.Lock()
+		self.Lock()
 		self.neighboursMap[sourceId] = index
 		// Update state
 		self.statusMap[sourceId] = StoreStatus{
 			LastRefresh: time.Now(),
 			State:       STATE_READY,
 		}
-		self.rwlock.Unlock()
+		self.Unlock()
 	}
 }
 
 func (self *NeighboursStore) GetNeighbourAt(
 	sourceId int,
 	id string,
-) api.Neighbour {
+) *api.Neighbour {
 	// Lookup neighbour on RS
-	self.rwlock.RLock()
+	self.RLock()
 	neighbours := self.neighboursMap[sourceId]
-	self.rwlock.RUnlock()
+	self.RUnlock()
 	return neighbours[id]
 }
 
 func (self *NeighboursStore) LookupNeighboursAt(
 	sourceId int,
 	query string,
-) []api.Neighbour {
-	results := []api.Neighbour{}
+) api.Neighbours {
+	results := api.Neighbours{}
 
-	self.rwlock.RLock()
+	self.RLock()
 	neighbours := self.neighboursMap[sourceId]
-	self.rwlock.RUnlock()
+	self.RUnlock()
+
+	asn := -1
+	if regex := regexp.MustCompile(`(?i)^AS(\d+)`); regex.MatchString(query) {
+		groups := regex.FindStringSubmatch(query)
+		if a, err := strconv.Atoi(groups[1]); err == nil {
+			asn = a
+		}
+	}
 
 	for _, neighbour := range neighbours {
-		if !ContainsCi(neighbour.Description, query) {
+		if asn >= 0 && neighbour.Asn == asn { // only executed if valid AS query is detected
+			results = append(results, neighbour)
+		} else if ContainsCi(neighbour.Description, query) {
+			results = append(results, neighbour)
+		} else {
 			continue
 		}
-
-		results = append(results, neighbour)
 	}
 
 	return results
@@ -162,7 +184,7 @@ func (self *NeighboursStore) Stats() NeighboursStoreStats {
 	totalNeighbours := 0
 	rsStats := []RouteServerNeighboursStats{}
 
-	self.rwlock.RLock()
+	self.RLock()
 	for sourceId, neighbours := range self.neighboursMap {
 		status := self.statusMap[sourceId]
 		totalNeighbours += len(neighbours)
@@ -174,7 +196,7 @@ func (self *NeighboursStore) Stats() NeighboursStoreStats {
 		}
 		rsStats = append(rsStats, serverStats)
 	}
-	self.rwlock.RUnlock()
+	self.RUnlock()
 
 	storeStats := NeighboursStoreStats{
 		TotalNeighbours: totalNeighbours,

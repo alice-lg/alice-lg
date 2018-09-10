@@ -19,15 +19,8 @@ export const LOAD_ROUTESERVER_PROTOCOL_REQUEST = '@birdseye/LOAD_ROUTESERVER_PRO
 export const LOAD_ROUTESERVER_PROTOCOL_SUCCESS = '@birdseye/LOAD_ROUTESERVER_PROTOCOL_SUCCESS';
 export const LOAD_ROUTESERVER_PROTOCOL_ERROR   = '@birdseye/LOAD_ROUTESERVER_PROTOCOL_ERROR';
 
-export const LOAD_ROUTESERVER_ROUTES_REQUEST = '@birdseye/LOAD_ROUTESERVER_ROUTES_REQUEST';
-export const LOAD_ROUTESERVER_ROUTES_SUCCESS = '@birdseye/LOAD_ROUTESERVER_ROUTES_SUCCESS';
-export const LOAD_ROUTESERVER_ROUTES_ERROR   = '@birdseye/LOAD_ROUTESERVER_ROUTES_ERROR';
-
-export const LOAD_ROUTESERVER_ROUTES_FILTERED_SUCCESS = '@birdseye/LOAD_ROUTESERVER_ROUTES_FILTERED_SUCCESS';
-export const LOAD_ROUTESERVER_ROUTES_NOEXPORT_SUCCESS = '@birdseye/LOAD_ROUTESERVER_ROUTES_NOEXPORT_SUCCESS';
-
 export const SET_PROTOCOLS_FILTER_VALUE = '@birdseye/SET_PROTOCOLS_FILTER_VALUE';
-export const SET_ROUTES_FILTER_VALUE = '@birdseye/SET_ROUTES_FILTER_VALUE';
+export const SET_PROTOCOLS_FILTER = '@birdseye/SET_PROTOCOLS_FILTER';
 
 
 // Action Creators
@@ -110,7 +103,7 @@ export function loadRouteserverStatus(routeserverId) {
       })
       .catch((error) => {
         dispatch(apiError(error));
-        dispatch(loadRouteserverStatusError(routeserverId, error.data));
+        dispatch(loadRouteserverStatusError(routeserverId, error));
       });
   }
 }
@@ -143,74 +136,7 @@ export function loadRouteserverProtocol(routeserverId) {
         dispatch(setProtocolsFilterValue(""));
         dispatch(loadRouteserverProtocolSuccess(routeserverId, data.neighbours));
       })
-      .catch(error => dispatch(apiError(error)));
-  }
-}
-
-
-export function loadRouteserverRoutesRequest(routeserverId, protocolId) {
-  return {
-    type: LOAD_ROUTESERVER_ROUTES_REQUEST,
-    payload: {
-      routeserverId: routeserverId,
-      protocolId: protocolId,
-    }
-  }
-}
-
-export function loadRouteserverRoutesSuccess(routeserverId, protocolId, routes) {
-  return {
-    type: LOAD_ROUTESERVER_ROUTES_SUCCESS,
-    payload: {
-      routeserverId: routeserverId,
-      protocolId: protocolId,
-      routes: routes
-    }
-  }
-}
-
-
-export function loadRouteserverRoutes(routeserverId, protocolId) {
-  return (dispatch) => {
-    dispatch(loadRouteserverRoutesRequest(routeserverId, protocolId))
-
-    axios.get(`/api/routeservers/${routeserverId}/neighbours/${protocolId}/routes`)
-      .then(({data}) => {
-        dispatch(
-          loadRouteserverRoutesSuccess(routeserverId, protocolId, data.imported)
-        );
-        dispatch(
-          loadRouteserverRoutesFilteredSuccess(routeserverId, protocolId, data.filtered)
-        );
-        dispatch(
-          loadRouteserverRoutesNoexportSuccess(routeserverId, protocolId, data.not_exported)
-        );
-        dispatch(setRoutesFilterValue(""));
-      })
-      .catch(error => dispatch(apiError(error)));
-  }
-}
-
-
-export function loadRouteserverRoutesFilteredSuccess(routeserverId, protocolId, routes) {
-  return {
-    type: LOAD_ROUTESERVER_ROUTES_FILTERED_SUCCESS,
-    payload: {
-      routeserverId: routeserverId,
-      protocolId: protocolId,
-      routes: routes
-    }
-  }
-}
-
-export function loadRouteserverRoutesNoexportSuccess(routeserverId, protocolId, routes) {
-  return {
-    type: LOAD_ROUTESERVER_ROUTES_NOEXPORT_SUCCESS,
-    payload: {
-      routeserverId: routeserverId,
-      protocolId: protocolId,
-      routes: routes
-    }
+      .catch((error) => dispatch(apiError(error)));
   }
 }
 
@@ -220,18 +146,19 @@ export function setProtocolsFilterValue(value) {
   return {
     type: SET_PROTOCOLS_FILTER_VALUE,
     payload: {
-      protocolsFilterValue: value
+      value: value
     }
   }
 }
 
 
-export function setRoutesFilterValue(value) {
+export function setProtocolsFilter(value) {
   return {
-    type: SET_ROUTES_FILTER_VALUE,
+    type: SET_PROTOCOLS_FILTER,
     payload: {
-      routesFilterValue: value
+      value: value, 
     }
   }
 }
+
 

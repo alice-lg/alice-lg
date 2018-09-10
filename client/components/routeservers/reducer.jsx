@@ -3,18 +3,16 @@
 
 import {LOAD_ROUTESERVERS_REQUEST,
         LOAD_ROUTESERVERS_SUCCESS,
+
         LOAD_ROUTESERVER_STATUS_SUCCESS,
+        LOAD_ROUTESERVER_STATUS_ERROR,
 
         LOAD_ROUTESERVER_PROTOCOL_REQUEST,
         LOAD_ROUTESERVER_PROTOCOL_SUCCESS,
 
-        LOAD_ROUTESERVER_ROUTES_REQUEST,
-        LOAD_ROUTESERVER_ROUTES_SUCCESS,
-
-        LOAD_ROUTESERVER_ROUTES_FILTERED_SUCCESS,
-        LOAD_ROUTESERVER_ROUTES_NOEXPORT_SUCCESS,
-
         SET_PROTOCOLS_FILTER_VALUE,
+        SET_PROTOCOLS_FILTER,
+
         SET_ROUTES_FILTER_VALUE}
   from './actions'
 
@@ -24,12 +22,12 @@ import {LOAD_REJECT_REASONS_SUCCESS,
 
 
 const initialState = {
+
   all: [],
-  noexport: {},
-  filtered: {},
+
   details: {},
   protocols: {},
-  routes: {},
+  statusErrors: {},
 
   reject_reasons: {},
   reject_id: 0,
@@ -40,11 +38,10 @@ const initialState = {
   noexport_asn: 0,
 
   protocolsFilterValue: "",
-  routesFilterValue: "",
+  protocolsFilter: "",
 
   isLoading: false,
 
-  routesAreLoading: false,
   protocolsAreLoading: false
 };
 
@@ -62,11 +59,6 @@ export default function reducer(state = initialState, action) {
         isLoading: false
       });
 
-    case LOAD_ROUTESERVER_ROUTES_REQUEST:
-      return Object.assign({}, state, {
-        routesAreLoading: true
-      });
-
     case LOAD_ROUTESERVER_PROTOCOL_REQUEST:
       return Object.assign({}, state, {
         protocolsAreLoading: true
@@ -81,31 +73,6 @@ export default function reducer(state = initialState, action) {
         protocolsAreLoading: false
       });
 
-    case LOAD_ROUTESERVER_ROUTES_SUCCESS:
-      var routes = Object.assign({}, state.routes, {
-        [action.payload.protocolId]: action.payload.routes
-      });
-      return Object.assign({}, state, {
-        routes: routes,
-        routesAreLoading: false
-      });
-
-    case LOAD_ROUTESERVER_ROUTES_FILTERED_SUCCESS:
-      var filtered = Object.assign({}, state.filtered, {
-        [action.payload.protocolId]: action.payload.routes
-      });
-      return Object.assign({}, state, {
-        filtered: filtered,
-      });
-
-    case LOAD_ROUTESERVER_ROUTES_NOEXPORT_SUCCESS:
-      var noexport = Object.assign({}, state.noexport, {
-        [action.payload.protocolId]: action.payload.routes
-      });
-      return Object.assign({}, state, {
-        noexport: noexport,
-      });
-
     case LOAD_NOEXPORT_REASONS_SUCCESS:
     case LOAD_REJECT_REASONS_SUCCESS:
       return Object.assign({}, state, action.payload);
@@ -115,17 +82,51 @@ export default function reducer(state = initialState, action) {
       var details = Object.assign({}, state.details, {
         [action.payload.routeserverId]: action.payload.status
       });
+      var errors = Object.assign({}, state.statusErrors, {
+        [action.payload.routeserverId]: null,
+      });
       return Object.assign({}, state, {
-        details: details
+        details: details,
+        statusErrors: errors 
       });
 
+    case LOAD_ROUTESERVER_STATUS_ERROR:
+      var info = {
+        code: 42,
+        tag: "UNKNOWN_ERROR",
+        message: "Unknown error"
+      };
+
+      if (action.payload.error &&
+          action.payload.error.response && 
+          action.payload.error.response.data &&
+          action.payload.error.response.data.code) {
+            info = action.payload.error.response.data;
+      }
+      
+      var errors = Object.assign({}, state.statusErrors, {
+        [action.payload.routeserverId]: info
+      });
+      return Object.assign({}, state, {
+        statusErrors: errors 
+      });
+      return state;
+
     case SET_PROTOCOLS_FILTER_VALUE:
+      return Object.assign({}, state, {
+        protocolsFilterValue: action.payload.value
+      });
+
+    case SET_PROTOCOLS_FILTER:
+      return Object.assign({}, state, {
+        protocolsFilter: action.payload.value
+      });
+
     case SET_ROUTES_FILTER_VALUE:
       return Object.assign({}, state, action.payload);
 
   }
   return state;
 }
-
 
 

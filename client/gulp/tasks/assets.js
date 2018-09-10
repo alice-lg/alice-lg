@@ -20,7 +20,7 @@ gulp.task('assets', function(){
   });
 
   // Copy local fonts
-  gulp.src('app/assets/fonts/**')
+  gulp.src('assets/fonts/**')
     .pipe(gulp.dest('build/fonts/'));
 
   // Copy images
@@ -32,5 +32,7 @@ gulp.task('assets', function(){
     .pipe(flatten())
     .pipe(gulp.dest('build/fonts/'));
 
+  gulp.src('node_modules/font-awesome/css/**')
+    .pipe(gulp.dest('build/fonts/'));
 });
 

@@ -3,11 +3,13 @@ import React from 'react'
 import {connect} from 'react-redux'
 
 import Datetime from 'components/datetime'
+import moment from 'moment'
 
 
 class Details extends React.Component {
 
   render() {
+
     let rsStatus = this.props.details[this.props.routeserverId];
     if (!rsStatus) {
       return null;
@@ -19,26 +21,52 @@ class Details extends React.Component {
       return null;
     }
 
-
     let lastReboot = rsStatus.last_reboot;
     if (lastReboot == "0001-01-01T00:00:00Z") {
         lastReboot = null;
     }
 
+    let cacheStatus = null;
+    if (this.props.cacheStatus) {
+      const s = this.props.cacheStatus;
+      cacheStatus = [
+         <tr key="cache-status-cached-at">
+           <td><i className="fa fa-refresh"></i></td>
+           <td>
+             Generated <b>{s.generatedAt.fromNow()}</b><br />
+             Next refresh <b>{s.ttl.fromNow()}</b>
+           </td>
+         </tr>,
+
+         <tr key="cache-status-ttl">
+           <td></td>
+           <td>
+           </td>
+         </tr>
+      ];
+    };
+
     return (
-      <div className="routeserver-status">
-        <ul>
-          {lastReboot &&
-            <li><i className="fa fa-clock-o"></i>
-              Last Reboot: <b><Datetime value={lastReboot} /></b>
-            </li>}
-          <li><i className="fa fa-clock-o"></i>
-            Last Reconfig: <b><Datetime value={rsStatus.last_reconfig} /></b>
-          </li>
-          <li><i className="fa fa-battery-full"></i>
-            <b>{rsStatus.message}</b></li>
-        </ul>
-      </div>
+      <table className="routeserver-status">
+        <tbody>
+        {lastReboot &&
+          <tr>
+            <td><i className="fa fa-clock-o"></i></td>
+            <td>Last Reboot: <b><Datetime value={lastReboot} /></b></td>
+          </tr>}
+        <tr>
+          <td><i className="fa fa-clock-o"></i></td>
+          <td>Last Reconfig: <b><Datetime value={rsStatus.last_reconfig} /></b></td>
+        </tr>
+
+        <tr>
+          <td><i className="fa fa-thumbs-up"></i></td>
+          <td><b>{rsStatus.message}</b></td>
+        </tr>
+
+        {cacheStatus}
+        </tbody>
+      </table>
     );
   }
 }
