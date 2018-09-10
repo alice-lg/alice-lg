@@ -48,10 +48,10 @@ sudo npm install --global gulp-cli
 
 go get github.com/GeertJohan/go.rice
 go get github.com/GeertJohan/go.rice/rice
-mkdir -p ~/go/bin ~/go/pkg ~/go/src/github.com/ecix/
+mkdir -p ~/go/bin ~/go/pkg ~/go/src/github.com/alice-lg/
 
-cd ~/go/src/github.com/ecix
-git clone https://github.com/ecix/alice-lg.git
+cd ~/go/src/github.com/alice-lg
+git clone https://github.com/alice-lg/alice-lg.git
 
 cd alice-lg
 make
@@ -158,14 +158,32 @@ Install build tools as needed:
 
 
 Create a fresh UI build with
-
-    cd client/
-    make client
+```bash
+cd client/
+make client
+```
 
 This will install all dependencies and run `gulp`.
 
 While working on the UI you might want to use `make watch`,
 which will keep the `gulp watch` task up and running.
 
+### Docker
+For convenience we added a `Dockerfile` for building the frontend / client.
 
+Create a fresh UI build using docker with
+```bash
+cd client/
+
+# Dev build:
+make -f Makefile.docker client
+
+# Production build:
+make -f Makefile.docker client_prod
+```
+
+You can use gulp with docker for watching the files while developing aswell:
+```bash
+make -f Makefile.docker watch
+```
 
