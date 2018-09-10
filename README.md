@@ -7,7 +7,6 @@ Take a look at an Alice-LG production example:
 - https://lg-beta.de-cix.net/api/config
 - https://lg-beta.de-cix.net/api/routeservers
 - https://lg-beta.de-cix.net/api/routeservers/0/status
-
 - https://lg.ecix.net/api/routeservers/0/neighbours
 - https://lg.ecix.net/api/routeservers/0/neighbours/ID109_AS31078/routes
 - https://lg.ecix.net/api/lookup/prefix?q=217.115.0.0
