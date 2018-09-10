@@ -27,7 +27,11 @@ const RoutesHeader = (props) => {
     [ROUTES_FILTERED]: "filtered",
     [ROUTES_NOT_EXPORTED]: "not exported"
   }[type];
-  const cls = `card-header card-header-routes ${type.toLowerCase()}`;
+  let stype = type;
+  if (stype == ROUTES_NOT_EXPORTED) {
+    stype = 'not-exported'; // *sigh*
+  }
+  const cls = `card-header card-header-routes ${stype}`;
   return (<p className={cls}>Routes {rtype}</p>);
 };
 
