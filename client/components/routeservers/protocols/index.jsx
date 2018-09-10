@@ -259,14 +259,14 @@ class NeighboursTableView extends React.Component {
 
     let uptimeTitle;
     let sectionTitle = '';
-    let sectionColor = 'black';
     let sectionAnchor = 'sessions-unknown';
+    let sectionCls = 'card-header card-header-neighbors ';
     switch(this.props.state) {
       case 'up':
         uptimeTitle = 'Uptime'; 
         sectionAnchor = 'sessions-up';
         sectionTitle  = 'Sessions Established';
-        sectionColor  = "green";
+        sectionCls  += 'established ';
         break;
       case 'down':
         uptimeTitle = 'Downtime'; 
@@ -274,17 +274,16 @@ class NeighboursTableView extends React.Component {
       case 'start':
         sectionAnchor = 'sessions-up';
         uptimeTitle = 'Since';
-        sectionTitle = 'BGP Sessions Down';
-        sectionColor = "red";
         sectionAnchor = 'sessions-down';
+        sectionTitle = 'BGP Sessions Down';
+        sectionCls += 'down ';
     }
 
 
     return (
       <div className="card">
         <a name={sectionAnchor} />
-        <p className="card-header"
-           style={{color: sectionColor}}>{sectionTitle}</p>
+        <p className={sectionCls}>{sectionTitle}</p>
 
         <table className="table table-striped table-protocols">
           <thead>

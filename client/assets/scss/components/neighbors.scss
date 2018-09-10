@@ -44,6 +44,16 @@
           color: red;
         }
     }
-
 }
+
+.card-header-neighbors {
+    &.established {
+        color: green;
+    }
+
+    &.down {
+        color: red;
+    }
+}
+
 
