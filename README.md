@@ -182,9 +182,20 @@ make -f Makefile.docker client
 # Production build:
 make -f Makefile.docker client_prod
 ```
-
 You can use gulp with docker for watching the files while developing aswell:
 ```bash
 make -f Makefile.docker watch
 ```
+
+## Sponsors
+
+The current development of Alice is sponsored by
+
+![DE-CIX](doc/images/DE-CIX_Logo_2016_small.png?raw=true "Title")
+
+
+
+
+
+
 
