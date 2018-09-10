@@ -72,18 +72,19 @@ You can copy it to any of the following locations:
 
 You will have to edit the configuration file as you need to point Alice-LG to the correct [APIs](https://github.com/ecix/birdwatcher):
 
-    [source.0]
-    name = rs1.example.com (IPv4)
-    [source.0.birdwatcher]
-    api = http://rs1.example.com:29184/
-    # show_last_reboot = true
-    # timezone = UTC
+```ini
+[source.0]
+name = rs1.example.com (IPv4)
+[source.0.birdwatcher]
+api = http://rs1.example.com:29184/
+# show_last_reboot = true
+# timezone = UTC
 
-    [source.1]
-    name = rs1.example.com (IPv6)
-    [source.1.birdwatcher]
-    api = http://rs1.example.com:29186/
-
+[source.1]
+name = rs1.example.com (IPv6)
+[source.1.birdwatcher]
+api = http://rs1.example.com:29186/
+```
 
 ## Running
 
