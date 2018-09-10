@@ -191,11 +191,6 @@ make -f Makefile.docker watch
 
 The current development of Alice is sponsored by
 
-![DE-CIX](doc/images/DE-CIX_Logo_2016_small.png?raw=true "Title")
-
-
-
-
-
+[![DE-CIX](doc/images/DE-CIX_Logo_2016_small.png?raw=true "DE-CIX Logo")](https://www.de-cix.net)
 
 
