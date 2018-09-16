@@ -3,7 +3,7 @@ import {debounce} from 'underscore'
 
 import React from 'react'
 import {connect} from 'react-redux'
-import {push} from 'react-router-redux'
+import {replace} from 'react-router-redux'
 
 import PageHeader from 'components/page-header'
 import Details from './details'
@@ -31,20 +31,13 @@ class RouteserversPage extends React.Component {
     this.props.dispatch(setFilterValue(value));
 
     // Update location delayed
-    this.dispatchDebounced(push(
+    this.dispatchDebounced(replace(
       makeQueryLinkProps(
         this.props.routing,
         value,
         this.props.sortColumn,
         this.props.sortOrder)));
   }
-
-  
-  componentDidMount() {
-    // Reset Filters
-    this.props.dispatch(setFilterValue(""));
-  }
-
 
   render() {
     return(

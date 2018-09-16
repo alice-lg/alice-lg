@@ -6,7 +6,7 @@ import React from 'react'
 import {connect} from 'react-redux'
 
 import {Link} from 'react-router'
-import {push} from 'react-router-redux'
+import {push, replace} from 'react-router-redux'
 
 import Details    from '../details'
 import Status     from '../status'
@@ -106,7 +106,7 @@ class RoutesPage extends React.Component {
       setFilterQueryValue(value)
     );
 
-    this.debouncedDispatch(push(makeQueryLinkProps(
+    this.debouncedDispatch(replace(makeQueryLinkProps(
       this.props.routing, value, this.props.loadNotExported
     )));
   }
