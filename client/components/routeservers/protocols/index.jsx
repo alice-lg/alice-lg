@@ -110,7 +110,7 @@ class NeighborColumnHeader extends React.Component {
     // Render link with sorting indicator
     if (active) {
       const nextOrder = (this.props.order == 'asc') ? 'desc' : 'asc';
-      const url = `${baseUrl}?s=${sortColumn}&o=${nextOrder}`;
+      const url = `${baseUrl}?s=${sortColumn}&o=${nextOrder}&q=${this.props.query}`;
       let indicator = <i className="fa fa-arrow-circle-up"></i>;
 
       cls += 'col-neighbor-active ';
@@ -126,7 +126,7 @@ class NeighborColumnHeader extends React.Component {
     }
     
     // Column is not active, just present a link:
-    const url = `${baseUrl}?s=${sortColumn}&o=${this.props.order}`
+    const url = `${baseUrl}?s=${sortColumn}&o=${this.props.order}&q=${this.props.query}`
     return(
       <th className={cls}>
         <Link to={url}>{name}</Link>
@@ -243,7 +243,8 @@ class NeighboursTableView extends React.Component {
                               rsId={this.props.routeserverId}
                               columns={columns} column={col}
                               sort={this.props.sortColumn}
-                              order={this.props.sortOrder} />
+                              order={this.props.sortOrder}
+                              query={this.props.filterQuery} />
       );
     });
 
@@ -307,6 +308,7 @@ const NeighboursTable = connect(
 
     sortColumn: state.neighbors.sortColumn,
     sortOrder:  state.neighbors.sortOrder,
+    filterQuery: state.neighbors.filterQuery,
   })
 )(NeighboursTableView);
 
@@ -342,7 +344,7 @@ class Protocols extends React.Component {
       return null;
     }
 
-    protocol = _filteredProtocols(protocol, this.props.filter);
+    protocol = _filteredProtocols(protocol, this.props.filterQuery);
     if(!protocol || protocol.length == 0) {
       return (
         <div className="card">
@@ -407,7 +409,9 @@ export default connect(
     return {
       isLoading: state.routeservers.protocolsAreLoading,
       protocols: state.routeservers.protocols,
-      filter: state.routeservers.protocolsFilter,
+
+      filterQuery: state.neighbors.filterQuery,
+      routing: state.routing.locationBeforeTransitions,
     }
   }
 )(Protocols);

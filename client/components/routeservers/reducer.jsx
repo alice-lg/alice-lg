@@ -8,12 +8,7 @@ import {LOAD_ROUTESERVERS_REQUEST,
         LOAD_ROUTESERVER_STATUS_ERROR,
 
         LOAD_ROUTESERVER_PROTOCOL_REQUEST,
-        LOAD_ROUTESERVER_PROTOCOL_SUCCESS,
-
-        SET_PROTOCOLS_FILTER_VALUE,
-        SET_PROTOCOLS_FILTER,
-
-        SET_ROUTES_FILTER_VALUE}
+        LOAD_ROUTESERVER_PROTOCOL_SUCCESS}
   from './actions'
 
 import {LOAD_REJECT_REASONS_SUCCESS,
@@ -36,9 +31,6 @@ const initialState = {
   noexport_reasons: {},
   noexport_id: 0,
   noexport_asn: 0,
-
-  protocolsFilterValue: "",
-  protocolsFilter: "",
 
   isLoading: false,
 
@@ -111,20 +103,6 @@ export default function reducer(state = initialState, action) {
         statusErrors: errors 
       });
       return state;
-
-    case SET_PROTOCOLS_FILTER_VALUE:
-      return Object.assign({}, state, {
-        protocolsFilterValue: action.payload.value
-      });
-
-    case SET_PROTOCOLS_FILTER:
-      return Object.assign({}, state, {
-        protocolsFilter: action.payload.value
-      });
-
-    case SET_ROUTES_FILTER_VALUE:
-      return Object.assign({}, state, action.payload);
-
   }
   return state;
 }
