@@ -342,7 +342,7 @@ class Protocols extends React.Component {
       return null;
     }
 
-    protocol = _filteredProtocols(protocol, this.props.filter);
+    protocol = _filteredProtocols(protocol, this.props.filterQuery);
     if(!protocol || protocol.length == 0) {
       return (
         <div className="card">
@@ -407,7 +407,9 @@ export default connect(
     return {
       isLoading: state.routeservers.protocolsAreLoading,
       protocols: state.routeservers.protocols,
-      filter: state.routeservers.protocolsFilter,
+
+      filterQuery: state.neighbors.filterQuery,
+      routing: state.routing.locationBeforeTransitions,
     }
   }
 )(Protocols);

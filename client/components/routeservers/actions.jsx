@@ -130,7 +130,6 @@ export function loadRouteserverProtocol(routeserverId) {
     dispatch(loadRouteserverProtocolRequest(routeserverId));
     axios.get(`/api/routeservers/${routeserverId}/neighbours`)
       .then(({data}) => {
-        dispatch(setProtocolsFilterValue(""));
         dispatch(loadRouteserverProtocolSuccess(routeserverId, data.neighbours));
       })
       .catch((error) => dispatch(apiError(error)));
