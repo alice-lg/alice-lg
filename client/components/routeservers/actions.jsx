@@ -19,9 +19,6 @@ export const LOAD_ROUTESERVER_PROTOCOL_REQUEST = '@birdseye/LOAD_ROUTESERVER_PRO
 export const LOAD_ROUTESERVER_PROTOCOL_SUCCESS = '@birdseye/LOAD_ROUTESERVER_PROTOCOL_SUCCESS';
 export const LOAD_ROUTESERVER_PROTOCOL_ERROR   = '@birdseye/LOAD_ROUTESERVER_PROTOCOL_ERROR';
 
-export const SET_PROTOCOLS_FILTER_VALUE = '@birdseye/SET_PROTOCOLS_FILTER_VALUE';
-export const SET_PROTOCOLS_FILTER = '@birdseye/SET_PROTOCOLS_FILTER';
-
 
 // Action Creators
 export function loadRouteserversRequest() {
@@ -139,26 +136,4 @@ export function loadRouteserverProtocol(routeserverId) {
       .catch((error) => dispatch(apiError(error)));
   }
 }
-
-
-
-export function setProtocolsFilterValue(value) {
-  return {
-    type: SET_PROTOCOLS_FILTER_VALUE,
-    payload: {
-      value: value
-    }
-  }
-}
-
-
-export function setProtocolsFilter(value) {
-  return {
-    type: SET_PROTOCOLS_FILTER,
-    payload: {
-      value: value, 
-    }
-  }
-}
-
 
