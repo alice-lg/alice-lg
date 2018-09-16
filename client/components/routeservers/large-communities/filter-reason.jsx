@@ -22,8 +22,7 @@ class FilterReason extends React.Component {
     const cls = `reject-reason reject-reason-${reason[0][2]}`;
     return (
       <p className={cls}>
-        <a className={cls}
-           href={`http://irrexplorer.nlnog.net/search/${route.network}`}
+        <a href={`http://irrexplorer.nlnog.net/search/${route.network}`}
            target="_blank" >{filter_reason}</a>
       </p>
     );
