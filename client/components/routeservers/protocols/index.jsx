@@ -26,18 +26,41 @@ function _filteredProtocols(protocols, filter) {
     return protocols; // nothing to do here
   }
 
-  filter = filter.toLowerCase();
-
-  // Filter protocols
-  filtered = _.filter(protocols, (p) => {
-    return (p.asn == filter ||
-            p.address.toLowerCase().indexOf(filter) != -1 ||
-            p.description.toLowerCase().indexOf(filter) != -1);
-  });
+  // We support different filter modes:
+  // - Default: Try to match as much as possible
+  // - AS$num: Try to match ASN only
+  const filterAsn = _getFilterAsn(filter);
+  if (filterAsn) {
+    filtered = _.filter(protocols, (p) => {
+      return (p.asn == filterAsn);
+    });
+  } else {
+    filter = filter.toLowerCase();
+    filtered = _.filter(protocols, (p) => {
+      return (p.asn == filter ||
+              p.address.toLowerCase().indexOf(filter) != -1 ||
+              p.description.toLowerCase().indexOf(filter) != -1);
+    });
+  }
 
   return filtered;
 }
 
+
+function _getFilterAsn(filter) {
+  const tokens = filter.split("AS", 2);
+  if (tokens.length !== 2) {
+    return false; // Not an ASN query
+  }
+  const asn = parseInt(tokens[1], 10);
+
+  // Check if ASN is a valid number
+  if (asn >= 0 == false) {
+    return false;
+  }
+
+  return asn;
+}
 
 function _sortAnum(sort) {
   return (a, b) => {
