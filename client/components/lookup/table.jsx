@@ -66,7 +66,7 @@ const RouteColumn = function(props) {
 }
 
 
-class RoutesTable extends React.Component {
+class LookupRoutesTable extends React.Component {
   showAttributesModal(route) {
     this.props.dispatch(showBgpAttributes(route));
   }
@@ -88,7 +88,7 @@ class RoutesTable extends React.Component {
                                  onClick={() => this.showAttributesModal(r)}
                                  column={col}
                                  route={r}
-                                 displayReasons={this.props.type} />);
+                                 displayReasons={this.props.displayReasons} />);
             }
           )}
         </tr>
@@ -115,6 +115,6 @@ export default connect(
     routesColumns:      state.config.lookup_columns,
     routesColumnsOrder: state.config.lookup_columns_order,
   })
-)(RoutesTable);
+)(LookupRoutesTable);
 
 

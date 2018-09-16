@@ -29,7 +29,7 @@ const ResultsView = function(props) {
     <div className="card">
       {props.header}
       <ResultsTable routes={props.routes}
-                    display_reasons={props.display_reasons} />
+                    displayReasons={props.displayReasons} />
     </div>
   );
 }
@@ -99,7 +99,8 @@ class LookupResults extends React.Component {
 
         <ResultsView header={filtdHeader}
                      routes={filteredRoutes}
-                     display_reasons="filtered" />
+                     displayReasons="filtered" />
+
         <ResultsView header={recvdHeader}
                      routes={importedRoutes} />
       </div>
