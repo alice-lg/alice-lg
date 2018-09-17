@@ -15,16 +15,20 @@ const initialState = {
   bgp_communities: {},
 
   blackholes: {}, // Map blackholes to routeservers
+  asns: {}, // Map ASNs to routeservers
 };
 
 const _handleRouteserversConfig = function(state, payload) {
   let blackholes = {};
+  let asns = {};
   for (const rs of payload.routeservers) {
     blackholes[rs.id] = rs.blackholes; 
+    asns[rs.is] = rs.asn;
   }
 
   return Object.assign({}, state, {
     blackholes: blackholes,
+    asns: asns,
   });
 }
 
