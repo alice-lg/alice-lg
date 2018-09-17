@@ -18,6 +18,7 @@ import LoadingIndicator
 	from 'components/loading-indicator/small'
 
 import {ipToNumeric} from 'components/utils/ip'
+import {urlEscape} from 'components/utils/query'
 
 
 function _filteredProtocols(protocols, filter) {
@@ -128,12 +129,13 @@ class NeighborColumnHeader extends React.Component {
     const name = this.props.columns[this.props.column];
     const sortColumn = this.props.column.toLowerCase();
     const active = sortColumn == this.props.sort;
+    const query = urlEscape(this.props.query);
     let cls = `col-neighbor-attr col-neighbor-${this.props.column} `;
 
     // Render link with sorting indicator
     if (active) {
       const nextOrder = (this.props.order == 'asc') ? 'desc' : 'asc';
-      const url = `${baseUrl}?s=${sortColumn}&o=${nextOrder}&q=${this.props.query}`;
+      const url = `${baseUrl}?s=${sortColumn}&o=${nextOrder}&q=${query}`;
       let indicator = <i className="fa fa-arrow-circle-up"></i>;
 
       cls += 'col-neighbor-active ';
@@ -149,7 +151,7 @@ class NeighborColumnHeader extends React.Component {
     }
     
     // Column is not active, just present a link:
-    const url = `${baseUrl}?s=${sortColumn}&o=${this.props.order}&q=${this.props.query}`
+    const url = `${baseUrl}?s=${sortColumn}&o=${this.props.order}&q=${query}`
     return(
       <th className={cls}>
         <Link to={url}>{name}</Link>
