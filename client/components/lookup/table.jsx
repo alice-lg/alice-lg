@@ -13,6 +13,7 @@ import {push} from 'react-router-redux'
 import {_lookup,
         ColDefault,
         ColNetwork,
+        ColFlags,
         ColAsPath} from 'components/routeservers/routes/column'
 
 import {showBgpAttributes}
@@ -47,6 +48,8 @@ const ColLinkedRouteserver = function(props) {
 const RouteColumn = function(props) {
   const widgets = {
     "network": ColNetwork,
+
+    "flags": ColFlags,
 
     "bgp.as_path": ColAsPath,
     "ASPath": ColAsPath,
