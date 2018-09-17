@@ -163,19 +163,15 @@ class RoutesView extends React.Component {
                                   totalResults={state.totalResults} />
            </div>
         </div>
-
         <RoutesTable type={type} routes={state.routes} />
-
         <center>
           <RoutesPaginator page={state.page} totalPages={state.totalPages}
                            queryParam={queryParam}
                            anchor={name} />
         </center>
-
       </div>
     );
   }
-
 
   renderLoadTrigger() {
     const type = this.props.type;
@@ -230,7 +226,7 @@ class RoutesView extends React.Component {
 
 export default connect(
   (state) => {
-    let received = {
+    const received = {
       routes:       state.routes.received,
       requested:    state.routes.receivedRequested,
       loading:      state.routes.receivedLoading,
@@ -240,7 +236,7 @@ export default connect(
       totalResults: state.routes.receivedTotalResults,
       loadRoutes:   true,
     };
-    let filtered = {
+    const filtered = {
       routes:       state.routes.filtered,
       loading:      state.routes.filteredLoading,
       requested:    state.routes.filteredRequested,
@@ -250,7 +246,7 @@ export default connect(
       totalResults: state.routes.filteredTotalResults,
       loadRoutes:   true,
     };
-    let notExported = {
+    const notExported = {
       routes:       state.routes.notExported,
       requested:    state.routes.notExportedRequested,
       loading:      state.routes.notExportedLoading,
