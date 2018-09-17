@@ -160,8 +160,9 @@ func apiRouteserversList(_req *http.Request, _params httprouter.Params) (api.Res
 	sources := AliceConfig.Sources
 	for _, source := range sources {
 		routeservers = append(routeservers, api.Routeserver{
-			Id:   source.Id,
-			Name: source.Name,
+			Id:         source.Id,
+			Name:       source.Name,
+			Blackholes: source.Blackholes,
 		})
 	}
 

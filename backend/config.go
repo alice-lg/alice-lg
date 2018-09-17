@@ -11,7 +11,6 @@ import (
 	"github.com/alice-lg/alice-lg/backend/sources/birdwatcher"
 
 	"github.com/go-ini/ini"
-	_ "github.com/imdario/mergo"
 )
 
 const SOURCE_UNKNOWN = 0
@@ -74,6 +73,9 @@ type SourceConfig struct {
 	Id   int
 	Name string
 	Type int
+
+	// Blackhole IPs
+	Blackholes []string
 
 	// Source configurations
 	Birdwatcher birdwatcher.Config
@@ -446,10 +448,15 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 		}
 
 		// Make config
+		sourceName := section.Key("name").MustString("Unknown Source")
+		sourceBlackholes := TrimmedStringList(
+			section.Key("blackholes").MustString(""))
+
 		config := &SourceConfig{
-			Id:   sourceId,
-			Name: section.Key("name").MustString("Unknown Source"),
-			Type: backendType,
+			Id:         sourceId,
+			Name:       sourceName,
+			Blackholes: sourceBlackholes,
+			Type:       backendType,
 		}
 
 		// Set backend

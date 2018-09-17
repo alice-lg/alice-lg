@@ -24,6 +24,7 @@ class RoutesTable extends React.Component {
     let routes = this.props.routes;
     const routesColumns = this.props.routesColumns;
     const routesColumnsOrder = this.props.routesColumnsOrder;
+    const blackholes = this.props.blackholes;
 
     if (!routes || !routes.length) {
       return null;
@@ -36,6 +37,7 @@ class RoutesTable extends React.Component {
                                                        onClick={() => this.showAttributesModal(r)}
                                                        column={col}
                                                        route={r}
+                                                       blackholes={blackholes}
                                                        displayReasons={this.props.type} />)
           )}
         </tr>
@@ -58,9 +60,14 @@ class RoutesTable extends React.Component {
 }
 
 export default connect(
-  (state) => ({
-    routesColumns:      state.config.routes_columns,
-    routesColumnsOrder: state.config.routes_columns_order,
-  })
+  (state, props) => {
+    const rsId = parseInt(props.routeserverId, 10);
+    const blackholes = state.config.blackholes[rsId];
+    return {
+      blackholes:         blackholes,
+      routesColumns:      state.config.routes_columns,
+      routesColumnsOrder: state.config.routes_columns_order,
+    }
+  }
 )(RoutesTable);
 

@@ -86,8 +86,9 @@ type StatusResponse struct {
 
 // Routeservers
 type Routeserver struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
+	Id         int      `json:"id"`
+	Name       string   `json:"name"`
+	Blackholes []string `json:"blackholes"`
 }
 
 type RouteserversResponse struct {
