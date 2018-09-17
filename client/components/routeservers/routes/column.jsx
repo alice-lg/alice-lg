@@ -34,7 +34,7 @@ export const PrimaryIndicator = function(props) {
 }
 
 export const BlackholeIndicator = function(props) {
-  const blackholes = props.blackholes;
+  const blackholes = props.blackholes || [];
   const communities = props.route.bgp.communities;
   const nextHop = props.route.bgp.next_hop;
 

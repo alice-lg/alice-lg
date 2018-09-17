@@ -60,10 +60,14 @@ const RouteColumn = function(props) {
     "routeserver.name": ColLinkedRouteserver
   };
 
+  const rsId = props.route.routeserver.id;
+  const blackholes = props.blackholesMap[rsId] || [];
+
   let Widget = widgets[props.column] || ColDefault;
   return (
     <Widget column={props.column} route={props.route}
             displayReasons={props.displayReasons}
+            blackholes={blackholes}
             onClick={props.onClick} />
   );
 }
@@ -89,6 +93,7 @@ class LookupRoutesTable extends React.Component {
           {routesColumnsOrder.map(col => {
             return (<RouteColumn key={col}
                                  onClick={() => this.showAttributesModal(r)}
+                                 blackholesMap={this.props.blackholesMap}
                                  column={col}
                                  route={r}
                                  displayReasons={this.props.displayReasons} />);
@@ -115,6 +120,7 @@ class LookupRoutesTable extends React.Component {
 
 export default connect(
   (state) => ({
+    blackholesMap:      state.config.blackholes,
     routesColumns:      state.config.lookup_columns,
     routesColumnsOrder: state.config.lookup_columns_order,
   })
