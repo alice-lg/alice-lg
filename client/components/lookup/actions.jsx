@@ -5,11 +5,23 @@
 
 import axios from 'axios'
 
+export const SET_LOOKUP_QUERY_VALUE = '@lookup/SET_LOOKUP_QUERY_VALUE';
+
 export const LOAD_RESULTS_REQUEST = '@lookup/LOAD_RESULTS_REQUEST';
 export const LOAD_RESULTS_SUCCESS = '@lookup/LOAD_RESULTS_SUCCESS';
 export const LOAD_RESULTS_ERROR   = '@lookup/LOAD_RESULTS_ERROR';
 
 // Action creators
+export function setLookupQueryValue(value) {
+  return {
+    type: SET_LOOKUP_QUERY_VALUE,
+    payload: {
+      value: value,
+    }
+  }
+}
+
+
 export function loadResultsRequest(query) {
   return {
     type: LOAD_RESULTS_REQUEST,

@@ -3,13 +3,17 @@
  * Alice (Prefix-)Lookup
  */
 
+import {debounce} from 'underscore'
+
 import React from 'react'
 import {connect} from 'react-redux'
+import {replace} from 'react-router-redux'
 
-import {loadResults} from './actions'
+import {setLookupQueryValue} from './actions'
+import {makeSearchQueryProps} from './query'
 
 import LookupResults from './results'
-import SearchInput from 'components/search-input/debounced'
+import SearchInput from 'components/search-input'
 
 
 class LookupHelp extends React.Component {
@@ -35,8 +39,16 @@ class LookupHelp extends React.Component {
 
 
 class Lookup extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.debouncedDispatch = debounce(this.props.dispatch, 400);
+  }
+
   doLookup(q) {
-    this.props.dispatch(loadResults(q));
+    // Set lookup params
+    this.props.dispatch(setLookupQueryValue(q));
+    this.debouncedDispatch(replace(makeSearchQueryProps(q)));
   }
 
   componentDidMount() {
@@ -44,6 +56,9 @@ class Lookup extends React.Component {
     // search input seems to kill the ref=
     let input = document.getElementById('lookup-search-input');
     input.focus();
+    let value = input.value;
+    input.value = "";
+    input.value = value;
   }
 
   render() {
@@ -51,7 +66,9 @@ class Lookup extends React.Component {
       <div className="lookup-container">
         <div className="card">
           <SearchInput
+            ref="searchInput"
             id="lookup-search-input"
+            value={this.props.queryValue}
             placeholder="Search for prefixes, peers or ASNs on all route servers"
             onChange={(e) => this.doLookup(e.target.value)}  />
         </div>
@@ -68,6 +85,7 @@ export default connect(
   (state) => {
     return {
         query: state.lookup.query,
+        queryValue: state.lookup.queryValue,
         isLoading: state.lookup.isLoading,
         error: state.lookup.error
     }

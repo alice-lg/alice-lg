@@ -20,6 +20,9 @@ class LookupView extends React.Component {
        <div className="col-md-8">
          <Lookup />
        </div>
+       <div className="col-md-4">
+         <LookupSummary />
+       </div>
       </div>
     );
   }
@@ -39,12 +42,7 @@ export default class Welcome extends React.Component {
     return (
       <div className="welcome-page">
        <PageHeader></PageHeader>
-
-       <div className="jumbotron">
-         <h1><Content id="welcome.title">Welcome to Alice!</Content></h1>
-         <p><Content id="welcome.tagline">Your friendly bird looking glass</Content></p>
-       </div>
-
+       <p></p>
        <LookupWidget />
 
       </div>

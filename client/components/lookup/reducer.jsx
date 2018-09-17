@@ -4,11 +4,16 @@
 
 import {LOAD_RESULTS_REQUEST,
         LOAD_RESULTS_SUCCESS,
-        LOAD_RESULTS_ERROR}
+        LOAD_RESULTS_ERROR,
+        
+        SET_LOOKUP_QUERY_VALUE}
  from './actions'
 
+const LOCATION_CHANGE = '@@router/LOCATION_CHANGE'
+
 const initialState = {
-  query: '',
+  query: "",
+  queryValue: "",
 
   results: [],
   error: null,
@@ -22,8 +27,30 @@ const initialState = {
   isLoading: false
 }
 
+/*
+ * Restore lookup query state from location paramenters
+ */
+const _restoreQueryState = function(state, payload) {
+  const params = payload.query;
+  const query = params["q"] || "";
+
+  return Object.assign({}, state, {
+    query: query,
+    queryValue: query
+  });
+}
+
+
 export default function reducer(state=initialState, action) {
   switch(action.type) {
+    case LOCATION_CHANGE:
+      return _restoreQueryState(state, action.payload);
+      
+    case SET_LOOKUP_QUERY_VALUE:
+      return Object.assign({}, state, {
+        queryValue: action.payload.value,
+      });
+
     case LOAD_RESULTS_REQUEST:
       return Object.assign({}, state, initialState, {
         query: action.payload.query,
