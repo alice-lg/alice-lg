@@ -11,7 +11,6 @@ import (
 	"github.com/alice-lg/alice-lg/backend/sources/birdwatcher"
 
 	"github.com/go-ini/ini"
-	_ "github.com/imdario/mergo"
 )
 
 const SOURCE_UNKNOWN = 0
