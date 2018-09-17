@@ -148,7 +148,6 @@ func apiConfigShow(_req *http.Request, _params httprouter.Params) (api.Response,
 		LookupColumns:          AliceConfig.Ui.LookupColumns,
 		LookupColumnsOrder:     AliceConfig.Ui.LookupColumnsOrder,
 		PrefixLookupEnabled:    AliceConfig.Server.EnablePrefixLookup,
-		Blackholes:             GetBlackholeMapping(AliceConfig.Sources),
 	}
 	return result, nil
 }

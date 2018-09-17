@@ -43,8 +43,6 @@ type ConfigResponse struct {
 	LookupColumnsOrder []string          `json:"lookup_columns_order"`
 
 	PrefixLookupEnabled bool `json:"prefix_lookup_enabled"`
-
-	Blackholes RouteserversBlackholes `json:"blackholes"`
 }
 
 type Rejection struct {
@@ -92,9 +90,6 @@ type Routeserver struct {
 	Name       string   `json:"name"`
 	Blackholes []string `json:"blackholes"`
 }
-
-// Mapping: RsId -> Blackholes
-type RouteserversBlackholes map[int][]string
 
 type RouteserversResponse struct {
 	Routeservers []Routeserver `json:"routeservers"`

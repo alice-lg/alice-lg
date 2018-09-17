@@ -484,17 +484,6 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 	return sources, nil
 }
 
-/*
- Get blackhole to source mapping
-*/
-func GetBlackholeMapping(configs []*SourceConfig) map[int][]string {
-	mapping := map[int][]string{}
-	for _, cfg := range configs {
-		mapping[cfg.Id] = cfg.Blackholes
-	}
-	return mapping
-}
-
 // Try to load configfiles as specified in the files
 // list. For example:
 //
