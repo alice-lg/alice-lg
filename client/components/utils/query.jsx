@@ -17,4 +17,7 @@ export function queryParams() {
     return params;
 }
 
+export function urlEscape(query) {
+  return query.replace(' ', '%20');
+}
 
