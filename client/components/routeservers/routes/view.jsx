@@ -163,7 +163,9 @@ class RoutesView extends React.Component {
                                   totalResults={state.totalResults} />
            </div>
         </div>
-        <RoutesTable type={type} routes={state.routes} />
+        <RoutesTable type={type}
+                     routes={state.routes}
+                     routeserverId={this.props.routeserverId} />
         <center>
           <RoutesPaginator page={state.page} totalPages={state.totalPages}
                            queryParam={queryParam}

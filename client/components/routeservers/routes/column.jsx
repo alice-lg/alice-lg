@@ -34,9 +34,14 @@ export const PrimaryIndicator = function(props) {
 }
 
 export const BlackholeIndicator = function(props) {
-  // Check if BGP community 65535:666 is set
+  const blackholes = props.blackholes;
   const communities = props.route.bgp.communities;
-  let isBlackhole = false;
+  const nextHop = props.route.bgp.next_hop;
+
+  // Check if next hop is a known blackhole
+  let isBlackhole = blackholes.includes(nextHop);
+
+  // Check if BGP community 65535:666 is set
   for (let c of communities) {
     if (c[0] == 65535 && c[1] == 666) {
       isBlackhole = true;
@@ -107,7 +112,7 @@ export const ColFlags = function(props) {
     <td className="col-route-flags">
       <span className="route-prefix-flags">
         <PrimaryIndicator route={props.route} />
-        <BlackholeIndicator route={props.route} />
+        <BlackholeIndicator route={props.route} blackholes={props.blackholes} />
       </span>
     </td>
   );
@@ -129,6 +134,7 @@ export default function(props) {
   return (
     <Widget column={props.column} route={props.route}
             displayReasons={props.displayReasons}
+            blackholes={props.blackholes}
             onClick={props.onClick} />
   );
 }
