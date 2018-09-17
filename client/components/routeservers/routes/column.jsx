@@ -3,9 +3,9 @@
  * Routes Rendering Columns
  */
 import _ from 'underscore'
-window._ = _;
 
 import React from 'react'
+import {connect} from 'react-redux'
 
 import FilterReason
   from 'components/routeservers/large-communities/filter-reason'
@@ -62,6 +62,7 @@ export const BlackholeIndicator = function(props) {
   );
 }
 
+
 // Helper: Lookup value in route path
 export const _lookup = (r, path) => {
   return path.split(".").reduce((acc, elem) => acc[elem], r);
@@ -112,7 +113,8 @@ export const ColFlags = function(props) {
     <td className="col-route-flags">
       <span className="route-prefix-flags">
         <PrimaryIndicator route={props.route} />
-        <BlackholeIndicator route={props.route} blackholes={props.blackholes} />
+        <BlackholeIndicator route={props.route}
+                            blackholes={props.blackholes} />
       </span>
     </td>
   );
