@@ -9,7 +9,7 @@ import {showBgpAttributes} from './bgp-attributes-modal-actions'
 
 import LoadingIndicator from './loading-indicator'
 
-import RouteColumn from './column'
+import RouteColumn from './route/column'
 
 
 class RoutesTable extends React.Component {

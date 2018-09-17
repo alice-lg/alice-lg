@@ -87,3 +87,21 @@ func TestBlackholeParsing(t *testing.T) {
 		t.Error("Unexpected blackhole, got:", rs1.Blackholes[0])
 	}
 }
+
+func TestSourceASN(t *testing.T) {
+	config, err := loadConfig("../etc/alicelg/alice.example.conf")
+	if err != nil {
+		t.Error("Could not load test config:", err)
+	}
+
+	// Get sources
+	rs1 := config.Sources[0]
+	if rs1.Asn != 99999 {
+		t.Error("Expected RS1 ASN to be: 99999, not:", rs1.Asn)
+	}
+
+	rs2 := config.Sources[1]
+	if rs2.Asn != 9033 {
+		t.Error("Expected RS2 to fall back to AS9033, not:", rs2.Asn)
+	}
+}

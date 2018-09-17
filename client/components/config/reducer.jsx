@@ -2,6 +2,8 @@ import {LOAD_CONFIG_SUCCESS} from './actions'
 import {LOAD_ROUTESERVERS_SUCCESS} from 'components/routeservers/actions'
 
 const initialState = {
+  asn: 0, // Our own ASN (might be abstracted in the future)
+
   routes_columns: {},
   routes_columns_order: [],
   neighbours_columns: {},
@@ -15,16 +17,25 @@ const initialState = {
   bgp_communities: {},
 
   blackholes: {}, // Map blackholes to routeservers
+  asns: {}, // Map ASNs to routeservers (for future use)
 };
 
 const _handleRouteserversConfig = function(state, payload) {
   let blackholes = {};
+  let asns = {};
+  let asn = 0;
   for (const rs of payload.routeservers) {
     blackholes[rs.id] = rs.blackholes; 
+    asns[rs.is] = rs.asn;
+    if (!asn) {
+      asn = rs.asn; // Just go with the first asn as our own
+    }
   }
 
   return Object.assign({}, state, {
+    asn: asn,
     blackholes: blackholes,
+    asns: asns,
   });
 }
 
