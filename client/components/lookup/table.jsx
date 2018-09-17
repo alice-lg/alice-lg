@@ -14,7 +14,7 @@ import {_lookup,
         ColDefault,
         ColNetwork,
         ColFlags,
-        ColAsPath} from 'components/routeservers/routes/column'
+        ColAsPath} from 'components/routeservers/routes/route/column'
 
 import {showBgpAttributes}
   from 'components/routeservers/routes/bgp-attributes-modal-actions'

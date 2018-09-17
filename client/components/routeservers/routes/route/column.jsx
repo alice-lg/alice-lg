@@ -15,52 +15,12 @@ import NoexportReason
 
 import {ROUTES_RECEIVED,
         ROUTES_FILTERED,
-        ROUTES_NOT_EXPORTED} from './actions';
+        ROUTES_NOT_EXPORTED} from '../actions'
 
-// Helper:
-export const PrimaryIndicator = function(props) {
-  if (props.route.primary) {
-    return(
-      <span className="route-prefix-flag primary-route is-primary-route"><i className="fa fa-star"></i>
-        <div>Best Route</div>
-      </span>
-    );
-  }
 
-  // Default
-  return (
-    <span className="route-prefix-flag primary-route not-primary-route"></span>
-  );
-}
-
-export const BlackholeIndicator = function(props) {
-  const blackholes = props.blackholes || [];
-  const communities = props.route.bgp.communities;
-  const nextHop = props.route.bgp.next_hop;
-
-  // Check if next hop is a known blackhole
-  let isBlackhole = blackholes.includes(nextHop);
-
-  // Check if BGP community 65535:666 is set
-  for (let c of communities) {
-    if (c[0] == 65535 && c[1] == 666) {
-      isBlackhole = true;
-      break;
-    }
-  }
-
-  if (isBlackhole) {
-    return(
-      <span className="route-prefix-flag blackhole-route is-blackhole-route"><i className="fa fa-circle"></i>
-        <div>Blackhole</div>
-      </span>
-    );
-  }
-
-  return (
-    <span className="route-prefix-flag blackhole-route not-blackhole-route"></span>
-  );
-}
+import {PrimaryIndicator,
+        BlackholeIndicator,
+        RpkiIndicator} from './flags'
 
 
 // Helper: Lookup value in route path
@@ -113,6 +73,7 @@ export const ColFlags = function(props) {
     <td className="col-route-flags">
       <span className="route-prefix-flags">
         <PrimaryIndicator route={props.route} />
+        <RpkiIndicator route={props.route} />
         <BlackholeIndicator route={props.route}
                             blackholes={props.blackholes} />
       </span>
