@@ -11,6 +11,8 @@ export const LOAD_RESULTS_REQUEST = '@lookup/LOAD_RESULTS_REQUEST';
 export const LOAD_RESULTS_SUCCESS = '@lookup/LOAD_RESULTS_SUCCESS';
 export const LOAD_RESULTS_ERROR   = '@lookup/LOAD_RESULTS_ERROR';
 
+export const RESET = "@lookup/RESET";
+
 // Action creators
 export function setLookupQueryValue(value) {
   return {
@@ -62,6 +64,13 @@ export function loadResults(query, limit=100, offset=0) {
       .catch((error) => {
         dispatch(loadResultsError(query, error));
       });
+  }
+}
+
+export function reset() {
+  return {
+    type: RESET,
+    payload: {}
   }
 }
 

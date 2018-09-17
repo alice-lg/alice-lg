@@ -6,7 +6,9 @@ import {LOAD_RESULTS_REQUEST,
         LOAD_RESULTS_SUCCESS,
         LOAD_RESULTS_ERROR,
         
-        SET_LOOKUP_QUERY_VALUE}
+        SET_LOOKUP_QUERY_VALUE,
+
+        RESET}
  from './actions'
 
 const LOCATION_CHANGE = '@@router/LOCATION_CHANGE'
@@ -54,6 +56,7 @@ export default function reducer(state=initialState, action) {
     case LOAD_RESULTS_REQUEST:
       return Object.assign({}, state, initialState, {
         query: action.payload.query,
+        queryValue: action.payload.query,
         isLoading: true
       });
     case LOAD_RESULTS_SUCCESS:
@@ -81,6 +84,9 @@ export default function reducer(state=initialState, action) {
         query: action.payload.query,
         error: action.payload.error
       });
+
+    case RESET:
+      return Object.assign({}, state, initialState);
   }
   return state;
 }

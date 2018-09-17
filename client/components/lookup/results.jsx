@@ -4,6 +4,7 @@ import _ from 'underscore'
 import React from 'react'
 import {connect} from 'react-redux'
 import {Link} from 'react-router'
+import {replace} from 'react-router-redux'
 
 import FilterReason
   from 'components/routeservers/large-communities/filter-reason'
@@ -18,6 +19,8 @@ import LoadingIndicator
 	from 'components/loading-indicator/small'
 
 import ResultsTable from './table'
+
+import {loadResults, reset} from './actions'
 
 
 const ResultsView = function(props) {
@@ -70,6 +73,24 @@ const NoResults = connect(
 
 class LookupResults extends React.Component {
 
+  componentDidMount() {
+    // Dispatch query
+  }
+
+  componentDidUpdate(prevProps) {
+    if(this.props.query != prevProps.query) {
+      if (this.props.query == "") {
+        // Dispatch reset and transition to main page
+        this.props.dispatch(reset());
+        this.props.dispatch(replace("/"));
+      } else {
+        this.props.dispatch(
+          loadResults(this.props.query)
+        );
+      }
+    }
+  }
+
   render() {
     if(this.props.isLoading) {
       return (
@@ -87,8 +108,8 @@ class LookupResults extends React.Component {
     const recvdHeader = mkHeader("green",  "accepted");
     const noexHeader  = mkHeader("red",    "not exported");
 
-    let filteredRoutes = this.props.routes.filtered;
-    let importedRoutes = this.props.routes.imported;
+    const filteredRoutes = this.props.routes.filtered;
+    const importedRoutes = this.props.routes.imported;
 
     return (
       <div className="lookup-results">
@@ -115,14 +136,16 @@ function selectRoutes(routes, state) {
 
 export default connect(
   (state) => {
-    let routes = state.lookup.results;
-    let filteredRoutes = selectRoutes(routes, 'filtered');
-    let importedRoutes = selectRoutes(routes, 'imported');
+    const routes = state.lookup.results;
+    const filteredRoutes = selectRoutes(routes, 'filtered');
+    const importedRoutes = selectRoutes(routes, 'imported');
     return {
       routes: {
         filtered: filteredRoutes,
         imported: importedRoutes
       },
+      isLoading: state.lookup.isLoading,
+      query: state.lookup.query,
     }
   }
 )(LookupResults);
