@@ -73,21 +73,26 @@ const NoResults = connect(
 
 class LookupResults extends React.Component {
 
+  dispatchLookup(query) {
+    if (query == "") {
+      // Dispatch reset and transition to main page
+      this.props.dispatch(reset());
+      this.props.dispatch(replace("/"));
+    } else {
+      this.props.dispatch(
+        loadResults(query)
+      );
+    }
+  }
+
   componentDidMount() {
     // Dispatch query
+    this.dispatchLookup(this.props.query);
   }
 
   componentDidUpdate(prevProps) {
     if(this.props.query != prevProps.query) {
-      if (this.props.query == "") {
-        // Dispatch reset and transition to main page
-        this.props.dispatch(reset());
-        this.props.dispatch(replace("/"));
-      } else {
-        this.props.dispatch(
-          loadResults(this.props.query)
-        );
-      }
+      this.dispatchLookup(this.props.query);
     }
   }
 
