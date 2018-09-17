@@ -61,3 +61,20 @@ func SerializeReasons(reasons map[int]string) map[string]string {
 	}
 	return res
 }
+
+/*
+ Make trimmed list of CSV strings.
+ Ommits empty values.
+*/
+func TrimmedStringList(s string) []string {
+	tokens := strings.Split(s, ",")
+	list := []string{}
+	for _, t := range tokens {
+		if t == "" {
+			continue
+		}
+
+		list = append(list, strings.TrimSpace(t))
+	}
+	return list
+}

@@ -74,6 +74,9 @@ type SourceConfig struct {
 	Name string
 	Type int
 
+	// Blackhole IPs
+	Blackholes []string
+
 	// Source configurations
 	Birdwatcher birdwatcher.Config
 
@@ -445,10 +448,15 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 		}
 
 		// Make config
+		sourceName := section.Key("name").MustString("Unknown Source")
+		sourceBlackholes := TrimmedStringList(
+			section.Key("blackholes").MustString(""))
+
 		config := &SourceConfig{
-			Id:   sourceId,
-			Name: section.Key("name").MustString("Unknown Source"),
-			Type: backendType,
+			Id:         sourceId,
+			Name:       sourceName,
+			Blackholes: sourceBlackholes,
+			Type:       backendType,
 		}
 
 		// Set backend
