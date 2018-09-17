@@ -72,12 +72,13 @@ type PaginationConfig struct {
 type SourceConfig struct {
 	Id   int
 	Name string
-	Type int
+	Asn  int
 
 	// Blackhole IPs
 	Blackholes []string
 
 	// Source configurations
+	Type        int
 	Birdwatcher birdwatcher.Config
 
 	// Source instance
@@ -301,6 +302,26 @@ func getRoutesNoexports(config *ini.File) (NoexportsConfig, error) {
 	return noexportsConfig, nil
 }
 
+// Helper: Get own ASN
+//  - Try to determine own ASN, for now it is most
+//    likely configured in the rejection or noexport section
+//
+func getOwnASN(config *ini.File) (int, error) {
+	noexport := config.Section("noexport")
+	rejection := config.Section("rejection")
+
+	asn := rejection.Key("asn").MustInt(-1)
+	if asn == -1 {
+		asn = noexport.Key("asn").MustInt(-1)
+	}
+
+	if asn == -1 {
+		return 0, fmt.Errorf("Could not derive own ASN from config")
+	}
+
+	return asn, nil
+}
+
 // Get UI config: Bgp Communities
 func getBgpCommunities(config *ini.File) BgpCommunities {
 	// Load defaults
@@ -447,14 +468,25 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 			return sources, fmt.Errorf("%s has an unsupported backend", section.Name())
 		}
 
+		// Get fallback ASN
+		fallbackAsn, err := getOwnASN(config)
+		if err != nil {
+			log.Println(
+				"Could not derive own ASN.",
+				"This might lead to unexpected behaviour with BGP large communities",
+			)
+		}
+
 		// Make config
 		sourceName := section.Key("name").MustString("Unknown Source")
 		sourceBlackholes := TrimmedStringList(
 			section.Key("blackholes").MustString(""))
+		sourceAsn := section.Key("asn").MustInt(fallbackAsn)
 
 		config := &SourceConfig{
 			Id:         sourceId,
 			Name:       sourceName,
+			Asn:        sourceAsn,
 			Blackholes: sourceBlackholes,
 			Type:       backendType,
 		}
