@@ -81,6 +81,14 @@ $labelOffsetEnd:   -30px;
     .rpki-valid {
        color: #009900;
     }
+    
+    .rpki-invalid {
+       color: #990000;
+    }
+
+    .rpki-unknown {
+       color: #2e6da4;
+    }
   }
 
   .route-prefix-flags {
