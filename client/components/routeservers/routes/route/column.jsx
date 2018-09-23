@@ -72,8 +72,8 @@ export const ColFlags = function(props) {
   return (
     <td className="col-route-flags">
       <span className="route-prefix-flags">
-        <PrimaryIndicator route={props.route} />
         <RpkiIndicator route={props.route} />
+        <PrimaryIndicator route={props.route} />
         <BlackholeIndicator route={props.route}
                             blackholes={props.blackholes} />
       </span>
