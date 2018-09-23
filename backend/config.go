@@ -39,6 +39,15 @@ type NoexportsConfig struct {
 	LoadOnDemand bool `ini:"load_on_demand"`
 }
 
+type RpkiConfig struct {
+	// Define communities
+	Enabled    bool     `ini:"enabled"`
+	Valid      []string `ini:"valid"`
+	Unknown    []string `ini:"unknown"`
+	NotChecked []string `ini:"not_checked"`
+	Invalid    []string `ini:"invalid"`
+}
+
 type UiConfig struct {
 	RoutesColumns      map[string]string
 	RoutesColumnsOrder []string
@@ -52,6 +61,7 @@ type UiConfig struct {
 	RoutesRejections RejectionsConfig
 	RoutesNoexports  NoexportsConfig
 	BgpCommunities   BgpCommunities
+	Rpki             RpkiConfig
 
 	Theme ThemeConfig
 
@@ -302,6 +312,62 @@ func getRoutesNoexports(config *ini.File) (NoexportsConfig, error) {
 	return noexportsConfig, nil
 }
 
+// Get UI config: RPKI configuration
+func getRpkiConfig(config *ini.File) (RpkiConfig, error) {
+	var rpki RpkiConfig
+	// Defaults taken from:
+	//   https://www.euro-ix.net/en/forixps/large-bgp-communities/
+	section := config.Section("rpki")
+	section.MapTo(&rpki)
+
+	fallbackAsn, err := getOwnASN(config)
+	if err != nil {
+		log.Println(
+			"Could not derive own ASN.",
+			"This might lead to unexpected behaviour with BGP large communities",
+		)
+	}
+	ownAsn := fmt.Sprintf("%d", fallbackAsn)
+
+	// Fill in defaults or postprocess config value
+	if len(rpki.Valid) == 0 {
+		rpki.Valid = []string{ownAsn, "1000", "1"}
+	} else {
+		rpki.Valid = strings.SplitN(rpki.Valid[0], ":", 3)
+	}
+
+	if len(rpki.Unknown) == 0 {
+		rpki.Unknown = []string{ownAsn, "1000", "2"}
+	} else {
+		rpki.Unknown = strings.SplitN(rpki.Unknown[0], ":", 3)
+	}
+
+	if len(rpki.NotChecked) == 0 {
+		rpki.NotChecked = []string{ownAsn, "1000", "3"}
+	} else {
+		rpki.NotChecked = strings.SplitN(rpki.NotChecked[0], ":", 3)
+	}
+
+	// As the euro-ix document states, this can be a range.
+	if len(rpki.Invalid) == 0 {
+		rpki.Invalid = []string{ownAsn, "1000", "4", "*"}
+	} else {
+		// Preprocess
+		rpki.Invalid = strings.SplitN(rpki.Invalid[0], ":", 3)
+		tokens := []string{}
+		if len(rpki.Invalid) != 3 {
+			// This is wrong, we should have three parts (RS):1000:[range]
+			return rpki, fmt.Errorf("Unexpected rpki.Invalid configuration: %v", rpki.Invalid)
+		} else {
+			tokens = strings.Split(rpki.Invalid[2], "-")
+		}
+
+		rpki.Invalid = append([]string{rpki.Invalid[0], rpki.Invalid[1]}, tokens...)
+	}
+
+	return rpki, nil
+}
+
 // Helper: Get own ASN
 //  - Try to determine own ASN, for now it is most
 //    likely configured in the rejection or noexport section
@@ -407,6 +473,12 @@ func getUiConfig(config *ini.File) (UiConfig, error) {
 		return uiConfig, err
 	}
 
+	// RPKI filter config
+	rpki, err := getRpkiConfig(config)
+	if err != nil {
+		return uiConfig, err
+	}
+
 	// Theme configuration: Theming is optional, if no settings
 	// are found, it will be ignored
 	themeConfig := getThemeConfig(config)
@@ -428,6 +500,7 @@ func getUiConfig(config *ini.File) (UiConfig, error) {
 		RoutesRejections: rejections,
 		RoutesNoexports:  noexports,
 		BgpCommunities:   getBgpCommunities(config),
+		Rpki:             rpki,
 
 		Theme: themeConfig,
 

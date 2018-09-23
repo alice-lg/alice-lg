@@ -105,3 +105,33 @@ func TestSourceASN(t *testing.T) {
 		t.Error("Expected RS2 to fall back to AS9033, not:", rs2.Asn)
 	}
 }
+
+func TestRpkiConfig(t *testing.T) {
+	config, err := loadConfig("../etc/alicelg/alice.example.conf")
+	if err != nil {
+		t.Error("Could not load test config:", err)
+	}
+
+	if len(config.Ui.Rpki.Valid) != 3 {
+		t.Error("Unexpected RPKI:VALID,", config.Ui.Rpki.Valid)
+	}
+	if len(config.Ui.Rpki.Invalid) != 4 {
+		t.Error("Unexpected RPKI:INVALID,", config.Ui.Rpki.Invalid)
+		return // We would fail hard later
+	}
+
+	// Check fallback
+	if config.Ui.Rpki.NotChecked[0] != "9033" {
+		t.Error(
+			"Expected NotChecked to fall back to defaults, got:",
+			config.Ui.Rpki.NotChecked,
+		)
+	}
+
+	// Check range postprocessing
+	if config.Ui.Rpki.Invalid[3] != "*" {
+		t.Error("Missing wildcard from config")
+	}
+
+	t.Log(config.Ui.Rpki)
+}

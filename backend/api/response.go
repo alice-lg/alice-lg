@@ -31,6 +31,8 @@ type ConfigResponse struct {
 	Noexport        Noexport          `json:"noexport"`
 	NoexportReasons map[string]string `json:"noexport_reasons"`
 
+	Rpki Rpki `json:"rpki"`
+
 	BgpCommunities map[string]interface{} `json:"bgp_communities"`
 
 	NeighboursColumns      map[string]string `json:"neighbours_columns"`
@@ -54,6 +56,14 @@ type Noexport struct {
 	Asn          int  `json:"asn"`
 	NoexportId   int  `json:"noexport_id"`
 	LoadOnDemand bool `json:"load_on_demand"`
+}
+
+type Rpki struct {
+	Enabled    bool     `json:"enabled"`
+	Valid      []string `json:"valid"`
+	Unknown    []string `json:"unknown"`
+	NotChecked []string `json:"not_checked"`
+	Invalid    []string `json:"invalid"`
 }
 
 // Status

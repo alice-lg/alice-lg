@@ -56,50 +56,82 @@ export const BlackholeIndicator = function(props) {
  * RPKI Status Indicators
  */
 const _RpkiIndicator = function(props) {
-  // Check for BGP large community RS:1000:[1..3]
-  // as defined in https://www.euro-ix.net/en/forixps/large-bgp-communities/
+  // Check if indicator is enabled
+  if (props.rpki.enabled == false) { return null; }
+
+  // Check for BGP large communities as configured in the alice.conf
+  const rpkiValid      = props.rpki.valid;
+  const rpkiUnknown    = props.rpki.unknown;
+  const rpkiNotChecked = props.rpki.not_checked;
+  const rpkiInvalid    = props.rpki.invalid;
+
   const communities = props.route.bgp.large_communities;
-  const ownAsn = props.asn;
+  for (const com of communities) {
 
-  let rpkiState = 0; // Not set
-
-  for (const c of communities) {
-    if (c[0] == ownAsn && c[1] == 1000) {
-      rpkiState = c[2];  
-    }
-  }
-
-  switch(rpkiState) {
-    case 1:
+    // RPKI VALID
+    if (com[0].toFixed() === rpkiValid[0] &&
+        com[1].toFixed() === rpkiValid[1] &&
+        com[2].toFixed() === rpkiValid[2]) {
       return (
         <span className="route-prefix-flag rpki-route rpki-valid">
           <i className="fa fa-check-circle" /> 
           <div>RPKI Valid</div>
         </span>
       );
+    }
 
-    case 2:
+    // RPKI UNKNOWN
+    if (com[0].toFixed() === rpkiUnknown[0] &&
+        com[1].toFixed() === rpkiUnknown[1] &&
+        com[2].toFixed() === rpkiUnknown[2]) {
       return (
         <span className="route-prefix-flag rpki-route rpki-unknown">
           <i className="fa fa-question-circle" />
           <div>RPKI Unknown</div>
         </span>
       );
+    }
 
-    case 3:
+    // RPKI NOT CHECKED
+    if (com[0].toFixed() === rpkiNotChecked[0] &&
+        com[1].toFixed() === rpkiNotChecked[1] &&
+        com[2].toFixed() === rpkiNotChecked[2]) {
       return (
         <span className="route-prefix-flag rpki-route rpki-not-checked"></span>
       );
-  }
+    }
 
-  if (rpkiState >= 4) { // Invalid
-    const cls = `route-prefix-flag rpki-route rpki-invalid rpki-invalid-${rpkiState}`
-    return (
-      <span className={cls}>
-        <i className="fa fa-minus-circle" />
-        <div>RPKI Invalid</div>
-      </span>
-    );
+    // RPKI INVALID
+    // Depending on the configration this can either be a
+    // single flag or a range with a given reason.
+    let rpkiInvalidReason = 0;
+    if (com[0].toFixed() === rpkiInvalid[0] &&
+        com[1].toFixed() === rpkiInvalid[1]) {
+
+      // This needs to be considered invalid, now try to detect why
+      if (rpkiInvalid.length > 3 && rpkiInvalid[3] == "*") {
+        // Check if token falls within range
+        const start = parseInt(rpkiInvalid[2], 10);
+        if (com[2] >= start) {
+          rpkiInvalidReason = com[2];
+        }
+      } else {
+        if (com[2].toFixed() === rpkiInvalid[2]) {
+          rpkiInvalidReason = 1;
+        }
+      }
+    }
+
+    // This in invalid, render it!
+    if (rpkiInvalidReason > 0) {
+      const cls = `route-prefix-flag rpki-route rpki-invalid rpki-invalid-${rpkiInvalidReason}`
+      return (
+        <span className={cls}>
+          <i className="fa fa-minus-circle" />
+          <div>RPKI Invalid</div>
+        </span>
+      );
+    }
   }
 
   return null;
@@ -107,6 +139,7 @@ const _RpkiIndicator = function(props) {
 
 export const RpkiIndicator = connect(
   (state) => ({
+    rpki: state.config.rpki,
     asn: state.config.asn,
   })
 )(_RpkiIndicator);
