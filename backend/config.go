@@ -41,6 +41,7 @@ type NoexportsConfig struct {
 
 type RpkiConfig struct {
 	// Define communities
+	Enabled    bool     `ini:"enabled"`
 	Valid      []string `ini:"valid"`
 	Unknown    []string `ini:"unknown"`
 	NotChecked []string `ini:"not_checked"`
@@ -328,18 +329,40 @@ func getRpkiConfig(config *ini.File) (RpkiConfig, error) {
 	}
 	ownAsn := fmt.Sprintf("%d", fallbackAsn)
 
-	// Fill in defaults
+	// Fill in defaults or postprocess config value
 	if len(rpki.Valid) == 0 {
 		rpki.Valid = []string{ownAsn, "1000", "1"}
+	} else {
+		rpki.Valid = strings.SplitN(rpki.Valid[0], ":", 3)
 	}
+
 	if len(rpki.Unknown) == 0 {
 		rpki.Unknown = []string{ownAsn, "1000", "2"}
+	} else {
+		rpki.Unknown = strings.SplitN(rpki.Unknown[0], ":", 3)
 	}
+
 	if len(rpki.NotChecked) == 0 {
 		rpki.NotChecked = []string{ownAsn, "1000", "3"}
+	} else {
+		rpki.NotChecked = strings.SplitN(rpki.NotChecked[0], ":", 3)
 	}
+
+	// As the euro-ix document states, this can be a range.
 	if len(rpki.Invalid) == 0 {
-		rpki.Invalid = []string{ownAsn, "1000", "4-*"}
+		rpki.Invalid = []string{ownAsn, "1000", "4", "*"}
+	} else {
+		// Preprocess
+		rpki.Invalid = strings.SplitN(rpki.Invalid[0], ":", 3)
+		tokens := []string{}
+		if len(rpki.Invalid) != 3 {
+			// This is wrong, we should have three parts (RS):1000:[range]
+			return rpki, fmt.Errorf("Unexpected rpki.Invalid configuration: %v", rpki.Invalid)
+		} else {
+			tokens = strings.Split(rpki.Invalid[2], "-")
+		}
+
+		rpki.Invalid = append([]string{rpki.Invalid[0], rpki.Invalid[1]}, tokens...)
 	}
 
 	return rpki, nil

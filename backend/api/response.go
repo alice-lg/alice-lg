@@ -59,6 +59,7 @@ type Noexport struct {
 }
 
 type Rpki struct {
+	Enabled    bool     `json:"enabled"`
 	Valid      []string `json:"valid"`
 	Unknown    []string `json:"unknown"`
 	NotChecked []string `json:"not_checked"`
