@@ -291,7 +291,7 @@ class NeighboursTableView extends React.Component {
       case 'up':
         uptimeTitle = 'Uptime'; 
         sectionAnchor = 'sessions-up';
-        sectionTitle  = 'Sessions Established';
+        sectionTitle  = 'BGP Sessions Established';
         sectionCls  += 'established ';
         break;
       case 'down':
