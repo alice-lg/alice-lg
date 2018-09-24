@@ -255,6 +255,19 @@ type LookupRoute struct {
 	Details Details `json:"details"`
 }
 
+// Implement sorting interface for lookup routes
+func (routes LookupRoutes) Len() int {
+	return len(routes)
+}
+
+func (routes LookupRoutes) Less(i, j int) bool {
+	return routes[i].Network < routes[j].Network
+}
+
+func (routes LookupRoutes) Swap(i, j int) {
+	routes[i], routes[j] = routes[j], routes[i]
+}
+
 type LookupRoutes []*LookupRoute
 
 // TODO: Naming is a bit yuck
