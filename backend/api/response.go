@@ -213,9 +213,8 @@ func (self *RoutesResponse) CacheTtl() time.Duration {
 	return self.Api.Ttl.Sub(now)
 }
 
-type PaginatedRoutesResponse struct {
-	*RoutesResponse
-	Pagination Pagination `json:"pagination"`
+type TimedResponse struct {
+	RequestDuration float64 `json:"request_duration_ms"`
 }
 
 type Pagination struct {
@@ -223,6 +222,15 @@ type Pagination struct {
 	PageSize     int `json:"page_size"`
 	TotalPages   int `json:"total_pages"`
 	TotalResults int `json:"total_results"`
+}
+
+type PaginatedResponse struct {
+	Pagination Pagination `json:"pagination"`
+}
+
+type PaginatedRoutesResponse struct {
+	*RoutesResponse
+	Pagination Pagination `json:"pagination"`
 }
 
 // Lookup Prefixes
@@ -249,6 +257,13 @@ type LookupRoute struct {
 
 type LookupRoutes []*LookupRoute
 
+// TODO: Naming is a bit yuck
+type LookupRoutesResponse struct {
+	*PaginatedResponse
+	Routes LookupRoutes `json:"routes"`
+}
+
+// TODO: Refactor this (might be legacy)
 type RoutesLookupResponse struct {
 	Api    ApiStatus    `json:"api"`
 	Routes LookupRoutes `json:"routes"`
@@ -264,4 +279,11 @@ type RoutesLookupResponseGlobal struct {
 
 	// Meta
 	Time float64 `json:"query_duration_ms"`
+}
+
+type PaginatedRoutesLookupResponse struct {
+	*TimedResponse
+
+	Imported *LookupRoutesResponse `json:"imported"`
+	Filtered *LookupRoutesResponse `json:"filtered"`
 }
