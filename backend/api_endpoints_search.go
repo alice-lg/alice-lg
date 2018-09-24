@@ -4,8 +4,8 @@ import (
 	"github.com/alice-lg/alice-lg/backend/api"
 	"github.com/julienschmidt/httprouter"
 
-	"log"
 	"net/http"
+	"sort"
 	"time"
 )
 
@@ -53,8 +53,6 @@ func apiLookupPrefixGlobal(
 
 	// Now, as we have allocated even more space, split routes
 	for _, r := range routes {
-		log.Println(r.State)
-
 		switch r.State {
 		case "filtered":
 			filtered = append(filtered, r)
@@ -64,6 +62,10 @@ func apiLookupPrefixGlobal(
 			break
 		}
 	}
+
+	// Homogenize results
+	sort.Sort(imported)
+	sort.Sort(filtered)
 
 	// Paginate results
 	pageImported := apiQueryMustInt(req, "page_imported", 0)
