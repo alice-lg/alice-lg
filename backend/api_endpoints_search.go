@@ -85,7 +85,14 @@ func apiLookupPrefixGlobal(
 
 	// Make response
 	response := api.PaginatedRoutesLookupResponse{
-		TimedResponse: &api.TimedResponse{
+		Api: api.ApiStatus{
+			CacheStatus: api.CacheStatus{
+				CachedAt: AliceRoutesStore.CachedAt(),
+			},
+			ResultFromCache: true, // Well.
+			Ttl:             AliceRoutesStore.CacheTtl(),
+		},
+		TimedResponse: api.TimedResponse{
 			RequestDuration: DurationMs(queryDuration),
 		},
 		Imported: &api.LookupRoutesResponse{

@@ -10,10 +10,12 @@ import (
 )
 
 type RoutesStore struct {
-	routesMap       map[int]*api.RoutesResponse
-	statusMap       map[int]StoreStatus
-	configMap       map[int]*SourceConfig
+	routesMap map[int]*api.RoutesResponse
+	statusMap map[int]StoreStatus
+	configMap map[int]*SourceConfig
+
 	refreshInterval time.Duration
+	lastRefresh     time.Time
 
 	sync.RWMutex
 }
@@ -111,6 +113,7 @@ func (self *RoutesStore) update() {
 			LastRefresh: time.Now(),
 			State:       STATE_READY,
 		}
+		self.lastRefresh = time.Now().UTC()
 		self.Unlock()
 	}
 }
@@ -154,6 +157,15 @@ func (self *RoutesStore) Stats() RoutesStoreStats {
 		RouteServers: rsStats,
 	}
 	return storeStats
+}
+
+// Provide cache status
+func (self *RoutesStore) CachedAt() time.Time {
+	return self.lastRefresh
+}
+
+func (self *RoutesStore) CacheTtl() time.Time {
+	return self.lastRefresh.Add(self.refreshInterval)
 }
 
 // Lookup routes transform

@@ -295,7 +295,9 @@ type RoutesLookupResponseGlobal struct {
 }
 
 type PaginatedRoutesLookupResponse struct {
-	*TimedResponse
+	TimedResponse
+
+	Api ApiStatus `json:"api"` // Add to provide cache status information
 
 	Imported *LookupRoutesResponse `json:"imported"`
 	Filtered *LookupRoutesResponse `json:"filtered"`
