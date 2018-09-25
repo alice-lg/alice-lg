@@ -30,6 +30,9 @@ const initialState = {
   pageImported: 0,
   pageFiltered: 0,
 
+  pageSizeImported: 0,
+  pageSizeFiltered: 0,
+
   totalPagesImported: 0,
   totalPagesFiltered: 0,
 
@@ -72,6 +75,8 @@ const _loadQueryResult = function(state, payload) {
     // Pagination
     pageImported:        imported.pagination.page,
     pageFiltered:        filtered.pagination.page,
+    pageSizeImported:    imported.pagination.page_size,
+    pageSizeFiltered:    filtered.pagination.page_size,
     totalPagesImported:  imported.pagination.total_pages, 
     totalPagesFiltered:  filtered.pagination.total_pages,
     totalRoutesImported: imported.pagination.total_results,
