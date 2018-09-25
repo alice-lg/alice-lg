@@ -50,7 +50,7 @@ class NoResultsView extends React.Component {
   }
 }
 
-const NoResults = connect(
+const NoResultsFallback = connect(
   (state) => {
     let total = state.lookup.results;
     let query = state.lookup.query;
@@ -111,17 +111,15 @@ class LookupResults extends React.Component {
 
     const filtdHeader = mkHeader("orange", "filtered");
     const recvdHeader = mkHeader("green",  "accepted");
-    const noexHeader  = mkHeader("red",    "not exported");
 
     const filteredRoutes = this.props.routes.filtered;
     const importedRoutes = this.props.routes.imported;
 
     return (
       <div className="lookup-results">
-
         <BgpAttributesModal />
 
-        <NoResults />
+        <NoResultsFallback />
 
         <ResultsView header={filtdHeader}
                      routes={filteredRoutes}
@@ -135,19 +133,25 @@ class LookupResults extends React.Component {
 
 }
 
-function selectRoutes(routes, state) {
-  return _.where(routes, {state: state});
-}
-
 export default connect(
   (state) => {
-    const routes = state.lookup.results;
-    const filteredRoutes = selectRoutes(routes, 'filtered');
-    const importedRoutes = selectRoutes(routes, 'imported');
+    const filteredRoutes = state.lookup.routesFiltered;
+    const importedRoutes = state.lookup.routesImported; 
+
     return {
       routes: {
         filtered: filteredRoutes,
         imported: importedRoutes
+      },
+      pagination: {
+        filtered: {
+          page: state.lookup.pageFiltered,
+          totalPages: state.lookup.totalPagesFiltered,
+        },
+        imported: {
+          page: state.lookup.pageImported,
+          totalPages: state.lookup.totalPagesImported,
+        }
       },
       isLoading: state.lookup.isLoading,
       query: state.lookup.query,

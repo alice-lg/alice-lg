@@ -1,7 +1,7 @@
 
 import React from 'react'
 import {connect} from 'react-redux'
-
+import RelativeTime from 'components/relativetime'
 
 class ResultsBox extends React.Component {
 
@@ -11,15 +11,21 @@ class ResultsBox extends React.Component {
     }
 
     const queryDuration = this.props.queryDuration.toFixed(2);
+    const cachedAt = this.props.cachedAt;
+    const cacheTtl = this.props.cacheTtl;
 
     return (
       <div className="card">
         <div className="lookup-result-summary">
           <ul>
             <li>
-            Displaying <b>{this.props.resultsCount}</b> of <b>{this.props.total}</b> routes
+              Found <b>{this.props.totalImported}</b> accepted 
+              and <b>{this.props.totalFiltered}</b> filtered routes.
             </li>
-            <li>Query took <b>{queryDuration} ms</b> to complete</li>
+            <li>Query took <b>{queryDuration} ms</b> to complete.</li>
+            <li>Routes cache was built <b><RelativeTime value={cachedAt} /> </b>
+                and will be refreshed <b><RelativeTime value={cacheTtl} /></b>.
+            </li>
           </ul>
         </div>
       </div>
@@ -31,11 +37,12 @@ class ResultsBox extends React.Component {
 export default connect(
   (state) => {
     return {
-      query: state.lookup.query,
-      resultsCount: state.lookup.results.length,
-      start: state.lookup.offset,
-      end: state.lookup.limit + state.lookup.offset,
-      total: state.lookup.totalRoutes,
+      totalImported: state.lookup.totalRoutesImported,
+      totalFiltered: state.lookup.totalRoutesFiltered, 
+
+      cachedAt: state.lookup.cachedAt,
+      cacheTtl: state.lookup.cacheTtl,
+
       queryDuration: state.lookup.queryDurationMs
     }
   }

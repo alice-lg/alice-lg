@@ -30,6 +30,9 @@ const initialState = {
   pageImported: 0,
   pageFiltered: 0,
 
+  totalPagesImported: 0,
+  totalPagesFiltered: 0,
+
   totalRoutesImported: 0,
   totalRoutesFiltered: 0,
 
@@ -69,12 +72,15 @@ const _loadQueryResult = function(state, payload) {
     // Pagination
     pageImported:        imported.pagination.page,
     pageFiltered:        filtered.pagination.page,
+    totalPagesImported:  imported.pagination.total_pages, 
+    totalPagesFiltered:  filtered.pagination.total_pages,
     totalRoutesImported: imported.pagination.total_results,
     totalRoutesFiltered: filtered.pagination.total_results,
-    totalRoutes: imported.pagination.total_results + filtered.pagination.total_results,
+
 
     // Statistics
-    queryDurationMs: results.request_duration_ms
+    queryDurationMs: results.request_duration_ms,
+    totalRoutes:     imported.pagination.total_results + filtered.pagination.total_results
   });
 }
 
