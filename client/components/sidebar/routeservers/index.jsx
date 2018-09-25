@@ -5,11 +5,10 @@
 
 
 import React from 'react'
-import { connect } from 'react-redux'
+import {connect} from 'react-redux'
+import {Link} from 'react-router'
 
-import{ push } from 'react-router-redux'
-
-import { loadRouteservers } from 'components/routeservers/actions'
+import {loadRouteservers} from 'components/routeservers/actions'
 
 // Components
 import Status from './status'
@@ -23,16 +22,10 @@ class RouteserversList extends React.Component {
     );
   }
 
-  showRouteserver(id) {
-    this.props.dispatch(
-      push(`/routeservers/${id}`)
-    );
-  }
-
   render() {
     let routeservers = this.props.routeservers.map((rs) =>
-      <li key={rs.id} onClick={() => this.showRouteserver(rs.id)}>
-        <span className="routeserver-id">{rs.name}</span>
+      <li key={rs.id}> 
+        <Link to={`/routeservers/${rs.id}`} className="routeserver-id">{rs.name}</Link>
         <Status routeserverId={rs.id} />
       </li>
     );
