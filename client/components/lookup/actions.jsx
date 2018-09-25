@@ -53,11 +53,14 @@ export function loadResultsError(query, error) {
   }
 }
 
-export function loadResults(query, limit=100, offset=0) {
+export function loadResults(query, pageImported=0, pageFiltered=0) {
   return (dispatch) => {
     dispatch(loadResultsRequest(query));
 
-    axios.get(`/api/lookup/prefix?q=${query}&limit=${limit}&offset=${offset}`)
+    // Build querystring
+    let q = `q=${query}&page_filtered=${pageFiltered}&page_imported=${pageImported}`;
+
+    axios.get(`/api/lookup/prefix?${q}`)
       .then((res) => {
         dispatch(loadResultsSuccess(query, res.data));
       })

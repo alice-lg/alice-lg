@@ -17,14 +17,21 @@ const initialState = {
   query: "",
   queryValue: "",
 
-  results: [],
+  routesImported: [],
+  routesFiltered: [],
+
   error: null,
 
   queryDurationMs: 0.0,
 
-  limit: 100,
-  offset: 0,
-  totalRoutes: 0,
+  cachedAt: false,
+  cacheTtl: false,
+
+  pageImported: 0,
+  pageFiltered: 0,
+
+  totalRoutesImported: 0,
+  totalRoutesFiltered: 0,
 
   isLoading: false
 }
@@ -39,6 +46,35 @@ const _restoreQueryState = function(state, payload) {
   return Object.assign({}, state, {
     query: query,
     queryValue: query
+  });
+}
+
+const _loadQueryResult = function(state, payload) {
+  const results = payload.results;
+  const imported = results.imported;
+  const filtered = results.filtered;
+  const api = results.api;
+
+  return Object.assign({}, state, {
+    isLoading: false,
+
+    // Cache Status
+    cachedAt: api.cache_status.cached_at, // I don't like this style. 
+    cacheTtl: api.ttl, 
+
+    // Routes
+    routesImported: imported.routes,
+    routesFiltered: filtered.routes,
+
+    // Pagination
+    pageImported:        imported.pagination.page,
+    pageFiltered:        filtered.pagination.page,
+    totalRoutesImported: imported.pagination.total_results,
+    totalRoutesFiltered: filtered.pagination.total_results,
+    totalRoutes: imported.pagination.total_results + filtered.pagination.total_results,
+
+    // Statistics
+    queryDurationMs: results.request_duration_ms
   });
 }
 
@@ -63,17 +99,7 @@ export default function reducer(state=initialState, action) {
       if (state.query != action.payload.query) {
         return state;
       }
-
-      return Object.assign({}, state, {
-        isLoading: false,
-        query: action.payload.query,
-        queryDurationMs: action.payload.results.query_duration_ms,
-        results: action.payload.results.routes,
-        limit: action.payload.results.limit,
-        offset: action.payload.results.offset,
-        totalRoutes: action.payload.results.total_routes,
-        error: null
-      });
+      return _loadQueryResult(state, action.payload);
 
     case LOAD_RESULTS_ERROR:
       if (state.query != action.payload.query) {
