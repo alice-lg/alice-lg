@@ -80,7 +80,7 @@ func apiLookupPrefixGlobal(
 		filtered, pageFiltered, pageSizeFiltered,
 	)
 
-	// Measure query duration
+	// Calculate query duration
 	queryDuration := time.Since(t0)
 
 	// Make response
