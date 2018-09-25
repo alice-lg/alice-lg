@@ -19,7 +19,7 @@ class ResultsBox extends React.Component {
         <div className="lookup-result-summary">
           <ul>
             <li>
-              Found <b>{this.props.totalImported}</b> accepted 
+              Found <b>{this.props.totalImported}</b> received 
               and <b>{this.props.totalFiltered}</b> filtered routes.
             </li>
             <li>Query took <b>{queryDuration} ms</b> to complete.</li>
