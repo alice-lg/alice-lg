@@ -77,8 +77,11 @@ func (self *RoutesStore) init() {
 
 // Update all routes
 func (self *RoutesStore) update() {
+	t0 := time.Now()
+
 	for sourceId, _ := range self.routesMap {
-		source := self.configMap[sourceId].getInstance()
+		sourceConfig := self.configMap[sourceId]
+		source := sourceConfig.getInstance()
 
 		// Get current update state
 		if self.statusMap[sourceId].State == STATE_UPDATING {
@@ -94,6 +97,13 @@ func (self *RoutesStore) update() {
 
 		routes, err := source.AllRoutes()
 		if err != nil {
+			log.Println(
+				"Refreshing the routes store failed for:", sourceConfig.Name,
+				"(", sourceConfig.Id, ")",
+				"with:", err,
+				"- NEXT STATE: ERROR",
+			)
+
 			self.Lock()
 			self.statusMap[sourceId] = StoreStatus{
 				State:       STATE_ERROR,
@@ -116,6 +126,13 @@ func (self *RoutesStore) update() {
 		self.lastRefresh = time.Now().UTC()
 		self.Unlock()
 	}
+
+	refreshDuration := time.Since(t0)
+	log.Println(
+		"Refreshed routes stores for all of", len(self.routesMap), "sources",
+		"in", refreshDuration,
+	)
+
 }
 
 // Calculate store insights
