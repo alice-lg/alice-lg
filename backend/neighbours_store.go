@@ -75,7 +75,11 @@ func (self *NeighboursStore) init() {
 	}
 }
 
+// Update all neighbors
 func (self *NeighboursStore) update() {
+	successCount := 0
+	errorCount := 0
+	t0 := time.Now()
 	for sourceId, _ := range self.neighboursMap {
 		// Get current state
 		if self.statusMap[sourceId].State == STATE_UPDATING {
@@ -89,10 +93,17 @@ func (self *NeighboursStore) update() {
 		}
 		self.Unlock()
 
-		source := self.configMap[sourceId].getInstance()
+		sourceConfig := self.configMap[sourceId]
+		source := sourceConfig.getInstance()
 
 		neighboursRes, err := source.Neighbours()
 		if err != nil {
+			log.Println(
+				"Refreshing the neighbors store failed for:",
+				sourceConfig.Name, "(", sourceConfig.Id, ")",
+				"with:", err,
+				"- NEXT STATE: ERROR",
+			)
 			// That's sad.
 			self.Lock()
 			self.statusMap[sourceId] = StoreStatus{
@@ -101,6 +112,8 @@ func (self *NeighboursStore) update() {
 				LastRefresh: time.Now(),
 			}
 			self.Unlock()
+
+			errorCount++
 			continue
 		}
 
@@ -121,7 +134,14 @@ func (self *NeighboursStore) update() {
 			State:       STATE_READY,
 		}
 		self.Unlock()
+		successCount++
 	}
+
+	refreshDuration := time.Since(t0)
+	log.Println(
+		"Refreshed neighbors store for", successCount, "of", successCount+errorCount,
+		"sources with", errorCount, "error(s) in", refreshDuration,
+	)
 }
 
 func (self *NeighboursStore) GetNeighbourAt(

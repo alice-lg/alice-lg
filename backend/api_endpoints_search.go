@@ -5,11 +5,17 @@ import (
 	"github.com/julienschmidt/httprouter"
 
 	"net/http"
+	"sort"
 	"time"
 )
 
 // Handle global lookup
-func apiLookupPrefixGlobal(req *http.Request, params httprouter.Params) (api.Response, error) {
+func apiLookupPrefixGlobal(
+	req *http.Request,
+	params httprouter.Params,
+) (api.Response, error) {
+	// TODO: This function is too long
+
 	// Get prefix to query
 	q, err := validateQueryString(req, "q")
 	if err != nil {
@@ -17,11 +23,6 @@ func apiLookupPrefixGlobal(req *http.Request, params httprouter.Params) (api.Res
 	}
 
 	q, err = validatePrefixQuery(q)
-	if err != nil {
-		return nil, err
-	}
-	// Get pagination params
-	limit, offset, err := validatePaginationParams(req, 50, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -44,22 +45,68 @@ func apiLookupPrefixGlobal(req *http.Request, params httprouter.Params) (api.Res
 		routes = AliceRoutesStore.LookupPrefixForNeighbours(neighbours)
 	}
 
-	// Paginate result
-	totalRoutes := len(routes)
-	cap := offset + limit
-	if cap > totalRoutes {
-		cap = totalRoutes
+	// Split routes
+	// TODO: Refactor at neighbors store
+	totalResults := len(routes)
+	imported := make(api.LookupRoutes, 0, totalResults)
+	filtered := make(api.LookupRoutes, 0, totalResults)
+
+	// Now, as we have allocated even more space, split routes
+	for _, r := range routes {
+		switch r.State {
+		case "filtered":
+			filtered = append(filtered, r)
+			break
+		case "imported":
+			imported = append(imported, r)
+			break
+		}
 	}
 
+	// Homogenize results
+	sort.Sort(imported)
+	sort.Sort(filtered)
+
+	// Paginate results
+	pageImported := apiQueryMustInt(req, "page_imported", 0)
+	pageSizeImported := AliceConfig.Ui.Pagination.RoutesAcceptedPageSize
+	routesImported, paginationImported := apiPaginateLookupRoutes(
+		imported, pageImported, pageSizeImported,
+	)
+
+	pageFiltered := apiQueryMustInt(req, "page_filtered", 0)
+	pageSizeFiltered := AliceConfig.Ui.Pagination.RoutesFilteredPageSize
+	routesFiltered, paginationFiltered := apiPaginateLookupRoutes(
+		filtered, pageFiltered, pageSizeFiltered,
+	)
+
+	// Calculate query duration
 	queryDuration := time.Since(t0)
-	response := api.RoutesLookupResponseGlobal{
-		Routes: routes[offset:cap],
 
-		TotalRoutes: totalRoutes,
-		Limit:       limit,
-		Offset:      offset,
-
-		Time: float64(queryDuration) / 1000.0 / 1000.0, // nano -> micro -> milli
+	// Make response
+	response := api.PaginatedRoutesLookupResponse{
+		Api: api.ApiStatus{
+			CacheStatus: api.CacheStatus{
+				CachedAt: AliceRoutesStore.CachedAt(),
+			},
+			ResultFromCache: true, // Well.
+			Ttl:             AliceRoutesStore.CacheTtl(),
+		},
+		TimedResponse: api.TimedResponse{
+			RequestDuration: DurationMs(queryDuration),
+		},
+		Imported: &api.LookupRoutesResponse{
+			Routes: routesImported,
+			PaginatedResponse: &api.PaginatedResponse{
+				Pagination: paginationImported,
+			},
+		},
+		Filtered: &api.LookupRoutesResponse{
+			Routes: routesFiltered,
+			PaginatedResponse: &api.PaginatedResponse{
+				Pagination: paginationFiltered,
+			},
+		},
 	}
 
 	return response, nil

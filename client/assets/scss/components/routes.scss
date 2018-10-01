@@ -62,9 +62,11 @@ $labelOffsetEnd:   -30px;
   }
 
   .col-route-flags {
-    padding: 7px 0px;
-    padding-left: 4px;
-    width: 35px;
+    // padding: 7px 0px;
+    padding-left: 2px;
+    width: auto;
+
+    white-space: nowrap;
   }
 
   .col-route-network {

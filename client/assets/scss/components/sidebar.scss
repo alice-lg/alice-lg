@@ -77,6 +77,14 @@
       display: block;
     }
 
+    a.routeserver-id {
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
     .routeserver-status {
       .bird-version {
         font-size: 10px;

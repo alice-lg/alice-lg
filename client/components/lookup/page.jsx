@@ -9,7 +9,7 @@ import LookupSummary from 'components/lookup/results-summary'
 
 import Content from 'components/content'
 
-class LookupView extends React.Component {
+class _LookupView extends React.Component {
   render() {
     if (this.props.enabled == false) {
       return null;
@@ -28,26 +28,24 @@ class LookupView extends React.Component {
   }
 }
 
-const LookupWidget = connect(
+const LookupView = connect(
   (state) => {
     return {
       enabled: state.config.prefix_lookup_enabled
     }
   }
-)(LookupView);
+)(_LookupView);
 
 
-export default class Welcome extends React.Component {
+export default class LookupPage extends React.Component {
   render() {
     return (
       <div className="welcome-page">
        <PageHeader></PageHeader>
        <p></p>
-       <LookupWidget />
-
+       <LookupView />
       </div>
     );
   }
 }
-
 

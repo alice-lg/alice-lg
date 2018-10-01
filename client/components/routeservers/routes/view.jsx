@@ -20,7 +20,7 @@ import {ROUTES_RECEIVED,
         ROUTES_NOT_EXPORTED} from './actions';
 
 
-const RoutesHeader = (props) => {
+export const RoutesHeader = (props) => {
   const type = props.type;
   const rtype = {
     [ROUTES_RECEIVED]: "accepted",
