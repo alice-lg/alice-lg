@@ -10,7 +10,6 @@ import {connect} from 'react-redux'
 import {replace} from 'react-router-redux'
 
 import {setLookupQueryValue} from './actions'
-import {makeSearchQueryProps} from './query'
 
 import LookupResults from './results'
 import SearchInput from 'components/search-input'
@@ -46,9 +45,15 @@ class Lookup extends React.Component {
   }
 
   doLookup(q) {
+    // Make path
+    const destination = {
+      pathname: "/search",
+      search: `?q=${q}`
+    };
+    
     // Set lookup params
     this.props.dispatch(setLookupQueryValue(q));
-    this.debouncedDispatch(replace(makeSearchQueryProps(q)));
+    this.debouncedDispatch(replace(destination));
   }
 
   componentDidMount() {

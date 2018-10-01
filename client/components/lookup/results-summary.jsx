@@ -1,7 +1,38 @@
 
 import React from 'react'
 import {connect} from 'react-redux'
+import moment from 'moment'
+
 import RelativeTime from 'components/relativetime'
+
+
+
+const RefreshState = function(props) {
+  if (!props.cachedAt || !props.cacheTtl) {
+    return null;
+  }
+
+  const cachedAt = moment.utc(props.cachedAt);
+  const cacheTtl = moment.utc(props.cacheTtl);
+
+  if (cacheTtl.isBefore(moment.utc())) {
+    // This means cache is currently being rebuilt
+    return (
+      <li>
+        Routes cache was built <b><RelativeTime value={cachedAt} /> </b>
+        and is currently being refreshed. 
+      </li>
+    );
+
+  }
+
+  return (
+    <li>
+      Routes cache was built <b><RelativeTime value={cachedAt} /> </b>
+      and will be refreshed <b><RelativeTime value={cacheTtl} /></b>.
+    </li>
+  );
+}
 
 class ResultsBox extends React.Component {
 
@@ -23,9 +54,8 @@ class ResultsBox extends React.Component {
               and <b>{this.props.totalFiltered}</b> filtered routes.
             </li>
             <li>Query took <b>{queryDuration} ms</b> to complete.</li>
-            <li>Routes cache was built <b><RelativeTime value={cachedAt} /> </b>
-                and will be refreshed <b><RelativeTime value={cacheTtl} /></b>.
-            </li>
+            <RefreshState cachedAt={this.props.cachedAt}
+                          cacheTtl={this.props.cacheTtl} />
           </ul>
         </div>
       </div>
