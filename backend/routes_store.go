@@ -77,6 +77,8 @@ func (self *RoutesStore) init() {
 
 // Update all routes
 func (self *RoutesStore) update() {
+	successCount := 0
+	errorCount := 0
 	t0 := time.Now()
 
 	for sourceId, _ := range self.routesMap {
@@ -112,6 +114,7 @@ func (self *RoutesStore) update() {
 			}
 			self.Unlock()
 
+			errorCount++
 			continue
 		}
 
@@ -125,12 +128,14 @@ func (self *RoutesStore) update() {
 		}
 		self.lastRefresh = time.Now().UTC()
 		self.Unlock()
+
+		successCount++
 	}
 
 	refreshDuration := time.Since(t0)
 	log.Println(
-		"Refreshed routes stores for all of", len(self.routesMap), "sources",
-		"in", refreshDuration,
+		"Refreshed routes store for", successCount, "of", successCount+errorCount,
+		"sources with", errorCount, "error(s) in", refreshDuration,
 	)
 
 }

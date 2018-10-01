@@ -77,6 +77,8 @@ func (self *NeighboursStore) init() {
 
 // Update all neighbors
 func (self *NeighboursStore) update() {
+	successCount := 0
+	errorCount := 0
 	t0 := time.Now()
 	for sourceId, _ := range self.neighboursMap {
 		// Get current state
@@ -110,6 +112,8 @@ func (self *NeighboursStore) update() {
 				LastRefresh: time.Now(),
 			}
 			self.Unlock()
+
+			errorCount++
 			continue
 		}
 
@@ -130,12 +134,13 @@ func (self *NeighboursStore) update() {
 			State:       STATE_READY,
 		}
 		self.Unlock()
+		successCount++
 	}
 
 	refreshDuration := time.Since(t0)
 	log.Println(
-		"Refreshed neighbors stores for all of", len(self.neighboursMap),
-		"sources in", refreshDuration,
+		"Refreshed neighbors store for", successCount, "of", successCount+errorCount,
+		"sources with", errorCount, "error(s) in", refreshDuration,
 	)
 }
 
