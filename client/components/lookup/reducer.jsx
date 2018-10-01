@@ -17,6 +17,8 @@ const initialState = {
   query: "",
   queryValue: "",
 
+  anchor: "",
+
   routesImported: [],
   routesFiltered: [],
 
@@ -43,18 +45,35 @@ const initialState = {
 }
 
 /*
+ * Helper: Get scroll anchor from hash
+ */
+const getScrollAnchor = function(hash) {
+  return hash.substr(hash.indexOf('-')+1);
+}
+
+
+/*
  * Restore lookup query state from location paramenters
  */
-const _restoreQueryState = function(state, payload) {
+const _handleLocationChange = function(state, payload) {
   const params = payload.query;
   const query = params["q"] || "";
+  const pageFiltered = parseInt(params["pf"] || 0, 10);
+  const pageReceived = parseInt(params["pr"] || 0, 10);
+  const anchor = getScrollAnchor(payload.hash);
 
   return Object.assign({}, state, {
+    anchor: anchor,
     query: query,
-    queryValue: query
+    queryValue: query,
+    pageImported: pageReceived,
+    pageFiltered: pageFiltered
   });
 }
 
+/*
+ * Receive query results
+ */
 const _loadQueryResult = function(state, payload) {
   const results = payload.results;
   const imported = results.imported;
@@ -67,7 +86,7 @@ const _loadQueryResult = function(state, payload) {
     // Cache Status
     cachedAt: api.cache_status.cached_at, // I don't like this style. 
     cacheTtl: api.ttl, 
-
+    
     // Routes
     routesImported: imported.routes,
     routesFiltered: filtered.routes,
@@ -93,7 +112,7 @@ const _loadQueryResult = function(state, payload) {
 export default function reducer(state=initialState, action) {
   switch(action.type) {
     case LOCATION_CHANGE:
-      return _restoreQueryState(state, action.payload);
+      return _handleLocationChange(state, action.payload);
       
     case SET_LOOKUP_QUERY_VALUE:
       return Object.assign({}, state, {
@@ -101,7 +120,7 @@ export default function reducer(state=initialState, action) {
       });
 
     case LOAD_RESULTS_REQUEST:
-      return Object.assign({}, state, initialState, {
+      return Object.assign({}, state, {
         query: action.payload.query,
         queryValue: action.payload.query,
         isLoading: true

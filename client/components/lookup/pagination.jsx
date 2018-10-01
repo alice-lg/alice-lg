@@ -34,21 +34,18 @@ const makeLinkProps = function(props) {
 
   // This here can be surely more elegant.
   switch(props.anchor) {
-    case "routes-received":
+    case "received":
       pr = linkPage;
       break;
-    case "routes-filtered":
+    case "filtered":
       pf = linkPage;
-      break;
-    case "routes-not-exported":
-      pn = linkPage;
       break;
   }
 
   const query = props.routing.query.q || "";
 
   const search = `?pr=${pr}&pf=${pf}&q=${query}`;
-  const hash   = `#${props.anchor}`;
+  const hash   = `#routes-${props.anchor}`;
   const linkTo = {
     pathname: props.routing.pathname,
     hash:     hash,
@@ -60,7 +57,7 @@ const makeLinkProps = function(props) {
 
 
 const PageLink = function(props) {
-  const linkPage = parseInt(props.page);
+  const linkPage = parseInt(props.page, 10);
   const label = props.label || (linkPage + 1);
 
   if (props.disabled) {

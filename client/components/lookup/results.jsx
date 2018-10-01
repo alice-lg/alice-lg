@@ -97,32 +97,43 @@ const NoResultsFallback = connect(
 
 class LookupResults extends React.Component {
 
-  dispatchLookup(query) {
+  dispatchLookup() {
+    const query = this.props.query;
+    const pageImported = this.props.pagination.imported.page;
+    const pageFiltered = this.props.pagination.filtered.page;
+
     if (query == "") {
       // Dispatch reset and transition to main page
       this.props.dispatch(reset());
       this.props.dispatch(replace("/"));
     } else {
       this.props.dispatch(
-        loadResults(query)
+        loadResults(query, pageImported, pageFiltered)
       );
     }
   }
 
   componentDidMount() {
     // Dispatch query
-    this.dispatchLookup(this.props.query);
+    this.dispatchLookup();
   }
 
   componentDidUpdate(prevProps) {
-    if(this.props.query != prevProps.query) {
-      this.dispatchLookup(this.props.query);
+    if(this.props.query != prevProps.query ||
+       this.props.pagination.filtered.page != prevProps.pagination.filtered.page ||
+       this.props.pagination.imported.page != prevProps.pagination.imported.page) {
+        this.dispatchLookup();
     }
   }
 
   render() {
     if(this.props.isLoading) {
       return <LoadingIndicator />;
+    }
+
+    const ref = this.refs[this.props.anchor];
+    if(ref) {
+      ref.scrollIntoView();
     }
 
     const filteredRoutes = this.props.routes.filtered;
@@ -134,6 +145,7 @@ class LookupResults extends React.Component {
 
         <NoResultsFallback />
 
+        <a ref="filtered" name="routes-filtered" />
         <ResultsView type="filtered"
                      routes={filteredRoutes}
 
@@ -146,6 +158,7 @@ class LookupResults extends React.Component {
 
                      displayReasons="filtered" />
 
+        <a ref="received" name="routes-received" />
         <ResultsView type="received"
 
                      page={this.props.pagination.imported.page}
@@ -157,9 +170,8 @@ class LookupResults extends React.Component {
 
                      routes={importedRoutes} />
       </div>
-    )
+    );
   }
-
 }
 
 export default connect(
@@ -168,6 +180,7 @@ export default connect(
     const importedRoutes = state.lookup.routesImported; 
 
     return {
+      anchor: state.lookup.anchor,
       routes: {
         filtered: filteredRoutes,
         imported: importedRoutes
