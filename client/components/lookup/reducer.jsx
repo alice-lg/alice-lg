@@ -119,6 +119,7 @@ export default function reducer(state=initialState, action) {
 
       return Object.assign({}, state, initialState, {
         query: action.payload.query,
+        queryValue: action.payload.query,
         error: action.payload.error
       });
 
