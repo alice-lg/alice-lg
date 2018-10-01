@@ -12,9 +12,7 @@ export default class RelativeTime extends React.Component {
       return null;
     }
 
-
     let time = false;
-
     if (this.props.value instanceof moment) {
       time = this.props.value;
     } else {
