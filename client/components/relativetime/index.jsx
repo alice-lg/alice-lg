@@ -12,7 +12,15 @@ export default class RelativeTime extends React.Component {
       return null;
     }
 
-    let time = moment.utc(this.props.value);
+
+    let time = false;
+
+    if (this.props.value instanceof moment) {
+      time = this.props.value;
+    } else {
+      time = moment.utc(this.props.value);
+    }
+
     return (
       <span>{time.fromNow(this.props.suffix)}</span>
     );
