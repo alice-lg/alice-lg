@@ -61,7 +61,8 @@ class RouteserversPage extends React.Component {
           </div>
           <div className="col-lg-3 col-md-4 col-xs-12">
             <div className="card">
-              <Status routeserverId={this.props.params.routeserverId} />
+              <Status routeserverId={this.props.params.routeserverId}
+                      cacheStatus={this.props.cacheStatus} />
             </div>
           </div>
         </div>
@@ -77,7 +78,13 @@ export default connect(
 
       filterValue: state.neighbors.filterValue,
       sortColumn:  state.neighbors.sortColumn,
-      sortOrder:   state.neighbors.sortOrder
+      sortOrder:   state.neighbors.sortOrder,
+
+      cacheStatus: {
+        generatedAt: state.neighbors.cachedAt,
+        ttl: state.neighbors.cacheTtl,
+      }
+
     };
   }
 )(RouteserversPage);
