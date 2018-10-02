@@ -39,6 +39,10 @@ type NoexportsConfig struct {
 	LoadOnDemand bool `ini:"load_on_demand"`
 }
 
+type RejectCandidatesConfig struct {
+	Communities BgpCommunities
+}
+
 type RpkiConfig struct {
 	// Define communities
 	Enabled    bool     `ini:"enabled"`
@@ -58,10 +62,12 @@ type UiConfig struct {
 	LookupColumns      map[string]string
 	LookupColumnsOrder []string
 
-	RoutesRejections RejectionsConfig
-	RoutesNoexports  NoexportsConfig
-	BgpCommunities   BgpCommunities
-	Rpki             RpkiConfig
+	RoutesRejections       RejectionsConfig
+	RoutesNoexports        NoexportsConfig
+	RoutesRejectCandidates RejectCandidatesConfig
+
+	BgpCommunities BgpCommunities
+	Rpki           RpkiConfig
 
 	Theme ThemeConfig
 
@@ -312,6 +318,27 @@ func getRoutesNoexports(config *ini.File) (NoexportsConfig, error) {
 	return noexportsConfig, nil
 }
 
+// Get UI config: Reject candidates
+func getRejectCandidatesConfig(config *ini.File) (RejectCandidatesConfig, error) {
+	candidateCommunities := config.Section(
+		"reject_candidates").Key("communities").String()
+
+	if candidateCommunities == "" {
+		return RejectCandidatesConfig{}, nil
+	}
+
+	communities := BgpCommunities{}
+	for i, c := range strings.Split(candidateCommunities, ",") {
+		communities.Set(c, fmt.Sprintf("reject-candidate-%d", i+1))
+	}
+
+	conf := RejectCandidatesConfig{
+		Communities: communities,
+	}
+
+	return conf, nil
+}
+
 // Get UI config: RPKI configuration
 func getRpkiConfig(config *ini.File) (RpkiConfig, error) {
 	var rpki RpkiConfig
@@ -473,6 +500,9 @@ func getUiConfig(config *ini.File) (UiConfig, error) {
 		return uiConfig, err
 	}
 
+	// Get reject candidates
+	rejectCandidates, _ := getRejectCandidatesConfig(config)
+
 	// RPKI filter config
 	rpki, err := getRpkiConfig(config)
 	if err != nil {
@@ -497,10 +527,12 @@ func getUiConfig(config *ini.File) (UiConfig, error) {
 		LookupColumns:      lookupColumns,
 		LookupColumnsOrder: lookupColumnsOrder,
 
-		RoutesRejections: rejections,
-		RoutesNoexports:  noexports,
-		BgpCommunities:   getBgpCommunities(config),
-		Rpki:             rpki,
+		RoutesRejections:       rejections,
+		RoutesNoexports:        noexports,
+		RoutesRejectCandidates: rejectCandidates,
+
+		BgpCommunities: getBgpCommunities(config),
+		Rpki:           rpki,
 
 		Theme: themeConfig,
 

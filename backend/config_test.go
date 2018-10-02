@@ -135,3 +135,22 @@ func TestRpkiConfig(t *testing.T) {
 
 	t.Log(config.Ui.Rpki)
 }
+
+func TestRejectCandidatesConfig(t *testing.T) {
+	config, err := loadConfig("../etc/alicelg/alice.example.conf")
+	if err != nil {
+		t.Error("Could not load test config:", err)
+		return
+	}
+
+	t.Log(config.Ui.RoutesRejectCandidates.Communities)
+
+	description, err := config.Ui.RoutesRejectCandidates.Communities.Lookup("23:42:46")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if description != "reject-candidate-3" {
+		t.Error("expected 23:42:46 to be a 'reject-candidate'")
+	}
+}

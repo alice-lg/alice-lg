@@ -31,6 +31,8 @@ type ConfigResponse struct {
 	Noexport        Noexport          `json:"noexport"`
 	NoexportReasons map[string]string `json:"noexport_reasons"`
 
+	RejectCandidates RejectCandidates `json:"reject_candidates"`
+
 	Rpki Rpki `json:"rpki"`
 
 	BgpCommunities map[string]interface{} `json:"bgp_communities"`
@@ -56,6 +58,10 @@ type Noexport struct {
 	Asn          int  `json:"asn"`
 	NoexportId   int  `json:"noexport_id"`
 	LoadOnDemand bool `json:"load_on_demand"`
+}
+
+type RejectCandidates struct {
+	Communities map[string]interface{} `json:"communities"`
 }
 
 type Rpki struct {

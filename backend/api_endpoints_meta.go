@@ -47,6 +47,9 @@ func apiConfigShow(_req *http.Request, _params httprouter.Params) (api.Response,
 		BgpCommunities: AliceConfig.Ui.BgpCommunities,
 		NoexportReasons: SerializeReasons(
 			AliceConfig.Ui.RoutesNoexports.Reasons),
+		RejectCandidates: api.RejectCandidates{
+			Communities: AliceConfig.Ui.RoutesRejectCandidates.Communities,
+		},
 		RoutesColumns:          AliceConfig.Ui.RoutesColumns,
 		RoutesColumnsOrder:     AliceConfig.Ui.RoutesColumnsOrder,
 		NeighboursColumns:      AliceConfig.Ui.NeighboursColumns,
