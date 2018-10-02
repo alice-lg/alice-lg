@@ -14,6 +14,8 @@ import {setLookupQueryValue} from './actions'
 import LookupResults from './results'
 import SearchInput from 'components/search-input'
 
+import QuickLinks from 'components/routeservers/routes/quick-links'
+
 
 class LookupHelp extends React.Component {
   render() {
@@ -78,6 +80,9 @@ class Lookup extends React.Component {
             onChange={(e) => this.doLookup(e.target.value)}  />
         </div>
 
+        <QuickLinks routes={this.props.routes}
+                    excludeNotExported={true} />
+
         <LookupHelp query={this.props.query} />
 
         <LookupResults />
@@ -88,11 +93,26 @@ class Lookup extends React.Component {
 
 export default connect(
   (state) => {
+    const lookup = state.lookup;
     return {
-        query: state.lookup.query,
-        queryValue: state.lookup.queryValue,
-        isLoading: state.lookup.isLoading,
-        error: state.lookup.error
+      query: state.lookup.query,
+      queryValue: state.lookup.queryValue,
+      isLoading: state.lookup.isLoading,
+      error: state.lookup.error,
+      routes: {
+        filtered: {
+          loading: lookup.isLoading, 
+          totalResults: lookup.totalRoutesFiltered,
+        },
+        received: {
+          loading: lookup.isLoading, 
+          totalResults: lookup.totalRoutesImported,
+        },
+        notExported: {
+          loading: false,
+          totalResults: 0,
+        }
+      }
     }
   }
 )(Lookup);

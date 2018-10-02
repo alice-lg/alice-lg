@@ -23,9 +23,19 @@ const QuickLinks = function(props) {
   // this.
   let showNotExported = (!props.routes.notExported.loading &&
                           props.routes.notExported.totalResults > 0);
-  if (props.loadNotExportedOnDemand) {
+  let excludeNotExported = props.excludeNotExported || false;
+  if (props.loadNotExportedOnDemand && !excludeNotExported) {
     // Show the link when nothing else is loading anymore
     showNotExported = !isLoading;
+  }
+
+  // Is there anything to show?
+  if (!isLoading &&
+      !showNotExported &&
+      props.routes.notExported.totalResults == 0 &&
+      props.routes.received.totalResults == 0 &&
+      props.routes.filtered.totalResults == 0) {
+        return null; // Nothing to do here.
   }
 
   return (
