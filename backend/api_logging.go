@@ -31,12 +31,12 @@ func apiLogSourceError(module string, sourceId int, params ...interface{}) {
 
 	if err != nil {
 		log.Println(fmt.Sprintf(
-			"API ERROR :: %s.%s(%s) :: %v",
+			"SOURCE ERROR :: %s.%s(%s) :: %v",
 			sourceName, module, strings.Join(args, ", "), err,
 		))
 	} else {
 		log.Println(fmt.Sprintf(
-			"API ERROR :: %s.%s(%s)",
+			"SOURCE ERROR :: %s.%s(%s)",
 			sourceName, module, strings.Join(args, ", "),
 		))
 	}
