@@ -115,12 +115,13 @@ export function loadRouteserverProtocolRequest(routeserverId) {
   }
 }
 
-export function loadRouteserverProtocolSuccess(routeserverId, protocol) {
+export function loadRouteserverProtocolSuccess(routeserverId, protocol, api) {
   return {
     type: LOAD_ROUTESERVER_PROTOCOL_SUCCESS,
     payload: {
       routeserverId: routeserverId,
-      protocol: protocol
+      protocol: protocol,
+      api: api
     }
   }
 }
@@ -130,7 +131,12 @@ export function loadRouteserverProtocol(routeserverId) {
     dispatch(loadRouteserverProtocolRequest(routeserverId));
     axios.get(`/api/routeservers/${routeserverId}/neighbours`)
       .then(({data}) => {
-        dispatch(loadRouteserverProtocolSuccess(routeserverId, data.neighbours));
+        console.log("LRS:", data);
+        dispatch(loadRouteserverProtocolSuccess(
+          routeserverId,
+          data.neighbours,
+          data.api,
+        ));
       })
       .catch((error) => dispatch(apiError(error)));
   }

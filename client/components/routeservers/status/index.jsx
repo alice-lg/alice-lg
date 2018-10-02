@@ -27,22 +27,20 @@ class Details extends React.Component {
     }
 
     let cacheStatus = null;
-    if (this.props.cacheStatus) {
+    if (this.props.cacheStatus && 
+        this.props.cacheStatus.ttl &&
+        this.props.cacheStatus.generatedAt) {
       const s = this.props.cacheStatus;
+      const generatedAt = moment(s.generatedAt);
+      const ttl = moment(s.ttl);
+
       cacheStatus = [
          <tr key="cache-status-cached-at">
            <td><i className="fa fa-refresh"></i></td>
            <td>
-             Generated <b>{s.generatedAt.fromNow()}</b><br />
-             Next refresh <b>{s.ttl.fromNow()}</b>
+             Generated <b>{generatedAt.fromNow()}</b> &middot;  Next refresh <b>{ttl.fromNow()}</b>.
            </td>
          </tr>,
-
-         <tr key="cache-status-ttl">
-           <td></td>
-           <td>
-           </td>
-         </tr>
       ];
     };
 
