@@ -38,7 +38,8 @@ class Details extends React.Component {
          <tr key="cache-status-cached-at">
            <td><i className="fa fa-refresh"></i></td>
            <td>
-             Generated <b>{generatedAt.fromNow()}</b> &middot;  Next refresh <b>{ttl.fromNow()}</b>.
+             Generated <b>{generatedAt.fromNow()}</b>.<br />
+             Next refresh <b>{ttl.fromNow()}</b>.
            </td>
          </tr>,
       ];
