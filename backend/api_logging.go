@@ -7,9 +7,16 @@ import (
 )
 
 // Log an api error
-func apiLogError(module string, params ...interface{}) {
+func apiLogSourceError(module string, sourceId int, params ...interface{}) {
 	var err error
 	args := []string{}
+
+	// Get source configuration
+	source := AliceConfig.Sources[sourceId]
+	sourceName := "unknown"
+	if source != nil {
+		sourceName = source.Name
+	}
 
 	// Build args string and get error from params
 	for _, p := range params {
@@ -24,13 +31,13 @@ func apiLogError(module string, params ...interface{}) {
 
 	if err != nil {
 		log.Println(fmt.Sprintf(
-			"API :: %s(%s) :: ERROR: %v",
-			module, strings.Join(args, ", "), err,
+			"API ERROR :: %s.%s(%s) :: %v",
+			sourceName, module, strings.Join(args, ", "), err,
 		))
 	} else {
 		log.Println(fmt.Sprintf(
-			"API :: %s(%s)",
-			module, strings.Join(args, ", "),
+			"API ERROR :: %s.%s(%s)",
+			sourceName, module, strings.Join(args, ", "),
 		))
 	}
 }
