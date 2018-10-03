@@ -32,25 +32,17 @@ func apiStatus(_req *http.Request, params httprouter.Params) (api.Response, erro
 // Handle Config Endpoint
 func apiConfigShow(_req *http.Request, _params httprouter.Params) (api.Response, error) {
 	result := api.ConfigResponse{
-		Asn: AliceConfig.Server.Asn,
-		Rejection: api.Rejection{
-			Asn:      AliceConfig.Ui.RoutesRejections.Asn,
-			RejectId: AliceConfig.Ui.RoutesRejections.RejectId,
-		},
-		RejectReasons: SerializeReasons(
-			AliceConfig.Ui.RoutesRejections.Reasons),
+		Asn:            AliceConfig.Server.Asn,
+		BgpCommunities: AliceConfig.Ui.BgpCommunities,
+		RejectReasons:  AliceConfig.Ui.RoutesRejections.Reasons,
 		Noexport: api.Noexport{
-			Asn:          AliceConfig.Ui.RoutesNoexports.Asn,
-			NoexportId:   AliceConfig.Ui.RoutesNoexports.NoexportId,
 			LoadOnDemand: AliceConfig.Ui.RoutesNoexports.LoadOnDemand,
 		},
-		Rpki:           api.Rpki(AliceConfig.Ui.Rpki),
-		BgpCommunities: AliceConfig.Ui.BgpCommunities,
-		NoexportReasons: SerializeReasons(
-			AliceConfig.Ui.RoutesNoexports.Reasons),
+		NoexportReasons: AliceConfig.Ui.RoutesNoexports.Reasons,
 		RejectCandidates: api.RejectCandidates{
 			Communities: AliceConfig.Ui.RoutesRejectCandidates.Communities,
 		},
+		Rpki:                   api.Rpki(AliceConfig.Ui.Rpki),
 		RoutesColumns:          AliceConfig.Ui.RoutesColumns,
 		RoutesColumnsOrder:     AliceConfig.Ui.RoutesColumnsOrder,
 		NeighboursColumns:      AliceConfig.Ui.NeighboursColumns,

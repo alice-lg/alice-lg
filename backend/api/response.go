@@ -27,11 +27,10 @@ type CacheableResponse interface {
 type ConfigResponse struct {
 	Asn int `json:"asn"`
 
-	Rejection     Rejection         `json:"rejection"`
-	RejectReasons map[string]string `json:"reject_reasons"`
+	RejectReasons map[string]interface{} `json:"reject_reasons"`
 
-	Noexport        Noexport          `json:"noexport"`
-	NoexportReasons map[string]string `json:"noexport_reasons"`
+	Noexport        Noexport               `json:"noexport"`
+	NoexportReasons map[string]interface{} `json:"noexport_reasons"`
 
 	RejectCandidates RejectCandidates `json:"reject_candidates"`
 
@@ -51,14 +50,7 @@ type ConfigResponse struct {
 	PrefixLookupEnabled bool `json:"prefix_lookup_enabled"`
 }
 
-type Rejection struct {
-	Asn      int `json:"asn"`
-	RejectId int `json:"reject_id"`
-}
-
 type Noexport struct {
-	Asn          int  `json:"asn"`
-	NoexportId   int  `json:"noexport_id"`
 	LoadOnDemand bool `json:"load_on_demand"`
 }
 
