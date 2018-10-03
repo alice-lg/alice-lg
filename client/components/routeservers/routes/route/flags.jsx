@@ -145,3 +145,8 @@ export const RpkiIndicator = connect(
 )(_RpkiIndicator);
 
 
+/*
+ * Reject Candidate Indicator
+ */
+
+
