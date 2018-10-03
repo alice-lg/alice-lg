@@ -69,6 +69,33 @@ func TestSourceConfigDefaultsOverride(t *testing.T) {
 	}
 }
 
+func TestRejectAndNoexportReasons(t *testing.T) {
+	config, err := loadConfig("../etc/alicelg/alice.example.conf")
+	if err != nil {
+		t.Error("Could not load test config:", err)
+	}
+
+	// Rejection reasons
+	description, err := config.Ui.RoutesRejections.Reasons.Lookup("23:42:1")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if description != "Some made up reason" {
+		t.Error("Unexpected reason for 23:42:1 -", description)
+	}
+
+	// Noexport reasons
+	description, err = config.Ui.RoutesNoexports.Reasons.Lookup("23:46:1")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if description != "Some other made up reason" {
+		t.Error("Unexpected reason for 23:46:1 -", description)
+	}
+}
+
 func TestBlackholeParsing(t *testing.T) {
 	config, err := loadConfig("../etc/alicelg/alice.example.conf")
 	if err != nil {
