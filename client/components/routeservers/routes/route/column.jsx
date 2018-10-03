@@ -42,7 +42,7 @@ export const ColNetwork = function(props) {
   return (
     <td className="col-route-network">
       <span className="route-network" onClick={props.onClick}>
-        {props.route.network}
+        {props.route.network} 
       </span>
       <FilterReason route={props.route} />
       <NoexportReason route={props.route} />
@@ -95,7 +95,6 @@ export default function(props) {
   let Widget = widgets[props.column] || ColDefault;
   return (
     <Widget column={props.column} route={props.route}
-            displayReasons={props.displayReasons}
             blackholes={props.blackholes}
             onClick={props.onClick} />
   );
