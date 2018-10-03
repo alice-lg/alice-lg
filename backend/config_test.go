@@ -69,6 +69,33 @@ func TestSourceConfigDefaultsOverride(t *testing.T) {
 	}
 }
 
+func TestRejectAndNoexportReasons(t *testing.T) {
+	config, err := loadConfig("../etc/alicelg/alice.example.conf")
+	if err != nil {
+		t.Error("Could not load test config:", err)
+	}
+
+	// Rejection reasons
+	description, err := config.Ui.RoutesRejections.Reasons.Lookup("23:42:1")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if description != "Some made up reason" {
+		t.Error("Unexpected reason for 23:42:1 -", description)
+	}
+
+	// Noexport reasons
+	description, err = config.Ui.RoutesNoexports.Reasons.Lookup("23:46:1")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if description != "Some other made up reason" {
+		t.Error("Unexpected reason for 23:46:1 -", description)
+	}
+}
+
 func TestBlackholeParsing(t *testing.T) {
 	config, err := loadConfig("../etc/alicelg/alice.example.conf")
 	if err != nil {
@@ -88,21 +115,14 @@ func TestBlackholeParsing(t *testing.T) {
 	}
 }
 
-func TestSourceASN(t *testing.T) {
+func TestOwnASN(t *testing.T) {
 	config, err := loadConfig("../etc/alicelg/alice.example.conf")
 	if err != nil {
 		t.Error("Could not load test config:", err)
 	}
 
-	// Get sources
-	rs1 := config.Sources[0]
-	if rs1.Asn != 99999 {
-		t.Error("Expected RS1 ASN to be: 99999, not:", rs1.Asn)
-	}
-
-	rs2 := config.Sources[1]
-	if rs2.Asn != 9033 {
-		t.Error("Expected RS2 to fall back to AS9033, not:", rs2.Asn)
+	if config.Server.Asn != 9033 {
+		t.Error("Expected a set server asn")
 	}
 }
 
@@ -134,4 +154,23 @@ func TestRpkiConfig(t *testing.T) {
 	}
 
 	t.Log(config.Ui.Rpki)
+}
+
+func TestRejectCandidatesConfig(t *testing.T) {
+	config, err := loadConfig("../etc/alicelg/alice.example.conf")
+	if err != nil {
+		t.Error("Could not load test config:", err)
+		return
+	}
+
+	t.Log(config.Ui.RoutesRejectCandidates.Communities)
+
+	description, err := config.Ui.RoutesRejectCandidates.Communities.Lookup("23:42:46")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if description != "reject-candidate-3" {
+		t.Error("expected 23:42:46 to be a 'reject-candidate'")
+	}
 }

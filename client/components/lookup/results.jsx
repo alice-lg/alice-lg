@@ -7,10 +7,10 @@ import {Link} from 'react-router'
 import {replace} from 'react-router-redux'
 
 import FilterReason
-  from 'components/routeservers/large-communities/filter-reason'
+  from 'components/routeservers/communities/filter-reason'
 
 import NoexportReason
-  from 'components/routeservers/large-communities/noexport-reason'
+  from 'components/routeservers/communities/noexport-reason'
 
 import BgpAttributesModal
   from 'components/routeservers/routes/bgp-attributes-modal'
@@ -38,7 +38,7 @@ const ResultsView = function(props) {
   const type = props.type;
 
   return (
-    <div className="card">
+    <div className={`card routes-view routes-${type}`}>
       <div className="row">
         <div className="col-md-6 routes-header-container">
           <RoutesHeader type={type} />

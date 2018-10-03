@@ -17,7 +17,6 @@ func apiRouteserversList(_req *http.Request, _params httprouter.Params) (api.Res
 		routeservers = append(routeservers, api.Routeserver{
 			Id:         source.Id,
 			Name:       source.Name,
-			Asn:        source.Asn,
 			Blackholes: source.Blackholes,
 		})
 	}

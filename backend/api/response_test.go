@@ -14,8 +14,8 @@ func TestStatusResponseSerialization(t *testing.T) {
 			Version:         "2.0.0",
 			CacheStatus:     CacheStatus{},
 			ResultFromCache: false,
+			Ttl:             time.Now(),
 		},
-		Ttl: time.Now(),
 		Status: Status{
 			Message:  "Server is up and running",
 			RouterId: "testrouter",

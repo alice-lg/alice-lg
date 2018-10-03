@@ -39,6 +39,7 @@ bundle:
 
 test:
 	go test -v
+	cd api/ && go test -v
 	cd caches/ && go test -v
 	cd sources/birdwatcher && go test -v
 

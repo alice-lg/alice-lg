@@ -2,6 +2,9 @@
 import React from 'react'
 import {connect} from 'react-redux'
 
+import {isRejectCandidate}
+  from 'components/routeservers/communities/utils'
+
 /*
  * Primary Route Indicator
  */
@@ -144,4 +147,32 @@ export const RpkiIndicator = connect(
   })
 )(_RpkiIndicator);
 
+
+/*
+ * Reject Candidate Indicator
+ */
+
+class _RejectCandidateIndicator extends React.Component {
+
+  render() {
+    if (!isRejectCandidate(this.props.candidateCommunities, this.props.route)) {
+      return null;
+    }
+
+    const cls = `route-prefix-flag reject-candidate-route`;
+    return (
+      <span className={cls}>
+        <i className="fa fa-exclamation-circle" />
+        <div>Reject Candidate</div>
+      </span>
+    );
+  }
+
+}
+
+export const RejectCandidateIndicator = connect(
+  (state) => ({
+    candidateCommunities: state.routeservers.rejectCandidates.communities,
+  })
+)(_RejectCandidateIndicator);
 

@@ -2,9 +2,6 @@
 import React from 'react'
 import moment from 'moment'
 
-
-window.momnet = moment;
-
 export default class RelativeTimestamp extends React.Component {
   render() {
     const tsMs = this.props.value / 1000.0 / 1000.0; // nano -> micro -> milli
@@ -16,5 +13,4 @@ export default class RelativeTimestamp extends React.Component {
     );
   }
 }
-
 

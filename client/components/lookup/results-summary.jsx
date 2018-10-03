@@ -3,7 +3,7 @@ import React from 'react'
 import {connect} from 'react-redux'
 import moment from 'moment'
 
-import RelativeTime from 'components/relativetime'
+import RelativeTime from 'components/datetime/relative'
 
 
 
@@ -19,7 +19,9 @@ const RefreshState = function(props) {
     // This means cache is currently being rebuilt
     return (
       <li>
-        Routes cache was built <b><RelativeTime value={cachedAt} /> </b>
+        Routes cache was built <b><RelativeTime fuzzyNow={5}
+                                                pastEvent={true}
+                                                value={cachedAt} /> </b>
         and is currently being refreshed. 
       </li>
     );
@@ -28,8 +30,8 @@ const RefreshState = function(props) {
 
   return (
     <li>
-      Routes cache was built <b><RelativeTime value={cachedAt} /> </b>
-      and will be refreshed <b><RelativeTime value={cacheTtl} /></b>.
+      Routes cache was built <b><RelativeTime fuzzyNow={5} value={cachedAt} /> </b>
+      and will be refreshed <b><RelativeTime value={cacheTtl} futureEvent={true} /></b>.
     </li>
   );
 }

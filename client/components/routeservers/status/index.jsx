@@ -3,7 +3,7 @@ import React from 'react'
 import {connect} from 'react-redux'
 
 import Datetime from 'components/datetime'
-import moment from 'moment'
+import RelativeTime from 'components/datetime/relative'
 
 
 class Details extends React.Component {
@@ -30,16 +30,17 @@ class Details extends React.Component {
     if (this.props.cacheStatus && 
         this.props.cacheStatus.ttl &&
         this.props.cacheStatus.generatedAt) {
-      const s = this.props.cacheStatus;
-      const generatedAt = moment(s.generatedAt);
-      const ttl = moment(s.ttl);
-
+      const cs = this.props.cacheStatus;
       cacheStatus = [
          <tr key="cache-status-cached-at">
            <td><i className="fa fa-refresh"></i></td>
            <td>
-             Generated <b>{generatedAt.fromNow()}</b>.<br />
-             Next refresh <b>{ttl.fromNow()}</b>.
+             Generated <b><RelativeTime value={cs.generatedAt}
+                                        fuzzyNow={5}
+                                        pastEvent={true} /></b>.<br />
+             Next refresh <b><RelativeTime futureEvent={true}
+                                           fuzzyNow={5}
+                                           value={cs.ttl} /></b>.
            </td>
          </tr>,
       ];

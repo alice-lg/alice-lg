@@ -12,7 +12,7 @@ import {loadRouteserverProtocol}
   from 'components/routeservers/actions'
 
 import RelativeTimestamp
-	from 'components/relativetime/timestamp'
+	from 'components/datetime/relative-timestamp'
 
 import LoadingIndicator
 	from 'components/loading-indicator/small'

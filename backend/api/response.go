@@ -25,11 +25,14 @@ type CacheableResponse interface {
 
 // Config
 type ConfigResponse struct {
-	Rejection     Rejection         `json:"rejection"`
-	RejectReasons map[string]string `json:"reject_reasons"`
+	Asn int `json:"asn"`
 
-	Noexport        Noexport          `json:"noexport"`
-	NoexportReasons map[string]string `json:"noexport_reasons"`
+	RejectReasons map[string]interface{} `json:"reject_reasons"`
+
+	Noexport        Noexport               `json:"noexport"`
+	NoexportReasons map[string]interface{} `json:"noexport_reasons"`
+
+	RejectCandidates RejectCandidates `json:"reject_candidates"`
 
 	Rpki Rpki `json:"rpki"`
 
@@ -47,15 +50,12 @@ type ConfigResponse struct {
 	PrefixLookupEnabled bool `json:"prefix_lookup_enabled"`
 }
 
-type Rejection struct {
-	Asn      int `json:"asn"`
-	RejectId int `json:"reject_id"`
+type Noexport struct {
+	LoadOnDemand bool `json:"load_on_demand"`
 }
 
-type Noexport struct {
-	Asn          int  `json:"asn"`
-	NoexportId   int  `json:"noexport_id"`
-	LoadOnDemand bool `json:"load_on_demand"`
+type RejectCandidates struct {
+	Communities map[string]interface{} `json:"communities"`
 }
 
 type Rpki struct {
@@ -98,7 +98,6 @@ type StatusResponse struct {
 type Routeserver struct {
 	Id         int      `json:"id"`
 	Name       string   `json:"name"`
-	Asn        int      `json:"asn"`
 	Blackholes []string `json:"blackholes"`
 }
 

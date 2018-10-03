@@ -2,26 +2,8 @@
 import React from 'react'
 import {connect} from 'react-redux'
 
+import {resolveCommunity} from './utils'
 
-function _lookupCommunity(communities, community) {
-  let lookup = communities;
-  for (let c of community) {
-    if (typeof(lookup) !== "object") {
-      return null;
-    }
-    let res = lookup[c];
-    if (!res) {
-      // Try the wildcard
-      if (lookup["*"]) {
-        res = lookup["*"]
-      } else {
-        return null; // We did everything we could
-      }
-    }
-    lookup = res;
-  }
-  return lookup;
-}
 
 
 /*
@@ -58,7 +40,7 @@ class Label extends React.Component {
   render() {
 
     // Lookup communities
-    const readableCommunityLabel = _lookupCommunity(this.props.communities, this.props.community);
+    const readableCommunityLabel = resolveCommunity(this.props.communities, this.props.community);
     const readableCommunity = _expandVars(readableCommunityLabel, this.props.community);
     const key = this.props.community.join(":");
 

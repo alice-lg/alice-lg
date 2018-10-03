@@ -37,8 +37,7 @@ class RoutesTable extends React.Component {
                                                        onClick={() => this.showAttributesModal(r)}
                                                        column={col}
                                                        route={r}
-                                                       blackholes={blackholes}
-                                                       displayReasons={this.props.type} />)
+                                                       blackholes={blackholes} />)
           )}
         </tr>
       );
