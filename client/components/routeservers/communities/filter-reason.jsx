@@ -2,6 +2,7 @@
 import React from 'react'
 import {connect} from 'react-redux'
 
+import {resolveCommunities} from './utils'
 
 class FilterReason extends React.Component {
   render() {
@@ -12,20 +13,21 @@ class FilterReason extends React.Component {
         return null;
     }
 
-    const reason = route.bgp.large_communities.filter(elem =>
-      elem[0] == this.props.asn && elem[1] == this.props.rejectId
+    const reasons = resolveCommunities(
+      this.props.rejectReasons, route.bgp.large_communities,
     );
-    if (!reason.length) {
-      return null;
-    }
-    const filterReason = this.props.rejectReasons[reason[0][2]];
-    const cls = `reject-reason reject-reason-${reason[0][2]}`;
-    return (
-      <p className={cls}>
-        <a href={`http://irrexplorer.nlnog.net/search/${route.network}`}
-           target="_blank" >{filterReason}</a>
-      </p>
-    );
+
+    const reasonsView = reasons.map(([community, reason], key) => {
+      const cls = `reject-reason reject-reason-${community[2]}`;
+      return (
+        <p key={key} className={cls}>
+          <a href={`http://irrexplorer.nlnog.net/search/${route.network}`}
+             target="_blank" >{reason}</a>
+        </p>
+      );
+    });
+
+    return (<div className="reject-reasons">{reasonsView}</div>);
   }
 }
 
@@ -33,8 +35,6 @@ export default connect(
   state => {
     return {
       rejectReasons: state.routeservers.rejectReasons,
-      asn:           state.routeservers.rejectAsn,
-      rejectId:      state.routeservers.rejectId,
     }
   }
 )(FilterReason);

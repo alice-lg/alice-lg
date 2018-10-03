@@ -2,7 +2,7 @@
 import React from 'react'
 import {connect} from 'react-redux'
 
-import {lookupCommunity} from './utils'
+import {resolveCommunity} from './utils'
 
 
 
@@ -40,7 +40,7 @@ class Label extends React.Component {
   render() {
 
     // Lookup communities
-    const readableCommunityLabel = lookupCommunity(this.props.communities, this.props.community);
+    const readableCommunityLabel = resolveCommunity(this.props.communities, this.props.community);
     const readableCommunity = _expandVars(readableCommunityLabel, this.props.community);
     const key = this.props.community.join(":");
 

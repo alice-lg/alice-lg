@@ -15,13 +15,13 @@
  *     }
  */
 
-export function lookupCommunity(communities, community) {
-  let lookup = communities;
-  for (let c of community) {
+export function resolveCommunity(base, community) {
+  let lookup = base;
+  for (const part of community) {
     if (typeof(lookup) !== "object") {
       return null;
     }
-    let res = lookup[c];
+    let res = lookup[part];
     if (!res) {
       // Try the wildcard
       if (lookup["*"]) {
@@ -33,6 +33,20 @@ export function lookupCommunity(communities, community) {
     lookup = res;
   }
   return lookup;
+}
+
+/*
+ * Resolve all communities
+ */
+export function resolveCommunities(base, communities) {
+  let results = [];
+  for (const c of communities) {
+    const description = resolveCommunity(base, c);
+    if (description != null) {
+      results.push([c, description]);
+    }
+  }
+  return results;
 }
 
 
