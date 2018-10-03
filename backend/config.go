@@ -21,6 +21,7 @@ type ServerConfig struct {
 	EnablePrefixLookup             bool   `ini:"enable_prefix_lookup"`
 	NeighboursStoreRefreshInterval int    `ini:"neighbours_store_refresh_interval"`
 	RoutesStoreRefreshInterval     int    `ini:"routes_store_refresh_interval"`
+	Asn                            int    `ini:"asn"`
 }
 
 type RejectionsConfig struct {
@@ -88,7 +89,6 @@ type PaginationConfig struct {
 type SourceConfig struct {
 	Id   int
 	Name string
-	Asn  int
 
 	// Blackhole IPs
 	Blackholes []string
@@ -350,7 +350,7 @@ func getRpkiConfig(config *ini.File) (RpkiConfig, error) {
 	fallbackAsn, err := getOwnASN(config)
 	if err != nil {
 		log.Println(
-			"Could not derive own ASN.",
+			"Own ASN is not configured.",
 			"This might lead to unexpected behaviour with BGP large communities",
 		)
 	}
@@ -395,21 +395,15 @@ func getRpkiConfig(config *ini.File) (RpkiConfig, error) {
 	return rpki, nil
 }
 
-// Helper: Get own ASN
-//  - Try to determine own ASN, for now it is most
-//    likely configured in the rejection or noexport section
-//
+// Helper: Get own ASN from ini
+// This is now easy, since we enforce an ASN in
+// the [server] section.
 func getOwnASN(config *ini.File) (int, error) {
-	noexport := config.Section("noexport")
-	rejection := config.Section("rejection")
-
-	asn := rejection.Key("asn").MustInt(-1)
-	if asn == -1 {
-		asn = noexport.Key("asn").MustInt(-1)
-	}
+	server := config.Section("server")
+	asn := server.Key("asn").MustInt(-1)
 
 	if asn == -1 {
-		return 0, fmt.Errorf("Could not derive own ASN from config")
+		return 0, fmt.Errorf("Could not get own ASN from config")
 	}
 
 	return asn, nil
@@ -573,25 +567,14 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 			return sources, fmt.Errorf("%s has an unsupported backend", section.Name())
 		}
 
-		// Get fallback ASN
-		fallbackAsn, err := getOwnASN(config)
-		if err != nil {
-			log.Println(
-				"Could not derive own ASN.",
-				"This might lead to unexpected behaviour with BGP large communities",
-			)
-		}
-
 		// Make config
 		sourceName := section.Key("name").MustString("Unknown Source")
 		sourceBlackholes := TrimmedStringList(
 			section.Key("blackholes").MustString(""))
-		sourceAsn := section.Key("asn").MustInt(fallbackAsn)
 
 		config := &SourceConfig{
 			Id:         sourceId,
 			Name:       sourceName,
-			Asn:        sourceAsn,
 			Blackholes: sourceBlackholes,
 			Type:       backendType,
 		}
