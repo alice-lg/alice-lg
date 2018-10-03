@@ -21,16 +21,16 @@ import (
 // Endpoints:
 //
 //   Config
-//     Show         /api/config
+//     Show         /api/v1/config
 //
 //   Routeservers
-//     List         /api/routeservers
-//     Status       /api/routeservers/:id/status
-//     Neighbors    /api/routeservers/:id/neighbours
-//     Routes       /api/routeservers/:id/neighbours/:neighbourId/routes
+//     List         /api/v1/routeservers
+//     Status       /api/v1/routeservers/:id/status
+//     Neighbors    /api/v1/routeservers/:id/neighbors
+//     Routes       /api/v1/routeservers/:id/neighbors/:neighborId/routes
 //
 //   Querying
-//     LookupPrefix /api/routeservers/:id/lookup/prefix?q=<prefix>
+//     LookupPrefix /api/v1/routeservers/:id/lookup/prefix?q=<prefix>
 //
 
 type apiEndpoint func(*http.Request, httprouter.Params) (api.Response, error)
@@ -88,28 +88,28 @@ func endpoint(wrapped apiEndpoint) httprouter.Handle {
 func apiRegisterEndpoints(router *httprouter.Router) error {
 
 	// Meta
-	router.GET("/api/status", endpoint(apiStatusShow))
-	router.GET("/api/config", endpoint(apiConfigShow))
+	router.GET("/api/v1/status", endpoint(apiStatusShow))
+	router.GET("/api/v1/config", endpoint(apiConfigShow))
 
 	// Routeservers
-	router.GET("/api/routeservers",
+	router.GET("/api/v1/routeservers",
 		endpoint(apiRouteserversList))
-	router.GET("/api/routeservers/:id/status",
+	router.GET("/api/v1/routeservers/:id/status",
 		endpoint(apiStatus))
-	router.GET("/api/routeservers/:id/neighbours",
+	router.GET("/api/v1/routeservers/:id/neighbors",
 		endpoint(apiNeighborsList))
-	router.GET("/api/routeservers/:id/neighbours/:neighbourId/routes",
+	router.GET("/api/v1/routeservers/:id/neighbors/:neighborId/routes",
 		endpoint(apiRoutesList))
-	router.GET("/api/routeservers/:id/neighbours/:neighbourId/routes/received",
+	router.GET("/api/v1/routeservers/:id/neighbors/:neighborId/routes/received",
 		endpoint(apiRoutesListReceived))
-	router.GET("/api/routeservers/:id/neighbours/:neighbourId/routes/filtered",
+	router.GET("/api/v1/routeservers/:id/neighbors/:neighborId/routes/filtered",
 		endpoint(apiRoutesListFiltered))
-	router.GET("/api/routeservers/:id/neighbours/:neighbourId/routes/not-exported",
+	router.GET("/api/v1/routeservers/:id/neighbors/:neighborId/routes/not-exported",
 		endpoint(apiRoutesListNotExported))
 
 	// Querying
 	if AliceConfig.Server.EnablePrefixLookup == true {
-		router.GET("/api/lookup/prefix",
+		router.GET("/api/v1/lookup/prefix",
 			endpoint(apiLookupPrefixGlobal))
 	}
 

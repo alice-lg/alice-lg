@@ -13,11 +13,11 @@ func apiRoutesList(_req *http.Request, params httprouter.Params) (api.Response, 
 	if err != nil {
 		return nil, err
 	}
-	neighbourId := params.ByName("neighbourId")
+	neighborId := params.ByName("neighborId")
 	source := AliceConfig.Sources[rsId].getInstance()
-	result, err := source.Routes(neighbourId)
+	result, err := source.Routes(neighborId)
 	if err != nil {
-		apiLogSourceError("routes", rsId, neighbourId, err)
+		apiLogSourceError("routes", rsId, neighborId, err)
 	}
 
 	return result, err
@@ -33,11 +33,11 @@ func apiRoutesListReceived(
 		return nil, err
 	}
 
-	neighbourId := params.ByName("neighbourId")
+	neighborId := params.ByName("neighborId")
 	source := AliceConfig.Sources[rsId].getInstance()
-	result, err := source.RoutesReceived(neighbourId)
+	result, err := source.RoutesReceived(neighborId)
 	if err != nil {
-		apiLogSourceError("routes_received", rsId, neighbourId, err)
+		apiLogSourceError("routes_received", rsId, neighborId, err)
 		return nil, err
 	}
 
@@ -70,11 +70,11 @@ func apiRoutesListFiltered(
 		return nil, err
 	}
 
-	neighbourId := params.ByName("neighbourId")
+	neighborId := params.ByName("neighborId")
 	source := AliceConfig.Sources[rsId].getInstance()
-	result, err := source.RoutesFiltered(neighbourId)
+	result, err := source.RoutesFiltered(neighborId)
 	if err != nil {
-		apiLogSourceError("routes_filtered", rsId, neighbourId, err)
+		apiLogSourceError("routes_filtered", rsId, neighborId, err)
 		return nil, err
 	}
 
@@ -107,11 +107,11 @@ func apiRoutesListNotExported(
 		return nil, err
 	}
 
-	neighbourId := params.ByName("neighbourId")
+	neighborId := params.ByName("neighborId")
 	source := AliceConfig.Sources[rsId].getInstance()
-	result, err := source.RoutesNotExported(neighbourId)
+	result, err := source.RoutesNotExported(neighborId)
 	if err != nil {
-		apiLogSourceError("routes_not_exported", rsId, neighbourId, err)
+		apiLogSourceError("routes_not_exported", rsId, neighborId, err)
 		return nil, err
 	}
 
