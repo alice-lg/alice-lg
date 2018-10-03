@@ -8,6 +8,8 @@
 * The API endpoints is now include the API version,
   e.g. /api/v1/status, /api/v1/routeservers, ...
 
+* The API is now consistently using 'neighbors' instead of 'neighbours'
+
 * Reject reasons are now configured in BGP community
   notataion: 1234:65666:1 = My filter reason
 
