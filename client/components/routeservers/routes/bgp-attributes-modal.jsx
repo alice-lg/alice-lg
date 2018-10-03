@@ -10,7 +10,7 @@ import {connect} from 'react-redux'
 import Modal, {Header, Body, Footer} from 'components/modals/modal'
 
 import BgpCommunitiyLabel 
-  from 'components/routeservers/bgp-communities/label'
+  from 'components/routeservers/communities/label'
 
 import {hideBgpAttributesModal}
   from './bgp-attributes-modal-actions'

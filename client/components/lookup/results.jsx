@@ -7,10 +7,10 @@ import {Link} from 'react-router'
 import {replace} from 'react-router-redux'
 
 import FilterReason
-  from 'components/routeservers/large-communities/filter-reason'
+  from 'components/routeservers/communities/filter-reason'
 
 import NoexportReason
-  from 'components/routeservers/large-communities/noexport-reason'
+  from 'components/routeservers/communities/noexport-reason'
 
 import BgpAttributesModal
   from 'components/routeservers/routes/bgp-attributes-modal'

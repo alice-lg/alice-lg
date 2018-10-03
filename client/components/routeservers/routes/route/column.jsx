@@ -8,10 +8,10 @@ import React from 'react'
 import {connect} from 'react-redux'
 
 import FilterReason
-  from 'components/routeservers/large-communities/filter-reason'
+  from 'components/routeservers/communities/filter-reason'
 
 import NoexportReason
-  from 'components/routeservers/large-communities/noexport-reason'
+  from 'components/routeservers/communities/noexport-reason'
 
 import {ROUTES_RECEIVED,
         ROUTES_FILTERED,
