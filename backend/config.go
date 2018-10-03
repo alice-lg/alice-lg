@@ -321,7 +321,7 @@ func getRoutesNoexports(config *ini.File) (NoexportsConfig, error) {
 // Get UI config: Reject candidates
 func getRejectCandidatesConfig(config *ini.File) (RejectCandidatesConfig, error) {
 	candidateCommunities := config.Section(
-		"reject_candidates").Key("communities").String()
+		"rejection_candidates").Key("communities").String()
 
 	if candidateCommunities == "" {
 		return RejectCandidatesConfig{}, nil
