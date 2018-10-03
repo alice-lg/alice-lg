@@ -1,6 +1,17 @@
 
 # Changelog
 
+## 3.0.0 (2018-10-03)
+
+## Breaking changes:
+
+* The API endpoints is now include the API version,
+  e.g. /api/v1/status, /api/v1/routeservers, ...
+
+* Reject reasons are now configured in BGP community
+  notataion: 1234:65666:1 = My filter reason
+
+
 ## 2.3.0 (2018-09-10)
 
 ### New Features:
