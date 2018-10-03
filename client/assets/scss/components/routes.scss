@@ -277,4 +277,24 @@ $labelOffsetEnd:   -30px;
     }
 }
 
+.routes-view {
+    &.routes-filtered {
+        .route-prefix-flag {
+            &.reject-candidate-route {
+                display: none;
+            }
+        }
+    }
+
+    &.routes-received {
+        .table-routes {
+            .reject-reason {
+                a {
+                    color: #555;
+                }
+            }
+        }
+    }
+}
+
 
