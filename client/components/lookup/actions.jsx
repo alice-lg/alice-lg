@@ -59,7 +59,7 @@ export function loadResults(query, pageImported=0, pageFiltered=0) {
 
     // Build querystring
     let q = `q=${query}&page_filtered=${pageFiltered}&page_imported=${pageImported}`;
-    axios.get(`/api/lookup/prefix?${q}`)
+    axios.get(`/api/v1/lookup/prefix?${q}`)
       .then((res) => {
         dispatch(loadResultsSuccess(query, res.data));
       })

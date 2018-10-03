@@ -15,7 +15,7 @@ function loadConfigSuccess(config) {
 
 export function loadConfig() {
   return (dispatch) => {
-    axios.get(`/api/config`)
+    axios.get(`/api/v1/config`)
       .then(({data}) => {
         dispatch(
           loadRejectReasonsSuccess(data.rejection.asn,
