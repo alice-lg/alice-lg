@@ -39,6 +39,7 @@ class Details extends React.Component {
                                         fuzzyNow={5}
                                         pastEvent={true} /></b>.<br />
              Next refresh <b><RelativeTime futureEvent={true}
+                                           fuzzyNow={5}
                                            value={cs.ttl} /></b>.
            </td>
          </tr>,
