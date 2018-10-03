@@ -85,11 +85,15 @@ $labelOffsetEnd:   -30px;
     }
     
     .rpki-invalid {
-       color: #990000;
+       color: #d80000;
     }
 
     .rpki-unknown {
        color: #2e6da4;
+    }
+
+    .reject-candidate-route {
+       color: #d80000;
     }
   }
 
