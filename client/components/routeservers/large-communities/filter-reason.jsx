@@ -7,23 +7,23 @@ class FilterReason extends React.Component {
   render() {
     const route = this.props.route;
 
-    if (!this.props.reject_reasons || !route || !route.bgp ||
+    if (!this.props.rejectReasons || !route || !route.bgp ||
         !route.bgp.large_communities) {
         return null;
     }
 
     const reason = route.bgp.large_communities.filter(elem =>
-      elem[0] == this.props.asn && elem[1] == this.props.reject_id
+      elem[0] == this.props.asn && elem[1] == this.props.rejectId
     );
     if (!reason.length) {
       return null;
     }
-    const filter_reason = this.props.reject_reasons[reason[0][2]];
+    const filterReason = this.props.rejectReasons[reason[0][2]];
     const cls = `reject-reason reject-reason-${reason[0][2]}`;
     return (
       <p className={cls}>
         <a href={`http://irrexplorer.nlnog.net/search/${route.network}`}
-           target="_blank" >{filter_reason}</a>
+           target="_blank" >{filterReason}</a>
       </p>
     );
   }
@@ -32,9 +32,10 @@ class FilterReason extends React.Component {
 export default connect(
   state => {
     return {
-      reject_reasons: state.routeservers.reject_reasons,
-      asn:            state.routeservers.reject_asn,
-      reject_id:      state.routeservers.reject_id,
+      rejectReasons: state.routeservers.rejectReasons,
+      asn:           state.routeservers.rejectAsn,
+      rejectId:      state.routeservers.rejectId,
     }
   }
 )(FilterReason);
+

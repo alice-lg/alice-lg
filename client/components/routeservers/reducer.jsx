@@ -11,10 +11,7 @@ import {LOAD_ROUTESERVERS_REQUEST,
         LOAD_ROUTESERVER_PROTOCOL_SUCCESS}
   from './actions'
 
-import {LOAD_REJECT_REASONS_SUCCESS,
-        LOAD_NOEXPORT_REASONS_SUCCESS}
-  from './large-communities/actions'
-
+import {LOAD_CONFIG_SUCCESS} from 'components/config/actions'
 
 const initialState = {
 
@@ -24,18 +21,101 @@ const initialState = {
   protocols: {},
   statusErrors: {},
 
-  reject_reasons: {},
-  reject_id: 0,
-  reject_asn: 0,
+  rejectReasons: {},
+  rejectId: 0,
+  rejectAsn: 0,
 
-  noexport_reasons: {},
-  noexport_id: 0,
-  noexport_asn: 0,
+  noexportReasons: {},
+  noexportId: 0,
+  noexportAsn: 0,
+
+  rejectCandidates: {
+    communities: {}
+  },
 
   isLoading: false,
 
   protocolsAreLoading: false
 };
+
+
+// == Handlers ==
+const _importConfig = function(state, payload) {
+  // Get reject and filter reasons from config
+  const rejectReasons = payload.reject_reasons;
+  const rejectId      = payload.rejection.reject_id;
+  const rejectAsn     = payload.rejection.asn;
+
+  const noexportReasons = payload.noexport_reasons;
+  const noexportId      = payload.noexport.noexport_id;
+  const noexportAsn     = payload.noexport.asn;
+
+  // Get reject candidates from config
+  const rejectCandidates = payload.reject_candidates;
+
+  return Object.assign({}, state, {
+    rejectReasons: rejectReasons,
+    rejectAsn:     rejectAsn,
+    rejectId:      rejectId,
+
+    rejectCandidates: rejectCandidates, 
+
+    noexportReasons: noexportReasons,
+    noexportAsn:     noexportAsn,
+    noexportId:      noexportId,
+  });
+};
+
+
+const _updateStatus = function(state, payload) {
+  const details = Object.assign({}, state.details, {
+    [payload.routeserverId]: payload.status
+  });
+  const errors = Object.assign({}, state.statusErrors, {
+    [payload.routeserverId]: null,
+  });
+
+  return Object.assign({}, state, {
+    details: details,
+    statusErrors: errors 
+  });
+}
+
+
+const _updateStatusError = function(state, payload) {
+  var info = {
+    code: 42,
+    tag: "UNKNOWN_ERROR",
+    message: "Unknown error"
+  };
+
+  if (payload.error &&
+      payload.error.response && 
+      payload.error.response.data &&
+      payload.error.response.data.code) {
+        info = payload.error.response.data;
+  }
+  
+  var errors = Object.assign({}, state.statusErrors, {
+    [payload.routeserverId]: info
+  });
+
+  return Object.assign({}, state, {
+    statusErrors: errors 
+  });
+}
+
+
+const _updateProtocol = function(state, payload) {
+  var protocols = Object.assign({}, state.protocols, {
+    [payload.routeserverId]: payload.protocol
+  });
+
+  return Object.assign({}, state, {
+    protocols: protocols,
+    protocolsAreLoading: false
+  });
+}
 
 
 export default function reducer(state = initialState, action) {
@@ -57,52 +137,16 @@ export default function reducer(state = initialState, action) {
       })
 
     case LOAD_ROUTESERVER_PROTOCOL_SUCCESS:
-      var protocols = Object.assign({}, state.protocols, {
-        [action.payload.routeserverId]: action.payload.protocol
-      });
-      return Object.assign({}, state, {
-        protocols: protocols,
-        protocolsAreLoading: false
-      });
+      return _updateProtocol(state, action.payload);
 
-    case LOAD_NOEXPORT_REASONS_SUCCESS:
-    case LOAD_REJECT_REASONS_SUCCESS:
-      return Object.assign({}, state, action.payload);
-
+    case LOAD_CONFIG_SUCCESS:
+      return _importConfig(state, action.payload);
 
     case LOAD_ROUTESERVER_STATUS_SUCCESS:
-      var details = Object.assign({}, state.details, {
-        [action.payload.routeserverId]: action.payload.status
-      });
-      var errors = Object.assign({}, state.statusErrors, {
-        [action.payload.routeserverId]: null,
-      });
-      return Object.assign({}, state, {
-        details: details,
-        statusErrors: errors 
-      });
+      return _updateStatus(state, action.payload);
 
     case LOAD_ROUTESERVER_STATUS_ERROR:
-      var info = {
-        code: 42,
-        tag: "UNKNOWN_ERROR",
-        message: "Unknown error"
-      };
-
-      if (action.payload.error &&
-          action.payload.error.response && 
-          action.payload.error.response.data &&
-          action.payload.error.response.data.code) {
-            info = action.payload.error.response.data;
-      }
-      
-      var errors = Object.assign({}, state.statusErrors, {
-        [action.payload.routeserverId]: info
-      });
-      return Object.assign({}, state, {
-        statusErrors: errors 
-      });
-      return state;
+      return _updateStatusError(state, action.payload);
   }
   return state;
 }
