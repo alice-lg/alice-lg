@@ -4,7 +4,6 @@
  */
 
 /* 
- * Check if a community exists in a given set of communities.
  * Communities are represented as a nested object:
  *     {
  *         1234: {
@@ -15,6 +14,10 @@
  *     }
  */
 
+/*
+ * Resolve a community description from the above described
+ * tree structure.
+ */
 export function resolveCommunity(base, community) {
   let lookup = base;
   for (const part of community) {
@@ -57,11 +60,16 @@ export function resolveCommunities(base, communities) {
  *  - make css classes
  */
 
-export function isRejectCandidate(route, rejectCommunities) {
+export function isRejectCandidate(rejectCommunities, route) {
   // Check if any reject candidate community is set
-  const communities = props.route.bgp.communities;
-  const largeCommunities = props.route.bgp.large_communities;
+  const communities = route.bgp.communities;
+  const largeCommunities = route.bgp.large_communities;
 
+  const resolved = resolveCommunities(
+    rejectCommunities, largeCommunities
+  );
+
+  return (resolved.length > 0);
 }
 
 

@@ -8,8 +8,6 @@ class NoExportReason extends React.Component {
   render() {
     const route = this.props.route;
   
-    console.log(this.props.noexportReasons);
-
     if (!this.props.noexportReasons || !route || !route.bgp ||
         !route.bgp.large_communities) {
         return null;

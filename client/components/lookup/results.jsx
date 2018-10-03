@@ -38,7 +38,7 @@ const ResultsView = function(props) {
   const type = props.type;
 
   return (
-    <div className="card">
+    <div className={`card routes-view routes-${type}`}>
       <div className="row">
         <div className="col-md-6 routes-header-container">
           <RoutesHeader type={type} />

@@ -20,7 +20,8 @@ import {ROUTES_RECEIVED,
 
 import {PrimaryIndicator,
         BlackholeIndicator,
-        RpkiIndicator} from './flags'
+        RpkiIndicator,
+        RejectCandidateIndicator} from './flags'
 
 
 // Helper: Lookup value in route path
@@ -75,6 +76,7 @@ export const ColFlags = function(props) {
         <PrimaryIndicator route={props.route} />
         <BlackholeIndicator route={props.route}
                             blackholes={props.blackholes} />
+        <RejectCandidateIndicator route={props.route} />
       </span>
     </td>
   );

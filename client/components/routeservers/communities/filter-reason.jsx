@@ -18,7 +18,7 @@ class FilterReason extends React.Component {
     );
 
     const reasonsView = reasons.map(([community, reason], key) => {
-      const cls = `reject-reason reject-reason-${community[2]}`;
+      const cls = `reject-reason reject-reason-${community[1]}-${community[2]}`;
       return (
         <p key={key} className={cls}>
           <a href={`http://irrexplorer.nlnog.net/search/${route.network}`}
