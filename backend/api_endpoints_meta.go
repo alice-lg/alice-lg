@@ -32,6 +32,7 @@ func apiStatus(_req *http.Request, params httprouter.Params) (api.Response, erro
 // Handle Config Endpoint
 func apiConfigShow(_req *http.Request, _params httprouter.Params) (api.Response, error) {
 	result := api.ConfigResponse{
+		Asn: AliceConfig.Server.Asn,
 		Rejection: api.Rejection{
 			Asn:      AliceConfig.Ui.RoutesRejections.Asn,
 			RejectId: AliceConfig.Ui.RoutesRejections.RejectId,
