@@ -5,9 +5,25 @@ import React from 'react'
 
 export default class RelativeTime extends React.Component {
 
-  render() {
+  // Local state updates, to trigger a rerender
+  // every second for time updates.
+  componentDidMount() {
+    this.timer = setInterval(() => {
+      this.setState({
+        now: Date.now()
+      })
+    }, 1000);
+  }
+
+  // Stop timer
+  componentWillUnmount() {
+    clearInterval(this.timer);
+  }
+
+  // Helper: Assert time is an instance of moment
+  getTime() {
     if (!this.props.value) {
-      return null;
+      return false;
     }
 
     let time = false;
@@ -16,6 +32,33 @@ export default class RelativeTime extends React.Component {
     } else {
       time = moment.utc(this.props.value);
     }
+    return time 
+  }
+
+
+  // Time can be capped, if we are handling a past
+  // or future event:
+  capTime(time) {
+    const now = moment.utc();
+    if (this.props.pastEvent && time.isAfter(now)) {
+      return now;
+    }
+
+    if (this.props.futureEvent && time.isBefore(now)) {
+      return now;
+    }
+
+    return time;
+  }
+  
+
+  render() {
+    let time = this.getTime();
+    if (!time) {
+      return null; // Well, nothing to do here
+    }
+
+    time = this.capTime(time);
 
     // A few seconds ago / in a few seconds can be replaced 
     // with 'just now'.

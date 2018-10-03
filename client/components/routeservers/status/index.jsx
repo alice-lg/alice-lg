@@ -36,8 +36,10 @@ class Details extends React.Component {
            <td><i className="fa fa-refresh"></i></td>
            <td>
              Generated <b><RelativeTime value={cs.generatedAt}
-                                        fuzzyNow={5} /></b>.<br />
-             Next refresh <b><RelativeTime value={cs.ttl} /></b>.
+                                        fuzzyNow={5}
+                                        pastEvent={true} /></b>.<br />
+             Next refresh <b><RelativeTime futureEvent={true}
+                                           value={cs.ttl} /></b>.
            </td>
          </tr>,
       ];
