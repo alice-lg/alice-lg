@@ -22,12 +22,7 @@ const initialState = {
   statusErrors: {},
 
   rejectReasons: {},
-  rejectId: 0,
-  rejectAsn: 0,
-
   noexportReasons: {},
-  noexportId: 0,
-  noexportAsn: 0,
 
   rejectCandidates: {
     communities: {}
@@ -42,27 +37,17 @@ const initialState = {
 // == Handlers ==
 const _importConfig = function(state, payload) {
   // Get reject and filter reasons from config
-  const rejectReasons = payload.reject_reasons;
-  const rejectId      = payload.rejection.reject_id;
-  const rejectAsn     = payload.rejection.asn;
-
+  const rejectReasons   = payload.reject_reasons;
   const noexportReasons = payload.noexport_reasons;
-  const noexportId      = payload.noexport.noexport_id;
-  const noexportAsn     = payload.noexport.asn;
 
   // Get reject candidates from config
   const rejectCandidates = payload.reject_candidates;
 
   return Object.assign({}, state, {
-    rejectReasons: rejectReasons,
-    rejectAsn:     rejectAsn,
-    rejectId:      rejectId,
+    rejectReasons:    rejectReasons,
+    rejectCandidates: rejectCandidates,
 
-    rejectCandidates: rejectCandidates, 
-
-    noexportReasons: noexportReasons,
-    noexportAsn:     noexportAsn,
-    noexportId:      noexportId,
+    noexportReasons: noexportReasons
   });
 };
 
@@ -77,7 +62,7 @@ const _updateStatus = function(state, payload) {
 
   return Object.assign({}, state, {
     details: details,
-    statusErrors: errors 
+    statusErrors: errors
   });
 }
 
@@ -90,18 +75,18 @@ const _updateStatusError = function(state, payload) {
   };
 
   if (payload.error &&
-      payload.error.response && 
+      payload.error.response &&
       payload.error.response.data &&
       payload.error.response.data.code) {
         info = payload.error.response.data;
   }
-  
+
   var errors = Object.assign({}, state.statusErrors, {
     [payload.routeserverId]: info
   });
 
   return Object.assign({}, state, {
-    statusErrors: errors 
+    statusErrors: errors
   });
 }
 

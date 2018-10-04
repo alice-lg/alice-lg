@@ -45,6 +45,9 @@ $(DIST_BUILD): deps client_prod
 	@echo "Done. Don't forget to push the dist to github"
 
 
+clean:
+	rm -rf build/
+
 
 dist: $(DIST_BUILD)
 	echo $(DIST_BUILD)
