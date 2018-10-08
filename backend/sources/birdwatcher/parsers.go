@@ -232,6 +232,7 @@ func parseRouteBgpInfo(data interface{}) api.BgpInfo {
 	asPath := mustIntList(bgpData["as_path"])
 	communities := parseBgpCommunities(bgpData["communities"])
 	largeCommunities := parseBgpCommunities(bgpData["large_communities"])
+	extCommunities := parseExtBgpCommunities(bgpData["ext_communities"])
 
 	localPref, _ := strconv.Atoi(mustString(bgpData["local_pref"], "0"))
 	med, _ := strconv.Atoi(mustString(bgpData["med"], "0"))
@@ -243,6 +244,7 @@ func parseRouteBgpInfo(data interface{}) api.BgpInfo {
 		LocalPref:        localPref,
 		Med:              med,
 		Communities:      communities,
+		ExtCommunities:   extCommunities,
 		LargeCommunities: largeCommunities,
 	}
 	return bgp
@@ -264,6 +266,22 @@ func parseBgpCommunities(data interface{}) []api.Community {
 			community = append(community, int(cinfo.(float64)))
 		}
 		communities = append(communities, community)
+	}
+
+	return communities
+}
+
+// Extract extended communtieis
+func parseExtBgpCommunities(data interface{}) []api.ExtCommunity {
+	communities := []api.ExtCommunity{}
+	ldata, ok := data.([]interface{})
+	if !ok { // We don't have any
+		return communities
+	}
+
+	for _, c := range ldata {
+		cdata := c.([]interface{})
+		communities = append(communities, api.ExtCommunity(cdata))
 	}
 
 	return communities

@@ -157,15 +157,17 @@ type NeighboursLookupResults map[int]Neighbours
 
 // BGP
 type Community []int
+type ExtCommunity []interface{}
 
 type BgpInfo struct {
-	Origin           string      `json:"origin"`
-	AsPath           []int       `json:"as_path"`
-	NextHop          string      `json:"next_hop"`
-	Communities      []Community `json:"communities"`
-	LargeCommunities []Community `json:"large_communities"`
-	LocalPref        int         `json:"local_pref"`
-	Med              int         `json:"med"`
+	Origin           string         `json:"origin"`
+	AsPath           []int          `json:"as_path"`
+	NextHop          string         `json:"next_hop"`
+	Communities      []Community    `json:"communities"`
+	LargeCommunities []Community    `json:"large_communities"`
+	ExtCommunities   []ExtCommunity `json:"ext_communities"`
+	LocalPref        int            `json:"local_pref"`
+	Med              int            `json:"med"`
 }
 
 // Prefixes
