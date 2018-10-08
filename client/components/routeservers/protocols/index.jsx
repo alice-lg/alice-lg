@@ -189,7 +189,8 @@ const ColDescription = function(props) {
                   protocol={neighbour.id}
                   state={neighbour.state}>
         {neighbour.description}
-        {neighbour.state != "up" && neighbour.last_error &&
+        {neighbour.state.toLowerCase() != "up" && 
+         neighbour.last_error &&
           <span className="protocol-state-error">
               {neighbour.last_error}
           </span>}
