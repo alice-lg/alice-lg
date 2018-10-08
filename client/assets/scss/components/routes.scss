@@ -92,6 +92,10 @@ $labelOffsetEnd:   -30px;
        color: #2e6da4;
     }
 
+    .rpki-not-checked {
+       color: #2e6da4;
+    }
+
     .reject-candidate-route {
        color: #d80000;
     }
@@ -289,9 +293,6 @@ $labelOffsetEnd:   -30px;
     &.routes-received {
         .table-routes {
             .reject-reason {
-                a {
-                    color: #555;
-                }
             }
         }
     }

@@ -100,7 +100,10 @@ const _RpkiIndicator = function(props) {
         com[1].toFixed() === rpkiNotChecked[1] &&
         com[2].toFixed() === rpkiNotChecked[2]) {
       return (
-        <span className="route-prefix-flag rpki-route rpki-not-checked"></span>
+        <span className="route-prefix-flag rpki-route rpki-not-checked">
+          <i className="fa fa-circle-o" />
+          <div>RPKI not checked</div>
+        </span>
       );
     }
 
