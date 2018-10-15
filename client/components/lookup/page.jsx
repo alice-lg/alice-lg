@@ -16,11 +16,11 @@ class _LookupView extends React.Component {
     }
 
     return (
-      <div className="lookup-container">
-       <div className="col-md-8">
+      <div className="lookup-container details-main">
+       <div className="col-main col-lg-9 col-md-12">
          <Lookup />
        </div>
-       <div className="col-md-4">
+       <div className="col-aside-details col-lg-3 col-md-12">
          <LookupSummary />
        </div>
       </div>

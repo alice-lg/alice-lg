@@ -145,7 +145,7 @@ class RoutesPage extends React.Component {
         <BgpAttributesModal />
 
         <div className="row details-main">
-          <div className="col-md-8">
+          <div className="col-main col-lg-9 col-md-12">
 
             <div className="card">
               <RelatedPeers peers={this.props.relatedPeers}
@@ -180,7 +180,7 @@ class RoutesPage extends React.Component {
             <RoutesLoadingIndicator />
 
           </div>
-          <div className="col-md-4">
+          <div className="col-lg-3 col-md-12 col-aside-details">
             <div className="card">
               <Status routeserverId={this.props.params.routeserverId}
                       cacheStatus={cacheStatus} />

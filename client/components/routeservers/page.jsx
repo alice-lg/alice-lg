@@ -47,7 +47,7 @@ class RouteserversPage extends React.Component {
         </PageHeader>
 
         <div className="row details-main">
-          <div className="col-lg-9 col-xs-12 col-md-8">
+          <div className="col-main col-lg-9 col-md-12">
             <div className="card">
               <SearchInput
                 value={this.props.filterValue}
@@ -59,7 +59,7 @@ class RouteserversPage extends React.Component {
 
             <Protocols protocol="bgp" routeserverId={this.props.params.routeserverId} />
           </div>
-          <div className="col-lg-3 col-md-4 col-xs-12">
+          <div className="col-lg-3 col-md-12 col-aside-details">
             <div className="card">
               <Status routeserverId={this.props.params.routeserverId}
                       cacheStatus={this.props.cacheStatus} />
