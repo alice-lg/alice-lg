@@ -75,12 +75,17 @@ func (self *NeighboursStore) init() {
 	}
 }
 
-// Get state by source Id
-func (self *NeighboursStore) SourceState(sourceId int) int {
+func (self *NeighboursStore) SourceStatus(sourceId int) StoreStatus {
 	self.RLock()
 	status := self.statusMap[sourceId]
 	self.RUnlock()
 
+	return status
+}
+
+// Get state by source Id
+func (self *NeighboursStore) SourceState(sourceId int) int {
+	status := self.SourceStatus(sourceId)
 	return status.State
 }
 

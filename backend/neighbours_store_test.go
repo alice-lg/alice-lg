@@ -104,6 +104,11 @@ func TestGetNeighbors(t *testing.T) {
 			neighbors[0])
 	}
 
+	neighbors = store.GetNeighborsAt(3)
+	if len(neighbors) != 0 {
+		t.Error("Unknown source should have yielded zero results")
+	}
+
 }
 
 func TestNeighbourLookupAt(t *testing.T) {
