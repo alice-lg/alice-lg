@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/alice-lg/alice-lg/backend/api"
 
+	"sort"
 	"testing"
 )
 
@@ -54,9 +55,29 @@ func makeTestNeighboursStore() *NeighboursStore {
 			1: rs1,
 			2: rs2,
 		},
+		statusMap: map[int]StoreStatus{
+			1: StoreStatus{
+				State: STATE_READY,
+			},
+			2: StoreStatus{
+				State: STATE_INIT,
+			},
+		},
 	}
 
 	return store
+}
+
+func TestGetSourceState(t *testing.T) {
+	store := makeTestNeighboursStore()
+
+	if store.SourceState(1) != STATE_READY {
+		t.Error("Expected Source(1) to be STATE_READY")
+	}
+
+	if store.SourceState(2) == STATE_READY {
+		t.Error("Expected Source(2) to be NOT STATE_READY")
+	}
 }
 
 func TestGetNeighbourAt(t *testing.T) {
@@ -65,6 +86,22 @@ func TestGetNeighbourAt(t *testing.T) {
 	neighbour := store.GetNeighbourAt(1, "ID2233_AS2343")
 	if neighbour.Id != "ID2233_AS2343" {
 		t.Error("Expected another peer in GetNeighbourAt")
+	}
+}
+
+func TestGetNeighbors(t *testing.T) {
+	store := makeTestNeighboursStore()
+	neighbors := store.GetNeighborsAt(2)
+
+	if len(neighbors) != 2 {
+		t.Error("Expected 2 neighbors, got:", len(neighbors))
+	}
+
+	sort.Sort(&neighbors)
+
+	if neighbors[0].Id != "ID2233_AS2342" {
+		t.Error("Expected neighbor: ID2233_AS2342, got:",
+			neighbors[0])
 	}
 
 }
