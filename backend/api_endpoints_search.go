@@ -35,6 +35,8 @@ func apiLookupPrefixGlobal(
 	// Measure response time
 	t0 := time.Now()
 
+	// Get additional filter criteria
+
 	// Perform query
 	var routes api.LookupRoutes
 	if lookupPrefix {
