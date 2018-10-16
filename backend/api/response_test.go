@@ -65,3 +65,15 @@ func TestNeighbourSerialization(t *testing.T) {
 
 	_ = result
 }
+
+func TestCommunityStringify(t *testing.T) {
+	com := Community{23, 42}
+	if com.String() != "23:42" {
+		t.Error("Expected 23:42, got:", com.String())
+	}
+
+	extCom := ExtCommunity{"ro", 42, 123}
+	if extCom.String() != "ro:42:123" {
+		t.Error("Expected ro:42:123, but got:", extCom.String())
+	}
+}

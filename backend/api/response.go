@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -157,7 +158,24 @@ type NeighboursLookupResults map[int]Neighbours
 
 // BGP
 type Community []int
+
+func (com Community) String() string {
+	res := ""
+	for _, v := range com {
+		res += fmt.Sprintf(":%d", v)
+	}
+	return res[1:]
+}
+
 type ExtCommunity []interface{}
+
+func (com ExtCommunity) String() string {
+	res := ""
+	for _, v := range com {
+		res += fmt.Sprintf(":%v", v)
+	}
+	return res[1:]
+}
 
 type BgpInfo struct {
 	Origin           string         `json:"origin"`
