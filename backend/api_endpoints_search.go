@@ -53,7 +53,8 @@ func apiLookupPrefixGlobal(
 	imported := make(api.LookupRoutes, 0, totalResults)
 	filtered := make(api.LookupRoutes, 0, totalResults)
 
-	// Now, as we have allocated even more space, split routes
+	// Now, as we have allocated even more space process routes by, splitting,
+	// filtering and updating the available filters...
 	for _, r := range routes {
 		switch r.State {
 		case "filtered":

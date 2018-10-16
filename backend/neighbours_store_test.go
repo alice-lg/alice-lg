@@ -97,7 +97,7 @@ func TestGetNeighbors(t *testing.T) {
 		t.Error("Expected 2 neighbors, got:", len(neighbors))
 	}
 
-	sort.Sort(&neighbors)
+	sort.Sort(neighbors)
 
 	if neighbors[0].Id != "ID2233_AS2342" {
 		t.Error("Expected neighbor: ID2233_AS2342, got:",
