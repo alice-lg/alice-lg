@@ -66,9 +66,16 @@ body,
 }
 
 .page-sidebar {
-  flex: 0 0 220px;
+  flex: 0 0 195px;
   background: #272634;
   // border-left: 1px solid #ccc;
+}
+
+@media (min-width: 1300px) {
+ .page-sidebar {
+   flex: 0 0 230px;
+   background: #272634;
+ }
 }
 
 header {
@@ -112,6 +119,10 @@ header {
     
     margin-right: 0px;
     margin-top: 20px;
+
+    &.row {
+        margin: 0px;
+    }
 }
 
 

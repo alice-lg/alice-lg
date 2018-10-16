@@ -5,6 +5,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 
 	"net/http"
+	"sort"
 )
 
 // Handle get neighbors on routeserver
@@ -13,11 +14,38 @@ func apiNeighborsList(_req *http.Request, params httprouter.Params) (api.Respons
 	if err != nil {
 		return nil, err
 	}
-	source := AliceConfig.Sources[rsId].getInstance()
-	result, err := source.Neighbours()
-	if err != nil {
-		apiLogSourceError("neighbors", rsId, err)
+
+	var neighborsResponse *api.NeighboursResponse
+
+	// Try to fetch neighbors from store, only fall back
+	// to RS query if store is not ready yet
+	sourceStatus := AliceNeighboursStore.SourceStatus(rsId)
+	if sourceStatus.State == STATE_READY {
+		neighbors := AliceNeighboursStore.GetNeighborsAt(rsId)
+		// Make response
+		neighborsResponse = &api.NeighboursResponse{
+			Api: api.ApiStatus{
+				Version: version,
+				CacheStatus: api.CacheStatus{
+					OrigTtl:  0,
+					CachedAt: sourceStatus.LastRefresh,
+				},
+				ResultFromCache: true, // you bet!
+				Ttl: sourceStatus.LastRefresh.Add(
+					AliceNeighboursStore.refreshInterval),
+			},
+			Neighbours: neighbors,
+		}
+	} else {
+		source := AliceConfig.Sources[rsId].getInstance()
+		neighborsResponse, err = source.Neighbours()
+		if err != nil {
+			apiLogSourceError("neighbors", rsId, err)
+		}
 	}
 
-	return result, err
+	// Sort result
+	sort.Sort(&neighborsResponse.Neighbours)
+
+	return neighborsResponse, err
 }

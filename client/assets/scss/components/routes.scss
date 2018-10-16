@@ -180,8 +180,7 @@ $labelOffsetEnd:   -30px;
 
 
 .routes-quick-links {
-    margin-bottom: 0.75em; 
-    margin-top: -0.5em;
+    margin: -0.75em 0; 
 
     text-align: right;
     span {
@@ -297,5 +296,21 @@ $labelOffsetEnd:   -30px;
         }
     }
 }
+
+// Responsive tweaks: The awkward inbetween.
+@media (min-width: 1200px) and (max-width: 1258px) {
+  .details-main {
+    > .col-main {
+        width: 80%;
+        float: left;
+    }
+    > .col-aside-details {
+        width: 20%;
+        float: left;
+    }
+  }
+}
+
+
 
 

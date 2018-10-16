@@ -75,6 +75,20 @@ func (self *NeighboursStore) init() {
 	}
 }
 
+func (self *NeighboursStore) SourceStatus(sourceId int) StoreStatus {
+	self.RLock()
+	status := self.statusMap[sourceId]
+	self.RUnlock()
+
+	return status
+}
+
+// Get state by source Id
+func (self *NeighboursStore) SourceState(sourceId int) int {
+	status := self.SourceStatus(sourceId)
+	return status.State
+}
+
 // Update all neighbors
 func (self *NeighboursStore) update() {
 	successCount := 0
@@ -144,15 +158,30 @@ func (self *NeighboursStore) update() {
 	)
 }
 
+func (self *NeighboursStore) GetNeighborsAt(sourceId int) api.Neighbours {
+	self.RLock()
+	neighborsIdx := self.neighboursMap[sourceId]
+	self.RUnlock()
+
+	neighbors := make(api.Neighbours, 0, len(neighborsIdx))
+
+	for _, neighbor := range neighborsIdx {
+		neighbors = append(neighbors, neighbor)
+	}
+
+	return neighbors
+}
+
 func (self *NeighboursStore) GetNeighbourAt(
 	sourceId int,
 	id string,
 ) *api.Neighbour {
 	// Lookup neighbour on RS
 	self.RLock()
-	neighbours := self.neighboursMap[sourceId]
+	neighborsIdx := self.neighboursMap[sourceId]
 	self.RUnlock()
-	return neighbours[id]
+
+	return neighborsIdx[id]
 }
 
 func (self *NeighboursStore) LookupNeighboursAt(
