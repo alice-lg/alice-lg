@@ -33,6 +33,93 @@ type SearchFilterGroup struct {
 	filtersIdx map[string]int
 }
 
+/*
+ Search comparators
+*/
+type SearchFilterComparator func(route LookupRoute, value interface{}) bool
+
+func searchFilterMatchSource(route LookupRoute, value interface{}) bool {
+	sourceId, ok := value.(int)
+	if !ok {
+		return false
+	}
+	return route.Routeserver.Id == sourceId
+}
+
+func searchFilterMatchAsn(route LookupRoute, value interface{}) bool {
+	asn, ok := value.(int)
+	if !ok {
+		return false
+	}
+
+	return route.Neighbour.Asn == asn
+}
+
+func searchFilterMatchCommunity(route LookupRoute, value interface{}) bool {
+	community, ok := value.(Community)
+	if !ok {
+		return false
+	}
+	return route.Bgp.HasCommunity(community)
+}
+
+func searchFilterMatchExtCommunity(route LookupRoute, value interface{}) bool {
+	community, ok := value.(ExtCommunity)
+	if !ok {
+		return false
+	}
+	return route.Bgp.HasExtCommunity(community)
+}
+
+func searchFilterMatchLargeCommunity(route LookupRoute, value interface{}) bool {
+	community, ok := value.(Community)
+	if !ok {
+		return false
+	}
+	return route.Bgp.HasLargeCommunity(community)
+}
+
+func (self *SearchFilterGroup) MatchAny(route LookupRoute) bool {
+	// Check if we have any filter to match
+	if len(self.Filters) == 0 {
+		return true // no filter, everything matches
+	}
+
+	// Get comparator
+	var cmp SearchFilterComparator
+	switch self.Key {
+	case SEARCH_KEY_SOURCES:
+		cmp = searchFilterMatchSource
+		break
+	case SEARCH_KEY_ASNS:
+		cmp = searchFilterMatchAsn
+		break
+	case SEARCH_KEY_COMMUNITIES:
+		cmp = searchFilterMatchCommunity
+		break
+	case SEARCH_KEY_EXT_COMMUNITIES:
+		cmp = searchFilterMatchExtCommunity
+		break
+	case SEARCH_KEY_LARGE_COMMUNITIES:
+		cmp = searchFilterMatchLargeCommunity
+		break
+	default:
+		cmp = nil
+	}
+
+	if cmp == nil {
+		return false // This should not have happened!
+	}
+
+	for _, filter := range self.Filters {
+		if cmp(route, filter.Value) {
+			return true
+		}
+	}
+
+	return false
+}
+
 type SearchFilters []*SearchFilterGroup
 
 func NewSearchFilters() *SearchFilters {
@@ -230,5 +317,30 @@ func FiltersFromQuery(query url.Values) (*SearchFilters, error) {
  Unless all filters are blank.
 */
 func (self *SearchFilters) MatchRoute(route LookupRoute) bool {
-	return false
+	sources := self.GetGroupByKey(SEARCH_KEY_SOURCES)
+	if !sources.MatchAny(route) {
+		return false
+	}
+
+	asns := self.GetGroupByKey(SEARCH_KEY_ASNS)
+	if !asns.MatchAny(route) {
+		return false
+	}
+
+	communities := self.GetGroupByKey(SEARCH_KEY_COMMUNITIES)
+	if !communities.MatchAny(route) {
+		return false
+	}
+
+	extCommunities := self.GetGroupByKey(SEARCH_KEY_EXT_COMMUNITIES)
+	if !extCommunities.MatchAny(route) {
+		return false
+	}
+
+	largeCommunities := self.GetGroupByKey(SEARCH_KEY_LARGE_COMMUNITIES)
+	if !largeCommunities.MatchAny(route) {
+		return false
+	}
+
+	return true
 }

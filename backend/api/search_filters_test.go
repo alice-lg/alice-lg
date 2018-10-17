@@ -5,6 +5,33 @@ import (
 	"testing"
 )
 
+func makeTestRoute() LookupRoute {
+	route := LookupRoute{
+		Bgp: BgpInfo{
+			Communities: []Community{
+				Community{23, 42},
+				Community{11, 111},
+			},
+			ExtCommunities: []ExtCommunity{
+				ExtCommunity{"ro", 23, 123},
+			},
+			LargeCommunities: []Community{
+				Community{1000, 23, 42},
+			},
+		},
+		Neighbour: &Neighbour{
+			Asn:         23042,
+			Description: "Security Solutions Ltd.",
+		},
+		Routeserver: Routeserver{
+			Id:   3,
+			Name: "test.rs.ixp",
+		},
+	}
+
+	return route
+}
+
 func TestSearchFilterGetGroupsByKey(t *testing.T) {
 	filtering := NewSearchFilters()
 
@@ -97,5 +124,93 @@ func TestSearchFiltersFromQuery(t *testing.T) {
 	sources := filters.GetGroupByKey(SEARCH_KEY_SOURCES).Filters
 	if len(sources) != 3 {
 		t.Error("Expected 3 source id filters")
+	}
+}
+
+func TestSearchFilterCompareRoute(t *testing.T) {
+	// Check filter matches
+	route := makeTestRoute()
+
+	// Source
+	if searchFilterMatchSource(route, 3) != true {
+		t.Error("Route should have sourceId 3")
+	}
+	if searchFilterMatchSource(route, 23) == true {
+		t.Error("Route should not have sourceId 23")
+	}
+
+	// Asn
+	if searchFilterMatchAsn(route, 23042) != true {
+		t.Error("Route should have ASN 23042")
+	}
+	if searchFilterMatchAsn(route, 123) == true {
+		t.Error("Route should not have ASN 123")
+	}
+
+	// Communities
+	if searchFilterMatchCommunity(route, Community{11, 111}) != true {
+		t.Error("Route should have community 11:111")
+	}
+	if searchFilterMatchCommunity(route, Community{42, 111}) == true {
+		t.Error("Route should not have community 42:111")
+	}
+
+	// Ext. Communities
+	if searchFilterMatchExtCommunity(route, ExtCommunity{"ro", 23, 123}) != true {
+		t.Error("Route should have community ro:23:123")
+	}
+	if searchFilterMatchExtCommunity(route, ExtCommunity{"rt", 42, 111}) == true {
+		t.Error("Route should not have community rt:42:111")
+	}
+
+	// Large Communities
+	if searchFilterMatchLargeCommunity(route, Community{1000, 23, 42}) != true {
+		t.Error("Route should have community 1000:23:42")
+	}
+	if searchFilterMatchLargeCommunity(route, Community{42, 111, 111}) == true {
+		t.Error("Route should not have community 42:111:111")
+	}
+}
+
+func TestSearchFilterMatchRoute(t *testing.T) {
+	route := makeTestRoute()
+
+	query := "asns=2342,23042&large_communities=1000:23:42&sources=1,2,3&q=foo"
+	values, err := url.ParseQuery(query)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	filters, err := FiltersFromQuery(values)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if filters.MatchRoute(route) == false {
+		t.Error("Route should have matched filters...")
+	}
+
+}
+
+func TestSearchFilterExcludeRoute(t *testing.T) {
+	route := makeTestRoute()
+
+	query := "asns=2342,23042&large_communities=42:23:42&sources=1,2,3&q=foo"
+	values, err := url.ParseQuery(query)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	filters, err := FiltersFromQuery(values)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if filters.MatchRoute(route) != false {
+		t.Error("Route should not have matched filters...")
 	}
 }
