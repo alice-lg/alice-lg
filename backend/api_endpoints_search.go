@@ -36,6 +36,10 @@ func apiLookupPrefixGlobal(
 	t0 := time.Now()
 
 	// Get additional filter criteria
+	filters, err := api.FiltersFromQuery(req.URL.Query())
+	if err != nil {
+		return nil, err
+	}
 
 	// Perform query
 	var routes api.LookupRoutes
@@ -57,6 +61,11 @@ func apiLookupPrefixGlobal(
 	// filtering and updating the available filters...
 	filtersAvailable := api.NewSearchFilters()
 	for _, r := range routes {
+
+		if !filters.MatchRoute(r) {
+			continue // Exclude route from results set
+		}
+
 		switch r.State {
 		case "filtered":
 			filtered = append(filtered, r)
