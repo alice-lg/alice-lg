@@ -55,6 +55,7 @@ func apiLookupPrefixGlobal(
 
 	// Now, as we have allocated even more space process routes by, splitting,
 	// filtering and updating the available filters...
+	filtersAvailable := api.NewSearchFilters()
 	for _, r := range routes {
 		switch r.State {
 		case "filtered":
@@ -64,6 +65,8 @@ func apiLookupPrefixGlobal(
 			imported = append(imported, r)
 			break
 		}
+
+		filtersAvailable.UpdateFromRoute(r)
 	}
 
 	// Homogenize results
@@ -109,6 +112,9 @@ func apiLookupPrefixGlobal(
 			PaginatedResponse: &api.PaginatedResponse{
 				Pagination: paginationFiltered,
 			},
+		},
+		FilterableResponse: api.FilterableResponse{
+			Filters: filtersAvailable,
 		},
 	}
 
