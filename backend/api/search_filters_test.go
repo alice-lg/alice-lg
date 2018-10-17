@@ -5,8 +5,8 @@ import (
 	"testing"
 )
 
-func makeTestRoute() LookupRoute {
-	route := LookupRoute{
+func makeTestRoute() *LookupRoute {
+	route := &LookupRoute{
 		Bgp: BgpInfo{
 			Communities: []Community{
 				Community{23, 42},

@@ -36,9 +36,9 @@ type SearchFilterGroup struct {
 /*
  Search comparators
 */
-type SearchFilterComparator func(route LookupRoute, value interface{}) bool
+type SearchFilterComparator func(route *LookupRoute, value interface{}) bool
 
-func searchFilterMatchSource(route LookupRoute, value interface{}) bool {
+func searchFilterMatchSource(route *LookupRoute, value interface{}) bool {
 	sourceId, ok := value.(int)
 	if !ok {
 		return false
@@ -46,7 +46,7 @@ func searchFilterMatchSource(route LookupRoute, value interface{}) bool {
 	return route.Routeserver.Id == sourceId
 }
 
-func searchFilterMatchAsn(route LookupRoute, value interface{}) bool {
+func searchFilterMatchAsn(route *LookupRoute, value interface{}) bool {
 	asn, ok := value.(int)
 	if !ok {
 		return false
@@ -55,7 +55,7 @@ func searchFilterMatchAsn(route LookupRoute, value interface{}) bool {
 	return route.Neighbour.Asn == asn
 }
 
-func searchFilterMatchCommunity(route LookupRoute, value interface{}) bool {
+func searchFilterMatchCommunity(route *LookupRoute, value interface{}) bool {
 	community, ok := value.(Community)
 	if !ok {
 		return false
@@ -63,7 +63,7 @@ func searchFilterMatchCommunity(route LookupRoute, value interface{}) bool {
 	return route.Bgp.HasCommunity(community)
 }
 
-func searchFilterMatchExtCommunity(route LookupRoute, value interface{}) bool {
+func searchFilterMatchExtCommunity(route *LookupRoute, value interface{}) bool {
 	community, ok := value.(ExtCommunity)
 	if !ok {
 		return false
@@ -71,7 +71,7 @@ func searchFilterMatchExtCommunity(route LookupRoute, value interface{}) bool {
 	return route.Bgp.HasExtCommunity(community)
 }
 
-func searchFilterMatchLargeCommunity(route LookupRoute, value interface{}) bool {
+func searchFilterMatchLargeCommunity(route *LookupRoute, value interface{}) bool {
 	community, ok := value.(Community)
 	if !ok {
 		return false
@@ -79,7 +79,7 @@ func searchFilterMatchLargeCommunity(route LookupRoute, value interface{}) bool 
 	return route.Bgp.HasLargeCommunity(community)
 }
 
-func (self *SearchFilterGroup) MatchAny(route LookupRoute) bool {
+func (self *SearchFilterGroup) MatchAny(route *LookupRoute) bool {
 	// Check if we have any filter to match
 	if len(self.Filters) == 0 {
 		return true // no filter, everything matches
@@ -316,7 +316,7 @@ func FiltersFromQuery(query url.Values) (*SearchFilters, error) {
  Match a route. Check if route matches all filters.
  Unless all filters are blank.
 */
-func (self *SearchFilters) MatchRoute(route LookupRoute) bool {
+func (self *SearchFilters) MatchRoute(route *LookupRoute) bool {
 	sources := self.GetGroupByKey(SEARCH_KEY_SOURCES)
 	if !sources.MatchAny(route) {
 		return false
