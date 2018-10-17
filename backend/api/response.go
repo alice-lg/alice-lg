@@ -188,6 +188,66 @@ type BgpInfo struct {
 	Med              int            `json:"med"`
 }
 
+func (bgp BgpInfo) HasCommunity(community Community) bool {
+	if len(community) != 2 {
+		return false // This can never match.
+	}
+
+	for _, com := range bgp.Communities {
+		if len(com) != len(community) {
+			continue // This can't match.
+		}
+
+		if com[0] == community[0] &&
+			com[1] == community[1] {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (bgp BgpInfo) HasExtCommunity(community ExtCommunity) bool {
+	if len(community) != 3 {
+		return false // This can never match.
+	}
+
+	for _, com := range bgp.ExtCommunities {
+		if len(com) != len(community) {
+			continue // This can't match.
+		}
+
+		if com[0] == community[0] &&
+			com[1] == community[1] &&
+			com[2] == community[2] {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (bgp BgpInfo) HasLargeCommunity(community Community) bool {
+	// TODO: This is an almost 1:1 match to the function above.
+	if len(community) != 3 {
+		return false // This can never match.
+	}
+
+	for _, com := range bgp.LargeCommunities {
+		if len(com) != len(community) {
+			continue // This can't match.
+		}
+
+		if com[0] == community[0] &&
+			com[1] == community[1] &&
+			com[2] == community[2] {
+			return true
+		}
+	}
+
+	return false
+}
+
 // Prefixes
 type Route struct {
 	Id          string `json:"id"`
