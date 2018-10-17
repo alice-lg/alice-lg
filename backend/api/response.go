@@ -247,6 +247,10 @@ type PaginatedResponse struct {
 	Pagination Pagination `json:"pagination"`
 }
 
+type FilterableResponse struct {
+	Filters *SearchFilters `json:"filters"`
+}
+
 type PaginatedRoutesResponse struct {
 	*RoutesResponse
 	Pagination Pagination `json:"pagination"`
@@ -315,6 +319,7 @@ type RoutesLookupResponseGlobal struct {
 
 type PaginatedRoutesLookupResponse struct {
 	TimedResponse
+	FilterableResponse
 
 	Api ApiStatus `json:"api"` // Add to provide cache status information
 

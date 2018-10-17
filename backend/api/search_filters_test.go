@@ -1,36 +1,37 @@
 package api
 
 import (
+	"net/url"
 	"testing"
 )
 
-func TestApiSearchFilterGetGroupsByKey(t *testing.T) {
-	filtering := NewApiSearchFilters()
+func TestSearchFilterGetGroupsByKey(t *testing.T) {
+	filtering := NewSearchFilters()
 
-	group := filtering.GetGroupByKey(API_SEARCH_KEY_ASNS)
+	group := filtering.GetGroupByKey(SEARCH_KEY_ASNS)
 	if group == nil {
-		t.Error(API_SEARCH_KEY_ASNS, "should exis")
+		t.Error(SEARCH_KEY_ASNS, "should exis")
 		return
 	}
 
-	if group.Key != API_SEARCH_KEY_ASNS {
-		t.Error("group should be:", API_SEARCH_KEY_ASNS, "but is:", group.Key)
+	if group.Key != SEARCH_KEY_ASNS {
+		t.Error("group should be:", SEARCH_KEY_ASNS, "but is:", group.Key)
 	}
 }
 
-func TestApiSearchFilterManagement(t *testing.T) {
-	filtering := NewApiSearchFilters()
-	group := filtering.GetGroupByKey(API_SEARCH_KEY_ASNS)
+func TestSearchFilterManagement(t *testing.T) {
+	filtering := NewSearchFilters()
+	group := filtering.GetGroupByKey(SEARCH_KEY_ASNS)
 
-	group.AddFilter(&ApiSearchFilter{
+	group.AddFilter(&SearchFilter{
 		Name:  "Tech Inc. Solutions GmbH",
 		Value: 23042})
 
-	group.AddFilter(&ApiSearchFilter{
+	group.AddFilter(&SearchFilter{
 		Name:  "T3ch Inc. Solutions GmbH",
 		Value: 23042})
 
-	group.AddFilter(&ApiSearchFilter{
+	group.AddFilter(&SearchFilter{
 		Name:  "Foocom Telecommunications Ltd.",
 		Value: 424242})
 
@@ -50,4 +51,21 @@ func TestApiSearchFilterManagement(t *testing.T) {
 	if filter.Cardinality != 2 {
 		t.Error("Expected a cardinality of 2, got:", filter.Cardinality)
 	}
+}
+
+func TestSearchFiltersFromQuery(t *testing.T) {
+	query := "asns=2342,23123&communities=23:42&large_communities=23:42:42&sources=1,2,3"
+	values, err := url.ParseQuery(query)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	filters, err := FiltersFromQuery(values)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	t.Log(filters)
 }
