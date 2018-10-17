@@ -230,5 +230,5 @@ func FiltersFromQuery(query url.Values) (*SearchFilters, error) {
  Unless all filters are blank.
 */
 func (self *SearchFilters) MatchRoute(route LookupRoute) bool {
-
+	return false
 }

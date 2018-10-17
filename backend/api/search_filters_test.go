@@ -54,7 +54,7 @@ func TestSearchFilterManagement(t *testing.T) {
 }
 
 func TestSearchFiltersFromQuery(t *testing.T) {
-	query := "asns=2342,23123&communities=23:42&large_communities=23:42:42&sources=1,2,3"
+	query := "asns=2342,23123&large_communities=23:42:42&sources=1,2,3&q=foo"
 	values, err := url.ParseQuery(query)
 	if err != nil {
 		t.Error(err)
@@ -67,5 +67,35 @@ func TestSearchFiltersFromQuery(t *testing.T) {
 		return
 	}
 
-	t.Log(filters)
+	// We should have 2 asns present
+	asns := filters.GetGroupByKey(SEARCH_KEY_ASNS).Filters
+	if asns[0].Value != 2342 {
+		t.Error("Expected asn.filter[0].Value to be 2342, but got:", asns[0].Value)
+	}
+	if asns[1].Value != 23123 {
+		t.Error("Expected asn.filter[1].Value to be 23123, but got:", asns[1].Value)
+	}
+
+	// Check communities
+	communities := filters.GetGroupByKey(SEARCH_KEY_COMMUNITIES).Filters
+	if len(communities) != 0 {
+		t.Error("There should be no communities filters")
+	}
+
+	largeCommunities := filters.GetGroupByKey(SEARCH_KEY_LARGE_COMMUNITIES).Filters
+	if len(largeCommunities) != 1 {
+		t.Error("There should have been 1 large community")
+	}
+
+	if largeCommunities[0].Name != "23:42:42" {
+		t.Error("There should have been 23:42:42 as a large community filter")
+	}
+
+	t.Log(largeCommunities[0].Value)
+
+	// Check Sources
+	sources := filters.GetGroupByKey(SEARCH_KEY_SOURCES).Filters
+	if len(sources) != 3 {
+		t.Error("Expected 3 source id filters")
+	}
 }
