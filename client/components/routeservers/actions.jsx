@@ -50,13 +50,14 @@ export function loadRouteservers() {
     dispatch(loadRouteserversRequest())
 
     axios.get('/api/v1/routeservers')
-      .then(({data}) => {
-        dispatch(loadRouteserversSuccess(data["routeservers"]));
-      })
-      .catch((error) => {
-        dispatch(apiError(error));
-        dispatch(loadRouteserversError(error.data));
-      });
+      .then(
+        ({data}) => {
+          dispatch(loadRouteserversSuccess(data["routeservers"]));
+        },
+        (error) => {
+          dispatch(apiError(error));
+          dispatch(loadRouteserversError(error.data));
+        });
   }
 }
 
@@ -95,13 +96,14 @@ export function loadRouteserverStatus(routeserverId) {
   return (dispatch) => {
     dispatch(loadRouteserverStatusRequest(routeserverId));
     axios.get(`/api/v1/routeservers/${routeserverId}/status`)
-      .then(({data}) => {
-        dispatch(loadRouteserverStatusSuccess(routeserverId, data.status));
-      })
-      .catch((error) => {
-        dispatch(apiError(error));
-        dispatch(loadRouteserverStatusError(routeserverId, error));
-      });
+      .then(
+        ({data}) => {
+          dispatch(loadRouteserverStatusSuccess(routeserverId, data.status));
+        },
+        (error) => {
+          dispatch(apiError(error));
+          dispatch(loadRouteserverStatusError(routeserverId, error));
+        });
   }
 }
 
@@ -130,14 +132,15 @@ export function loadRouteserverProtocol(routeserverId) {
   return (dispatch) => {
     dispatch(loadRouteserverProtocolRequest(routeserverId));
     axios.get(`/api/v1/routeservers/${routeserverId}/neighbors`)
-      .then(({data}) => {
-        dispatch(loadRouteserverProtocolSuccess(
-          routeserverId,
-          data.neighbours,
-          data.api,
-        ));
-      })
-      .catch((error) => dispatch(apiError(error)));
+      .then(
+        ({data}) => {
+          dispatch(loadRouteserverProtocolSuccess(
+            routeserverId,
+            data.neighbours,
+            data.api,
+          ));
+        },
+        (error) => dispatch(apiError(error)));
   }
 }
 

@@ -92,16 +92,17 @@ function fetchRoutes(type) {
       dispatch(requestAction());
 
       axios.get(routesUrl(type, rsId, pId, page, query))
-        .then(({data}) => {
-          dispatch(successAction(
-            data[rtype],
-            data.pagination,
-            data.api));
-        })
-        .catch((error) => {
-          dispatch(errorAction(error));
-          dispatch(apiError(error));
-        });
+        .then(
+          ({data}) => {
+            dispatch(successAction(
+              data[rtype],
+              data.pagination,
+              data.api));
+          },
+          (error) => {
+            dispatch(errorAction(error));
+            dispatch(apiError(error));
+          });
     }
   }
 };
