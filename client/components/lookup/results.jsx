@@ -31,6 +31,9 @@ import {RoutesHeader}
 
 
 const ResultsView = function(props) {
+  if(!props.routes) {
+    return null;
+  }
   if(props.routes.length == 0) {
     return null;
   }
@@ -121,6 +124,7 @@ class LookupResults extends React.Component {
 
   componentDidUpdate(prevProps) {
     if(this.props.query != prevProps.query ||
+       this.props.filtersApplied != prevProps.filtersApplied ||
        this.props.pagination.filtered.page != prevProps.pagination.filtered.page ||
        this.props.pagination.imported.page != prevProps.pagination.imported.page) {
         this.dispatchLookup();

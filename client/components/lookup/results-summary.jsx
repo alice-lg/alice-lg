@@ -43,6 +43,10 @@ class ResultsBox extends React.Component {
       return null;
     }
 
+    if (this.props.isLoading) {
+      return null;
+    }
+
     const queryDuration = this.props.queryDuration.toFixed(2);
     const cachedAt = this.props.cachedAt;
     const cacheTtl = this.props.cacheTtl;
@@ -69,6 +73,8 @@ class ResultsBox extends React.Component {
 export default connect(
   (state) => {
     return {
+      isLoading: state.lookup.isLoading,
+
       totalImported: state.lookup.totalRoutesImported,
       totalFiltered: state.lookup.totalRoutesFiltered, 
 

@@ -2,14 +2,19 @@
  * Prefix Lookup Reducer
  */
 
-import {LOAD_RESULTS_REQUEST,
-        LOAD_RESULTS_SUCCESS,
-        LOAD_RESULTS_ERROR,
-        
-        SET_LOOKUP_QUERY_VALUE,
+import {
+  LOAD_RESULTS_REQUEST,
+  LOAD_RESULTS_SUCCESS,
+  LOAD_RESULTS_ERROR,
 
-        RESET}
- from './actions'
+  SET_LOOKUP_QUERY_VALUE,
+
+  RESET,
+} from './actions'
+
+import {
+  APPLY_FILTER,
+} from './filter-actions'
 
 import {
   FILTER_GROUP_SOURCES,
