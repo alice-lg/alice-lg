@@ -1,0 +1,24 @@
+
+.lookup-filters-editor {
+    
+    // Select Control
+    .select-ctrl {
+        width: 100%;
+        .select-container {
+            width: 100%;
+        }
+        select {
+            padding: 0px;
+            width: 100%;
+        }
+        .btn {
+            margin-left: 3px;
+            border-radius: 100px;
+            padding: 8px 10px;
+            font-size: 10px;
+            line-height: 10px;
+        }
+    }
+
+}
+

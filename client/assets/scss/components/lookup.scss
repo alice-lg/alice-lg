@@ -7,8 +7,7 @@
     }
 
     li {
-      padding: 8px;
-      padding-left: 15px;
+      padding: 5px 0;
     }
 }
 
@@ -28,4 +27,25 @@
 
     }
 }
+
+/*
+ * Filters
+ */
+
+.lookup-filters-editor {
+  h2 {
+    color: #555;
+    font-weight: bold;
+
+    margin-top: 8px;
+    margin-bottom: 5px;
+
+    font-size: 12px;
+
+    text-transform: uppercase;
+
+    padding: 0;
+  }
+}
+
 
