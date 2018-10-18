@@ -308,7 +308,8 @@ type PaginatedResponse struct {
 }
 
 type FilterableResponse struct {
-	Filters *SearchFilters `json:"filters"`
+	FiltersAvailable *SearchFilters `json:"filters_available"`
+	FiltersApplied   *SearchFilters `json:"filters_applied"`
 }
 
 type PaginatedRoutesResponse struct {

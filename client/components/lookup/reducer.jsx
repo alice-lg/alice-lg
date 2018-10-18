@@ -13,11 +13,22 @@ import {LOAD_RESULTS_REQUEST,
 
 const LOCATION_CHANGE = '@@router/LOCATION_CHANGE'
 
+const initialFilterState = [
+  {"key": "sources", "filters": []}, 
+  {"key": "asns", "filters": []}, 
+  {"key": "communities", "filters": []}, 
+  {"key": "ext_communities", "filters": []}, 
+  {"key": "large_communities", "filters": []}, 
+];
+
 const initialState = {
   query: "",
   queryValue: "",
 
   anchor: "",
+
+  filtersAvailable: initialFilterState,
+  filtersApplied: initialFilterState,
 
   routesImported: [],
   routesFiltered: [],
@@ -91,6 +102,10 @@ const _loadQueryResult = function(state, payload) {
     routesImported: imported.routes,
     routesFiltered: filtered.routes,
 
+    // Filters available
+    filtersAvailable: results.filters_available,
+    filtersApplied:   results.filters_applied,
+
     // Pagination
     pageImported:        imported.pagination.page,
     pageFiltered:        filtered.pagination.page,
@@ -100,7 +115,6 @@ const _loadQueryResult = function(state, payload) {
     totalPagesFiltered:  filtered.pagination.total_pages,
     totalRoutesImported: imported.pagination.total_results,
     totalRoutesFiltered: filtered.pagination.total_results,
-
 
     // Statistics
     queryDurationMs: results.request_duration_ms,

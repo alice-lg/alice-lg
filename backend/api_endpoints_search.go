@@ -123,7 +123,8 @@ func apiLookupPrefixGlobal(
 			},
 		},
 		FilterableResponse: api.FilterableResponse{
-			Filters: filtersAvailable,
+			FiltersAvailable: filtersAvailable,
+			FiltersApplied:   filters,
 		},
 	}
 

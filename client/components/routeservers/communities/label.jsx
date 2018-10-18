@@ -2,28 +2,7 @@
 import React from 'react'
 import {connect} from 'react-redux'
 
-import {resolveCommunity} from './utils'
-
-
-
-/*
- * Expand variables in string:
- *    "Test AS$0 rejects $2"
- * will expand with [23, 42, 123] to
- *    "Test AS23 rejects 123"
- */
-function _expandVars(str, vars) {
-  if (!str) {
-    return str; // We don't have to do anything.
-  }
-
-  var res = str;
-  vars.map((v, i) => {
-    res = res.replace(`$${i}`, v); 
-  });
-
-  return res;
-}
+import {makeReadableCommunity} from './utils'
 
 /*
  * Make style tags
@@ -36,12 +15,15 @@ function _makeStyleTags(community) {
 }
 
 
+/*
+ * Render community label
+ */
 class Label extends React.Component {
   render() {
-
     // Lookup communities
-    const readableCommunityLabel = resolveCommunity(this.props.communities, this.props.community);
-    const readableCommunity = _expandVars(readableCommunityLabel, this.props.community);
+    const readableCommunity = makeReadableCommunity(
+      this.props.communities,
+      this.props.community);
     const key = this.props.community.join(":");
 
     let cls = 'label label-bgp-community ';
