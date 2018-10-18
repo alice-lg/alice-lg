@@ -101,6 +101,7 @@ class LookupResults extends React.Component {
     const query = this.props.query;
     const pageImported = this.props.pagination.imported.page;
     const pageFiltered = this.props.pagination.filtered.page;
+    const filters = this.props.filtersApplied;
 
     if (query == "") {
       // Dispatch reset and transition to main page
@@ -108,7 +109,7 @@ class LookupResults extends React.Component {
       this.props.dispatch(replace("/"));
     } else {
       this.props.dispatch(
-        loadResults(query, pageImported, pageFiltered)
+        loadResults(query, filters, pageImported, pageFiltered)
       );
     }
   }
@@ -201,6 +202,7 @@ export default connect(
       },
       isLoading: state.lookup.isLoading,
       query: state.lookup.query,
+      filtersApplied: state.lookup.filtersApplied,
     }
   }
 )(LookupResults);

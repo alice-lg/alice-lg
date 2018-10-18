@@ -195,6 +195,8 @@ class FiltersEditor extends React.Component {
 
 export default connect(
   (state) => ({
+    isLoading: state.lookup.isLoading,
+
     available: state.lookup.filtersAvailable,
     applied: state.lookup.filtersApplied,
 
