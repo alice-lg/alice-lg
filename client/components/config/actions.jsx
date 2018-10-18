@@ -13,9 +13,10 @@ function loadConfigSuccess(config) {
 export function loadConfig() {
   return (dispatch) => {
     axios.get(`/api/v1/config`)
-      .then(({data}) => {
-        dispatch(loadConfigSuccess(data));
-      })
-      .catch(error => dispatch(apiError(error)));
+      .then(
+        ({data}) => {
+          dispatch(loadConfigSuccess(data));
+        },
+        (error) => dispatch(apiError(error)));
   }
 }
