@@ -4,21 +4,46 @@
  * Manage state
  */
 
-export function lookupStateUrlEncode(state) {
-    const pageImported = state.pageImported;
-    const pageFiltered = state.pageFiltered;
-    const filters = state.filtersApplied;
-    const q = `q=${query}`;
-    const f = filtersUrlEncode(filters); 
+import {
+  filtersUrlEncode
+} from './filter-encoding'
 
-    let p = "";
-    if (pageFiltered > 0) {
-      p += `&page_filtered=${pageFiltered}`;
-    }
-    if (pageImported > 0) {
-      p += `&page_imported=${pageImported}`;
-    }
 
-    return `${q}${f}${p}`;
+/* 
+ * Maybe this can be customized and injected into 
+ * the PageLink component.
+ */
+export function  makeLinkProps(props) {
+  const linkPage = parseInt(props.page, 10);
+
+  let pr = props.pageReceived;
+  let pf = props.pageFiltered;
+
+  // This here can be surely more elegant.
+  switch(props.anchor) {
+    case "received":
+      pr = linkPage;
+      break;
+    case "filtered":
+      pf = linkPage;
+      break;
+  }
+
+  let filtering = "";
+  if (props.filtersApplied) {
+    filtering = filtersUrlEncode(props.filtersApplied);
+  }
+
+  const query = props.routing.query.q || "";
+
+  const search = `?pr=${pr}&pf=${pf}&q=${query}${filtering}`;
+  const hash   = `#routes-${props.anchor}`;
+  const linkTo = {
+    pathname: props.routing.pathname,
+    hash:     hash,
+    search:   search,
+  };
+
+  return linkTo;
 }
 

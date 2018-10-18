@@ -4,10 +4,12 @@ import _ from 'underscore'
 import React from 'react'
 import {connect} from 'react-redux'
 
+import {push} from 'react-router-redux'
+
 import {makeReadableCommunity}
   from 'components/routeservers/communities/utils'
 
-import {applyFilterValue} from './filter-actions'
+import {makeLinkProps} from './state'
 
 import {FILTER_GROUP_SOURCES,
         FILTER_GROUP_ASNS,
@@ -17,10 +19,26 @@ import {FILTER_GROUP_SOURCES,
   from './filter-groups'
 
 
-
 /*
- * Helper: Merge filter applied
+ * Helper: Add and remove filter
  */
+function _applyFilterValue(filters, group, value) {
+  let nextFilters = Object.assign([], filters);
+  nextFilters[group].filters.push({
+    value: value,
+  });
+  return nextFilters;
+}
+
+function _removeFilterValue(filters, group, value) {
+  const svalue = value.toString();
+  let nextFilters = Object.assign([], filters);
+  let groupFilters = nextFilters[group].filters;
+  nextFilters[group].filters = _.filter(groupFilters, (f) => {
+    return f.value.toString() !== svalue;
+  });
+  return nextFilters;
+}
 
 
 class RouteserversSelect extends React.Component {
@@ -65,12 +83,9 @@ class RouteserversSelect extends React.Component {
         </option>;
     });
 
-    let options = [];
-    if (appliedFilter.value != undefined) {
-      options = [
-        <option key="none">Show results from RS...</option>
-      ];
-    }
+    let options = [
+      <option key="none">Show results from RS...</option>
+    ];
     options = options.concat(optionsAvailable);
 
     return (
@@ -256,7 +271,15 @@ const CommunitiesSelect = connect(
 
 class FiltersEditor extends React.Component {
   selectSource(sourceId) {
-    this.props.dispatch(applyFilterValue(FILTER_GROUP_SOURCES, sourceId));
+    let nextFilters = _applyFilterValue(
+      this.props.applied, FILTER_GROUP_SOURCES, sourceId
+    );
+
+    this.props.dispatch(push(
+      makeLinkProps(Object.assign({}, this.props.link, {
+        filtersApplied: nextFilters,
+      }))
+    ));
   }
 
   render() {
@@ -284,6 +307,15 @@ class FiltersEditor extends React.Component {
 export default connect(
   (state) => ({
     isLoading: state.lookup.isLoading,
+
+    link: {
+      pageReceived:   state.lookup.pageReceived,
+      pageFiltered:   state.lookup.pageFiltered,
+      query:          state.lookup.query,
+      filtersApplied: state.lookup.filtersApplied,
+      routing:        state.routing.locationBeforeTransitions,
+    },
+    
 
     available: state.lookup.filtersAvailable,
     applied: state.lookup.filtersApplied,
