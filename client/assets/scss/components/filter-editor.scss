@@ -1,24 +1,46 @@
 
+/*
+ * Filters
+ */
+
 .lookup-filters-editor {
+  h2 {
+    color: #555;
+    font-weight: bold;
+
+    margin-top: 8px;
+    margin-bottom: 5px;
+
+    font-size: 12px;
+
+    text-transform: uppercase;
+
+    padding: 0;
+  }
+
     
-    // Select Control
-    .select-ctrl {
-        width: 100%;
-        .select-container {
-            width: 100%;
-        }
-        select {
-            padding: 0px;
-            width: 100%;
-        }
-        .btn {
-            margin-left: 3px;
-            border-radius: 100px;
-            padding: 8px 10px;
-            font-size: 10px;
-            line-height: 10px;
-        }
-    }
+  // Select Control
+  .select-ctrl {
+     width: 100%;
+     .select-container {
+         width: 100%;
+     }
+     select {
+         padding: 0px;
+         width: 100%;
+     }
+     .btn {
+         margin-left: 3px;
+         border-radius: 100px;
+         padding: 8px 10px;
+         font-size: 10px;
+         line-height: 10px;
+         color: #337ab7;
+     }
+     .btn-remove {
+        color: #aa0000;
+     }
+  }
 
 }
 
