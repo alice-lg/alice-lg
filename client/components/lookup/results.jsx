@@ -6,6 +6,8 @@ import {connect} from 'react-redux'
 import {Link} from 'react-router'
 import {replace} from 'react-router-redux'
 
+import {filtersEqual} from './filter-groups'
+
 import FilterReason
   from 'components/routeservers/communities/filter-reason'
 
@@ -123,10 +125,11 @@ class LookupResults extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
+
     if(this.props.query != prevProps.query ||
-       this.props.filtersApplied != prevProps.filtersApplied ||
        this.props.pagination.filtered.page != prevProps.pagination.filtered.page ||
-       this.props.pagination.imported.page != prevProps.pagination.imported.page) {
+       this.props.pagination.imported.page != prevProps.pagination.imported.page ||
+       !filtersEqual(this.props.filtersApplied, prevProps.filtersApplied)) {
         this.dispatchLookup();
     }
   }
@@ -170,7 +173,7 @@ class LookupResults extends React.Component {
                      pageSize={this.props.pagination.imported.pageSize}
                      totalPages={this.props.pagination.imported.totalPages}
                      totalResults={this.props.pagination.imported.totalResults}
-                     
+
                      query={this.props.query}
 
                      routes={importedRoutes} />
@@ -182,7 +185,7 @@ class LookupResults extends React.Component {
 export default connect(
   (state) => {
     const filteredRoutes = state.lookup.routesFiltered;
-    const importedRoutes = state.lookup.routesImported; 
+    const importedRoutes = state.lookup.routesImported;
 
     return {
       anchor: state.lookup.anchor,

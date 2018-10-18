@@ -145,7 +145,7 @@ class PeersFilterSelect extends React.Component {
     // Build options
     const optionsAvailable = sortedFiltersAvailable.map((filter) => {
       return <option key={filter.value} value={filter}>
-          {filter.name} ({filter.cardinality})
+          {filter.name} AS{filter.value} ({filter.cardinality})
         </option>;
     });
 
@@ -181,7 +181,7 @@ class _CommunitiesSelect extends React.Component {
     const communitiesAvailable = this.props.available.communities.sort((a, b) => {
       return (a.value[0] - b.value[0]) * 100000 + (a.value[1] - b.value[1]);
     });
-    
+
     const extCommunitiesAvailable = this.props.available.ext.sort((a, b) => {
       return (a.value[1] - b.value[1]) * 100000 + (a.value[2] - b.value[2]);
     });
@@ -191,7 +191,7 @@ class _CommunitiesSelect extends React.Component {
              (a.value[1] - b.value[1]) * 100000 +
              (a.value[2] - b.value[2]);
     });
-    
+
     const communitiesOptions = communitiesAvailable.map((filter) => {
       const name = makeReadableCommunity(this.props.communities, filter.value);
       const cls = `select-bgp-community-0-${filter.value[0]} ` +
@@ -276,25 +276,30 @@ class FiltersEditor extends React.Component {
     );
 
     this.props.dispatch(push(
+      /*
       makeLinkProps(Object.assign({}, this.props.link, {
         filtersApplied: nextFilters,
       }))
+      */
     ));
   }
 
   render() {
+    if (!this.props.hasRoutes) {
+      return null;
+    }
     return (
       <div className="card lookup-filters-editor">
-        <h2>Route server</h2>        
+        <h2>Route server</h2>
         <RouteserversSelect onChange={(value) => this.selectSource(value)}
                             available={this.props.availableSources}
                             applied={this.props.appliedSources} />
 
-        <h2>Neighbor</h2>        
-        <PeersFilterSelect available={this.props.availableAsns} 
+        <h2>Neighbor</h2>
+        <PeersFilterSelect available={this.props.availableAsns}
                            applied={this.props.appliedAsns} />
-        
-        <h2>Communities</h2> 
+
+        <h2>Communities</h2>
         <CommunitiesSelect available={this.props.availableCommunities}
                            applied={this.props.appliedCommunities} />
 
@@ -307,6 +312,8 @@ class FiltersEditor extends React.Component {
 export default connect(
   (state) => ({
     isLoading: state.lookup.isLoading,
+    hasRoutes: state.lookup.routesFiltered.length > 0 ||
+               state.lookup.routesImported.length > 0,
 
     link: {
       pageReceived:   state.lookup.pageReceived,
@@ -315,7 +322,6 @@ export default connect(
       filtersApplied: state.lookup.filtersApplied,
       routing:        state.routing.locationBeforeTransitions,
     },
-    
 
     available: state.lookup.filtersAvailable,
     applied: state.lookup.filtersApplied,
@@ -324,7 +330,7 @@ export default connect(
     appliedSources:   state.lookup.filtersApplied[FILTER_GROUP_SOURCES].filters,
 
     availableAsns: state.lookup.filtersAvailable[FILTER_GROUP_ASNS].filters,
-    appliedAsns:   state.lookup.filtersApplied[FILTER_GROUP_ASNS].filters, 
+    appliedAsns:   state.lookup.filtersApplied[FILTER_GROUP_ASNS].filters,
 
     availableCommunities: {
       communities: state.lookup.filtersAvailable[FILTER_GROUP_COMMUNITIES].filters,

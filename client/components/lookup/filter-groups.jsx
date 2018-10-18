@@ -11,3 +11,21 @@ export const FILTER_GROUP_COMMUNITIES = 2
 export const FILTER_GROUP_EXT_COMMUNITIES = 3
 export const FILTER_GROUP_LARGE_COMMUNITIES = 4
 
+
+export function filtersEqual(a, b) {
+  return (a[FILTER_GROUP_SOURCES].filters.length ===
+          b[FILTER_GROUP_SOURCES].filters.length) &&
+
+         (a[FILTER_GROUP_ASNS].filters.length ===
+          b[FILTER_GROUP_ASNS].filters.length) &&
+
+         (a[FILTER_GROUP_COMMUNITIES].filters.length ===
+          b[FILTER_GROUP_COMMUNITIES].filters.length) &&
+
+         (a[FILTER_GROUP_EXT_COMMUNITIES].filters.length ===
+          b[FILTER_GROUP_EXT_COMMUNITIES].filters.length) &&
+
+         (a[FILTER_GROUP_LARGE_COMMUNITIES].filters.length ===
+          b[FILTER_GROUP_LARGE_COMMUNITIES].filters.length);
+}
+
