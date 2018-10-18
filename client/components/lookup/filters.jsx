@@ -1,4 +1,5 @@
 
+import _ from 'underscore'
 
 import React from 'react'
 import {connect} from 'react-redux'
@@ -17,6 +18,11 @@ import {FILTER_GROUP_SOURCES,
 
 
 
+/*
+ * Helper: Merge filter applied
+ */
+
+
 class RouteserversSelect extends React.Component {
   render() {
     // Sort filters available
@@ -26,6 +32,31 @@ class RouteserversSelect extends React.Component {
 
     // For now we allow only one applied
     const appliedFilter = this.props.applied[0] || {value: undefined};
+
+    if (appliedFilter.value !== undefined) {
+      const filter = _.findWhere(sortedFiltersAvailable, {
+        value: appliedFilter.value
+      });
+
+      // Just render this, with a button for removal
+      return (
+        <table className="select-ctrl">
+          <tbody>
+            <tr>
+              <td className="select-container">
+                {filter.name}
+              </td>
+              <td>
+                <button className="btn btn-remove"
+                        onClick={() => this.props.onRemove(filter.value)}>
+                  <i className="fa fa-times" />
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      );
+    }
 
     // Build options
     const optionsAvailable = sortedFiltersAvailable.map((filter) => {
@@ -70,6 +101,31 @@ class PeersFilterSelect extends React.Component {
 
     // For now we allow only one applied
     const appliedFilter = this.props.applied[0] || {value: undefined};
+
+    if (appliedFilter.value !== undefined) {
+      const filter = _.findWhere(sortedFiltersAvailable, {
+        value: appliedFilter.value
+      });
+
+      // Just render this, with a button for removal
+      return (
+        <table className="select-ctrl">
+          <tbody>
+            <tr>
+              <td className="select-container">
+                {filter.name}
+              </td>
+              <td>
+                <button className="btn btn-remove"
+                        onClick={() => this.props.onRemove(filter.value)}>
+                  <i className="fa fa-times" />
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      );
+    }
 
     // Build options
     const optionsAvailable = sortedFiltersAvailable.map((filter) => {
