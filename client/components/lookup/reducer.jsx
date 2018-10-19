@@ -32,15 +32,18 @@ import {
   decodeFiltersLargeCommunities,
 } from './filter-encoding'
 
+import {
+  cloneFilters
+} from './state'
 
 const LOCATION_CHANGE = '@@router/LOCATION_CHANGE'
 
 const initialFilterState = [
-  {"key": "sources", "filters": []}, 
-  {"key": "asns", "filters": []}, 
-  {"key": "communities", "filters": []}, 
-  {"key": "ext_communities", "filters": []}, 
-  {"key": "large_communities", "filters": []}, 
+  {"key": "sources", "filters": []},
+  {"key": "asns", "filters": []},
+  {"key": "communities", "filters": []},
+  {"key": "ext_communities", "filters": []},
+  {"key": "large_communities", "filters": []},
 ];
 
 const initialState = {
@@ -88,7 +91,7 @@ const getScrollAnchor = function(hash) {
  * Decode filters applied from params
  */
 const _decodeFiltersApplied = function(params) {
-  let groups = Object.assign([], initialFilterState);
+  let groups = cloneFilters(initialFilterState);
 
   groups[FILTER_GROUP_SOURCES].filters =           decodeFiltersSources(params);
   groups[FILTER_GROUP_ASNS].filters =              decodeFiltersAsns(params);
@@ -136,9 +139,9 @@ const _loadQueryResult = function(state, payload) {
     isLoading: false,
 
     // Cache Status
-    cachedAt: api.cache_status.cached_at, // I don't like this style. 
-    cacheTtl: api.ttl, 
-    
+    cachedAt: api.cache_status.cached_at, // I don't like this style.
+    cacheTtl: api.ttl,
+
     // Routes
     routesImported: imported.routes,
     routesFiltered: filtered.routes,
@@ -151,7 +154,7 @@ const _loadQueryResult = function(state, payload) {
     pageFiltered:        filtered.pagination.page,
     pageSizeImported:    imported.pagination.page_size,
     pageSizeFiltered:    filtered.pagination.page_size,
-    totalPagesImported:  imported.pagination.total_pages, 
+    totalPagesImported:  imported.pagination.total_pages,
     totalPagesFiltered:  filtered.pagination.total_pages,
     totalRoutesImported: imported.pagination.total_results,
     totalRoutesFiltered: filtered.pagination.total_results,
@@ -167,7 +170,7 @@ export default function reducer(state=initialState, action) {
   switch(action.type) {
     case LOCATION_CHANGE:
       return _handleLocationChange(state, action.payload);
-      
+
     case SET_LOOKUP_QUERY_VALUE:
       return Object.assign({}, state, {
         queryValue: action.payload.value,

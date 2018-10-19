@@ -125,6 +125,7 @@ class LookupResults extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
+    console.log("filters equal:", filtersEqual(this.props.filtersApplied, prevProps.filtersApplied));
 
     if(this.props.query != prevProps.query ||
        this.props.pagination.filtered.page != prevProps.pagination.filtered.page ||

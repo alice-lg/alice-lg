@@ -8,9 +8,16 @@ import {
   filtersUrlEncode
 } from './filter-encoding'
 
+import {
+  FILTER_GROUP_SOURCES,
+  FILTER_GROUP_ASNS,
+  FILTER_GROUP_COMMUNITIES,
+  FILTER_GROUP_EXT_COMMUNITIES,
+  FILTER_GROUP_LARGE_COMMUNITIES,
+} from './filter-groups'
 
-/* 
- * Maybe this can be customized and injected into 
+/*
+ * Maybe this can be customized and injected into
  * the PageLink component.
  */
 export function  makeLinkProps(props) {
@@ -29,6 +36,14 @@ export function  makeLinkProps(props) {
       break;
   }
 
+  let pagination = "";
+  if (pr) {
+    pagination += `pr=${pr}`
+  }
+  if (pf) {
+    pagination += `pf=${pf}`
+  }
+
   let filtering = "";
   if (props.filtersApplied) {
     filtering = filtersUrlEncode(props.filtersApplied);
@@ -36,8 +51,12 @@ export function  makeLinkProps(props) {
 
   const query = props.routing.query.q || "";
 
-  const search = `?pr=${pr}&pf=${pf}&q=${query}${filtering}`;
-  const hash   = `#routes-${props.anchor}`;
+  const search = `?${pagination}&q=${query}${filtering}`;
+  let hash = "";
+  if (props.anchor) {
+    hash += `#routes-${props.anchor}`;
+  }
+
   const linkTo = {
     pathname: props.routing.pathname,
     hash:     hash,
@@ -45,5 +64,32 @@ export function  makeLinkProps(props) {
   };
 
   return linkTo;
+}
+
+export function cloneFilters(filters) {
+  const nextFilters = [
+    Object.assign({}, filters[FILTER_GROUP_SOURCES]),
+    Object.assign({}, filters[FILTER_GROUP_ASNS]),
+    Object.assign({}, filters[FILTER_GROUP_COMMUNITIES]),
+    Object.assign({}, filters[FILTER_GROUP_EXT_COMMUNITIES]),
+    Object.assign({}, filters[FILTER_GROUP_LARGE_COMMUNITIES]),
+  ];
+
+  nextFilters[FILTER_GROUP_SOURCES].filters =
+    [...nextFilters[FILTER_GROUP_SOURCES].filters];
+
+  nextFilters[FILTER_GROUP_ASNS].filters =
+    [...nextFilters[FILTER_GROUP_ASNS].filters];
+
+  nextFilters[FILTER_GROUP_COMMUNITIES].filters =
+    [...nextFilters[FILTER_GROUP_COMMUNITIES].filters];
+
+  nextFilters[FILTER_GROUP_EXT_COMMUNITIES].filters =
+    [...nextFilters[FILTER_GROUP_EXT_COMMUNITIES].filters];
+
+  nextFilters[FILTER_GROUP_LARGE_COMMUNITIES].filters =
+    [...nextFilters[FILTER_GROUP_LARGE_COMMUNITIES].filters];
+
+  return nextFilters;
 }
 

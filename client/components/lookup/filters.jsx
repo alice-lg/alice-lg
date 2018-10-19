@@ -23,7 +23,7 @@ import {FILTER_GROUP_SOURCES,
  * Helper: Add and remove filter
  */
 function _applyFilterValue(filters, group, value) {
-  let nextFilters = Object.assign([], filters);
+  let nextFilters = [...filters];
   nextFilters[group].filters.push({
     value: value,
   });
@@ -32,7 +32,7 @@ function _applyFilterValue(filters, group, value) {
 
 function _removeFilterValue(filters, group, value) {
   const svalue = value.toString();
-  let nextFilters = Object.assign([], filters);
+  let nextFilters = [...filters];
   let groupFilters = nextFilters[group].filters;
   nextFilters[group].filters = _.filter(groupFilters, (f) => {
     return f.value.toString() !== svalue;
@@ -276,11 +276,21 @@ class FiltersEditor extends React.Component {
     );
 
     this.props.dispatch(push(
-      /*
       makeLinkProps(Object.assign({}, this.props.link, {
         filtersApplied: nextFilters,
       }))
-      */
+    ));
+  }
+
+  removeSource(sourceId) {
+    let nextFilters = _removeFilterValue(
+      this.props.applied, FILTER_GROUP_SOURCES, sourceId
+    );
+
+    this.props.dispatch(push(
+      makeLinkProps(Object.assign({}, this.props.link, {
+        filtersApplied: nextFilters,
+      }))
     ));
   }
 
@@ -292,6 +302,7 @@ class FiltersEditor extends React.Component {
       <div className="card lookup-filters-editor">
         <h2>Route server</h2>
         <RouteserversSelect onChange={(value) => this.selectSource(value)}
+                            onRemove={(value) => this.removeSource(value)}
                             available={this.props.availableSources}
                             applied={this.props.appliedSources} />
 
@@ -306,7 +317,6 @@ class FiltersEditor extends React.Component {
       </div>
     );
   }
-
 }
 
 export default connect(

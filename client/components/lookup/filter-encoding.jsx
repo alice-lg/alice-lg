@@ -88,7 +88,6 @@ export function filtersUrlEncode(filters) {
   let encoded = "";
 
   encoded += encodeGroupInt(filters[FILTER_GROUP_SOURCES]);
-  encoded += encodeGroupInt(filters[FILTER_GROUP_SOURCES]);
   encoded += encodeGroupInt(filters[FILTER_GROUP_ASNS]);
   encoded += encodeGroupCommunities(filters[FILTER_GROUP_COMMUNITIES]);
   encoded += encodeGroupCommunities(filters[FILTER_GROUP_EXT_COMMUNITIES]);
