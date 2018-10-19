@@ -183,7 +183,6 @@ const lookupProperty = function(obj, path) {
 // Widgets:
 const ColDescription = function(props) {
   const neighbour = props.neighbour;
-  console.log("neighbour:", neighbour);
   return (
     <td>
       <RoutesLink routeserverId={props.rsId}
