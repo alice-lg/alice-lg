@@ -183,6 +183,7 @@ const lookupProperty = function(obj, path) {
 // Widgets:
 const ColDescription = function(props) {
   const neighbour = props.neighbour;
+  console.log("neighbour:", neighbour);
   return (
     <td>
       <RoutesLink routeserverId={props.rsId}
@@ -412,14 +413,14 @@ class Protocols extends React.Component {
                                    neighbours={neighboursUp}
                                    routeserverId={this.props.routeserverId} />);
     }
-    if (neighboursDown.length) {
-      tables.push(<NeighboursTable key="down" state="down"
-                                   neighbours={neighboursDown}
-                                   routeserverId={this.props.routeserverId} />);
-    }
     if (neighboursIdle.length) {
       tables.push(<NeighboursTable key="start" state="start"
                                    neighbours={neighboursIdle}
+                                   routeserverId={this.props.routeserverId} />);
+    }
+    if (neighboursDown.length) {
+      tables.push(<NeighboursTable key="down" state="down"
+                                   neighbours={neighboursDown}
                                    routeserverId={this.props.routeserverId} />);
     }
 
