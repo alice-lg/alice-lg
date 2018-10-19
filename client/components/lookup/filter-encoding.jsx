@@ -32,7 +32,6 @@ export function decodeFiltersAsns(params) {
   return asns.map((asn) => _makeFilter(parseInt(asn, 10)));
 }
 
-
 function _decodeCommunity(community) {
   const parts = community.split(":");
   return parts.map((p) => parseInt(p, 10));

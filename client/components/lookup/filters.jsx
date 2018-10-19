@@ -9,7 +9,7 @@ import {push} from 'react-router-redux'
 import {makeReadableCommunity}
   from 'components/routeservers/communities/utils'
 
-import {makeLinkProps} from './state'
+import {makeLinkProps, cloneFilters} from './state'
 
 import {FILTER_GROUP_SOURCES,
         FILTER_GROUP_ASNS,
@@ -23,7 +23,7 @@ import {FILTER_GROUP_SOURCES,
  * Helper: Add and remove filter
  */
 function _applyFilterValue(filters, group, value) {
-  let nextFilters = [...filters];
+  let nextFilters = cloneFilters(filters);
   nextFilters[group].filters.push({
     value: value,
   });
@@ -32,7 +32,7 @@ function _applyFilterValue(filters, group, value) {
 
 function _removeFilterValue(filters, group, value) {
   const svalue = value.toString();
-  let nextFilters = [...filters];
+  let nextFilters = cloneFilters(filters);
   let groupFilters = nextFilters[group].filters;
   nextFilters[group].filters = _.filter(groupFilters, (f) => {
     return f.value.toString() !== svalue;
@@ -271,9 +271,12 @@ const CommunitiesSelect = connect(
 
 class FiltersEditor extends React.Component {
   selectSource(sourceId) {
+    console.log("Selecting source. Applied:", this.props.applied);
     let nextFilters = _applyFilterValue(
       this.props.applied, FILTER_GROUP_SOURCES, sourceId
     );
+    console.log("Prev filters:", this.props.applied);
+    console.log("Next filteers:", nextFilters);
 
     this.props.dispatch(push(
       makeLinkProps(Object.assign({}, this.props.link, {
