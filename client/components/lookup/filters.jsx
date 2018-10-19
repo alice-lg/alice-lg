@@ -300,7 +300,6 @@ const CommunitiesSelect = connect(
 
 class FiltersEditor extends React.Component {
   addFilter(group, value) {
-    console.log("ADDING FILTER:", group, "value:", value);
     let nextFilters = _applyFilterValue(
       this.props.applied, group, value 
     );
@@ -359,8 +358,8 @@ export default connect(
                state.lookup.routesImported.length > 0,
 
     link: {
-      pageReceived:   state.lookup.pageReceived,
-      pageFiltered:   state.lookup.pageFiltered,
+      pageReceived:   0, // Reset pagination on filter change
+      pageFiltered:   0,
       query:          state.lookup.query,
       filtersApplied: state.lookup.filtersApplied,
       routing:        state.routing.locationBeforeTransitions,
