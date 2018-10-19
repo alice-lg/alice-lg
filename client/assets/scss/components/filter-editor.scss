@@ -29,16 +29,29 @@
          padding: 0px;
          width: 100%;
      }
+     td {
+        padding-bottom: 5px;
+        vertical-align: middle;
+     }
      .btn {
          margin-left: 3px;
          border-radius: 100px;
-         padding: 8px 10px;
+         padding: 3px 5px;
          font-size: 10px;
          line-height: 10px;
          color: #337ab7;
      }
      .btn-remove {
         color: #aa0000;
+     }
+
+     .options-title {
+        font-weight: bold;
+     }
+
+     .label {
+        text-align: left;
+        white-space: normal;
      }
   }
 

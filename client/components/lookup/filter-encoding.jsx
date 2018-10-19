@@ -47,7 +47,7 @@ export function decodeFiltersCommunities(params) {
     return []; // No params available
   }
   const communities = params.communities.split(",");
-  return communities.map((c) => _decodeCommunity(c));
+  return communities.map((c) => _makeFilter(_decodeCommunity(c)));
 }
 
 export function decodeFiltersExtCommunities(params) {
@@ -55,7 +55,7 @@ export function decodeFiltersExtCommunities(params) {
     return []; // No params available
   }
   const communities = params.ext_communities.split(",");
-  return communities.map((c) => _decodeCommunity(c));
+  return communities.map((c) => _makeFilter(_decodeCommunity(c)));
 }
 
 export function decodeFiltersLargeCommunities(params) {
@@ -63,7 +63,7 @@ export function decodeFiltersLargeCommunities(params) {
     return []; // No params available
   }
   const communities = params.large_communities.split(",");
-  return communities.map((c) => _decodeCommunity(c));
+  return communities.map((c) => _makeFilter(_decodeCommunity(c)));
 }
 
 
