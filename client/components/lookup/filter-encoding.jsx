@@ -55,7 +55,7 @@ export function decodeFiltersExtCommunities(params) {
     return []; // No params available
   }
   const communities = params.ext_communities.split(",");
-  return communities.map((c) => _makeFilter(_decodeCommunity(c)));
+  return communities.map((c) => _makeFilter(_decodeExtCommunity(c)));
 }
 
 export function decodeFiltersLargeCommunities(params) {
