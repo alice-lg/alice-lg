@@ -207,6 +207,7 @@ func parseNeighborSummary(
 			State:          mustString(n["state"], "unknown"),
 			Uptime:         uptime,
 			Description:    mustString(n["description"], "unknown"),
+			LastError:      mustString(n["last_error"], ""),
 			RoutesReceived: mustInt(n["routes_received"], -1),
 			RoutesAccepted: mustInt(n["routes_accepted"], -1),
 			RoutesFiltered: mustInt(n["routes_filtered"], -1),
