@@ -144,8 +144,8 @@ class PeersFilterSelect extends React.Component {
 
     // Build options
     const optionsAvailable = sortedFiltersAvailable.map((filter) => {
-      return <option key={filter.value} value={filter}>
-          {filter.name} AS{filter.value} ({filter.cardinality})
+      return <option key={filter.value} value={filter.value}>
+          {filter.name}, AS{filter.value} ({filter.cardinality})
         </option>;
     });
 
@@ -270,14 +270,10 @@ const CommunitiesSelect = connect(
 
 
 class FiltersEditor extends React.Component {
-  selectSource(sourceId) {
-    console.log("Selecting source. Applied:", this.props.applied);
+  addFilter(group, sourceId) {
     let nextFilters = _applyFilterValue(
-      this.props.applied, FILTER_GROUP_SOURCES, sourceId
+      this.props.applied, group, sourceId
     );
-    console.log("Prev filters:", this.props.applied);
-    console.log("Next filteers:", nextFilters);
-
     this.props.dispatch(push(
       makeLinkProps(Object.assign({}, this.props.link, {
         filtersApplied: nextFilters,
@@ -285,9 +281,9 @@ class FiltersEditor extends React.Component {
     ));
   }
 
-  removeSource(sourceId) {
+  removeFilter(group, sourceId) {
     let nextFilters = _removeFilterValue(
-      this.props.applied, FILTER_GROUP_SOURCES, sourceId
+      this.props.applied, group, sourceId
     );
 
     this.props.dispatch(push(
@@ -296,6 +292,8 @@ class FiltersEditor extends React.Component {
       }))
     ));
   }
+
+
 
   render() {
     if (!this.props.hasRoutes) {
@@ -304,13 +302,15 @@ class FiltersEditor extends React.Component {
     return (
       <div className="card lookup-filters-editor">
         <h2>Route server</h2>
-        <RouteserversSelect onChange={(value) => this.selectSource(value)}
-                            onRemove={(value) => this.removeSource(value)}
+        <RouteserversSelect onChange={(value) => this.addFilter(FILTER_GROUP_SOURCES, value)}
+                            onRemove={(value) => this.removeFilter(FILTER_GROUP_SOURCES, value)}
                             available={this.props.availableSources}
                             applied={this.props.appliedSources} />
 
         <h2>Neighbor</h2>
-        <PeersFilterSelect available={this.props.availableAsns}
+        <PeersFilterSelect onChange={(value) => this.addFilter(FILTER_GROUP_ASNS, value)}
+                           onRemove={(value) => this.removeFilter(FILTER_GROUP_ASNS, value)}
+                           available={this.props.availableAsns}
                            applied={this.props.appliedAsns} />
 
         <h2>Communities</h2>
