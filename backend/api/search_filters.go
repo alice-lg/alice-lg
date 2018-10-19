@@ -79,15 +79,9 @@ func searchFilterMatchLargeCommunity(route *LookupRoute, value interface{}) bool
 	return route.Bgp.HasLargeCommunity(community)
 }
 
-func (self *SearchFilterGroup) MatchAny(route *LookupRoute) bool {
-	// Check if we have any filter to match
-	if len(self.Filters) == 0 {
-		return true // no filter, everything matches
-	}
-
-	// Get comparator
+func selectCmpFuncByKey(key string) SearchFilterComparator {
 	var cmp SearchFilterComparator
-	switch self.Key {
+	switch key {
 	case SEARCH_KEY_SOURCES:
 		cmp = searchFilterMatchSource
 		break
@@ -107,10 +101,22 @@ func (self *SearchFilterGroup) MatchAny(route *LookupRoute) bool {
 		cmp = nil
 	}
 
+	return cmp
+}
+
+func (self *SearchFilterGroup) MatchAny(route *LookupRoute) bool {
+	// Check if we have any filter to match
+	if len(self.Filters) == 0 {
+		return true // no filter, everything matches
+	}
+
+	// Get comparator
+	cmp := selectCmpFuncByKey(self.Key)
 	if cmp == nil {
 		return false // This should not have happened!
 	}
 
+	// Check if any of the given filters matches
 	for _, filter := range self.Filters {
 		if cmp(route, filter.Value) {
 			return true
@@ -118,6 +124,29 @@ func (self *SearchFilterGroup) MatchAny(route *LookupRoute) bool {
 	}
 
 	return false
+}
+
+func (self *SearchFilterGroup) MatchAll(route *LookupRoute) bool {
+	// Check if we have any filter to match
+	if len(self.Filters) == 0 {
+		return true // no filter, everything matches. Like above.
+	}
+
+	// Get comparator
+	cmp := selectCmpFuncByKey(self.Key)
+	if cmp == nil {
+		return false // This again should not have happened!
+	}
+
+	// Assert that all filters match.
+	for _, filter := range self.Filters {
+		if !cmp(route, filter.Value) {
+			return false
+		}
+	}
+
+	// Everythings fine.
+	return true
 }
 
 type SearchFilters []*SearchFilterGroup
@@ -328,17 +357,17 @@ func (self *SearchFilters) MatchRoute(route *LookupRoute) bool {
 	}
 
 	communities := self.GetGroupByKey(SEARCH_KEY_COMMUNITIES)
-	if !communities.MatchAny(route) {
+	if !communities.MatchAll(route) {
 		return false
 	}
 
 	extCommunities := self.GetGroupByKey(SEARCH_KEY_EXT_COMMUNITIES)
-	if !extCommunities.MatchAny(route) {
+	if !extCommunities.MatchAll(route) {
 		return false
 	}
 
 	largeCommunities := self.GetGroupByKey(SEARCH_KEY_LARGE_COMMUNITIES)
-	if !largeCommunities.MatchAny(route) {
+	if !largeCommunities.MatchAll(route) {
 		return false
 	}
 

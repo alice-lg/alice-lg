@@ -10,7 +10,7 @@ func makeTestRoute() *LookupRoute {
 		Bgp: BgpInfo{
 			Communities: []Community{
 				Community{23, 42},
-				Community{11, 111},
+				Community{111, 11},
 			},
 			ExtCommunities: []ExtCommunity{
 				ExtCommunity{"ro", 23, 123},
@@ -148,8 +148,8 @@ func TestSearchFilterCompareRoute(t *testing.T) {
 	}
 
 	// Communities
-	if searchFilterMatchCommunity(route, Community{11, 111}) != true {
-		t.Error("Route should have community 11:111")
+	if searchFilterMatchCommunity(route, Community{111, 11}) != true {
+		t.Error("Route should have community 111:11")
 	}
 	if searchFilterMatchCommunity(route, Community{42, 111}) == true {
 		t.Error("Route should not have community 42:111")
@@ -212,5 +212,85 @@ func TestSearchFilterExcludeRoute(t *testing.T) {
 
 	if filters.MatchRoute(route) != false {
 		t.Error("Route should not have matched filters...")
+	}
+}
+
+// Communities should match all aswell
+func TestSearchFilterExcludeRouteCommunity(t *testing.T) {
+	route := makeTestRoute()
+
+	query := "communities=23:42,111:11"
+	values, err := url.ParseQuery(query)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	filters, err := FiltersFromQuery(values)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if filters.MatchRoute(route) == false {
+		t.Error("Route should have matched filters!")
+	}
+
+	// Now check that all communities need to match
+	query = "communities=23:42,111:12"
+	values, err = url.ParseQuery(query)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	filters, err = FiltersFromQuery(values)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if filters.MatchRoute(route) != false {
+		t.Error("Route should not have matched filters!")
+	}
+}
+
+// Check that ext. communities work
+func TestSearchFilterExtCommunities(t *testing.T) {
+	route := makeTestRoute()
+
+	query := "ext_communities=ro:23:123"
+	values, err := url.ParseQuery(query)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	filters, err := FiltersFromQuery(values)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if filters.MatchRoute(route) == false {
+		t.Error("Route should have matched filters!")
+	}
+
+	// Now check that all communities need to match
+	query = "ext_communities=ro:23:142"
+	values, err = url.ParseQuery(query)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	filters, err = FiltersFromQuery(values)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if filters.MatchRoute(route) != false {
+		t.Error("Route should not have matched filters!")
 	}
 }
