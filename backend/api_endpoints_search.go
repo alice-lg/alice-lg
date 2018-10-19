@@ -35,6 +35,12 @@ func apiLookupPrefixGlobal(
 	// Measure response time
 	t0 := time.Now()
 
+	// Get additional filter criteria
+	filters, err := api.FiltersFromQuery(req.URL.Query())
+	if err != nil {
+		return nil, err
+	}
+
 	// Perform query
 	var routes api.LookupRoutes
 	if lookupPrefix {
@@ -51,8 +57,15 @@ func apiLookupPrefixGlobal(
 	imported := make(api.LookupRoutes, 0, totalResults)
 	filtered := make(api.LookupRoutes, 0, totalResults)
 
-	// Now, as we have allocated even more space, split routes
+	// Now, as we have allocated even more space process routes by, splitting,
+	// filtering and updating the available filters...
+	filtersAvailable := api.NewSearchFilters()
 	for _, r := range routes {
+
+		if !filters.MatchRoute(r) {
+			continue // Exclude route from results set
+		}
+
 		switch r.State {
 		case "filtered":
 			filtered = append(filtered, r)
@@ -61,6 +74,8 @@ func apiLookupPrefixGlobal(
 			imported = append(imported, r)
 			break
 		}
+
+		filtersAvailable.UpdateFromRoute(r)
 	}
 
 	// Homogenize results
@@ -106,6 +121,10 @@ func apiLookupPrefixGlobal(
 			PaginatedResponse: &api.PaginatedResponse{
 				Pagination: paginationFiltered,
 			},
+		},
+		FilterableResponse: api.FilterableResponse{
+			FiltersAvailable: filtersAvailable,
+			FiltersApplied:   filters,
 		},
 	}
 

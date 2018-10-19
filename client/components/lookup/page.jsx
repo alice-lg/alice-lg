@@ -6,6 +6,7 @@ import PageHeader from 'components/page-header'
 
 import Lookup from 'components/lookup'
 import LookupSummary from 'components/lookup/results-summary'
+import LookupFilters from 'components/lookup/filters'
 
 import Content from 'components/content'
 
@@ -22,6 +23,7 @@ class _LookupView extends React.Component {
        </div>
        <div className="col-aside-details col-lg-3 col-md-12">
          <LookupSummary />
+         <LookupFilters />
        </div>
       </div>
     );

@@ -5,6 +5,8 @@
 
 import axios from 'axios'
 
+import {filtersUrlEncode} from './filter-encoding'
+
 export const SET_LOOKUP_QUERY_VALUE = '@lookup/SET_LOOKUP_QUERY_VALUE';
 
 export const LOAD_RESULTS_REQUEST = '@lookup/LOAD_RESULTS_REQUEST';
@@ -53,19 +55,21 @@ export function loadResultsError(query, error) {
   }
 }
 
-export function loadResults(query, pageImported=0, pageFiltered=0) {
+export function loadResults(query, filters, pageImported=0, pageFiltered=0) {
   return (dispatch) => {
     dispatch(loadResultsRequest(query));
 
     // Build querystring
-    let q = `q=${query}&page_filtered=${pageFiltered}&page_imported=${pageImported}`;
-    axios.get(`/api/v1/lookup/prefix?${q}`)
-      .then((res) => {
-        dispatch(loadResultsSuccess(query, res.data));
-      })
-      .catch((error) => {
-        dispatch(loadResultsError(query, error));
-      });
+    const q = `q=${query}&page_filtered=${pageFiltered}&page_imported=${pageImported}`;
+    const f = filtersUrlEncode(filters); 
+    axios.get(`/api/v1/lookup/prefix?${q}${f}`)
+      .then(
+        (res) => {
+          dispatch(loadResultsSuccess(query, res.data));
+        },
+        (error) => {
+          dispatch(loadResultsError(query, error));
+        });
   }
 }
 

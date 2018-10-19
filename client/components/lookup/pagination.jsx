@@ -21,39 +21,7 @@ import {connect} from 'react-redux'
 import {Link} from 'react-router'
 import {push} from 'react-router-redux'
 
-
-/* 
- * Maybe this can be customized and injected into 
- * the PageLink component.
- */
-const makeLinkProps = function(props) {
-  const linkPage = parseInt(props.page, 10);
-
-  let pr = props.pageReceived;
-  let pf = props.pageFiltered;
-
-  // This here can be surely more elegant.
-  switch(props.anchor) {
-    case "received":
-      pr = linkPage;
-      break;
-    case "filtered":
-      pf = linkPage;
-      break;
-  }
-
-  const query = props.routing.query.q || "";
-
-  const search = `?pr=${pr}&pf=${pf}&q=${query}`;
-  const hash   = `#routes-${props.anchor}`;
-  const linkTo = {
-    pathname: props.routing.pathname,
-    hash:     hash,
-    search:   search,
-  };
-
-  return linkTo;
-}
+import {makeLinkProps} from './state'
 
 
 const PageLink = function(props) {

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -157,7 +158,24 @@ type NeighboursLookupResults map[int]Neighbours
 
 // BGP
 type Community []int
+
+func (com Community) String() string {
+	res := ""
+	for _, v := range com {
+		res += fmt.Sprintf(":%d", v)
+	}
+	return res[1:]
+}
+
 type ExtCommunity []interface{}
+
+func (com ExtCommunity) String() string {
+	res := ""
+	for _, v := range com {
+		res += fmt.Sprintf(":%v", v)
+	}
+	return res[1:]
+}
 
 type BgpInfo struct {
 	Origin           string         `json:"origin"`
@@ -168,6 +186,66 @@ type BgpInfo struct {
 	ExtCommunities   []ExtCommunity `json:"ext_communities"`
 	LocalPref        int            `json:"local_pref"`
 	Med              int            `json:"med"`
+}
+
+func (bgp BgpInfo) HasCommunity(community Community) bool {
+	if len(community) != 2 {
+		return false // This can never match.
+	}
+
+	for _, com := range bgp.Communities {
+		if len(com) != len(community) {
+			continue // This can't match.
+		}
+
+		if com[0] == community[0] &&
+			com[1] == community[1] {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (bgp BgpInfo) HasExtCommunity(community ExtCommunity) bool {
+	if len(community) != 3 {
+		return false // This can never match.
+	}
+
+	for _, com := range bgp.ExtCommunities {
+		if len(com) != len(community) {
+			continue // This can't match.
+		}
+
+		if com[0] == community[0] &&
+			com[1] == community[1] &&
+			com[2] == community[2] {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (bgp BgpInfo) HasLargeCommunity(community Community) bool {
+	// TODO: This is an almost 1:1 match to the function above.
+	if len(community) != 3 {
+		return false // This can never match.
+	}
+
+	for _, com := range bgp.LargeCommunities {
+		if len(com) != len(community) {
+			continue // This can't match.
+		}
+
+		if com[0] == community[0] &&
+			com[1] == community[1] &&
+			com[2] == community[2] {
+			return true
+		}
+	}
+
+	return false
 }
 
 // Prefixes
@@ -227,6 +305,11 @@ type Pagination struct {
 
 type PaginatedResponse struct {
 	Pagination Pagination `json:"pagination"`
+}
+
+type FilterableResponse struct {
+	FiltersAvailable *SearchFilters `json:"filters_available"`
+	FiltersApplied   *SearchFilters `json:"filters_applied"`
 }
 
 type PaginatedRoutesResponse struct {
@@ -297,6 +380,7 @@ type RoutesLookupResponseGlobal struct {
 
 type PaginatedRoutesLookupResponse struct {
 	TimedResponse
+	FilterableResponse
 
 	Api ApiStatus `json:"api"` // Add to provide cache status information
 

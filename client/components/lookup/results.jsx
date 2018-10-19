@@ -6,6 +6,8 @@ import {connect} from 'react-redux'
 import {Link} from 'react-router'
 import {replace} from 'react-router-redux'
 
+import {filtersEqual} from './filter-groups'
+
 import FilterReason
   from 'components/routeservers/communities/filter-reason'
 
@@ -31,6 +33,9 @@ import {RoutesHeader}
 
 
 const ResultsView = function(props) {
+  if(!props.routes) {
+    return null;
+  }
   if(props.routes.length == 0) {
     return null;
   }
@@ -101,6 +106,7 @@ class LookupResults extends React.Component {
     const query = this.props.query;
     const pageImported = this.props.pagination.imported.page;
     const pageFiltered = this.props.pagination.filtered.page;
+    const filters = this.props.filtersApplied;
 
     if (query == "") {
       // Dispatch reset and transition to main page
@@ -108,7 +114,7 @@ class LookupResults extends React.Component {
       this.props.dispatch(replace("/"));
     } else {
       this.props.dispatch(
-        loadResults(query, pageImported, pageFiltered)
+        loadResults(query, filters, pageImported, pageFiltered)
       );
     }
   }
@@ -121,7 +127,8 @@ class LookupResults extends React.Component {
   componentDidUpdate(prevProps) {
     if(this.props.query != prevProps.query ||
        this.props.pagination.filtered.page != prevProps.pagination.filtered.page ||
-       this.props.pagination.imported.page != prevProps.pagination.imported.page) {
+       this.props.pagination.imported.page != prevProps.pagination.imported.page ||
+       !filtersEqual(this.props.filtersApplied, prevProps.filtersApplied)) {
         this.dispatchLookup();
     }
   }
@@ -165,7 +172,7 @@ class LookupResults extends React.Component {
                      pageSize={this.props.pagination.imported.pageSize}
                      totalPages={this.props.pagination.imported.totalPages}
                      totalResults={this.props.pagination.imported.totalResults}
-                     
+
                      query={this.props.query}
 
                      routes={importedRoutes} />
@@ -177,7 +184,7 @@ class LookupResults extends React.Component {
 export default connect(
   (state) => {
     const filteredRoutes = state.lookup.routesFiltered;
-    const importedRoutes = state.lookup.routesImported; 
+    const importedRoutes = state.lookup.routesImported;
 
     return {
       anchor: state.lookup.anchor,
@@ -201,6 +208,7 @@ export default connect(
       },
       isLoading: state.lookup.isLoading,
       query: state.lookup.query,
+      filtersApplied: state.lookup.filtersApplied,
     }
   }
 )(LookupResults);
