@@ -17,6 +17,10 @@ const initialState = {
 
   all: [],
 
+  groups: groups,
+  isGrouped: false,
+  selectedGroup: "",
+
   details: {},
   protocols: {},
   statusErrors: {},
@@ -102,6 +106,24 @@ const _updateProtocol = function(state, payload) {
   });
 }
 
+const _loadRouteservers = function(state, routeservers) {
+  // Caclulate grouping
+  let groups = [];
+  for (const rs of routeservers) {
+    if (groups.indexOf(rs.group) == -1) {
+      groups.push(rs.group);
+    }
+  }
+
+  return Object.assign({}, state, {
+    all: routeservers,
+    groups: groups,
+    isGrouped: groups.length > 1,
+    selectedGroup: groups[0],
+    isLoading: false
+  });
+}
+
 
 export default function reducer(state = initialState, action) {
   switch(action.type) {
@@ -111,10 +133,7 @@ export default function reducer(state = initialState, action) {
       });
 
     case LOAD_ROUTESERVERS_SUCCESS:
-      return Object.assign({}, state, {
-        all: action.payload.routeservers,
-        isLoading: false
-      });
+      return _loadRouteservers(state, action.payload.routeservers);
 
     case LOAD_ROUTESERVER_PROTOCOL_REQUEST:
       return Object.assign({}, state, {
