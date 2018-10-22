@@ -4,6 +4,8 @@ import Sidebar from 'components/sidebar'
 import ErrorsPage from 'components/errors/page'
 import Config from 'components/config/view'
 
+import Content from 'components/content'
+
 export default class LayoutMain extends React.Component {
   render() {
     return (
@@ -12,7 +14,12 @@ export default class LayoutMain extends React.Component {
         <Sidebar />
         <div className="page-body">
           <main className="page-content">
-            {this.props.children}
+            <div className="main-content-wrapper">
+              {this.props.children}
+            </div>
+            <footer className="page-footer">
+              <Content id="footer"></Content> 
+            </footer>
           </main>
         </div>
         <Config/>

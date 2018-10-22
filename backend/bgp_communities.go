@@ -72,10 +72,12 @@ func (self BgpCommunities) Lookup(community string) (string, error) {
 	lookup = self
 
 	for _, key := range path {
+		key = strings.TrimSpace(key)
+
 		clookup, ok := lookup.(BgpCommunities)
 		if !ok {
 			// This happens if path.len > depth
-			return "", fmt.Errorf("community not found")
+			return "", fmt.Errorf("community not found @ %v", key)
 		}
 
 		res, ok := clookup[key]
@@ -92,7 +94,7 @@ func (self BgpCommunities) Lookup(community string) (string, error) {
 
 	label, ok := lookup.(string)
 	if !ok {
-		return "", fmt.Errorf("community not found")
+		return "", fmt.Errorf("community not found: %v", community)
 	}
 
 	return label, nil
@@ -104,6 +106,7 @@ func (self BgpCommunities) Set(community string, label string) {
 	lookup = self
 
 	for _, key := range path[:len(path)-1] {
+		key = strings.TrimSpace(key)
 		clookup, ok := lookup.(BgpCommunities)
 		if !ok {
 			break

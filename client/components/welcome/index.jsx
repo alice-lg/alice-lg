@@ -20,15 +20,12 @@ class LookupView extends React.Component {
        <div className="col-md-8">
          <Lookup />
        </div>
-       <div className="col-md-4">
-         <LookupSummary />
-       </div>
       </div>
     );
   }
 }
 
-const LookupPage = connect(
+const LookupWidget = connect(
   (state) => {
     return {
       enabled: state.config.prefix_lookup_enabled
@@ -48,7 +45,7 @@ export default class Welcome extends React.Component {
          <p><Content id="welcome.tagline">Your friendly bird looking glass</Content></p>
        </div>
 
-       <LookupPage />
+       <LookupWidget />
 
       </div>
     );

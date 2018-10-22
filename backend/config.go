@@ -4,14 +4,12 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/alice-lg/alice-lg/backend/sources"
 	"github.com/alice-lg/alice-lg/backend/sources/birdwatcher"
 
 	"github.com/go-ini/ini"
-	_ "github.com/imdario/mergo"
 )
 
 const SOURCE_UNKNOWN = 0
@@ -22,22 +20,29 @@ type ServerConfig struct {
 	EnablePrefixLookup             bool   `ini:"enable_prefix_lookup"`
 	NeighboursStoreRefreshInterval int    `ini:"neighbours_store_refresh_interval"`
 	RoutesStoreRefreshInterval     int    `ini:"routes_store_refresh_interval"`
+	Asn                            int    `ini:"asn"`
 }
 
 type RejectionsConfig struct {
-	Asn      int `ini:"asn"`
-	RejectId int `ini:"reject_id"`
-
-	Reasons map[int]string
+	Reasons BgpCommunities
 }
 
 type NoexportsConfig struct {
-	Asn        int `ini:"asn"`
-	NoexportId int `ini:"noexport_id"`
-
-	Reasons map[int]string
-
+	Reasons      BgpCommunities
 	LoadOnDemand bool `ini:"load_on_demand"`
+}
+
+type RejectCandidatesConfig struct {
+	Communities BgpCommunities
+}
+
+type RpkiConfig struct {
+	// Define communities
+	Enabled    bool     `ini:"enabled"`
+	Valid      []string `ini:"valid"`
+	Unknown    []string `ini:"unknown"`
+	NotChecked []string `ini:"not_checked"`
+	Invalid    []string `ini:"invalid"`
 }
 
 type UiConfig struct {
@@ -50,9 +55,12 @@ type UiConfig struct {
 	LookupColumns      map[string]string
 	LookupColumnsOrder []string
 
-	RoutesRejections RejectionsConfig
-	RoutesNoexports  NoexportsConfig
-	BgpCommunities   BgpCommunities
+	RoutesRejections       RejectionsConfig
+	RoutesNoexports        NoexportsConfig
+	RoutesRejectCandidates RejectCandidatesConfig
+
+	BgpCommunities BgpCommunities
+	Rpki           RpkiConfig
 
 	Theme ThemeConfig
 
@@ -71,11 +79,15 @@ type PaginationConfig struct {
 }
 
 type SourceConfig struct {
-	Id   int
-	Name string
-	Type int
+	Id    int
+	Name  string
+	Group string
+
+	// Blackhole IPs
+	Blackholes []string
 
 	// Source configurations
+	Type        int
 	Birdwatcher birdwatcher.Config
 
 	// Source instance
@@ -249,67 +261,13 @@ func getLookupColumns(config *ini.File) (
 	return columns, order, nil
 }
 
-// Get UI config: Get rejections
-func getRoutesRejections(config *ini.File) (RejectionsConfig, error) {
-	reasons := make(map[int]string)
-	baseConfig := config.Section("rejection")
-	reasonsConfig := config.Section("rejection_reasons")
-
-	// Map base configuration
-	rejectionsConfig := RejectionsConfig{}
-	baseConfig.MapTo(&rejectionsConfig)
-
-	// Map reasons
-	keys := reasonsConfig.Keys()
-	for _, key := range keys {
-		id, err := strconv.Atoi(key.Name())
-		if err != nil {
-			return rejectionsConfig, err
-		}
-		reasons[id] = reasonsConfig.Key(key.Name()).MustString("")
-	}
-
-	rejectionsConfig.Reasons = reasons
-
-	return rejectionsConfig, nil
-}
-
-// Get UI config: Get no export config
-func getRoutesNoexports(config *ini.File) (NoexportsConfig, error) {
-	reasons := make(map[int]string)
-	baseConfig := config.Section("noexport")
-	reasonsConfig := config.Section("noexport_reasons")
-
-	// Map base configuration
-	noexportsConfig := NoexportsConfig{}
-	baseConfig.MapTo(&noexportsConfig)
-
-	// Map reasons for missing export
-	keys := reasonsConfig.Keys()
-	for _, key := range keys {
-		id, err := strconv.Atoi(key.Name())
-		if err != nil {
-			return noexportsConfig, err
-		}
-		reasons[id] = reasonsConfig.Key(key.Name()).MustString("")
-	}
-
-	noexportsConfig.Reasons = reasons
-
-	return noexportsConfig, nil
-}
-
-// Get UI config: Bgp Communities
-func getBgpCommunities(config *ini.File) BgpCommunities {
-	// Load defaults
-	communities := MakeWellKnownBgpCommunities()
-	communitiesConfig := config.Section("bgp_communities")
-	if communitiesConfig == nil {
-		return communities // nothing else to do here, go with the default
-	}
+// Helper parse communities from a section body
+func parseAndMergeCommunities(
+	communities BgpCommunities, body string,
+) BgpCommunities {
 
 	// Parse and merge communities
-	lines := strings.Split(communitiesConfig.Body(), "\n")
+	lines := strings.Split(body, "\n")
 	for _, line := range lines {
 		kv := strings.SplitN(line, "=", 2)
 		if len(kv) != 2 {
@@ -323,6 +281,145 @@ func getBgpCommunities(config *ini.File) BgpCommunities {
 	}
 
 	return communities
+}
+
+// Get UI config: Bgp Communities
+func getBgpCommunities(config *ini.File) BgpCommunities {
+	// Load defaults
+	communities := MakeWellKnownBgpCommunities()
+	communitiesConfig := config.Section("bgp_communities")
+	if communitiesConfig == nil {
+		return communities // nothing else to do here, go with the default
+	}
+
+	return parseAndMergeCommunities(communities, communitiesConfig.Body())
+}
+
+// Get UI config: Get rejections
+func getRoutesRejections(config *ini.File) (RejectionsConfig, error) {
+	reasonsConfig := config.Section("rejection_reasons")
+	if reasonsConfig == nil {
+		return RejectionsConfig{}, nil
+	}
+
+	reasons := parseAndMergeCommunities(
+		make(BgpCommunities),
+		reasonsConfig.Body())
+
+	rejectionsConfig := RejectionsConfig{
+		Reasons: reasons,
+	}
+
+	return rejectionsConfig, nil
+}
+
+// Get UI config: Get no export config
+func getRoutesNoexports(config *ini.File) (NoexportsConfig, error) {
+	baseConfig := config.Section("noexport")
+	reasonsConfig := config.Section("noexport_reasons")
+
+	// Map base configuration
+	noexportsConfig := NoexportsConfig{}
+	baseConfig.MapTo(&noexportsConfig)
+
+	reasons := parseAndMergeCommunities(
+		make(BgpCommunities),
+		reasonsConfig.Body())
+
+	noexportsConfig.Reasons = reasons
+
+	return noexportsConfig, nil
+}
+
+// Get UI config: Reject candidates
+func getRejectCandidatesConfig(config *ini.File) (RejectCandidatesConfig, error) {
+	candidateCommunities := config.Section(
+		"rejection_candidates").Key("communities").String()
+
+	if candidateCommunities == "" {
+		return RejectCandidatesConfig{}, nil
+	}
+
+	communities := BgpCommunities{}
+	for i, c := range strings.Split(candidateCommunities, ",") {
+		communities.Set(c, fmt.Sprintf("reject-candidate-%d", i+1))
+	}
+
+	conf := RejectCandidatesConfig{
+		Communities: communities,
+	}
+
+	return conf, nil
+}
+
+// Get UI config: RPKI configuration
+func getRpkiConfig(config *ini.File) (RpkiConfig, error) {
+	var rpki RpkiConfig
+	// Defaults taken from:
+	//   https://www.euro-ix.net/en/forixps/large-bgp-communities/
+	section := config.Section("rpki")
+	section.MapTo(&rpki)
+
+	fallbackAsn, err := getOwnASN(config)
+	if err != nil {
+		log.Println(
+			"Own ASN is not configured.",
+			"This might lead to unexpected behaviour with BGP large communities",
+		)
+	}
+	ownAsn := fmt.Sprintf("%d", fallbackAsn)
+
+	// Fill in defaults or postprocess config value
+	if len(rpki.Valid) == 0 {
+		rpki.Valid = []string{ownAsn, "1000", "1"}
+	} else {
+		rpki.Valid = strings.SplitN(rpki.Valid[0], ":", 3)
+	}
+
+	if len(rpki.Unknown) == 0 {
+		rpki.Unknown = []string{ownAsn, "1000", "2"}
+	} else {
+		rpki.Unknown = strings.SplitN(rpki.Unknown[0], ":", 3)
+	}
+
+	if len(rpki.NotChecked) == 0 {
+		rpki.NotChecked = []string{ownAsn, "1000", "3"}
+	} else {
+		rpki.NotChecked = strings.SplitN(rpki.NotChecked[0], ":", 3)
+	}
+
+	// As the euro-ix document states, this can be a range.
+	if len(rpki.Invalid) == 0 {
+		rpki.Invalid = []string{ownAsn, "1000", "4", "*"}
+	} else {
+		// Preprocess
+		rpki.Invalid = strings.SplitN(rpki.Invalid[0], ":", 3)
+		tokens := []string{}
+		if len(rpki.Invalid) != 3 {
+			// This is wrong, we should have three parts (RS):1000:[range]
+			return rpki, fmt.Errorf("Unexpected rpki.Invalid configuration: %v", rpki.Invalid)
+		} else {
+			tokens = strings.Split(rpki.Invalid[2], "-")
+		}
+
+		rpki.Invalid = append([]string{rpki.Invalid[0], rpki.Invalid[1]}, tokens...)
+	}
+
+	return rpki, nil
+}
+
+// Helper: Get own ASN from ini
+// This is now easy, since we enforce an ASN in
+// the [server] section.
+func getOwnASN(config *ini.File) (int, error) {
+	server := config.Section("server")
+	asn := server.Key("asn").MustInt(-1)
+
+	if asn == -1 {
+		return 0, fmt.Errorf("Could not get own ASN from config")
+	}
+
+	return asn, nil
 }
 
 // Get UI config: Theme settings
@@ -384,6 +481,15 @@ func getUiConfig(config *ini.File) (UiConfig, error) {
 		return uiConfig, err
 	}
 
+	// Get reject candidates
+	rejectCandidates, _ := getRejectCandidatesConfig(config)
+
+	// RPKI filter config
+	rpki, err := getRpkiConfig(config)
+	if err != nil {
+		return uiConfig, err
+	}
+
 	// Theme configuration: Theming is optional, if no settings
 	// are found, it will be ignored
 	themeConfig := getThemeConfig(config)
@@ -402,9 +508,12 @@ func getUiConfig(config *ini.File) (UiConfig, error) {
 		LookupColumns:      lookupColumns,
 		LookupColumnsOrder: lookupColumnsOrder,
 
-		RoutesRejections: rejections,
-		RoutesNoexports:  noexports,
-		BgpCommunities:   getBgpCommunities(config),
+		RoutesRejections:       rejections,
+		RoutesNoexports:        noexports,
+		RoutesRejectCandidates: rejectCandidates,
+
+		BgpCommunities: getBgpCommunities(config),
+		Rpki:           rpki,
 
 		Theme: themeConfig,
 
@@ -446,10 +555,17 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 		}
 
 		// Make config
+		sourceName := section.Key("name").MustString("Unknown Source")
+		sourceGroup := section.Key("group").MustString("")
+		sourceBlackholes := TrimmedStringList(
+			section.Key("blackholes").MustString(""))
+
 		config := &SourceConfig{
-			Id:   sourceId,
-			Name: section.Key("name").MustString("Unknown Source"),
-			Type: backendType,
+			Id:         sourceId,
+			Name:       sourceName,
+			Group:      sourceGroup,
+			Blackholes: sourceBlackholes,
+			Type:       backendType,
 		}
 
 		// Set backend
@@ -495,7 +611,11 @@ func loadConfig(file string) (*Config, error) {
 	// Load configuration, but handle bgp communities section
 	// with our own parser
 	parsedConfig, err := ini.LoadSources(ini.LoadOptions{
-		UnparseableSections: []string{"bgp_communities"},
+		UnparseableSections: []string{
+			"bgp_communities",
+			"rejection_reasons",
+			"noexport_reasons",
+		},
 	}, file)
 	if err != nil {
 		return nil, err

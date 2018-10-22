@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -25,11 +26,16 @@ type CacheableResponse interface {
 
 // Config
 type ConfigResponse struct {
-	Rejection     Rejection         `json:"rejection"`
-	RejectReasons map[string]string `json:"reject_reasons"`
+	Asn int `json:"asn"`
 
-	Noexport        Noexport          `json:"noexport"`
-	NoexportReasons map[string]string `json:"noexport_reasons"`
+	RejectReasons map[string]interface{} `json:"reject_reasons"`
+
+	Noexport        Noexport               `json:"noexport"`
+	NoexportReasons map[string]interface{} `json:"noexport_reasons"`
+
+	RejectCandidates RejectCandidates `json:"reject_candidates"`
+
+	Rpki Rpki `json:"rpki"`
 
 	BgpCommunities map[string]interface{} `json:"bgp_communities"`
 
@@ -45,15 +51,20 @@ type ConfigResponse struct {
 	PrefixLookupEnabled bool `json:"prefix_lookup_enabled"`
 }
 
-type Rejection struct {
-	Asn      int `json:"asn"`
-	RejectId int `json:"reject_id"`
+type Noexport struct {
+	LoadOnDemand bool `json:"load_on_demand"`
 }
 
-type Noexport struct {
-	Asn          int  `json:"asn"`
-	NoexportId   int  `json:"noexport_id"`
-	LoadOnDemand bool `json:"load_on_demand"`
+type RejectCandidates struct {
+	Communities map[string]interface{} `json:"communities"`
+}
+
+type Rpki struct {
+	Enabled    bool     `json:"enabled"`
+	Valid      []string `json:"valid"`
+	Unknown    []string `json:"unknown"`
+	NotChecked []string `json:"not_checked"`
+	Invalid    []string `json:"invalid"`
 }
 
 // Status
@@ -86,8 +97,10 @@ type StatusResponse struct {
 
 // Routeservers
 type Routeserver struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
+	Id         int      `json:"id"`
+	Name       string   `json:"name"`
+	Group      string   `json:"group"`
+	Blackholes []string `json:"blackholes"`
 }
 
 type RouteserversResponse struct {
@@ -147,14 +160,93 @@ type NeighboursLookupResults map[int]Neighbours
 // BGP
 type Community []int
 
+func (com Community) String() string {
+	res := ""
+	for _, v := range com {
+		res += fmt.Sprintf(":%d", v)
+	}
+	return res[1:]
+}
+
+type ExtCommunity []interface{}
+
+func (com ExtCommunity) String() string {
+	res := ""
+	for _, v := range com {
+		res += fmt.Sprintf(":%v", v)
+	}
+	return res[1:]
+}
+
 type BgpInfo struct {
-	Origin           string      `json:"origin"`
-	AsPath           []int       `json:"as_path"`
-	NextHop          string      `json:"next_hop"`
-	Communities      []Community `json:"communities"`
-	LargeCommunities []Community `json:"large_communities"`
-	LocalPref        int         `json:"local_pref"`
-	Med              int         `json:"med"`
+	Origin           string         `json:"origin"`
+	AsPath           []int          `json:"as_path"`
+	NextHop          string         `json:"next_hop"`
+	Communities      []Community    `json:"communities"`
+	LargeCommunities []Community    `json:"large_communities"`
+	ExtCommunities   []ExtCommunity `json:"ext_communities"`
+	LocalPref        int            `json:"local_pref"`
+	Med              int            `json:"med"`
+}
+
+func (bgp BgpInfo) HasCommunity(community Community) bool {
+	if len(community) != 2 {
+		return false // This can never match.
+	}
+
+	for _, com := range bgp.Communities {
+		if len(com) != len(community) {
+			continue // This can't match.
+		}
+
+		if com[0] == community[0] &&
+			com[1] == community[1] {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (bgp BgpInfo) HasExtCommunity(community ExtCommunity) bool {
+	if len(community) != 3 {
+		return false // This can never match.
+	}
+
+	for _, com := range bgp.ExtCommunities {
+		if len(com) != len(community) {
+			continue // This can't match.
+		}
+
+		if com[0] == community[0] &&
+			com[1] == community[1] &&
+			com[2] == community[2] {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (bgp BgpInfo) HasLargeCommunity(community Community) bool {
+	// TODO: This is an almost 1:1 match to the function above.
+	if len(community) != 3 {
+		return false // This can never match.
+	}
+
+	for _, com := range bgp.LargeCommunities {
+		if len(com) != len(community) {
+			continue // This can't match.
+		}
+
+		if com[0] == community[0] &&
+			com[1] == community[1] &&
+			com[2] == community[2] {
+			return true
+		}
+	}
+
+	return false
 }
 
 // Prefixes
@@ -201,9 +293,8 @@ func (self *RoutesResponse) CacheTtl() time.Duration {
 	return self.Api.Ttl.Sub(now)
 }
 
-type PaginatedRoutesResponse struct {
-	*RoutesResponse
-	Pagination Pagination `json:"pagination"`
+type TimedResponse struct {
+	RequestDuration float64 `json:"request_duration_ms"`
 }
 
 type Pagination struct {
@@ -211,6 +302,20 @@ type Pagination struct {
 	PageSize     int `json:"page_size"`
 	TotalPages   int `json:"total_pages"`
 	TotalResults int `json:"total_results"`
+}
+
+type PaginatedResponse struct {
+	Pagination Pagination `json:"pagination"`
+}
+
+type FilterableResponse struct {
+	FiltersAvailable *SearchFilters `json:"filters_available"`
+	FiltersApplied   *SearchFilters `json:"filters_applied"`
+}
+
+type PaginatedRoutesResponse struct {
+	*RoutesResponse
+	Pagination Pagination `json:"pagination"`
 }
 
 // Lookup Prefixes
@@ -235,8 +340,28 @@ type LookupRoute struct {
 	Details Details `json:"details"`
 }
 
+// Implement sorting interface for lookup routes
+func (routes LookupRoutes) Len() int {
+	return len(routes)
+}
+
+func (routes LookupRoutes) Less(i, j int) bool {
+	return routes[i].Network < routes[j].Network
+}
+
+func (routes LookupRoutes) Swap(i, j int) {
+	routes[i], routes[j] = routes[j], routes[i]
+}
+
 type LookupRoutes []*LookupRoute
 
+// TODO: Naming is a bit yuck
+type LookupRoutesResponse struct {
+	*PaginatedResponse
+	Routes LookupRoutes `json:"routes"`
+}
+
+// TODO: Refactor this (might be legacy)
 type RoutesLookupResponse struct {
 	Api    ApiStatus    `json:"api"`
 	Routes LookupRoutes `json:"routes"`
@@ -252,4 +377,14 @@ type RoutesLookupResponseGlobal struct {
 
 	// Meta
 	Time float64 `json:"query_duration_ms"`
+}
+
+type PaginatedRoutesLookupResponse struct {
+	TimedResponse
+	FilterableResponse
+
+	Api ApiStatus `json:"api"` // Add to provide cache status information
+
+	Imported *LookupRoutesResponse `json:"imported"`
+	Filtered *LookupRoutesResponse `json:"filtered"`
 }

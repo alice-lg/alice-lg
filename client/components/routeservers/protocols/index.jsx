@@ -12,12 +12,13 @@ import {loadRouteserverProtocol}
   from 'components/routeservers/actions'
 
 import RelativeTimestamp
-	from 'components/relativetime/timestamp'
+	from 'components/datetime/relative-timestamp'
 
 import LoadingIndicator
 	from 'components/loading-indicator/small'
 
 import {ipToNumeric} from 'components/utils/ip'
+import {urlEscape} from 'components/utils/query'
 
 
 function _filteredProtocols(protocols, filter) {
@@ -26,18 +27,41 @@ function _filteredProtocols(protocols, filter) {
     return protocols; // nothing to do here
   }
 
-  filter = filter.toLowerCase();
-
-  // Filter protocols
-  filtered = _.filter(protocols, (p) => {
-    return (p.asn == filter ||
-            p.address.toLowerCase().indexOf(filter) != -1 ||
-            p.description.toLowerCase().indexOf(filter) != -1);
-  });
+  // We support different filter modes:
+  // - Default: Try to match as much as possible
+  // - AS$num: Try to match ASN only
+  const filterAsn = _getFilterAsn(filter);
+  if (filterAsn) {
+    filtered = _.filter(protocols, (p) => {
+      return (p.asn == filterAsn);
+    });
+  } else {
+    filter = filter.toLowerCase();
+    filtered = _.filter(protocols, (p) => {
+      return (p.asn == filter ||
+              p.address.toLowerCase().indexOf(filter) != -1 ||
+              p.description.toLowerCase().indexOf(filter) != -1);
+    });
+  }
 
   return filtered;
 }
 
+
+function _getFilterAsn(filter) {
+  const tokens = filter.split("AS", 2);
+  if (tokens.length !== 2) {
+    return false; // Not an ASN query
+  }
+  const asn = parseInt(tokens[1], 10);
+
+  // Check if ASN is a valid number
+  if (asn >= 0 == false) {
+    return false;
+  }
+
+  return asn;
+}
 
 function _sortAnum(sort) {
   return (a, b) => {
@@ -105,12 +129,13 @@ class NeighborColumnHeader extends React.Component {
     const name = this.props.columns[this.props.column];
     const sortColumn = this.props.column.toLowerCase();
     const active = sortColumn == this.props.sort;
+    const query = urlEscape(this.props.query);
     let cls = `col-neighbor-attr col-neighbor-${this.props.column} `;
 
     // Render link with sorting indicator
     if (active) {
       const nextOrder = (this.props.order == 'asc') ? 'desc' : 'asc';
-      const url = `${baseUrl}?s=${sortColumn}&o=${nextOrder}`;
+      const url = `${baseUrl}?s=${sortColumn}&o=${nextOrder}&q=${query}`;
       let indicator = <i className="fa fa-arrow-circle-up"></i>;
 
       cls += 'col-neighbor-active ';
@@ -126,7 +151,7 @@ class NeighborColumnHeader extends React.Component {
     }
     
     // Column is not active, just present a link:
-    const url = `${baseUrl}?s=${sortColumn}&o=${this.props.order}`
+    const url = `${baseUrl}?s=${sortColumn}&o=${this.props.order}&q=${query}`
     return(
       <th className={cls}>
         <Link to={url}>{name}</Link>
@@ -164,7 +189,8 @@ const ColDescription = function(props) {
                   protocol={neighbour.id}
                   state={neighbour.state}>
         {neighbour.description}
-        {neighbour.state != "up" && neighbour.last_error &&
+        {neighbour.state.toLowerCase() != "up" && 
+         neighbour.last_error &&
           <span className="protocol-state-error">
               {neighbour.last_error}
           </span>}
@@ -243,7 +269,8 @@ class NeighboursTableView extends React.Component {
                               rsId={this.props.routeserverId}
                               columns={columns} column={col}
                               sort={this.props.sortColumn}
-                              order={this.props.sortOrder} />
+                              order={this.props.sortOrder}
+                              query={this.props.filterQuery} />
       );
     });
 
@@ -259,14 +286,14 @@ class NeighboursTableView extends React.Component {
 
     let uptimeTitle;
     let sectionTitle = '';
-    let sectionColor = 'black';
     let sectionAnchor = 'sessions-unknown';
+    let sectionCls = 'card-header card-header-neighbors ';
     switch(this.props.state) {
       case 'up':
         uptimeTitle = 'Uptime'; 
         sectionAnchor = 'sessions-up';
-        sectionTitle  = 'Sessions Established';
-        sectionColor  = "green";
+        sectionTitle  = 'BGP Sessions Established';
+        sectionCls  += 'established ';
         break;
       case 'down':
         uptimeTitle = 'Downtime'; 
@@ -274,17 +301,16 @@ class NeighboursTableView extends React.Component {
       case 'start':
         sectionAnchor = 'sessions-up';
         uptimeTitle = 'Since';
-        sectionTitle = 'BGP Sessions Down';
-        sectionColor = "red";
         sectionAnchor = 'sessions-down';
+        sectionTitle = 'BGP Sessions Down';
+        sectionCls += 'down ';
     }
 
 
     return (
       <div className="card">
         <a name={sectionAnchor} />
-        <p className="card-header"
-           style={{color: sectionColor}}>{sectionTitle}</p>
+        <p className={sectionCls}>{sectionTitle}</p>
 
         <table className="table table-striped table-protocols">
           <thead>
@@ -308,6 +334,7 @@ const NeighboursTable = connect(
 
     sortColumn: state.neighbors.sortColumn,
     sortOrder:  state.neighbors.sortOrder,
+    filterQuery: state.neighbors.filterQuery,
   })
 )(NeighboursTableView);
 
@@ -343,7 +370,7 @@ class Protocols extends React.Component {
       return null;
     }
 
-    protocol = _filteredProtocols(protocol, this.props.filter);
+    protocol = _filteredProtocols(protocol, this.props.filterQuery);
     if(!protocol || protocol.length == 0) {
       return (
         <div className="card">
@@ -385,14 +412,14 @@ class Protocols extends React.Component {
                                    neighbours={neighboursUp}
                                    routeserverId={this.props.routeserverId} />);
     }
-    if (neighboursDown.length) {
-      tables.push(<NeighboursTable key="down" state="down"
-                                   neighbours={neighboursDown}
-                                   routeserverId={this.props.routeserverId} />);
-    }
     if (neighboursIdle.length) {
       tables.push(<NeighboursTable key="start" state="start"
                                    neighbours={neighboursIdle}
+                                   routeserverId={this.props.routeserverId} />);
+    }
+    if (neighboursDown.length) {
+      tables.push(<NeighboursTable key="down" state="down"
+                                   neighbours={neighboursDown}
                                    routeserverId={this.props.routeserverId} />);
     }
 
@@ -408,7 +435,9 @@ export default connect(
     return {
       isLoading: state.routeservers.protocolsAreLoading,
       protocols: state.routeservers.protocols,
-      filter: state.routeservers.protocolsFilter,
+
+      filterQuery: state.neighbors.filterQuery,
+      routing: state.routing.locationBeforeTransitions,
     }
   }
 )(Protocols);

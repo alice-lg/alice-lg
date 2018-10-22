@@ -13,7 +13,8 @@ import {push} from 'react-router-redux'
 import {_lookup,
         ColDefault,
         ColNetwork,
-        ColAsPath} from 'components/routeservers/routes/column'
+        ColFlags,
+        ColAsPath} from 'components/routeservers/routes/route/column'
 
 import {showBgpAttributes}
   from 'components/routeservers/routes/bgp-attributes-modal-actions'
@@ -48,6 +49,8 @@ const RouteColumn = function(props) {
   const widgets = {
     "network": ColNetwork,
 
+    "flags": ColFlags,
+
     "bgp.as_path": ColAsPath,
     "ASPath": ColAsPath,
 
@@ -57,16 +60,20 @@ const RouteColumn = function(props) {
     "routeserver.name": ColLinkedRouteserver
   };
 
+  const rsId = props.route.routeserver.id;
+  const blackholes = props.blackholesMap[rsId] || [];
+
   let Widget = widgets[props.column] || ColDefault;
   return (
     <Widget column={props.column} route={props.route}
             displayReasons={props.displayReasons}
+            blackholes={blackholes}
             onClick={props.onClick} />
   );
 }
 
 
-class RoutesTable extends React.Component {
+class LookupRoutesTable extends React.Component {
   showAttributesModal(route) {
     this.props.dispatch(showBgpAttributes(route));
   }
@@ -86,9 +93,10 @@ class RoutesTable extends React.Component {
           {routesColumnsOrder.map(col => {
             return (<RouteColumn key={col}
                                  onClick={() => this.showAttributesModal(r)}
+                                 blackholesMap={this.props.blackholesMap}
                                  column={col}
                                  route={r}
-                                 displayReasons={this.props.type} />);
+                                 displayReasons={this.props.displayReasons} />);
             }
           )}
         </tr>
@@ -112,9 +120,10 @@ class RoutesTable extends React.Component {
 
 export default connect(
   (state) => ({
+    blackholesMap:      state.config.blackholes,
     routesColumns:      state.config.lookup_columns,
     routesColumnsOrder: state.config.lookup_columns_order,
   })
-)(RoutesTable);
+)(LookupRoutesTable);
 
 

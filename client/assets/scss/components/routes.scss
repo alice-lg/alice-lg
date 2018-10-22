@@ -1,6 +1,6 @@
 
-$labelOffsetStart: -10px;
-$labelOffsetEnd:   -30px;
+$labelOffsetStart: -90px;
+$labelOffsetEnd:   -70px;
 
 
 @-webkit-keyframes fadeSmooth {
@@ -62,9 +62,11 @@ $labelOffsetEnd:   -30px;
   }
 
   .col-route-flags {
-    padding: 7px 0px;
-    padding-left: 4px;
-    width: 35px;
+    // padding: 7px 0px;
+    padding-left: 2px;
+    width: auto;
+
+    white-space: nowrap;
   }
 
   .col-route-network {
@@ -76,6 +78,26 @@ $labelOffsetEnd:   -30px;
   .route-prefix-flags {
     .primary-route {
        color: #efb208; 
+    }
+
+    .rpki-valid {
+       color: #009900;
+    }
+    
+    .rpki-invalid {
+       color: #d80000;
+    }
+
+    .rpki-unknown {
+       color: #2e6da4;
+    }
+
+    .rpki-not-checked {
+       color: #2e6da4;
+    }
+
+    .reject-candidate-route {
+       color: #d80000;
     }
   }
 
@@ -158,8 +180,7 @@ $labelOffsetEnd:   -30px;
 
 
 .routes-quick-links {
-    margin-bottom: 0.75em; 
-    margin-top: -0.5em;
+    margin: -0.75em 0; 
 
     text-align: right;
     span {
@@ -246,5 +267,50 @@ $labelOffsetEnd:   -30px;
         padding-top: 21px;
     }
 }
+
+.card-header-routes {
+    &.received {
+        color: green;
+    }
+    &.filtered {
+        color: orange;
+    }
+    &.not-exported {
+        color: red;
+    }
+}
+
+.routes-view {
+    &.routes-filtered {
+        .route-prefix-flag {
+            &.reject-candidate-route {
+                display: none;
+            }
+        }
+    }
+
+    &.routes-received {
+        .table-routes {
+            .reject-reason {
+            }
+        }
+    }
+}
+
+// Responsive tweaks: The awkward inbetween.
+@media (min-width: 1200px) and (max-width: 1258px) {
+  .details-main {
+    > .col-main {
+        width: 80%;
+        float: left;
+    }
+    > .col-aside-details {
+        width: 20%;
+        float: left;
+    }
+  }
+}
+
+
 
 

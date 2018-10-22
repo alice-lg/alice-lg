@@ -10,40 +10,158 @@ import {LOAD_ROUTESERVERS_REQUEST,
         LOAD_ROUTESERVER_PROTOCOL_REQUEST,
         LOAD_ROUTESERVER_PROTOCOL_SUCCESS,
 
-        SET_PROTOCOLS_FILTER_VALUE,
-        SET_PROTOCOLS_FILTER,
-
-        SET_ROUTES_FILTER_VALUE}
+        SELECT_GROUP}
   from './actions'
 
-import {LOAD_REJECT_REASONS_SUCCESS,
-        LOAD_NOEXPORT_REASONS_SUCCESS}
-  from './large-communities/actions'
+import {LOAD_CONFIG_SUCCESS} from 'components/config/actions'
 
+const LOCATION_CHANGE = '@@router/LOCATION_CHANGE'
 
 const initialState = {
 
   all: [],
+  selectedRsId: 0,
+
+  groups: [],
+  isGrouped: false,
+  selectedGroup: "",
 
   details: {},
   protocols: {},
   statusErrors: {},
 
-  reject_reasons: {},
-  reject_id: 0,
-  reject_asn: 0,
+  rejectReasons: {},
+  noexportReasons: {},
 
-  noexport_reasons: {},
-  noexport_id: 0,
-  noexport_asn: 0,
-
-  protocolsFilterValue: "",
-  protocolsFilter: "",
+  rejectCandidates: {
+    communities: {}
+  },
 
   isLoading: false,
 
   protocolsAreLoading: false
 };
+
+// == Helpers ==
+const _groupForRsId = function(routeservers, rsId) {
+  const rs = routeservers[rsId]||{group:""};
+  return rs.group;
+}
+
+
+// == Handlers ==
+const _importConfig = function(state, payload) {
+  // Get reject and filter reasons from config
+  const rejectReasons   = payload.reject_reasons;
+  const noexportReasons = payload.noexport_reasons;
+
+  // Get reject candidates from config
+  const rejectCandidates = payload.reject_candidates;
+
+  return Object.assign({}, state, {
+    rejectReasons:    rejectReasons,
+    rejectCandidates: rejectCandidates,
+
+    noexportReasons: noexportReasons
+  });
+};
+
+
+const _updateStatus = function(state, payload) {
+  const details = Object.assign({}, state.details, {
+    [payload.routeserverId]: payload.status
+  });
+  const errors = Object.assign({}, state.statusErrors, {
+    [payload.routeserverId]: null,
+  });
+
+  return Object.assign({}, state, {
+    details: details,
+    statusErrors: errors
+  });
+}
+
+
+const _updateStatusError = function(state, payload) {
+  var info = {
+    code: 42,
+    tag: "UNKNOWN_ERROR",
+    message: "Unknown error"
+  };
+
+  if (payload.error &&
+      payload.error.response &&
+      payload.error.response.data &&
+      payload.error.response.data.code) {
+        info = payload.error.response.data;
+  }
+
+  var errors = Object.assign({}, state.statusErrors, {
+    [payload.routeserverId]: info
+  });
+
+  return Object.assign({}, state, {
+    statusErrors: errors
+  });
+}
+
+
+const _updateProtocol = function(state, payload) {
+  var protocols = Object.assign({}, state.protocols, {
+    [payload.routeserverId]: payload.protocol
+  });
+
+  return Object.assign({}, state, {
+    protocols: protocols,
+    protocolsAreLoading: false
+  });
+}
+
+const _loadRouteservers = function(state, routeservers) {
+  // Caclulate grouping
+  let groups = [];
+  for (const rs of routeservers) {
+    if (groups.indexOf(rs.group) == -1) {
+      groups.push(rs.group);
+    }
+  }
+
+  const selectedGroup = _groupForRsId(
+    routeservers, state.selectedRsId
+  );
+
+  return Object.assign({}, state, {
+    all: routeservers,
+    groups: groups,
+    isGrouped: groups.length > 1,
+    selectedGroup: selectedGroup,
+    isLoading: false
+  });
+}
+
+
+const _restoreStatefromLocation = function(state, location) {
+  const path = location.pathname.split("/");
+  if(path.length < 3) {
+    return state; // nothing to do here
+  }
+  const [_, resource, rid, ...rest] = path;
+
+  if (resource != "routeservers") {
+    return state;
+  }
+  const routeserverId = parseInt(rid, 10);
+
+  let selectedGroup = state.selectedGroup;
+  if (state.all.length > 0) {
+    selectedGroup = _groupForRsId(state.all, routeserverId);
+  }
+
+  return Object.assign({}, state, {
+    selectedRsId: routeserverId,
+    selectedGroup: selectedGroup,
+  });
+}
 
 
 export default function reducer(state = initialState, action) {
@@ -54,10 +172,7 @@ export default function reducer(state = initialState, action) {
       });
 
     case LOAD_ROUTESERVERS_SUCCESS:
-      return Object.assign({}, state, {
-        all: action.payload.routeservers,
-        isLoading: false
-      });
+      return _loadRouteservers(state, action.payload.routeservers);
 
     case LOAD_ROUTESERVER_PROTOCOL_REQUEST:
       return Object.assign({}, state, {
@@ -65,66 +180,24 @@ export default function reducer(state = initialState, action) {
       })
 
     case LOAD_ROUTESERVER_PROTOCOL_SUCCESS:
-      var protocols = Object.assign({}, state.protocols, {
-        [action.payload.routeserverId]: action.payload.protocol
-      });
-      return Object.assign({}, state, {
-        protocols: protocols,
-        protocolsAreLoading: false
-      });
+      return _updateProtocol(state, action.payload);
 
-    case LOAD_NOEXPORT_REASONS_SUCCESS:
-    case LOAD_REJECT_REASONS_SUCCESS:
-      return Object.assign({}, state, action.payload);
-
+    case LOAD_CONFIG_SUCCESS:
+      return _importConfig(state, action.payload);
 
     case LOAD_ROUTESERVER_STATUS_SUCCESS:
-      var details = Object.assign({}, state.details, {
-        [action.payload.routeserverId]: action.payload.status
-      });
-      var errors = Object.assign({}, state.statusErrors, {
-        [action.payload.routeserverId]: null,
-      });
-      return Object.assign({}, state, {
-        details: details,
-        statusErrors: errors 
-      });
+      return _updateStatus(state, action.payload);
 
     case LOAD_ROUTESERVER_STATUS_ERROR:
-      var info = {
-        code: 42,
-        tag: "UNKNOWN_ERROR",
-        message: "Unknown error"
-      };
+      return _updateStatusError(state, action.payload);
 
-      if (action.payload.error &&
-          action.payload.error.response && 
-          action.payload.error.response.data &&
-          action.payload.error.response.data.code) {
-            info = action.payload.error.response.data;
-      }
-      
-      var errors = Object.assign({}, state.statusErrors, {
-        [action.payload.routeserverId]: info
-      });
+    case SELECT_GROUP:
       return Object.assign({}, state, {
-        statusErrors: errors 
-      });
-      return state;
-
-    case SET_PROTOCOLS_FILTER_VALUE:
-      return Object.assign({}, state, {
-        protocolsFilterValue: action.payload.value
+        selectedGroup: action.payload,
       });
 
-    case SET_PROTOCOLS_FILTER:
-      return Object.assign({}, state, {
-        protocolsFilter: action.payload.value
-      });
-
-    case SET_ROUTES_FILTER_VALUE:
-      return Object.assign({}, state, action.payload);
-
+    case LOCATION_CHANGE:
+      return _restoreStatefromLocation(state, action.payload);
   }
   return state;
 }

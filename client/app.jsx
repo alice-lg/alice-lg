@@ -44,6 +44,8 @@ import RouteserverPage
   from 'components/routeservers/page'
 import RoutesPage
   from 'components/routeservers/routes/page'
+import LookupPage
+  from 'components/lookup/page'
 
 // Middlewares
 import thunkMiddleware from 'redux-thunk'
@@ -98,6 +100,8 @@ class Birdseye extends Component {
         <Router history={history}>
           <Route path="/" component={LayoutMain}>
             <IndexRoute component={WelcomePage}/>
+            <Route path="/search"
+                   component={LookupPage} />
             <Route path="/routeservers">
               <Route path=":routeserverId" component={RouteserverPage} />
               <Route path=":routeserverId/protocols/:protocolId/routes" component={RoutesPage} />

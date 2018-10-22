@@ -75,7 +75,25 @@ func (self *NeighboursStore) init() {
 	}
 }
 
+func (self *NeighboursStore) SourceStatus(sourceId int) StoreStatus {
+	self.RLock()
+	status := self.statusMap[sourceId]
+	self.RUnlock()
+
+	return status
+}
+
+// Get state by source Id
+func (self *NeighboursStore) SourceState(sourceId int) int {
+	status := self.SourceStatus(sourceId)
+	return status.State
+}
+
+// Update all neighbors
 func (self *NeighboursStore) update() {
+	successCount := 0
+	errorCount := 0
+	t0 := time.Now()
 	for sourceId, _ := range self.neighboursMap {
 		// Get current state
 		if self.statusMap[sourceId].State == STATE_UPDATING {
@@ -89,10 +107,17 @@ func (self *NeighboursStore) update() {
 		}
 		self.Unlock()
 
-		source := self.configMap[sourceId].getInstance()
+		sourceConfig := self.configMap[sourceId]
+		source := sourceConfig.getInstance()
 
 		neighboursRes, err := source.Neighbours()
 		if err != nil {
+			log.Println(
+				"Refreshing the neighbors store failed for:",
+				sourceConfig.Name, "(", sourceConfig.Id, ")",
+				"with:", err,
+				"- NEXT STATE: ERROR",
+			)
 			// That's sad.
 			self.Lock()
 			self.statusMap[sourceId] = StoreStatus{
@@ -101,6 +126,8 @@ func (self *NeighboursStore) update() {
 				LastRefresh: time.Now(),
 			}
 			self.Unlock()
+
+			errorCount++
 			continue
 		}
 
@@ -121,7 +148,28 @@ func (self *NeighboursStore) update() {
 			State:       STATE_READY,
 		}
 		self.Unlock()
+		successCount++
 	}
+
+	refreshDuration := time.Since(t0)
+	log.Println(
+		"Refreshed neighbors store for", successCount, "of", successCount+errorCount,
+		"sources with", errorCount, "error(s) in", refreshDuration,
+	)
+}
+
+func (self *NeighboursStore) GetNeighborsAt(sourceId int) api.Neighbours {
+	self.RLock()
+	neighborsIdx := self.neighboursMap[sourceId]
+	self.RUnlock()
+
+	neighbors := make(api.Neighbours, 0, len(neighborsIdx))
+
+	for _, neighbor := range neighborsIdx {
+		neighbors = append(neighbors, neighbor)
+	}
+
+	return neighbors
 }
 
 func (self *NeighboursStore) GetNeighbourAt(
@@ -130,9 +178,10 @@ func (self *NeighboursStore) GetNeighbourAt(
 ) *api.Neighbour {
 	// Lookup neighbour on RS
 	self.RLock()
-	neighbours := self.neighboursMap[sourceId]
+	neighborsIdx := self.neighboursMap[sourceId]
 	self.RUnlock()
-	return neighbours[id]
+
+	return neighborsIdx[id]
 }
 
 func (self *NeighboursStore) LookupNeighboursAt(

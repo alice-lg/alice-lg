@@ -2,8 +2,11 @@
 __"No, no! The adventures first, explanations take such a dreadful time."__  
 _Lewis Carroll, Alice's Adventures in Wonderland & Through the Looking-Glass_
 
-Take a look at an Alice-LG production example:
+Take a look at an Alice-LG production examples at:
+- https://lg-beta.de-cix.net/
 - https://lg.ecix.net/
+
+And checkout the API at:
 - https://lg.ecix.net/api/config
 - https://lg.ecix.net/api/routeservers
 - https://lg.ecix.net/api/routeservers/0/status
@@ -56,7 +59,7 @@ git clone https://github.com/alice-lg/alice-lg.git
 cd alice-lg
 make
 ```
-Your Alice-LG source will now be located at `~/go/src/alice-lg` and your alice-LG executable should be at `~/go/src/alice-lg/bin/alice-lg-linux-amd64`
+Your Alice-LG source will now be located at `~/go/src/github.com/alice-lg/alice-lg` and your alice-LG executable should be at `~/go/src/github.com/alice-lg/alice-lg/bin/alice-lg-linux-amd64`
 
 ## Configuration
 
@@ -72,18 +75,19 @@ You can copy it to any of the following locations:
 
 You will have to edit the configuration file as you need to point Alice-LG to the correct [APIs](https://github.com/ecix/birdwatcher):
 
-    [source.0]
-    name = rs1.example.com (IPv4)
-    [source.0.birdwatcher]
-    api = http://rs1.example.com:29184/
-    # show_last_reboot = true
-    # timezone = UTC
+```ini
+[source.0]
+name = rs1.example.com (IPv4)
+[source.0.birdwatcher]
+api = http://rs1.example.com:29184/
+# show_last_reboot = true
+# timezone = UTC
 
-    [source.1]
-    name = rs1.example.com (IPv6)
-    [source.1.birdwatcher]
-    api = http://rs1.example.com:29186/
-
+[source.1]
+name = rs1.example.com (IPv6)
+[source.1.birdwatcher]
+api = http://rs1.example.com:29186/
+```
 
 ## Running
 
@@ -181,9 +185,18 @@ make -f Makefile.docker client
 # Production build:
 make -f Makefile.docker client_prod
 ```
-
 You can use gulp with docker for watching the files while developing aswell:
 ```bash
 make -f Makefile.docker watch
 ```
 
+## Sponsors
+
+The development of Alice is now sponsored by
+<p align="center">
+    <a href="https://www.de-cix.net" target="_blank">
+        <img src="doc/images/DE-CIX_Logo_2016_small.png?raw=true" alt="DE-CIX Logo" title="DE-CIX" />
+    </a>
+</p>
+
+Many thanks go out to [ECIX](https://www.ecix.net), where this project originated and was backed over the last two years.

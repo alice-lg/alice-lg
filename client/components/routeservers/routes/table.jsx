@@ -9,7 +9,7 @@ import {showBgpAttributes} from './bgp-attributes-modal-actions'
 
 import LoadingIndicator from './loading-indicator'
 
-import RouteColumn from './column'
+import RouteColumn from './route/column'
 
 
 class RoutesTable extends React.Component {
@@ -24,6 +24,7 @@ class RoutesTable extends React.Component {
     let routes = this.props.routes;
     const routesColumns = this.props.routesColumns;
     const routesColumnsOrder = this.props.routesColumnsOrder;
+    const blackholes = this.props.blackholes;
 
     if (!routes || !routes.length) {
       return null;
@@ -36,7 +37,7 @@ class RoutesTable extends React.Component {
                                                        onClick={() => this.showAttributesModal(r)}
                                                        column={col}
                                                        route={r}
-                                                       displayReasons={this.props.type} />)
+                                                       blackholes={blackholes} />)
           )}
         </tr>
       );
@@ -58,9 +59,14 @@ class RoutesTable extends React.Component {
 }
 
 export default connect(
-  (state) => ({
-    routesColumns:      state.config.routes_columns,
-    routesColumnsOrder: state.config.routes_columns_order,
-  })
+  (state, props) => {
+    const rsId = parseInt(props.routeserverId, 10);
+    const blackholes = state.config.blackholes[rsId];
+    return {
+      blackholes:         blackholes,
+      routesColumns:      state.config.routes_columns,
+      routesColumnsOrder: state.config.routes_columns_order,
+    }
+  }
 )(RoutesTable);
 

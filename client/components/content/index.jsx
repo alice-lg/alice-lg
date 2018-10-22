@@ -28,7 +28,7 @@ function ContentComponent(props) {
     resolved = defaultValue; 
   }
 
-  return (<span>{resolved}</span>);
+  return (<span dangerouslySetInnerHTML={{__html: resolved}}></span>);
 }
 
 export default connect(

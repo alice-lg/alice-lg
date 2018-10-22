@@ -55,26 +55,32 @@
   .routeservers-list {
     margin-top: 40px;
 
-    ul {
+    > ul {
       list-style: none;
       padding: 0px;
       margin: 0px;
-    }
+        li {
+          padding: 8px;
+          padding-left: 15px;
 
-    li {
-      padding: 8px;
-      padding-left: 15px;
+          cursor: pointer;
+        }
 
-      cursor: pointer;
-    }
-
-    li.active {
-
+        li.active {
+        }
     }
 
     .routeserver-id {
       font-size: 13px;
       display: block;
+    }
+
+    a.routeserver-id {
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
     }
 
     .routeserver-status {
@@ -91,5 +97,49 @@
 
   }
 
+  .routeservers-groups-select {
+    display: block;
+    padding: 0px 15px;
+    .btn-select {
+      display: block;
+      width: 100%;
+      background: #222;
+      border: #222;
+      text-align: left;
+      color: white;
+      text-shadow: none;
+
+      .caret {
+        float: right;
+        margin-top: 10px;
+      }
+
+      &:focus,
+      &:hover {
+        background: #222;
+        color: white;
+        text-shadow: none;
+      }
+
+      &:focus {
+        box-shadow: 0px 1px 0px #555;
+      }
+    }
+    
+    .btn-option {
+        display: block;
+        text-align: left;
+        color: #222;
+        width: 100%;
+        padding: 2px 10px;
+
+        &:hover {
+            background: #ccc;
+            text-decoration: none;
+        }
+    }
+
+
+  }
 
 }

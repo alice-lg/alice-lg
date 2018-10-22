@@ -28,7 +28,7 @@ function routesUrl(type, rsId, pId, page, query) {
       rtype = "not-exported"; // This is a bit ugly
     }
 
-    let base = `/api/routeservers/${rsId}/neighbours/${pId}/routes/${rtype}`
+    let base = `/api/v1/routeservers/${rsId}/neighbors/${pId}/routes/${rtype}`
     let params = `?page=${page}&q=${query}`
     return base + params;
 };
@@ -92,16 +92,17 @@ function fetchRoutes(type) {
       dispatch(requestAction());
 
       axios.get(routesUrl(type, rsId, pId, page, query))
-        .then(({data}) => {
-          dispatch(successAction(
-            data[rtype],
-            data.pagination,
-            data.api));
-        })
-        .catch((error) => {
-          dispatch(errorAction(error));
-          dispatch(apiError(error));
-        });
+        .then(
+          ({data}) => {
+            dispatch(successAction(
+              data[rtype],
+              data.pagination,
+              data.api));
+          },
+          (error) => {
+            dispatch(errorAction(error));
+            dispatch(apiError(error));
+          });
     }
   }
 };

@@ -9,7 +9,7 @@ import {makeLinkProps} from './urls'
 
 
 const PageLink = function(props) {
-  const linkPage = parseInt(props.page);
+  const linkPage = parseInt(props.page, 10);
   const label = props.label || (linkPage + 1);
 
   if (props.disabled) {

@@ -7,20 +7,19 @@ import axios from 'axios'
 
 import {apiError} from 'components/errors/actions'
 
-export const LOAD_ROUTESERVERS_REQUEST = '@birdseye/LOAD_ROUTESERVERS_REQUEST';
-export const LOAD_ROUTESERVERS_SUCCESS = '@birdseye/LOAD_ROUTESERVERS_SUCCESS';
-export const LOAD_ROUTESERVERS_ERROR   = '@birdseye/LOAD_ROUTESERVERS_ERROR';
+export const LOAD_ROUTESERVERS_REQUEST = '@routeservers/LOAD_ROUTESERVERS_REQUEST';
+export const LOAD_ROUTESERVERS_SUCCESS = '@routeservers/LOAD_ROUTESERVERS_SUCCESS';
+export const LOAD_ROUTESERVERS_ERROR   = '@routeservers/LOAD_ROUTESERVERS_ERROR';
 
-export const LOAD_ROUTESERVER_STATUS_REQUEST = '@birdseye/LOAD_ROUTESERVER_STATUS_REQUEST';
-export const LOAD_ROUTESERVER_STATUS_SUCCESS = '@birdseye/LOAD_ROUTESERVER_STATUS_SUCCESS';
-export const LOAD_ROUTESERVER_STATUS_ERROR   = '@birdseye/LOAD_ROUTESERVER_STATUS_ERROR';
+export const LOAD_ROUTESERVER_STATUS_REQUEST = '@routeservers/LOAD_ROUTESERVER_STATUS_REQUEST';
+export const LOAD_ROUTESERVER_STATUS_SUCCESS = '@routeservers/LOAD_ROUTESERVER_STATUS_SUCCESS';
+export const LOAD_ROUTESERVER_STATUS_ERROR   = '@routeservers/LOAD_ROUTESERVER_STATUS_ERROR';
 
-export const LOAD_ROUTESERVER_PROTOCOL_REQUEST = '@birdseye/LOAD_ROUTESERVER_PROTOCOL_REQUEST';
-export const LOAD_ROUTESERVER_PROTOCOL_SUCCESS = '@birdseye/LOAD_ROUTESERVER_PROTOCOL_SUCCESS';
-export const LOAD_ROUTESERVER_PROTOCOL_ERROR   = '@birdseye/LOAD_ROUTESERVER_PROTOCOL_ERROR';
+export const LOAD_ROUTESERVER_PROTOCOL_REQUEST = '@routeservers/LOAD_ROUTESERVER_PROTOCOL_REQUEST';
+export const LOAD_ROUTESERVER_PROTOCOL_SUCCESS = '@routeservers/LOAD_ROUTESERVER_PROTOCOL_SUCCESS';
+export const LOAD_ROUTESERVER_PROTOCOL_ERROR   = '@routeservers/LOAD_ROUTESERVER_PROTOCOL_ERROR';
 
-export const SET_PROTOCOLS_FILTER_VALUE = '@birdseye/SET_PROTOCOLS_FILTER_VALUE';
-export const SET_PROTOCOLS_FILTER = '@birdseye/SET_PROTOCOLS_FILTER';
+export const SELECT_GROUP = "@routeservers/SELECT_GROUP";
 
 
 // Action Creators
@@ -52,14 +51,15 @@ export function loadRouteservers() {
   return (dispatch) => {
     dispatch(loadRouteserversRequest())
 
-    axios.get('/api/routeservers')
-      .then(({data}) => {
-        dispatch(loadRouteserversSuccess(data["routeservers"]));
-      })
-      .catch((error) => {
-        dispatch(apiError(error));
-        dispatch(loadRouteserversError(error.data));
-      });
+    axios.get('/api/v1/routeservers')
+      .then(
+        ({data}) => {
+          dispatch(loadRouteserversSuccess(data["routeservers"]));
+        },
+        (error) => {
+          dispatch(apiError(error));
+          dispatch(loadRouteserversError(error.data));
+        });
   }
 }
 
@@ -97,14 +97,15 @@ export function loadRouteserverStatusError(routeserverId, error) {
 export function loadRouteserverStatus(routeserverId) {
   return (dispatch) => {
     dispatch(loadRouteserverStatusRequest(routeserverId));
-    axios.get(`/api/routeservers/${routeserverId}/status`)
-      .then(({data}) => {
-        dispatch(loadRouteserverStatusSuccess(routeserverId, data.status));
-      })
-      .catch((error) => {
-        dispatch(apiError(error));
-        dispatch(loadRouteserverStatusError(routeserverId, error));
-      });
+    axios.get(`/api/v1/routeservers/${routeserverId}/status`)
+      .then(
+        ({data}) => {
+          dispatch(loadRouteserverStatusSuccess(routeserverId, data.status));
+        },
+        (error) => {
+          dispatch(apiError(error));
+          dispatch(loadRouteserverStatusError(routeserverId, error));
+        });
   }
 }
 
@@ -118,12 +119,13 @@ export function loadRouteserverProtocolRequest(routeserverId) {
   }
 }
 
-export function loadRouteserverProtocolSuccess(routeserverId, protocol) {
+export function loadRouteserverProtocolSuccess(routeserverId, protocol, api) {
   return {
     type: LOAD_ROUTESERVER_PROTOCOL_SUCCESS,
     payload: {
       routeserverId: routeserverId,
-      protocol: protocol
+      protocol: protocol,
+      api: api
     }
   }
 }
@@ -131,34 +133,24 @@ export function loadRouteserverProtocolSuccess(routeserverId, protocol) {
 export function loadRouteserverProtocol(routeserverId) {
   return (dispatch) => {
     dispatch(loadRouteserverProtocolRequest(routeserverId));
-    axios.get(`/api/routeservers/${routeserverId}/neighbours`)
-      .then(({data}) => {
-        dispatch(setProtocolsFilterValue(""));
-        dispatch(loadRouteserverProtocolSuccess(routeserverId, data.neighbours));
-      })
-      .catch((error) => dispatch(apiError(error)));
+    axios.get(`/api/v1/routeservers/${routeserverId}/neighbors`)
+      .then(
+        ({data}) => {
+          dispatch(loadRouteserverProtocolSuccess(
+            routeserverId,
+            data.neighbours,
+            data.api,
+          ));
+        },
+        (error) => dispatch(apiError(error)));
   }
 }
 
 
-
-export function setProtocolsFilterValue(value) {
+export function selectGroup(group) {
   return {
-    type: SET_PROTOCOLS_FILTER_VALUE,
-    payload: {
-      value: value
-    }
+    type: SELECT_GROUP,
+    payload: group,
   }
 }
-
-
-export function setProtocolsFilter(value) {
-  return {
-    type: SET_PROTOCOLS_FILTER,
-    payload: {
-      value: value, 
-    }
-  }
-}
-
 

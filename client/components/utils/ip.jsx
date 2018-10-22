@@ -6,15 +6,14 @@ export function IPv6ToNumeric(addr) {
   const parts = addr.split(":"); // let's se what we can do about the :: expansion
   let expanded = [];
 
-  for (let p of parts) {
+  for (const p of parts) {
+    if (p === "") { continue; }
     let binary = parseInt(p, 16).toString(2); // Convert to binary
     while (binary.length < 16) {
-      // Leftpad
-      binary = "0" + binary;
+      binary = "0" + binary; // leftpad
     }
     expanded.push(binary);
   }
-
   return bigInt(expanded.join(""), 2);
 }
 

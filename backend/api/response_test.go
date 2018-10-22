@@ -14,8 +14,8 @@ func TestStatusResponseSerialization(t *testing.T) {
 			Version:         "2.0.0",
 			CacheStatus:     CacheStatus{},
 			ResultFromCache: false,
+			Ttl:             time.Now(),
 		},
-		Ttl: time.Now(),
 		Status: Status{
 			Message:  "Server is up and running",
 			RouterId: "testrouter",
@@ -64,4 +64,60 @@ func TestNeighbourSerialization(t *testing.T) {
 	}
 
 	_ = result
+}
+
+func TestCommunityStringify(t *testing.T) {
+	com := Community{23, 42}
+	if com.String() != "23:42" {
+		t.Error("Expected 23:42, got:", com.String())
+	}
+
+	extCom := ExtCommunity{"ro", 42, 123}
+	if extCom.String() != "ro:42:123" {
+		t.Error("Expected ro:42:123, but got:", extCom.String())
+	}
+}
+
+func TestHasCommunity(t *testing.T) {
+	com := Community{23, 42}
+
+	bgp := BgpInfo{
+		Communities: []Community{
+			Community{42, 123},
+			Community{23, 42},
+			Community{42, 23},
+		},
+		ExtCommunities: []ExtCommunity{
+			ExtCommunity{"rt", 23, 42},
+			ExtCommunity{"ro", 123, 456},
+		},
+		LargeCommunities: []Community{
+			Community{1000, 23, 42},
+			Community{2000, 123, 456},
+		},
+	}
+
+	if bgp.HasCommunity(com) == false {
+		t.Error("Expected community 23:42 to be present")
+	}
+
+	if bgp.HasCommunity(Community{111, 11}) != false {
+		t.Error("Expected community 111:11 to be not present")
+	}
+
+	if bgp.HasExtCommunity(ExtCommunity{"ro", 123, 456}) == false {
+		t.Error("Expected ro:123:456 in ext community set")
+	}
+
+	if bgp.HasExtCommunity(ExtCommunity{"ro", 111, 11}) != false {
+		t.Error("Expected ro:111:111 not in ext community set")
+	}
+
+	if bgp.HasLargeCommunity(Community{2000, 123, 456}) == false {
+		t.Error("Expected community 2000:123:456 present")
+	}
+
+	if bgp.HasLargeCommunity(Community{23, 42}) != false {
+		t.Error("23:42 should not be present in large commnuties")
+	}
 }

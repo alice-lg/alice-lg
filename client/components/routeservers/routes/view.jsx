@@ -20,22 +20,19 @@ import {ROUTES_RECEIVED,
         ROUTES_NOT_EXPORTED} from './actions';
 
 
-const RoutesHeader = (props) => {
+export const RoutesHeader = (props) => {
   const type = props.type;
-  const color = {
-    [ROUTES_RECEIVED]: "green",
-    [ROUTES_FILTERED]: "orange",
-    [ROUTES_NOT_EXPORTED]: "red"
-  }[type];
   const rtype = {
     [ROUTES_RECEIVED]: "accepted",
     [ROUTES_FILTERED]: "filtered",
     [ROUTES_NOT_EXPORTED]: "not exported"
   }[type];
-  return (<p className="routes-header"
-             style={{"color": color, "textTransform": "uppercase"}}>
-            Routes {rtype}
-          </p>);
+  let stype = type;
+  if (stype == ROUTES_NOT_EXPORTED) {
+    stype = 'not-exported'; // *sigh*
+  }
+  const cls = `card-header card-header-routes ${stype}`;
+  return (<p className={cls}>Routes {rtype}</p>);
 };
 
 /*
@@ -166,19 +163,17 @@ class RoutesView extends React.Component {
                                   totalResults={state.totalResults} />
            </div>
         </div>
-
-        <RoutesTable type={type} routes={state.routes} />
-
+        <RoutesTable type={type}
+                     routes={state.routes}
+                     routeserverId={this.props.routeserverId} />
         <center>
           <RoutesPaginator page={state.page} totalPages={state.totalPages}
                            queryParam={queryParam}
                            anchor={name} />
         </center>
-
       </div>
     );
   }
-
 
   renderLoadTrigger() {
     const type = this.props.type;
@@ -219,7 +214,7 @@ class RoutesView extends React.Component {
           </div>
         </div>
         <p className="help">
-          Due to the high amount of routes not exported, 
+          Due to the potentially high amount of routes not exported, 
           they are only fetched on demand.
         </p>
 
@@ -233,7 +228,7 @@ class RoutesView extends React.Component {
 
 export default connect(
   (state) => {
-    let received = {
+    const received = {
       routes:       state.routes.received,
       requested:    state.routes.receivedRequested,
       loading:      state.routes.receivedLoading,
@@ -243,7 +238,7 @@ export default connect(
       totalResults: state.routes.receivedTotalResults,
       loadRoutes:   true,
     };
-    let filtered = {
+    const filtered = {
       routes:       state.routes.filtered,
       loading:      state.routes.filteredLoading,
       requested:    state.routes.filteredRequested,
@@ -253,7 +248,7 @@ export default connect(
       totalResults: state.routes.filteredTotalResults,
       loadRoutes:   true,
     };
-    let notExported = {
+    const notExported = {
       routes:       state.routes.notExported,
       requested:    state.routes.notExportedRequested,
       loading:      state.routes.notExportedLoading,

@@ -10,10 +10,12 @@ import (
 )
 
 type RoutesStore struct {
-	routesMap       map[int]*api.RoutesResponse
-	statusMap       map[int]StoreStatus
-	configMap       map[int]*SourceConfig
+	routesMap map[int]*api.RoutesResponse
+	statusMap map[int]StoreStatus
+	configMap map[int]*SourceConfig
+
 	refreshInterval time.Duration
+	lastRefresh     time.Time
 
 	sync.RWMutex
 }
@@ -75,8 +77,13 @@ func (self *RoutesStore) init() {
 
 // Update all routes
 func (self *RoutesStore) update() {
+	successCount := 0
+	errorCount := 0
+	t0 := time.Now()
+
 	for sourceId, _ := range self.routesMap {
-		source := self.configMap[sourceId].getInstance()
+		sourceConfig := self.configMap[sourceId]
+		source := sourceConfig.getInstance()
 
 		// Get current update state
 		if self.statusMap[sourceId].State == STATE_UPDATING {
@@ -92,6 +99,13 @@ func (self *RoutesStore) update() {
 
 		routes, err := source.AllRoutes()
 		if err != nil {
+			log.Println(
+				"Refreshing the routes store failed for:", sourceConfig.Name,
+				"(", sourceConfig.Id, ")",
+				"with:", err,
+				"- NEXT STATE: ERROR",
+			)
+
 			self.Lock()
 			self.statusMap[sourceId] = StoreStatus{
 				State:       STATE_ERROR,
@@ -100,6 +114,7 @@ func (self *RoutesStore) update() {
 			}
 			self.Unlock()
 
+			errorCount++
 			continue
 		}
 
@@ -111,8 +126,18 @@ func (self *RoutesStore) update() {
 			LastRefresh: time.Now(),
 			State:       STATE_READY,
 		}
+		self.lastRefresh = time.Now().UTC()
 		self.Unlock()
+
+		successCount++
 	}
+
+	refreshDuration := time.Since(t0)
+	log.Println(
+		"Refreshed routes store for", successCount, "of", successCount+errorCount,
+		"sources with", errorCount, "error(s) in", refreshDuration,
+	)
+
 }
 
 // Calculate store insights
@@ -154,6 +179,15 @@ func (self *RoutesStore) Stats() RoutesStoreStats {
 		RouteServers: rsStats,
 	}
 	return storeStats
+}
+
+// Provide cache status
+func (self *RoutesStore) CachedAt() time.Time {
+	return self.lastRefresh
+}
+
+func (self *RoutesStore) CacheTtl() time.Time {
+	return self.lastRefresh.Add(self.refreshInterval)
 }
 
 // Lookup routes transform

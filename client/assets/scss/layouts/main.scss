@@ -29,11 +29,12 @@ body,
 .page-body {
   display: flex;
   flex: 1;
-
 }
 
 .page-content {
+  display: flex;
   flex: 1 0;
+  flex-direction: column;
   background: #f4f5f7;
   background-image: url('../img/alicebg.png');
   background-position: 90% 100%;
@@ -41,6 +42,20 @@ body,
   background-repeat: no-repeat;
   padding: 0px;
   margin: 0px;
+}
+
+.main-content-wrapper {
+  flex: 1;
+}
+
+.page-footer {
+  flex: 0 1;
+  padding: 3px;
+
+  a {
+    font-size: 12px;
+    text-decoration: none;
+  }
 }
 
 .page-nav {
@@ -51,12 +66,19 @@ body,
 }
 
 .page-sidebar {
-  flex: 0 0 220px;
+  flex: 0 0 195px;
   background: #272634;
   // border-left: 1px solid #ccc;
 }
 
-header, footer {
+@media (min-width: 1300px) {
+ .page-sidebar {
+   flex: 0 0 230px;
+   background: #272634;
+ }
+}
+
+header {
   flex: none;
 }
 
@@ -97,5 +119,10 @@ header, footer {
     
     margin-right: 0px;
     margin-top: 20px;
+
+    &.row {
+        margin: 0px;
+    }
 }
+
 

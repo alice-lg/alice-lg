@@ -6,7 +6,7 @@ import React from 'react'
 import {connect} from 'react-redux'
 
 import {Link} from 'react-router'
-import {push} from 'react-router-redux'
+import {push, replace} from 'react-router-redux'
 
 import Details    from '../details'
 import Status     from '../status'
@@ -27,8 +27,9 @@ import RelatedPeers from './related-peers'
 import BgpAttributesModal
   from './bgp-attributes-modal'
 
-
 import RoutesLoadingIndicator from './loading-indicator'
+
+import {filterableColumnsText} from './utils'
 
 // Actions
 import {setFilterQueryValue}
@@ -106,7 +107,7 @@ class RoutesPage extends React.Component {
       setFilterQueryValue(value)
     );
 
-    this.debouncedDispatch(push(makeQueryLinkProps(
+    this.debouncedDispatch(replace(makeQueryLinkProps(
       this.props.routing, value, this.props.loadNotExported
     )));
   }
@@ -131,6 +132,13 @@ class RoutesPage extends React.Component {
       pageClass += " has-related-peers";
     }
 
+    // Make placeholder for filter input
+    const filterPlaceholder = "Filter by " +
+      filterableColumnsText(
+        this.props.routesColumns,
+        this.props.routesColumnsOrder
+      );
+
     return(
       <div className={pageClass}>
         <PageHeader>
@@ -145,7 +153,7 @@ class RoutesPage extends React.Component {
         <BgpAttributesModal />
 
         <div className="row details-main">
-          <div className="col-md-8">
+          <div className="col-main col-lg-9 col-md-12">
 
             <div className="card">
               <RelatedPeers peers={this.props.relatedPeers}
@@ -153,7 +161,7 @@ class RoutesPage extends React.Component {
                             routeserverId={this.props.params.routeserverId} />
               <SearchInput
                 value={this.props.filterValue}
-                placeholder="Filter by Network or BGP next-hop"
+                placeholder={filterPlaceholder}
                 onChange={(e) => this.setFilter(e.target.value)}  />
             </div>
 
@@ -180,7 +188,7 @@ class RoutesPage extends React.Component {
             <RoutesLoadingIndicator />
 
           </div>
-          <div className="col-md-4">
+          <div className="col-lg-3 col-md-12 col-aside-details">
             <div className="card">
               <Status routeserverId={this.props.params.routeserverId}
                       cacheStatus={cacheStatus} />
@@ -233,6 +241,9 @@ export default connect(
           [ROUTES_FILTERED]:     filtered,
           [ROUTES_NOT_EXPORTED]: notExported
       },
+      routesColumns: state.config.routes_columns,
+      routesColumnsOrder: state.config.routes_columns_order,
+
       routing: state.routing.locationBeforeTransitions,
       loadNotExported: state.routes.loadNotExported ||
                        !state.config.noexport_load_on_demand,

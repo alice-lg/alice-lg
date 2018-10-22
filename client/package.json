@@ -39,7 +39,6 @@
     "moment": "^2.15.1",
     "node-sass": "^3.13.1",
     "react": "^15.6.1",
-    "react-debounce-input": "^3.0.0",
     "react-dom": "^15.3.2",
     "react-redux": "^4.4.5",
     "react-router": "^2.8.1",
