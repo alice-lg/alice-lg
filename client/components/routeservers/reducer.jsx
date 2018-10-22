@@ -13,11 +13,13 @@ import {LOAD_ROUTESERVERS_REQUEST,
 
 import {LOAD_CONFIG_SUCCESS} from 'components/config/actions'
 
+const LOCATION_CHANGE = '@@router/LOCATION_CHANGE'
+
 const initialState = {
 
   all: [],
 
-  groups: groups,
+  groups: [],
   isGrouped: false,
   selectedGroup: "",
 
@@ -36,6 +38,12 @@ const initialState = {
 
   protocolsAreLoading: false
 };
+
+// == Helpers ==
+const _groupForRsId = function(routeservers, rsId) {
+  const rs = routeservers[rsId]||{group:""};
+  return rs.group;
+}
 
 
 // == Handlers ==
@@ -125,6 +133,25 @@ const _loadRouteservers = function(state, routeservers) {
 }
 
 
+const _restoreStatefromLocation = function(state, location) {
+  const path = location.pathname.split("/");
+  if(path.length < 3) {
+    return state; // nothing to do here
+  }
+  const [_, resource, rid, ...rest] = path;
+
+  if (resource != "routeservers") {
+    return state;
+  }
+
+  const routeserverId = parseInt(rid, 10);
+
+  return Object.assign({}, state, {
+    selectedGroup: _groupForRsId(state.all, routeserverId)
+  });
+}
+
+
 export default function reducer(state = initialState, action) {
   switch(action.type) {
     case LOAD_ROUTESERVERS_REQUEST:
@@ -151,6 +178,9 @@ export default function reducer(state = initialState, action) {
 
     case LOAD_ROUTESERVER_STATUS_ERROR:
       return _updateStatusError(state, action.payload);
+
+    case LOCATION_CHANGE:
+      return _restoreStatefromLocation(state, action.payload);
   }
   return state;
 }
