@@ -41,11 +41,12 @@ func apiNeighborsList(_req *http.Request, params httprouter.Params) (api.Respons
 		neighborsResponse, err = source.Neighbours()
 		if err != nil {
 			apiLogSourceError("neighbors", rsId, err)
+			return nil, err
 		}
 	}
 
 	// Sort result
 	sort.Sort(&neighborsResponse.Neighbours)
 
-	return neighborsResponse, err
+	return neighborsResponse, nil
 }
