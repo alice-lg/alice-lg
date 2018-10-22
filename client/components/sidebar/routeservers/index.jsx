@@ -23,17 +23,32 @@ const GroupSelect = (props) => {
   }
 
   const options = props.groups.map((group) => (
-    <option key={group} value={group}>{group}</option>
+    <li key={group}>
+      <button className="btn btn-link btn-option" onClick={() => props.onChange(group)}>
+        {group}
+      </button>
+    </li>
   ));
 
   return (
     <div className="routeservers-groups-select">
-      <select value={props.selected}
-              onChange={(e) => props.onChange(e.target.value)}>
-        {options}
-      </select>
+        <div className="dropdown">
+            <button className="btn btn-default dropdown-toggle btn-select"
+                    type="button"
+                    id="select-routeservers-group"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="true">
+               {props.selected}
+               <span className="caret"></span>
+            </button>
+            <ul className="dropdown-menu" aria-labelledby="select-routeservers-group">
+              {options}
+            </ul>
+        </div>
     </div>
   );
+
 }
 
 
