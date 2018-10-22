@@ -118,6 +118,7 @@ class RoutesPaginatorView extends React.Component {
                     routing={this.props.routing}
                     anchor={this.props.anchor}
                     loadNotExported={this.props.loadNotExported}
+                    filtersApplied={this.props.filtersApplied}
                     pageReceived={this.props.pageReceived}
                     pageFiltered={this.props.pageFiltered}
                     pageNotExported={this.props.pageNotExported} />
