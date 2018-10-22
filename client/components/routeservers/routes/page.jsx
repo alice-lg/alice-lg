@@ -27,8 +27,9 @@ import RelatedPeers from './related-peers'
 import BgpAttributesModal
   from './bgp-attributes-modal'
 
-
 import RoutesLoadingIndicator from './loading-indicator'
+
+import {filterableColumnsText} from './utils'
 
 // Actions
 import {setFilterQueryValue}
@@ -131,6 +132,13 @@ class RoutesPage extends React.Component {
       pageClass += " has-related-peers";
     }
 
+    // Make placeholder for filter input
+    const filterPlaceholder = "Filter by " +
+      filterableColumnsText(
+        this.props.routesColumns,
+        this.props.routesColumnsOrder
+      );
+
     return(
       <div className={pageClass}>
         <PageHeader>
@@ -153,7 +161,7 @@ class RoutesPage extends React.Component {
                             routeserverId={this.props.params.routeserverId} />
               <SearchInput
                 value={this.props.filterValue}
-                placeholder="Filter by Network or BGP next-hop"
+                placeholder={filterPlaceholder}
                 onChange={(e) => this.setFilter(e.target.value)}  />
             </div>
 
@@ -233,6 +241,9 @@ export default connect(
           [ROUTES_FILTERED]:     filtered,
           [ROUTES_NOT_EXPORTED]: notExported
       },
+      routesColumns: state.config.routes_columns,
+      routesColumnsOrder: state.config.routes_columns_order,
+
       routing: state.routing.locationBeforeTransitions,
       loadNotExported: state.routes.loadNotExported ||
                        !state.config.noexport_load_on_demand,

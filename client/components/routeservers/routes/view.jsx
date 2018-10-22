@@ -214,7 +214,7 @@ class RoutesView extends React.Component {
           </div>
         </div>
         <p className="help">
-          Due to the high amount of routes not exported, 
+          Due to the potentially high amount of routes not exported, 
           they are only fetched on demand.
         </p>
 

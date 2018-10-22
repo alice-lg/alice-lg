@@ -16,7 +16,7 @@ export function intersect(a, b) {
 }
 
 /**
- * Resolve list with dict: [dict[x]||x | x <- L]
+ * Resolve list with dict: [dict[x] or x | x <- L]
  */
 export function resolve(dict, list) {
   let result = [];
