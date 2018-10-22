@@ -19,6 +19,8 @@ export const LOAD_ROUTESERVER_PROTOCOL_REQUEST = '@routeservers/LOAD_ROUTESERVER
 export const LOAD_ROUTESERVER_PROTOCOL_SUCCESS = '@routeservers/LOAD_ROUTESERVER_PROTOCOL_SUCCESS';
 export const LOAD_ROUTESERVER_PROTOCOL_ERROR   = '@routeservers/LOAD_ROUTESERVER_PROTOCOL_ERROR';
 
+export const SELECT_GROUP = "@routeservers/SELECT_GROUP";
+
 
 // Action Creators
 export function loadRouteserversRequest() {
@@ -141,6 +143,14 @@ export function loadRouteserverProtocol(routeserverId) {
           ));
         },
         (error) => dispatch(apiError(error)));
+  }
+}
+
+
+export function selectGroup(group) {
+  return {
+    type: SELECT_GROUP,
+    payload: group,
   }
 }
 

@@ -79,8 +79,9 @@ type PaginationConfig struct {
 }
 
 type SourceConfig struct {
-	Id   int
-	Name string
+	Id    int
+	Name  string
+	Group string
 
 	// Blackhole IPs
 	Blackholes []string
@@ -555,12 +556,14 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 
 		// Make config
 		sourceName := section.Key("name").MustString("Unknown Source")
+		sourceGroup := section.Key("group").MustString("")
 		sourceBlackholes := TrimmedStringList(
 			section.Key("blackholes").MustString(""))
 
 		config := &SourceConfig{
 			Id:         sourceId,
 			Name:       sourceName,
+			Group:      sourceGroup,
 			Blackholes: sourceBlackholes,
 			Type:       backendType,
 		}

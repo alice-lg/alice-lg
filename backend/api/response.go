@@ -99,6 +99,7 @@ type StatusResponse struct {
 type Routeserver struct {
 	Id         int      `json:"id"`
 	Name       string   `json:"name"`
+	Group      string   `json:"group"`
 	Blackholes []string `json:"blackholes"`
 }
 

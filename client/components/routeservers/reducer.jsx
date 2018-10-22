@@ -8,14 +8,23 @@ import {LOAD_ROUTESERVERS_REQUEST,
         LOAD_ROUTESERVER_STATUS_ERROR,
 
         LOAD_ROUTESERVER_PROTOCOL_REQUEST,
-        LOAD_ROUTESERVER_PROTOCOL_SUCCESS}
+        LOAD_ROUTESERVER_PROTOCOL_SUCCESS,
+
+        SELECT_GROUP}
   from './actions'
 
 import {LOAD_CONFIG_SUCCESS} from 'components/config/actions'
 
+const LOCATION_CHANGE = '@@router/LOCATION_CHANGE'
+
 const initialState = {
 
   all: [],
+  selectedRsId: 0,
+
+  groups: [],
+  isGrouped: false,
+  selectedGroup: "",
 
   details: {},
   protocols: {},
@@ -32,6 +41,12 @@ const initialState = {
 
   protocolsAreLoading: false
 };
+
+// == Helpers ==
+const _groupForRsId = function(routeservers, rsId) {
+  const rs = routeservers[rsId]||{group:""};
+  return rs.group;
+}
 
 
 // == Handlers ==
@@ -102,6 +117,52 @@ const _updateProtocol = function(state, payload) {
   });
 }
 
+const _loadRouteservers = function(state, routeservers) {
+  // Caclulate grouping
+  let groups = [];
+  for (const rs of routeservers) {
+    if (groups.indexOf(rs.group) == -1) {
+      groups.push(rs.group);
+    }
+  }
+
+  const selectedGroup = _groupForRsId(
+    routeservers, state.selectedRsId
+  );
+
+  return Object.assign({}, state, {
+    all: routeservers,
+    groups: groups,
+    isGrouped: groups.length > 1,
+    selectedGroup: selectedGroup,
+    isLoading: false
+  });
+}
+
+
+const _restoreStatefromLocation = function(state, location) {
+  const path = location.pathname.split("/");
+  if(path.length < 3) {
+    return state; // nothing to do here
+  }
+  const [_, resource, rid, ...rest] = path;
+
+  if (resource != "routeservers") {
+    return state;
+  }
+  const routeserverId = parseInt(rid, 10);
+
+  let selectedGroup = state.selectedGroup;
+  if (state.all.length > 0) {
+    selectedGroup = _groupForRsId(state.all, routeserverId);
+  }
+
+  return Object.assign({}, state, {
+    selectedRsId: routeserverId,
+    selectedGroup: selectedGroup,
+  });
+}
+
 
 export default function reducer(state = initialState, action) {
   switch(action.type) {
@@ -111,10 +172,7 @@ export default function reducer(state = initialState, action) {
       });
 
     case LOAD_ROUTESERVERS_SUCCESS:
-      return Object.assign({}, state, {
-        all: action.payload.routeservers,
-        isLoading: false
-      });
+      return _loadRouteservers(state, action.payload.routeservers);
 
     case LOAD_ROUTESERVER_PROTOCOL_REQUEST:
       return Object.assign({}, state, {
@@ -132,6 +190,14 @@ export default function reducer(state = initialState, action) {
 
     case LOAD_ROUTESERVER_STATUS_ERROR:
       return _updateStatusError(state, action.payload);
+
+    case SELECT_GROUP:
+      return Object.assign({}, state, {
+        selectedGroup: action.payload,
+      });
+
+    case LOCATION_CHANGE:
+      return _restoreStatefromLocation(state, action.payload);
   }
   return state;
 }
