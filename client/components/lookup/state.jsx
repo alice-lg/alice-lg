@@ -4,17 +4,13 @@
  * Manage state
  */
 
-import {
-  filtersUrlEncode
-} from 'components/filters/encoding'
+import {filtersUrlEncode} from 'components/filters/encoding'
 
-import {
-  FILTER_GROUP_SOURCES,
-  FILTER_GROUP_ASNS,
-  FILTER_GROUP_COMMUNITIES,
-  FILTER_GROUP_EXT_COMMUNITIES,
-  FILTER_GROUP_LARGE_COMMUNITIES,
-} from 'components/filters/groups'
+import {FILTER_GROUP_SOURCES,
+        FILTER_GROUP_ASNS,
+        FILTER_GROUP_COMMUNITIES,
+        FILTER_GROUP_EXT_COMMUNITIES,
+        FILTER_GROUP_LARGE_COMMUNITIES} from 'components/filters/groups'
 
 /*
  * Maybe this can be customized and injected into
@@ -52,7 +48,7 @@ export function  makeLinkProps(props) {
   const query = props.routing.query.q || "";
 
   const search = `?${pagination}&q=${query}${filtering}`;
-  let hash = "";
+  let hash = null;
   if (props.anchor) {
     hash += `#routes-${props.anchor}`;
   }

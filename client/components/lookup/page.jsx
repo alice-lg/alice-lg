@@ -44,6 +44,8 @@ const LookupView = connect(
       filtersApplied:   state.lookup.filtersApplied,
 
       linkProps: {
+        anchor:         "filtered",
+        page:           0,
         pageReceived:   0, // Reset pagination on filter change
         pageFiltered:   0,
         query:          state.lookup.query,

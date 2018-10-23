@@ -34,6 +34,8 @@ import {filterableColumnsText} from './utils'
 import FiltersEditor from 'components/filters/editor'
 import {mergeFilters} from 'components/filters/state'
 
+import {makeLinkProps} from './urls'
+
 // Actions
 import {setFilterQueryValue}
   from './actions'
@@ -141,10 +143,6 @@ class RoutesPage extends React.Component {
         this.props.routesColumns,
         this.props.routesColumnsOrder
       );
-
-    const makeLinkProps = (props) => ({
-      pathname: "/implement-me"
-    });
 
     return(
       <div className={pageClass}>
@@ -267,6 +265,21 @@ export default connect(
         state.routes.filteredFiltersAvailable,
         state.routes.notExportedFiltersAvailable
       ),
+
+      linkProps: {
+        routing: state.routing.locationBeforeTransitions,
+
+        loadNotExported: state.routes.loadNotExported,
+
+        page:            0,
+        pageReceived:    0, // Reset pagination on filter change
+        pageFiltered:    0,
+        pageNotExported: 0,
+
+        query: state.routes.filterValue,
+
+        filtersApplied: state.routes.filtersApplied,
+      },
 
       relatedPeers: relatedPeers
     });
