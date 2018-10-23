@@ -90,7 +90,10 @@ export function mergeFilters(a, b) {
 function mergeFilterSet(inSet, a, b) {
   let result = a;
   for (const f of b) {
-    if (inSet(result, f)) {
+    const present = inSet(result, f);
+    if (present) {
+      // Update filter cardinality
+      present.cardinality = Math.max(f.cardinality, present.cardinality);
       continue;
     }
     result.push(f);
@@ -111,10 +114,10 @@ export function groupHasFilters(group) {
 function cmpFilterValue(set, filter) {
   for (const f of set) {
     if(f.value == filter.value) {
-      return true;
+      return f;
     }
   }
-  return false;
+  return null;
 }
 
 function cmpFilterCommunity(set, filter) {
@@ -128,10 +131,10 @@ function cmpFilterCommunity(set, filter) {
     }
 
     if (match) {
-      return true;
+      return f;
     }
   }
-  return false;
+  return null;
 }
 
 /*

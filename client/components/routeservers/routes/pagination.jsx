@@ -39,7 +39,7 @@ const PageSelect = (props) => {
   if (active) {
     itemClassName = "active";
   }
-  
+
   return (
     <li className={itemClassName}>
       <select className="form-control pagination-select"
@@ -64,8 +64,8 @@ class RoutesPaginatorView extends React.Component {
    * select for a dropdown like access.
    */
   makePaginationPages(numPages) {
-    const MAX_ITEMS = 12; 
-    const pages = Array.from(Array(numPages), (_, i) => i); 
+    const MAX_ITEMS = 12;
+    const pages = Array.from(Array(numPages), (_, i) => i);
     return {
       items:  pages.slice(0, MAX_ITEMS),
       select: pages.slice(MAX_ITEMS)
@@ -104,6 +104,7 @@ class RoutesPaginatorView extends React.Component {
                     loadNotExported={this.props.loadNotExported}
                     pageReceived={this.props.pageReceived}
                     pageFiltered={this.props.pageFiltered}
+                    filtersApplied={this.props.filtersApplied}
                     pageNotExported={this.props.pageNotExported} />
         </li>
       );
@@ -129,6 +130,7 @@ class RoutesPaginatorView extends React.Component {
                       disabled={this.props.page == 0}
                       routing={this.props.routing}
                       anchor={this.props.anchor}
+                      filtersApplied={this.props.filtersApplied}
                       loadNotExported={this.props.loadNotExported}
                       pageReceived={this.props.pageReceived}
                       pageFiltered={this.props.pageFiltered}
@@ -137,6 +139,7 @@ class RoutesPaginatorView extends React.Component {
           {pageLinks}
           <PageSelect pages={pages.select}
                       page={this.props.page}
+                      filtersApplied={this.props.filtersApplied}
                       onChange={(page) => this.navigateToPage(page)} />
 
           {pages.select.length == 0 &&
@@ -146,6 +149,7 @@ class RoutesPaginatorView extends React.Component {
                         label="&raquo;"
                         routing={this.props.routing}
                         anchor={this.props.anchor}
+                        filtersApplied={this.props.filtersApplied}
                         loadNotExported={this.props.loadNotExported}
                         pageReceived={this.props.pageReceived}
                         pageFiltered={this.props.pageFiltered}
@@ -165,6 +169,8 @@ export const RoutesPaginator = connect(
       pageNotExported: state.routes.notExportedPage,
 
       loadNotExported: state.routes.loadNotExported,
+
+      filtersApplied: state.routes.filtersApplied,
 
       routing: state.routing.locationBeforeTransitions
   })

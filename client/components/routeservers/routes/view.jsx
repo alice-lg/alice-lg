@@ -14,6 +14,8 @@ import {fetchRoutesReceived,
 
 import {makeLinkProps} from './urls'
 
+import {filtersEqual} from 'components/filters/groups'
+
 // Constants
 import {ROUTES_RECEIVED,
         ROUTES_FILTERED,
@@ -90,8 +92,9 @@ class RoutesView extends React.Component {
     const nextParams = this.props.routes[type];
     const params = props.routes[type]; // Previous props
 
-    if (this.props.filterQuery != props.filterQuery || // Pagination
-        params.page != nextParams.page || // Query
+    if (this.props.filterQuery != props.filterQuery || // Query
+        params.page != nextParams.page || // Pagination
+        !filtersEqual(this.props.filtersApplied, props.filtersApplied) || // Filters
         params.loadRoutes != nextParams.loadRoutes || // Defered loading
         props.protocolId != this.props.protocolId // Switch related peers
         ) {
@@ -149,7 +152,7 @@ class RoutesView extends React.Component {
     if (state.totalResults == 0) {
       return null;
     }
-    
+
     // Render the routes card
     return (
       <div className={`card routes-view ${name}`}>
