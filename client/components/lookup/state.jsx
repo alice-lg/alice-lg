@@ -6,7 +6,7 @@
 
 import {
   filtersUrlEncode
-} from 'components/filters/filter-encoding'
+} from 'components/filters/encoding'
 
 import {
   FILTER_GROUP_SOURCES,
@@ -14,7 +14,7 @@ import {
   FILTER_GROUP_COMMUNITIES,
   FILTER_GROUP_EXT_COMMUNITIES,
   FILTER_GROUP_LARGE_COMMUNITIES,
-} from 'components/filters/filter-groups'
+} from 'components/filters/groups'
 
 /*
  * Maybe this can be customized and injected into
