@@ -14,7 +14,7 @@
 .modal-dialog {
     .modal-body {
       max-height: 70vh;
-      overflow: scroll;
+      overflow-y: auto;
     }
 }
 
