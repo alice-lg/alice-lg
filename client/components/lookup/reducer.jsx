@@ -13,16 +13,12 @@ import {
 } from './actions'
 
 import {
-  APPLY_FILTER,
-} from './filter-actions'
-
-import {
   FILTER_GROUP_SOURCES,
   FILTER_GROUP_ASNS,
   FILTER_GROUP_COMMUNITIES,
   FILTER_GROUP_EXT_COMMUNITIES,
   FILTER_GROUP_LARGE_COMMUNITIES,
-} from './filter-groups'
+} from 'components/filters/filter-groups'
 
 import {
   decodeFiltersSources,
@@ -30,11 +26,11 @@ import {
   decodeFiltersCommunities,
   decodeFiltersExtCommunities,
   decodeFiltersLargeCommunities,
-} from './filter-encoding'
+} from 'components/filters/filter-encoding'
 
 import {
   cloneFilters
-} from './state'
+} from 'components/filters/state'
 
 const LOCATION_CHANGE = '@@router/LOCATION_CHANGE'
 

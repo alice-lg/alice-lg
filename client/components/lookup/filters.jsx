@@ -11,14 +11,15 @@ import CommunityLabel
 import {makeReadableCommunity}
   from 'components/routeservers/communities/utils'
 
-import {makeLinkProps, cloneFilters} from './state'
+import {makeLinkProps} from './state'
+import {cloneFilters} from 'components/filters/state'
 
 import {FILTER_GROUP_SOURCES,
         FILTER_GROUP_ASNS,
         FILTER_GROUP_COMMUNITIES,
         FILTER_GROUP_EXT_COMMUNITIES,
         FILTER_GROUP_LARGE_COMMUNITIES}
-  from './filter-groups'
+  from 'components/filters/filter-groups'
 
 
 /*

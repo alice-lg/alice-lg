@@ -6,7 +6,7 @@
 
 import {
   filtersUrlEncode
-} from './filter-encoding'
+} from 'components/filters/filter-encoding'
 
 import {
   FILTER_GROUP_SOURCES,
@@ -14,7 +14,7 @@ import {
   FILTER_GROUP_COMMUNITIES,
   FILTER_GROUP_EXT_COMMUNITIES,
   FILTER_GROUP_LARGE_COMMUNITIES,
-} from './filter-groups'
+} from 'components/filters/filter-groups'
 
 /*
  * Maybe this can be customized and injected into
@@ -64,32 +64,5 @@ export function  makeLinkProps(props) {
   };
 
   return linkTo;
-}
-
-export function cloneFilters(filters) {
-  const nextFilters = [
-    Object.assign({}, filters[FILTER_GROUP_SOURCES]),
-    Object.assign({}, filters[FILTER_GROUP_ASNS]),
-    Object.assign({}, filters[FILTER_GROUP_COMMUNITIES]),
-    Object.assign({}, filters[FILTER_GROUP_EXT_COMMUNITIES]),
-    Object.assign({}, filters[FILTER_GROUP_LARGE_COMMUNITIES]),
-  ];
-
-  nextFilters[FILTER_GROUP_SOURCES].filters =
-    [...nextFilters[FILTER_GROUP_SOURCES].filters];
-
-  nextFilters[FILTER_GROUP_ASNS].filters =
-    [...nextFilters[FILTER_GROUP_ASNS].filters];
-
-  nextFilters[FILTER_GROUP_COMMUNITIES].filters =
-    [...nextFilters[FILTER_GROUP_COMMUNITIES].filters];
-
-  nextFilters[FILTER_GROUP_EXT_COMMUNITIES].filters =
-    [...nextFilters[FILTER_GROUP_EXT_COMMUNITIES].filters];
-
-  nextFilters[FILTER_GROUP_LARGE_COMMUNITIES].filters =
-    [...nextFilters[FILTER_GROUP_LARGE_COMMUNITIES].filters];
-
-  return nextFilters;
 }
 

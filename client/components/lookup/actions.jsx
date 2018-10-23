@@ -5,7 +5,7 @@
 
 import axios from 'axios'
 
-import {filtersUrlEncode} from './filter-encoding'
+import {filtersUrlEncode} from 'components/filters/filter-encoding'
 
 export const SET_LOOKUP_QUERY_VALUE = '@lookup/SET_LOOKUP_QUERY_VALUE';
 
