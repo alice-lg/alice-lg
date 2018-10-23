@@ -114,7 +114,7 @@ func selectCmpFuncByKey(key string) SearchFilterComparator {
 	return cmp
 }
 
-func (self *SearchFilterGroup) MatchAny(route *LookupRoute) bool {
+func (self *SearchFilterGroup) MatchAny(route Filterable) bool {
 	// Check if we have any filter to match
 	if len(self.Filters) == 0 {
 		return true // no filter, everything matches
@@ -136,7 +136,7 @@ func (self *SearchFilterGroup) MatchAny(route *LookupRoute) bool {
 	return false
 }
 
-func (self *SearchFilterGroup) MatchAll(route *LookupRoute) bool {
+func (self *SearchFilterGroup) MatchAll(route Filterable) bool {
 	// Check if we have any filter to match
 	if len(self.Filters) == 0 {
 		return true // no filter, everything matches. Like above.
@@ -355,7 +355,7 @@ func FiltersFromQuery(query url.Values) (*SearchFilters, error) {
  Match a route. Check if route matches all filters.
  Unless all filters are blank.
 */
-func (self *SearchFilters) MatchRoute(route *LookupRoute) bool {
+func (self *SearchFilters) MatchRoute(route Filterable) bool {
 	sources := self.GetGroupByKey(SEARCH_KEY_SOURCES)
 	if !sources.MatchAny(route) {
 		return false
