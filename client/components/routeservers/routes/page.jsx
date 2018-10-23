@@ -31,6 +31,11 @@ import RoutesLoadingIndicator from './loading-indicator'
 
 import {filterableColumnsText} from './utils'
 
+import FiltersEditor from 'components/filters/editor'
+import {mergeFilters} from 'components/filters/state'
+
+import {makeLinkProps} from './urls'
+
 // Actions
 import {setFilterQueryValue}
   from './actions'
@@ -73,7 +78,7 @@ const RoutesViewEmpty = (props) => {
   if (!props.loadNotExported) {
     return null; // There may be routes matching the query in there!
   }
-  
+
   const hasContent = props.routes.received.totalResults > 0 ||
                      props.routes.filtered.totalResults > 0 ||
                      props.routes.notExported.totalResults > 0;
@@ -95,7 +100,7 @@ const RoutesViewEmpty = (props) => {
 class RoutesPage extends React.Component {
   constructor(props) {
     super(props);
-    
+
     // Create debounced dispatch, as we don't want to flood
     // the server with API queries
     this.debouncedDispatch = debounce(this.props.dispatch, 350);
@@ -125,7 +130,7 @@ class RoutesPage extends React.Component {
       cacheStatus = null;
     }
 
-    // We have to shift the layout a bit, to make room for 
+    // We have to shift the layout a bit, to make room for
     // the related peers tabs
     let pageClass = "routeservers-page";
     if (this.props.relatedPeers.length > 1) {
@@ -167,7 +172,7 @@ class RoutesPage extends React.Component {
 
             <QuickLinks routes={this.props.routes} />
 
-            <RoutesViewEmpty routes={this.props.routes} 
+            <RoutesViewEmpty routes={this.props.routes}
                              loadNotExported={this.props.loadNotExported} />
 
             <RoutesView
@@ -193,6 +198,10 @@ class RoutesPage extends React.Component {
               <Status routeserverId={this.props.params.routeserverId}
                       cacheStatus={cacheStatus} />
             </div>
+            <FiltersEditor makeLinkProps={makeLinkProps}
+                           linkProps={this.props.linkProps}
+                           filtersApplied={this.props.filtersApplied}
+                           filtersAvailable={this.props.filtersAvailable} />
           </div>
         </div>
       </div>
@@ -247,8 +256,30 @@ export default connect(
       routing: state.routing.locationBeforeTransitions,
       loadNotExported: state.routes.loadNotExported ||
                        !state.config.noexport_load_on_demand,
-       
+
       anyLoading: anyLoading,
+
+      filtersApplied: state.routes.filtersApplied,
+      filtersAvailable: mergeFilters(
+        state.routes.receivedFiltersAvailable,
+        state.routes.filteredFiltersAvailable,
+        state.routes.notExportedFiltersAvailable
+      ),
+
+      linkProps: {
+        routing: state.routing.locationBeforeTransitions,
+
+        loadNotExported: state.routes.loadNotExported,
+
+        page:            0,
+        pageReceived:    0, // Reset pagination on filter change
+        pageFiltered:    0,
+        pageNotExported: 0,
+
+        query: state.routes.filterValue,
+
+        filtersApplied: state.routes.filtersApplied,
+      },
 
       relatedPeers: relatedPeers
     });

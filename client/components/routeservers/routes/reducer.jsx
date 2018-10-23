@@ -17,9 +17,14 @@ import {ROUTES_RECEIVED,
 
 import {SET_FILTER_QUERY_VALUE} from './actions'
 
+import {cloneFilters, decodeFiltersApplied, initialFilterState}
+  from 'components/filters/state'
+
 const LOCATION_CHANGE = '@@router/LOCATION_CHANGE'
 
 const initialState = {
+
+  filtersApplied: initialFilterState,
 
   received: [],
   receivedLoading: false,
@@ -30,6 +35,7 @@ const initialState = {
   receivedTotalPages: 0,
   receivedTotalResults: 0,
   receivedApiStatus: {},
+  receivedFiltersAvailable: initialFilterState,
 
   filtered: [],
   filteredLoading: false,
@@ -40,6 +46,7 @@ const initialState = {
   filteredTotalPages: 0,
   filteredTotalResults: 0,
   filteredApiStatus: {},
+  filteredFiltersAvailable: initialFilterState,
 
   notExported: [],
   notExportedLoading: false,
@@ -50,6 +57,7 @@ const initialState = {
   notExportedTotalPages: 0,
   notExportedTotalResults: 0,
   notExportedApiStatus: {},
+  notExportedFiltersAvailable: initialFilterState,
 
   // Derived state from location
   loadNotExported: false,
@@ -83,6 +91,9 @@ function _handleLocationChange(state, payload) {
   // Determine on demand loading state
   const loadNotExported = parseInt(query["ne"] || 0, 10) === 1 ? true : false;
 
+  // Restore filters applied from location
+  const filtersApplied = decodeFiltersApplied(query);
+
   const nextState = Object.assign({}, state, {
     filterQuery: filterQuery,
     filterValue: filterQuery, // location overrides form
@@ -92,6 +103,7 @@ function _handleLocationChange(state, payload) {
     notExportedPage: notExportedPage,
 
     loadNotExported: loadNotExported,
+    filtersApplied: filtersApplied,
   });
 
   return nextState;
@@ -108,7 +120,6 @@ function _handleFetchRoutesRequest(type, state, payload) {
   return nextState;
 }
 
-
 function _handleFetchRoutesSuccess(type, state, payload) {
   const stype = _stateType(type);
   const pagination = payload.pagination;
@@ -124,7 +135,9 @@ function _handleFetchRoutesSuccess(type, state, payload) {
 
     [stype+'ApiStatus']: apiStatus,
 
-    [stype+'Loading']: false
+    [stype+'Loading']: false,
+
+    [stype+'FiltersAvailable']: payload.filtersAvailable,
   });
 
   return nextState;

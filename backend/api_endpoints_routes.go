@@ -5,6 +5,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 
 	"net/http"
+	"time"
 )
 
 // Handle routes
@@ -28,6 +29,9 @@ func apiRoutesListReceived(
 	req *http.Request,
 	params httprouter.Params,
 ) (api.Response, error) {
+	// Measure response time
+	t0 := time.Now()
+
 	rsId, err := validateSourceId(params.ByName("id"))
 	if err != nil {
 		return nil, err
@@ -42,18 +46,44 @@ func apiRoutesListReceived(
 	}
 
 	// Filter routes based on criteria if present
-	routes := apiQueryFilterNextHopGateway(req, "q", result.Imported)
+	allRoutes := apiQueryFilterNextHopGateway(req, "q", result.Imported)
+	routes := api.Routes{}
+
+	// Apply other (commmunity) filters
+	filters, err := api.FiltersFromQuery(req.URL.Query())
+	if err != nil {
+		return nil, err
+	}
+
+	filtersAvailable := api.NewSearchFilters()
+	for _, r := range allRoutes {
+		if !filters.MatchRoute(r) {
+			continue // Exclude route from results set
+		}
+		routes = append(routes, r)
+		filtersAvailable.UpdateFromRoute(r)
+	}
 
 	// Paginate results
 	page := apiQueryMustInt(req, "page", 0)
 	pageSize := AliceConfig.Ui.Pagination.RoutesAcceptedPageSize
 	routes, pagination := apiPaginateRoutes(routes, page, pageSize)
 
+	// Calculate query duration
+	queryDuration := time.Since(t0)
+
 	// Make paginated response
 	response := api.PaginatedRoutesResponse{
 		RoutesResponse: &api.RoutesResponse{
 			Api:      result.Api,
 			Imported: routes,
+		},
+		TimedResponse: api.TimedResponse{
+			RequestDuration: DurationMs(queryDuration),
+		},
+		FilterableResponse: api.FilterableResponse{
+			FiltersAvailable: filtersAvailable,
+			FiltersApplied:   filters,
 		},
 		Pagination: pagination,
 	}
@@ -65,6 +95,8 @@ func apiRoutesListFiltered(
 	req *http.Request,
 	params httprouter.Params,
 ) (api.Response, error) {
+	t0 := time.Now()
+
 	rsId, err := validateSourceId(params.ByName("id"))
 	if err != nil {
 		return nil, err
@@ -79,18 +111,44 @@ func apiRoutesListFiltered(
 	}
 
 	// Filter routes based on criteria if present
-	routes := apiQueryFilterNextHopGateway(req, "q", result.Filtered)
+	allRoutes := apiQueryFilterNextHopGateway(req, "q", result.Filtered)
+	routes := api.Routes{}
+
+	// Apply other (commmunity) filters
+	filters, err := api.FiltersFromQuery(req.URL.Query())
+	if err != nil {
+		return nil, err
+	}
+
+	filtersAvailable := api.NewSearchFilters()
+	for _, r := range allRoutes {
+		if !filters.MatchRoute(r) {
+			continue // Exclude route from results set
+		}
+		routes = append(routes, r)
+		filtersAvailable.UpdateFromRoute(r)
+	}
 
 	// Paginate results
 	page := apiQueryMustInt(req, "page", 0)
 	pageSize := AliceConfig.Ui.Pagination.RoutesFilteredPageSize
 	routes, pagination := apiPaginateRoutes(routes, page, pageSize)
 
+	// Calculate query duration
+	queryDuration := time.Since(t0)
+
 	// Make response
 	response := api.PaginatedRoutesResponse{
 		RoutesResponse: &api.RoutesResponse{
 			Api:      result.Api,
 			Filtered: routes,
+		},
+		TimedResponse: api.TimedResponse{
+			RequestDuration: DurationMs(queryDuration),
+		},
+		FilterableResponse: api.FilterableResponse{
+			FiltersAvailable: filtersAvailable,
+			FiltersApplied:   filters,
 		},
 		Pagination: pagination,
 	}
@@ -102,6 +160,8 @@ func apiRoutesListNotExported(
 	req *http.Request,
 	params httprouter.Params,
 ) (api.Response, error) {
+	t0 := time.Now()
+
 	rsId, err := validateSourceId(params.ByName("id"))
 	if err != nil {
 		return nil, err
@@ -115,18 +175,45 @@ func apiRoutesListNotExported(
 		return nil, err
 	}
 
-	routes := apiQueryFilterNextHopGateway(req, "q", result.NotExported)
+	// Filter routes based on criteria if present
+	allRoutes := apiQueryFilterNextHopGateway(req, "q", result.NotExported)
+	routes := api.Routes{}
+
+	// Apply other (commmunity) filters
+	filters, err := api.FiltersFromQuery(req.URL.Query())
+	if err != nil {
+		return nil, err
+	}
+
+	filtersAvailable := api.NewSearchFilters()
+	for _, r := range allRoutes {
+		if !filters.MatchRoute(r) {
+			continue // Exclude route from results set
+		}
+		routes = append(routes, r)
+		filtersAvailable.UpdateFromRoute(r)
+	}
 
 	// Paginate results
 	page := apiQueryMustInt(req, "page", 0)
 	pageSize := AliceConfig.Ui.Pagination.RoutesNotExportedPageSize
 	routes, pagination := apiPaginateRoutes(routes, page, pageSize)
 
+	// Calculate query duration
+	queryDuration := time.Since(t0)
+
 	// Make response
 	response := api.PaginatedRoutesResponse{
 		RoutesResponse: &api.RoutesResponse{
 			Api:         result.Api,
 			NotExported: routes,
+		},
+		TimedResponse: api.TimedResponse{
+			RequestDuration: DurationMs(queryDuration),
+		},
+		FilterableResponse: api.FilterableResponse{
+			FiltersAvailable: filtersAvailable,
+			FiltersApplied:   filters,
 		},
 		Pagination: pagination,
 	}

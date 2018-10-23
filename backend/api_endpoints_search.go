@@ -75,7 +75,7 @@ func apiLookupPrefixGlobal(
 			break
 		}
 
-		filtersAvailable.UpdateFromRoute(r)
+		filtersAvailable.UpdateFromLookupRoute(r)
 	}
 
 	// Homogenize results

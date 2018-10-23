@@ -20,10 +20,12 @@ API Search
 * Handle filter criteria
 
 */
+type FilterValue interface{}
+
 type SearchFilter struct {
 	Cardinality int         `json:"cardinality"`
 	Name        string      `json:"name"`
-	Value       interface{} `json:"value"`
+	Value       FilterValue `json:"value"`
 }
 
 type SearchFilterGroup struct {
@@ -33,50 +35,58 @@ type SearchFilterGroup struct {
 	filtersIdx map[string]int
 }
 
+type Filterable interface {
+	MatchSourceId(sourceId int) bool
+	MatchAsn(asn int) bool
+	MatchCommunity(community Community) bool
+	MatchExtCommunity(community ExtCommunity) bool
+	MatchLargeCommunity(community Community) bool
+}
+
 /*
  Search comparators
 */
-type SearchFilterComparator func(route *LookupRoute, value interface{}) bool
+type SearchFilterComparator func(route Filterable, value interface{}) bool
 
-func searchFilterMatchSource(route *LookupRoute, value interface{}) bool {
+func searchFilterMatchSource(route Filterable, value interface{}) bool {
 	sourceId, ok := value.(int)
 	if !ok {
 		return false
 	}
-	return route.Routeserver.Id == sourceId
+	return route.MatchSourceId(sourceId)
 }
 
-func searchFilterMatchAsn(route *LookupRoute, value interface{}) bool {
+func searchFilterMatchAsn(route Filterable, value interface{}) bool {
 	asn, ok := value.(int)
 	if !ok {
 		return false
 	}
 
-	return route.Neighbour.Asn == asn
+	return route.MatchAsn(asn)
 }
 
-func searchFilterMatchCommunity(route *LookupRoute, value interface{}) bool {
+func searchFilterMatchCommunity(route Filterable, value interface{}) bool {
 	community, ok := value.(Community)
 	if !ok {
 		return false
 	}
-	return route.Bgp.HasCommunity(community)
+	return route.MatchCommunity(community)
 }
 
-func searchFilterMatchExtCommunity(route *LookupRoute, value interface{}) bool {
+func searchFilterMatchExtCommunity(route Filterable, value interface{}) bool {
 	community, ok := value.(ExtCommunity)
 	if !ok {
 		return false
 	}
-	return route.Bgp.HasExtCommunity(community)
+	return route.MatchExtCommunity(community)
 }
 
-func searchFilterMatchLargeCommunity(route *LookupRoute, value interface{}) bool {
+func searchFilterMatchLargeCommunity(route Filterable, value interface{}) bool {
 	community, ok := value.(Community)
 	if !ok {
 		return false
 	}
-	return route.Bgp.HasLargeCommunity(community)
+	return route.MatchLargeCommunity(community)
 }
 
 func selectCmpFuncByKey(key string) SearchFilterComparator {
@@ -104,7 +114,7 @@ func selectCmpFuncByKey(key string) SearchFilterComparator {
 	return cmp
 }
 
-func (self *SearchFilterGroup) MatchAny(route *LookupRoute) bool {
+func (self *SearchFilterGroup) MatchAny(route Filterable) bool {
 	// Check if we have any filter to match
 	if len(self.Filters) == 0 {
 		return true // no filter, everything matches
@@ -126,7 +136,7 @@ func (self *SearchFilterGroup) MatchAny(route *LookupRoute) bool {
 	return false
 }
 
-func (self *SearchFilterGroup) MatchAll(route *LookupRoute) bool {
+func (self *SearchFilterGroup) MatchAll(route Filterable) bool {
 	// Check if we have any filter to match
 	if len(self.Filters) == 0 {
 		return true // no filter, everything matches. Like above.
@@ -241,7 +251,7 @@ func (self *SearchFilterGroup) AddFilters(filters []*SearchFilter) {
   - Extract ASN, source, bgp communites,
   - Find Filter in group, increment result count if required.
 */
-func (self *SearchFilters) UpdateFromRoute(route *LookupRoute) {
+func (self *SearchFilters) UpdateFromLookupRoute(route *LookupRoute) {
 	// Add source
 	self.GetGroupByKey(SEARCH_KEY_SOURCES).AddFilter(&SearchFilter{
 		Name:  route.Routeserver.Name,
@@ -253,6 +263,34 @@ func (self *SearchFilters) UpdateFromRoute(route *LookupRoute) {
 		Name:  route.Neighbour.Description,
 		Value: route.Neighbour.Asn,
 	})
+
+	// Add communities
+	communities := self.GetGroupByKey(SEARCH_KEY_COMMUNITIES)
+	for _, c := range route.Bgp.Communities {
+		communities.AddFilter(&SearchFilter{
+			Name:  c.String(),
+			Value: c,
+		})
+	}
+	extCommunities := self.GetGroupByKey(SEARCH_KEY_EXT_COMMUNITIES)
+	for _, c := range route.Bgp.ExtCommunities {
+		extCommunities.AddFilter(&SearchFilter{
+			Name:  c.String(),
+			Value: c,
+		})
+	}
+	largeCommunities := self.GetGroupByKey(SEARCH_KEY_LARGE_COMMUNITIES)
+	for _, c := range route.Bgp.LargeCommunities {
+		largeCommunities.AddFilter(&SearchFilter{
+			Name:  c.String(),
+			Value: c,
+		})
+	}
+}
+
+// This is the same as above, but only the communities
+// are considered.
+func (self *SearchFilters) UpdateFromRoute(route *Route) {
 
 	// Add communities
 	communities := self.GetGroupByKey(SEARCH_KEY_COMMUNITIES)
@@ -345,7 +383,7 @@ func FiltersFromQuery(query url.Values) (*SearchFilters, error) {
  Match a route. Check if route matches all filters.
  Unless all filters are blank.
 */
-func (self *SearchFilters) MatchRoute(route *LookupRoute) bool {
+func (self *SearchFilters) MatchRoute(route Filterable) bool {
 	sources := self.GetGroupByKey(SEARCH_KEY_SOURCES)
 	if !sources.MatchAny(route) {
 		return false
