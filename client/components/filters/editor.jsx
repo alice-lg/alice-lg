@@ -95,40 +95,32 @@ class FiltersEditor extends React.Component {
 }
 
 export default connect(
-  (state) => ({
+  (state, props) => ({
     isLoading: state.lookup.isLoading,
     hasRoutes: state.lookup.routesFiltered.length > 0 ||
                state.lookup.routesImported.length > 0,
 
-    link: {
-      pageReceived:   0, // Reset pagination on filter change
-      pageFiltered:   0,
-      query:          state.lookup.query,
-      filtersApplied: state.lookup.filtersApplied,
-      routing:        state.routing.locationBeforeTransitions,
-    },
+    link: props.linkProps,
 
-    available: state.lookup.filtersAvailable,
-    applied: state.lookup.filtersApplied,
+    available: props.filtersAvailable,
+    applied:   props.filtersApplied,
 
-    availableSources: state.lookup.filtersAvailable[FILTER_GROUP_SOURCES].filters,
-    appliedSources:   state.lookup.filtersApplied[FILTER_GROUP_SOURCES].filters,
+    availableSources: props.filtersAvailable[FILTER_GROUP_SOURCES].filters,
+    appliedSources:   props.filtersApplied[FILTER_GROUP_SOURCES].filters,
 
-    availableAsns: state.lookup.filtersAvailable[FILTER_GROUP_ASNS].filters,
-    appliedAsns:   state.lookup.filtersApplied[FILTER_GROUP_ASNS].filters,
+    availableAsns: props.filtersAvailable[FILTER_GROUP_ASNS].filters,
+    appliedAsns:   props.filtersApplied[FILTER_GROUP_ASNS].filters,
 
     availableCommunities: {
-      communities: state.lookup.filtersAvailable[FILTER_GROUP_COMMUNITIES].filters,
-      ext:         state.lookup.filtersAvailable[FILTER_GROUP_EXT_COMMUNITIES].filters,
-      large:       state.lookup.filtersAvailable[FILTER_GROUP_LARGE_COMMUNITIES].filters,
+      communities: props.filtersAvailable[FILTER_GROUP_COMMUNITIES].filters,
+      ext:         props.filtersAvailable[FILTER_GROUP_EXT_COMMUNITIES].filters,
+      large:       props.filtersAvailable[FILTER_GROUP_LARGE_COMMUNITIES].filters,
     },
     appliedCommunities: {
-      communities: state.lookup.filtersApplied[FILTER_GROUP_COMMUNITIES].filters,
-      ext:         state.lookup.filtersApplied[FILTER_GROUP_EXT_COMMUNITIES].filters,
-      large:       state.lookup.filtersApplied[FILTER_GROUP_LARGE_COMMUNITIES].filters,
+      communities: props.filtersApplied[FILTER_GROUP_COMMUNITIES].filters,
+      ext:         props.filtersApplied[FILTER_GROUP_EXT_COMMUNITIES].filters,
+      large:       props.filtersApplied[FILTER_GROUP_LARGE_COMMUNITIES].filters,
     },
-
   })
-
 )(FiltersEditor);
 

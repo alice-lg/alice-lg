@@ -25,7 +25,10 @@ class _LookupView extends React.Component {
        </div>
        <div className="col-aside-details col-lg-3 col-md-12">
          <LookupSummary />
-         <FiltersEditor makeLinkProps={makeLinkProps} />
+         <FiltersEditor makeLinkProps={makeLinkProps}
+                        linkProps={this.props.linkProps}
+                        filtersApplied={this.props.filtersApplied}
+                        filtersAvailable={this.props.filtersAvailable} />
        </div>
       </div>
     );
@@ -35,7 +38,18 @@ class _LookupView extends React.Component {
 const LookupView = connect(
   (state) => {
     return {
-      enabled: state.config.prefix_lookup_enabled
+      enabled: state.config.prefix_lookup_enabled,
+
+      filtersAvailable: state.lookup.filtersAvailable,
+      filtersApplied:   state.lookup.filtersApplied,
+
+      linkProps: {
+        pageReceived:   0, // Reset pagination on filter change
+        pageFiltered:   0,
+        query:          state.lookup.query,
+        filtersApplied: state.lookup.filtersApplied,
+        routing:        state.routing.locationBeforeTransitions,
+      },
     }
   }
 )(_LookupView);
