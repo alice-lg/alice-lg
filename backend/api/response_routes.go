@@ -92,6 +92,8 @@ type FilterableResponse struct {
 
 type PaginatedRoutesResponse struct {
 	*RoutesResponse
+	TimedResponse
+	FilterableResponse
 	Pagination Pagination `json:"pagination"`
 }
 

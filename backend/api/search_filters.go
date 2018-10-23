@@ -251,7 +251,7 @@ func (self *SearchFilterGroup) AddFilters(filters []*SearchFilter) {
   - Extract ASN, source, bgp communites,
   - Find Filter in group, increment result count if required.
 */
-func (self *SearchFilters) UpdateFromRoute(route *LookupRoute) {
+func (self *SearchFilters) UpdateFromLookupRoute(route *LookupRoute) {
 	// Add source
 	self.GetGroupByKey(SEARCH_KEY_SOURCES).AddFilter(&SearchFilter{
 		Name:  route.Routeserver.Name,
@@ -263,6 +263,34 @@ func (self *SearchFilters) UpdateFromRoute(route *LookupRoute) {
 		Name:  route.Neighbour.Description,
 		Value: route.Neighbour.Asn,
 	})
+
+	// Add communities
+	communities := self.GetGroupByKey(SEARCH_KEY_COMMUNITIES)
+	for _, c := range route.Bgp.Communities {
+		communities.AddFilter(&SearchFilter{
+			Name:  c.String(),
+			Value: c,
+		})
+	}
+	extCommunities := self.GetGroupByKey(SEARCH_KEY_EXT_COMMUNITIES)
+	for _, c := range route.Bgp.ExtCommunities {
+		extCommunities.AddFilter(&SearchFilter{
+			Name:  c.String(),
+			Value: c,
+		})
+	}
+	largeCommunities := self.GetGroupByKey(SEARCH_KEY_LARGE_COMMUNITIES)
+	for _, c := range route.Bgp.LargeCommunities {
+		largeCommunities.AddFilter(&SearchFilter{
+			Name:  c.String(),
+			Value: c,
+		})
+	}
+}
+
+// This is the same as above, but only the communities
+// are considered.
+func (self *SearchFilters) UpdateFromRoute(route *Route) {
 
 	// Add communities
 	communities := self.GetGroupByKey(SEARCH_KEY_COMMUNITIES)
