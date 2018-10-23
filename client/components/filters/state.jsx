@@ -6,6 +6,13 @@ import {FILTER_GROUP_SOURCES,
         FILTER_GROUP_LARGE_COMMUNITIES}
   from './groups'
 
+import {decodeFiltersSources,
+        decodeFiltersAsns,
+        decodeFiltersCommunities,
+        decodeFiltersExtCommunities,
+        decodeFiltersLargeCommunities}
+  from 'components/filters/encoding'
+
 export function cloneFilters(filters) {
   const nextFilters = [
     Object.assign({}, filters[FILTER_GROUP_SOURCES]),
@@ -33,3 +40,17 @@ export function cloneFilters(filters) {
   return nextFilters;
 }
 
+/*
+ * Decode filters applied from params
+ */
+export function decodeFiltersApplied(params) {
+  let groups = cloneFilters(initialFilterState);
+
+  groups[FILTER_GROUP_SOURCES].filters =           decodeFiltersSources(params);
+  groups[FILTER_GROUP_ASNS].filters =              decodeFiltersAsns(params);
+  groups[FILTER_GROUP_COMMUNITIES].filters =       decodeFiltersCommunities(params);
+  groups[FILTER_GROUP_EXT_COMMUNITIES].filters =   decodeFiltersExtCommunities(params);
+  groups[FILTER_GROUP_LARGE_COMMUNITIES].filters = decodeFiltersLargeCommunities(params);
+
+  return groups;
+}

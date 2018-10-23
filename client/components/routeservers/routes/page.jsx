@@ -73,7 +73,7 @@ const RoutesViewEmpty = (props) => {
   if (!props.loadNotExported) {
     return null; // There may be routes matching the query in there!
   }
-  
+
   const hasContent = props.routes.received.totalResults > 0 ||
                      props.routes.filtered.totalResults > 0 ||
                      props.routes.notExported.totalResults > 0;
@@ -95,7 +95,7 @@ const RoutesViewEmpty = (props) => {
 class RoutesPage extends React.Component {
   constructor(props) {
     super(props);
-    
+
     // Create debounced dispatch, as we don't want to flood
     // the server with API queries
     this.debouncedDispatch = debounce(this.props.dispatch, 350);
@@ -125,7 +125,7 @@ class RoutesPage extends React.Component {
       cacheStatus = null;
     }
 
-    // We have to shift the layout a bit, to make room for 
+    // We have to shift the layout a bit, to make room for
     // the related peers tabs
     let pageClass = "routeservers-page";
     if (this.props.relatedPeers.length > 1) {
@@ -167,7 +167,7 @@ class RoutesPage extends React.Component {
 
             <QuickLinks routes={this.props.routes} />
 
-            <RoutesViewEmpty routes={this.props.routes} 
+            <RoutesViewEmpty routes={this.props.routes}
                              loadNotExported={this.props.loadNotExported} />
 
             <RoutesView
@@ -247,7 +247,7 @@ export default connect(
       routing: state.routing.locationBeforeTransitions,
       loadNotExported: state.routes.loadNotExported ||
                        !state.config.noexport_load_on_demand,
-       
+
       anyLoading: anyLoading,
 
       relatedPeers: relatedPeers
