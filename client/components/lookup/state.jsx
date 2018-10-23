@@ -50,7 +50,7 @@ export function  makeLinkProps(props) {
   const search = `?${pagination}&q=${query}${filtering}`;
   let hash = null;
   if (props.anchor) {
-    hash += `#routes-${props.anchor}`;
+    hash = `#routes-${props.anchor}`;
   }
 
   const linkTo = {
