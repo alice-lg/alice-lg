@@ -5,7 +5,26 @@ import (
 	"testing"
 )
 
-func makeTestRoute() *LookupRoute {
+func makeTestRoute() *Route {
+	route := &Route{
+		Bgp: BgpInfo{
+			Communities: []Community{
+				Community{23, 42},
+				Community{111, 11},
+			},
+			ExtCommunities: []ExtCommunity{
+				ExtCommunity{"ro", 23, 123},
+			},
+			LargeCommunities: []Community{
+				Community{1000, 23, 42},
+			},
+		},
+	}
+
+	return route
+}
+
+func makeTestLookupRoute() *LookupRoute {
 	route := &LookupRoute{
 		Bgp: BgpInfo{
 			Communities: []Community{
@@ -129,7 +148,7 @@ func TestSearchFiltersFromQuery(t *testing.T) {
 
 func TestSearchFilterCompareRoute(t *testing.T) {
 	// Check filter matches
-	route := makeTestRoute()
+	route := makeTestLookupRoute()
 
 	// Source
 	if searchFilterMatchSource(route, 3) != true {
@@ -173,7 +192,7 @@ func TestSearchFilterCompareRoute(t *testing.T) {
 }
 
 func TestSearchFilterMatchRoute(t *testing.T) {
-	route := makeTestRoute()
+	route := makeTestLookupRoute()
 
 	query := "asns=2342,23042&large_communities=1000:23:42&sources=1,2,3&q=foo"
 	values, err := url.ParseQuery(query)
@@ -195,7 +214,7 @@ func TestSearchFilterMatchRoute(t *testing.T) {
 }
 
 func TestSearchFilterExcludeRoute(t *testing.T) {
-	route := makeTestRoute()
+	route := makeTestLookupRoute()
 
 	query := "asns=2342,23042&large_communities=42:23:42&sources=1,2,3&q=foo"
 	values, err := url.ParseQuery(query)
@@ -216,9 +235,7 @@ func TestSearchFilterExcludeRoute(t *testing.T) {
 }
 
 // Communities should match all aswell
-func TestSearchFilterExcludeRouteCommunity(t *testing.T) {
-	route := makeTestRoute()
-
+func testSearchFilterCommunities(route Filterable, t *testing.T) {
 	query := "communities=23:42,111:11"
 	values, err := url.ParseQuery(query)
 	if err != nil {
@@ -255,10 +272,13 @@ func TestSearchFilterExcludeRouteCommunity(t *testing.T) {
 	}
 }
 
-// Check that ext. communities work
-func TestSearchFilterExtCommunities(t *testing.T) {
-	route := makeTestRoute()
+func TestSearchFilterLookupRouteCommunity(t *testing.T) {
+	route := makeTestLookupRoute()
+	testSearchFilterCommunities(route, t)
+}
 
+// Check that ext. communities work
+func testSearchFilterExtCommunities(route Filterable, t *testing.T) {
 	query := "ext_communities=ro:23:123"
 	values, err := url.ParseQuery(query)
 	if err != nil {
@@ -293,4 +313,62 @@ func TestSearchFilterExtCommunities(t *testing.T) {
 	if filters.MatchRoute(route) != false {
 		t.Error("Route should not have matched filters!")
 	}
+}
+
+func TestSearchFilterRouteExtCommunities(t *testing.T) {
+	route := makeTestRoute()
+	testSearchFilterExtCommunities(route, t)
+}
+
+func TestSearchFilterLookupRouteExtCommunities(t *testing.T) {
+	route := makeTestLookupRoute()
+	testSearchFilterExtCommunities(route, t)
+}
+
+// Check that large communities work aswell
+func testSearchFilterLargeCommunities(route Filterable, t *testing.T) {
+	query := "large_communities=1000:23:42"
+	values, err := url.ParseQuery(query)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	filters, err := FiltersFromQuery(values)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if filters.MatchRoute(route) == false {
+		t.Error("Route should have matched filters!")
+	}
+
+	// Now check that all communities need to match
+	query = "large_communities=1002:111:11"
+	values, err = url.ParseQuery(query)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	filters, err = FiltersFromQuery(values)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if filters.MatchRoute(route) != false {
+		t.Error("Route should not have matched filters!")
+	}
+}
+
+func TestSearchFilterRouteLargeCommunities(t *testing.T) {
+	route := makeTestRoute()
+	testSearchFilterLargeCommunities(route, t)
+}
+
+func TestSearchFilterLookupRouteLargeCommunities(t *testing.T) {
+	route := makeTestLookupRoute()
+	testSearchFilterLargeCommunities(route, t)
 }
