@@ -52,7 +52,7 @@ class Lookup extends React.Component {
       pathname: "/search",
       search: `?q=${q}`
     };
-    
+
     // Set lookup params
     this.props.dispatch(setLookupQueryValue(q));
     this.debouncedDispatch(replace(destination));
@@ -101,11 +101,11 @@ export default connect(
       error: state.lookup.error,
       routes: {
         filtered: {
-          loading: lookup.isLoading, 
+          loading: lookup.isLoading,
           totalResults: lookup.totalRoutesFiltered,
         },
         received: {
-          loading: lookup.isLoading, 
+          loading: lookup.isLoading,
           totalResults: lookup.totalRoutesImported,
         },
         notExported: {

@@ -6,9 +6,11 @@ import PageHeader from 'components/page-header'
 
 import Lookup from 'components/lookup'
 import LookupSummary from 'components/lookup/results-summary'
-import LookupFilters from 'components/lookup/filters'
+import FiltersEditor from 'components/filters/editor'
 
 import Content from 'components/content'
+
+import {makeLinkProps} from './state'
 
 class _LookupView extends React.Component {
   render() {
@@ -23,7 +25,7 @@ class _LookupView extends React.Component {
        </div>
        <div className="col-aside-details col-lg-3 col-md-12">
          <LookupSummary />
-         <LookupFilters />
+         <FiltersEditor makeLinkProps={makeLinkProps} />
        </div>
       </div>
     );

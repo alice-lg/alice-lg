@@ -6,7 +6,7 @@ import {connect} from 'react-redux'
 import {Link} from 'react-router'
 import {replace} from 'react-router-redux'
 
-import {filtersEqual} from 'components/filters/filter'
+import {filtersEqual} from 'components/filters/groups'
 
 import FilterReason
   from 'components/routeservers/communities/filter-reason'
