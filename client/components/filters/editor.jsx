@@ -6,7 +6,9 @@ import {connect} from 'react-redux'
 
 import {push} from 'react-router-redux'
 
-import {cloneFilters} from 'components/filters/state'
+import {cloneFilters,
+        hasFilters}
+  from 'components/filters/state'
 
 import {FILTER_GROUP_SOURCES,
         FILTER_GROUP_ASNS,
@@ -66,24 +68,26 @@ class FiltersEditor extends React.Component {
   }
 
   render() {
-    if (!this.props.hasRoutes) {
+    if (!hasFilters(this.props.available)) {
       return null;
     }
     return (
       <div className="card lookup-filters-editor">
-        <h2>Route server</h2>
+        {this.props.availableSources.length > 0 && <h2>Route server</h2>}
         <RouteserversSelect onChange={(value) => this.addFilter(FILTER_GROUP_SOURCES, value)}
                             onRemove={(value) => this.removeFilter(FILTER_GROUP_SOURCES, value)}
                             available={this.props.availableSources}
                             applied={this.props.appliedSources} />
 
-        <h2>Neighbor</h2>
+        {this.props.availableAsns.length > 0 && <h2>Neighbor</h2>}
         <PeersFilterSelect onChange={(value) => this.addFilter(FILTER_GROUP_ASNS, value)}
                            onRemove={(value) => this.removeFilter(FILTER_GROUP_ASNS, value)}
                            available={this.props.availableAsns}
                            applied={this.props.appliedAsns} />
 
-        <h2>Communities</h2>
+        {(this.props.availableCommunities.communities.legnth > 0 ||
+         this.props.availableCommunities.ext.length > 0 ||
+         this.props.availableCommunities.large.length > 0 ) && <h2>Communities</h2>}
         <CommunitiesSelect onChange={(group, value) => this.addFilter(group, value)}
                            onRemove={(group, value) => this.removeFilter(group, value)}
                            available={this.props.availableCommunities}
@@ -97,8 +101,6 @@ class FiltersEditor extends React.Component {
 export default connect(
   (state, props) => ({
     isLoading: state.lookup.isLoading,
-    hasRoutes: state.lookup.routesFiltered.length > 0 ||
-               state.lookup.routesImported.length > 0,
 
     link: props.linkProps,
 

@@ -17,6 +17,11 @@ import {FILTER_GROUP_COMMUNITIES,
 
 export class RouteserversSelect extends React.Component {
   render() {
+    // Nothing to do if we don't have filters
+    if (this.props.available.length == 0) {
+      return null;
+    }
+
     // Sort filters available
     const sortedFiltersAvailable = this.props.available.sort((a, b) => {
       return a.value - b.value;
@@ -79,6 +84,11 @@ export class RouteserversSelect extends React.Component {
 
 export class PeersFilterSelect extends React.Component {
   render() {
+    // Nothing to do if we don't have filters
+    if (this.props.available.length == 0) {
+      return null;
+    }
+
     // Sort filters available
     const sortedFiltersAvailable = this.props.available.sort((a, b) => {
       return a.name.localeCompare(b.name);
@@ -150,6 +160,13 @@ class _CommunitiesSelect extends React.Component {
   }
 
   render() {
+    // Nothing to do if we don't have filters
+    if (this.props.available.communities.length == 0 &&
+        this.props.available.ext.length == 0 &&
+        this.props.available.large.length == 0) {
+      return null;
+    }
+
     const communitiesAvailable = this.props.available.communities.sort((a, b) => {
       return (a.value[0] - b.value[0]) * 100000 + (a.value[1] - b.value[1]);
     });

@@ -31,6 +31,9 @@ import RoutesLoadingIndicator from './loading-indicator'
 
 import {filterableColumnsText} from './utils'
 
+import FiltersEditor from 'components/filters/editor'
+import {mergeFilters} from 'components/filters/state'
+
 // Actions
 import {setFilterQueryValue}
   from './actions'
@@ -139,6 +142,10 @@ class RoutesPage extends React.Component {
         this.props.routesColumnsOrder
       );
 
+    const makeLinkProps = (props) => ({
+      pathname: "/implement-me"
+    });
+
     return(
       <div className={pageClass}>
         <PageHeader>
@@ -193,6 +200,10 @@ class RoutesPage extends React.Component {
               <Status routeserverId={this.props.params.routeserverId}
                       cacheStatus={cacheStatus} />
             </div>
+            <FiltersEditor makeLinkProps={makeLinkProps}
+                           linkProps={this.props.linkProps}
+                           filtersApplied={this.props.filtersApplied}
+                           filtersAvailable={this.props.filtersAvailable} />
           </div>
         </div>
       </div>
@@ -249,6 +260,13 @@ export default connect(
                        !state.config.noexport_load_on_demand,
 
       anyLoading: anyLoading,
+
+      filtersApplied: state.routes.filtersApplied,
+      filtersAvailable: mergeFilters(
+        state.routes.receivedFiltersAvailable,
+        state.routes.filteredFiltersAvailable,
+        state.routes.notExportedFiltersAvailable
+      ),
 
       relatedPeers: relatedPeers
     });

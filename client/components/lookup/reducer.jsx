@@ -138,6 +138,7 @@ export default function reducer(state=initialState, action) {
         queryValue: action.payload.query,
         isLoading: true
       });
+
     case LOAD_RESULTS_SUCCESS:
       if (state.query != action.payload.query) {
         return state;

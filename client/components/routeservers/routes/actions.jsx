@@ -43,11 +43,13 @@ function routesRequest(type) {
 }
 
 function routesSuccess(type) {
-  return (routes, pagination, apiStatus) => ({
+  return (routes, pagination, filtersAvailable, filtersApplied, apiStatus) => ({
     type: type,
     payload: {
       routes: routes,
       pagination: pagination,
+      filtersAvailable: filtersAvailable,
+      filtersApplied: filtersApplied,
       apiStatus: apiStatus
     }
   });
@@ -97,6 +99,8 @@ function fetchRoutes(type) {
             dispatch(successAction(
               data[rtype],
               data.pagination,
+              data.filters_available,
+              data.filters_applied,
               data.api));
           },
           (error) => {
