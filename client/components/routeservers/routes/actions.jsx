@@ -2,6 +2,7 @@
 import axios from 'axios'
 
 import {apiError} from 'components/errors/actions'
+import {filtersUrlEncode} from 'components/filters/encoding'
 
 export const ROUTES_RECEIVED = "received";
 export const ROUTES_FILTERED = "filtered";
@@ -22,14 +23,16 @@ export const FETCH_ROUTES_NOT_EXPORTED_ERROR   = "@routes/FETCH_ROUTES_NOT_EXPOR
 export const SET_FILTER_QUERY_VALUE = "@routes/SET_FILTER_QUERY_VALUE";
 
 // Url helper
-function routesUrl(type, rsId, pId, page, query) {
+function routesUrl(type, rsId, pId, page, query, filters) {
     let rtype = type;
     if (type == ROUTES_NOT_EXPORTED) {
       rtype = "not-exported"; // This is a bit ugly
     }
 
-    let base = `/api/v1/routeservers/${rsId}/neighbors/${pId}/routes/${rtype}`
-    let params = `?page=${page}&q=${query}`
+    const filtersEncoded = filtersUrlEncode(filters);
+    const base = `/api/v1/routeservers/${rsId}/neighbors/${pId}/routes/${rtype}`
+    const params = `?page=${page}&q=${query}${filtersEncoded}`
+
     return base + params;
 };
 
@@ -89,11 +92,11 @@ function fetchRoutes(type) {
     [ROUTES_NOT_EXPORTED]: 'not_exported',
   }[type];
 
-  return (rsId, pId, page, query) => {
+  return (rsId, pId, page, query, filters) => {
     return (dispatch) => {
       dispatch(requestAction());
 
-      axios.get(routesUrl(type, rsId, pId, page, query))
+      axios.get(routesUrl(type, rsId, pId, page, query, filters))
         .then(
           ({data}) => {
             dispatch(successAction(

@@ -61,7 +61,7 @@ export function loadResults(query, filters, pageImported=0, pageFiltered=0) {
 
     // Build querystring
     const q = `q=${query}&page_filtered=${pageFiltered}&page_imported=${pageImported}`;
-    const f = filtersUrlEncode(filters); 
+    const f = filtersUrlEncode(filters);
     axios.get(`/api/v1/lookup/prefix?${q}${f}`)
       .then(
         (res) => {

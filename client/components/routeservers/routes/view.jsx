@@ -52,6 +52,9 @@ class RoutesView extends React.Component {
   dispatchFetchRoutes() {
     const type = this.props.type;
 
+    // Get filters
+    const filters = this.props.filtersApplied;
+
     // Depending on the component's configuration, dispatch
     // routes fetching
     const fetchRoutes = {
@@ -75,11 +78,11 @@ class RoutesView extends React.Component {
     }
 
     // Otherwise, just dispatch the request:
-    this.props.dispatch(fetchRoutes(rsId, pId, params.page, query));
+    this.props.dispatch(fetchRoutes(rsId, pId, params.page, query, filters));
   }
 
   /*
-   * Diff props and this.props to check if we need to 
+   * Diff props and this.props to check if we need to
    * dispatch another fetch routes
    */
   routesNeedFetch(props) {
@@ -196,7 +199,7 @@ class RoutesView extends React.Component {
 
       anchor: "routes-not-exported",
       page: this.props.routes.notExported.page,
-      
+
       pageReceived:    this.props.routes.received.page,
       pageFiltered:    this.props.routes.filtered.page,
       pageNotExported: this.props.routes.notExported.page,
@@ -214,7 +217,7 @@ class RoutesView extends React.Component {
           </div>
         </div>
         <p className="help">
-          Due to the potentially high amount of routes not exported, 
+          Due to the potentially high amount of routes not exported,
           they are only fetched on demand.
         </p>
 
@@ -272,6 +275,7 @@ export default connect(
           [ROUTES_FILTERED]:     filtered,
           [ROUTES_NOT_EXPORTED]: notExported
       },
+      filtersApplied: state.routes.filtersApplied,
       routing: state.routing.locationBeforeTransitions
     });
   }
