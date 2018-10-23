@@ -13,6 +13,14 @@ import {decodeFiltersSources,
         decodeFiltersLargeCommunities}
   from 'components/filters/encoding'
 
+export const initialFilterState = [
+  {"key": "sources", "filters": []},
+  {"key": "asns", "filters": []},
+  {"key": "communities", "filters": []},
+  {"key": "ext_communities", "filters": []},
+  {"key": "large_communities", "filters": []},
+];
+
 export function cloneFilters(filters) {
   const nextFilters = [
     Object.assign({}, filters[FILTER_GROUP_SOURCES]),

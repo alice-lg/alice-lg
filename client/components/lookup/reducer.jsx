@@ -12,18 +12,10 @@ import {
   RESET,
 } from './actions'
 
-import {cloneFilters, decodeFiltersApplied}
+import {cloneFilters, decodeFiltersApplied, initialFilterState}
   from 'components/filters/state'
 
 const LOCATION_CHANGE = '@@router/LOCATION_CHANGE'
-
-const initialFilterState = [
-  {"key": "sources", "filters": []},
-  {"key": "asns", "filters": []},
-  {"key": "communities", "filters": []},
-  {"key": "ext_communities", "filters": []},
-  {"key": "large_communities", "filters": []},
-];
 
 const initialState = {
   query: "",
