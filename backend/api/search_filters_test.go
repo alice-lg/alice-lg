@@ -51,6 +51,93 @@ func makeTestLookupRoute() *LookupRoute {
 	return route
 }
 
+func TestSearchFilterCmpInt(t *testing.T) {
+	if searchFilterCmpInt(23, 23) != true {
+		t.Error("23 == 23 should be true")
+	}
+	if searchFilterCmpInt(23, 42) == true {
+		t.Error("23 == 42 should be false")
+	}
+}
+
+func TestSearchFilterCmpCommunity(t *testing.T) {
+	// Standard communities
+	if searchFilterCmpCommunity(Community{23, 42}, Community{23, 42}) != true {
+		t.Error("23:42 == 23:42 should be true")
+	}
+	if searchFilterCmpCommunity(Community{23, 42}, Community{42, 23}) == true {
+		t.Error("23:42 == 42:23 should be false")
+	}
+
+	// Large communities
+	if searchFilterCmpCommunity(Community{1000, 23, 42}, Community{1000, 23, 42}) != true {
+		t.Error("1000:23:42 == 1000:23:42 should be true")
+	}
+	if searchFilterCmpCommunity(Community{1000, 23, 42}, Community{1111, 42, 23}) == true {
+		t.Error("1000:23:42 == 1111:42:23 should be false")
+	}
+
+	// Length missmatch
+	if searchFilterCmpCommunity(Community{1000, 23, 42}, Community{42, 23}) == true {
+		t.Error("1000:23:42 == 42:23 should be false")
+	}
+}
+
+func TestSearchFilterEqual(t *testing.T) {
+	// Int values (ASNS, SourceId)
+	a := &SearchFilter{Value: 23}
+	b := &SearchFilter{Value: 23}
+	c := &SearchFilter{Value: 42}
+
+	if a.Equal(b) == false {
+		t.Error("filter[23] == filter[23] should be true")
+	}
+
+	if a.Equal(c) {
+		t.Error("filter[23] == filter[42] should be false")
+	}
+
+	// Communities
+	a = &SearchFilter{Value: Community{23, 42}}
+	b = &SearchFilter{Value: Community{23, 42}}
+	c = &SearchFilter{Value: Community{42, 23}}
+
+	if a.Equal(b) == false {
+		t.Error("filter[23:42] == filter[23:42] should be true")
+	}
+
+	if a.Equal(c) {
+		t.Error("filter[23:42] == filter[42:23] should be false")
+	}
+
+	// Ext. Communities
+	a = &SearchFilter{Value: ExtCommunity{"ro", 23, 42}}
+	b = &SearchFilter{Value: ExtCommunity{"ro", 23, 42}}
+	c = &SearchFilter{Value: ExtCommunity{"rt", 42, 23}}
+
+	if a.Equal(b) == false {
+		t.Error("filter[ro:23:42] == filter[ro:23:42] should be true")
+	}
+
+	if a.Equal(c) {
+		t.Error("filter[ro:23:42] == filter[rt:42:23] should be false")
+	}
+
+	// Large communities
+	a = &SearchFilter{Value: Community{1000, 23, 42}}
+	b = &SearchFilter{Value: Community{1000, 23, 42}}
+	c = &SearchFilter{Value: Community{1111, 42, 23}}
+
+	if a.Equal(b) == false {
+		t.Error("filter[23:42] == filter[23:42] should be true")
+	}
+
+	if a.Equal(c) {
+		t.Error("filter[23:42] == filter[42:23] should be false")
+	}
+
+}
+
 func TestSearchFilterGetGroupsByKey(t *testing.T) {
 	filtering := NewSearchFilters()
 

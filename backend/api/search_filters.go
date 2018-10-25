@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"log"
 	"net/url"
 )
 
@@ -26,6 +27,62 @@ type SearchFilter struct {
 	Cardinality int         `json:"cardinality"`
 	Name        string      `json:"name"`
 	Value       FilterValue `json:"value"`
+}
+
+type SearchFilterCmpFunc func(a FilterValue, b FilterValue) bool
+
+func searchFilterCmpInt(a FilterValue, b FilterValue) bool {
+	return a.(int) == b.(int)
+}
+
+func searchFilterCmpCommunity(a FilterValue, b FilterValue) bool {
+	ca := a.(Community)
+	cb := b.(Community)
+
+	if len(ca) != len(cb) {
+		return false
+	}
+
+	// Compare components
+	for i, _ := range ca {
+		if ca[i] != cb[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
+func searchFilterCmpExtCommunity(a FilterValue, b FilterValue) bool {
+	ca := a.(ExtCommunity)
+	cb := b.(ExtCommunity)
+
+	if len(ca) != len(cb) || len(ca) != 3 || len(cb) != 3 {
+		return false
+	}
+
+	return ca[0] == cb[0] && ca[1] == cb[1] && ca[2] == cb[2]
+}
+
+func (self *SearchFilter) Equal(other *SearchFilter) bool {
+	var cmp SearchFilterCmpFunc
+	switch other.Value.(type) {
+	case Community:
+		cmp = searchFilterCmpCommunity
+		break
+	case ExtCommunity:
+		cmp = searchFilterCmpExtCommunity
+		break
+	case int:
+		cmp = searchFilterCmpInt
+	}
+
+	if cmp == nil {
+		log.Println("Unknown search filter value type")
+		return false
+	}
+
+	return cmp(self.Value, other.Value)
 }
 
 type SearchFilterGroup struct {
@@ -244,6 +301,13 @@ func (self *SearchFilterGroup) AddFilters(filters []*SearchFilter) {
 	for _, filter := range filters {
 		self.AddFilter(filter)
 	}
+}
+
+/*
+ Find search filter in group
+*/
+func (self *SearchFilterGroup) FindFilter(filter *SearchFilter) {
+
 }
 
 /*
