@@ -135,7 +135,25 @@ func TestSearchFilterEqual(t *testing.T) {
 	if a.Equal(c) {
 		t.Error("filter[23:42] == filter[42:23] should be false")
 	}
+}
 
+func TestSearchFilterGroupContains(t *testing.T) {
+	group := SearchFilterGroup{
+		Filters: []*SearchFilter{
+			&SearchFilter{Value: Community{1000, 23, 42}},
+			&SearchFilter{Value: Community{1001, 24, 43}},
+		},
+	}
+
+	f := &SearchFilter{Value: Community{1001, 24, 43}}
+	if group.Contains(f) == false {
+		t.Error("Group should contain filter.")
+	}
+
+	f = &SearchFilter{Value: Community{1111, 24, 43}}
+	if group.Contains(f) {
+		t.Error("Group should not contain filter.")
+	}
 }
 
 func TestSearchFilterGetGroupsByKey(t *testing.T) {
@@ -458,4 +476,69 @@ func TestSearchFilterRouteLargeCommunities(t *testing.T) {
 func TestSearchFilterLookupRouteLargeCommunities(t *testing.T) {
 	route := makeTestLookupRoute()
 	testSearchFilterLargeCommunities(route, t)
+}
+
+// Subtract other
+func TestSearchFiltersSub(t *testing.T) {
+	query := "asns=2342,23042&communities=23:42&large_communities=42:23:42&sources=1,2,3&q=foo"
+	values, err := url.ParseQuery(query)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	a, err := FiltersFromQuery(values)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	query = "asns=2342,10&large_communities=42:23:42&sources=1,2,3&q=foo"
+	values, err = url.ParseQuery(query)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	b, err := FiltersFromQuery(values)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// Modify some filters
+	g := a.GetGroupByKey(SEARCH_KEY_ASNS)
+	g.Filters[1].Cardinality = 9001
+
+	t.Log(a)
+	t.Log(b)
+
+	c := a.Sub(b)
+
+	// Check diff
+	g = c.GetGroupByKey(SEARCH_KEY_ASNS)
+	if len(g.Filters) != 1 {
+		t.Error("There should be now only be one filter")
+	}
+
+	if g.Filters[0].Cardinality != 9001 {
+		t.Error("This should be the modified filter")
+	}
+
+	if g.Filters[0].Value != 23042 {
+		t.Error("This should be the modified filter")
+	}
+
+	// Should still contain community filter
+	g = c.GetGroupByKey(SEARCH_KEY_COMMUNITIES)
+	if len(g.Filters) != 1 {
+		t.Error("The community filter should not have been touched")
+	}
+
+	// The large community filter should have been removed
+	g = c.GetGroupByKey(SEARCH_KEY_LARGE_COMMUNITIES)
+	if len(g.Filters) != 0 {
+		t.Error("The large community filter is not removed")
+	}
+
 }
