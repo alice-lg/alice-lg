@@ -71,6 +71,7 @@ class FiltersEditor extends React.Component {
     if (!hasFilters(this.props.available)) {
       return null;
     }
+
     return (
       <div className="card lookup-filters-editor">
         {this.props.availableSources.length > 0 && <h2>Route server</h2>}
@@ -85,7 +86,7 @@ class FiltersEditor extends React.Component {
                            available={this.props.availableAsns}
                            applied={this.props.appliedAsns} />
 
-        {(this.props.availableCommunities.communities.legnth > 0 ||
+        {(this.props.availableCommunities.communities.length > 0 ||
          this.props.availableCommunities.ext.length > 0 ||
          this.props.availableCommunities.large.length > 0 ) && <h2>Communities</h2>}
         <CommunitiesSelect onChange={(group, value) => this.addFilter(group, value)}
