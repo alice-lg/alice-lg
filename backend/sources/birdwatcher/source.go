@@ -29,8 +29,6 @@ type Birdwatcher struct {
 	// Mutices:
 	routesFetchMutex map[string]*sync.Mutex
 
-	hasNeighborSummary bool
-
 	sync.Mutex
 }
 
@@ -56,19 +54,11 @@ func NewBirdwatcher(config Config) *Birdwatcher {
 		routesCacheDisabled, routesCacheMaxSize)
 
 	// Check if we have a neighbor summary endpoint:
-	hasNeighborSummary := true
 	if config.DisableNeighborSummary {
-		hasNeighborSummary = false
-		log.Println("Config override: Disable neighbor summary; using `show protocols all`")
-	}
-
-	_, err := client.GetJson(NEIGHBOR_SUMMARY_ENDPOINT)
-	if err != nil {
-		hasNeighborSummary = false
-	} else {
-		if !config.DisableNeighborSummary {
-			log.Println("Using neighbor-summary capabilities on:", config.Name)
-		}
+		log.Println(
+			"Config override:",
+			"Disabled neighbor summary on", config.Name,
+		)
 	}
 
 	birdwatcher := &Birdwatcher{
@@ -83,8 +73,6 @@ func NewBirdwatcher(config Config) *Birdwatcher {
 		routesNotExportedCache: routesNotExportedCache,
 
 		routesFetchMutex: map[string]*sync.Mutex{},
-
-		hasNeighborSummary: hasNeighborSummary,
 	}
 	return birdwatcher
 }
@@ -123,12 +111,29 @@ func (self *Birdwatcher) Neighbours() (*api.NeighboursResponse, error) {
 
 	var err error
 
-	if self.hasNeighborSummary {
-		response, err = self.summaryNeighbors()
-	} else {
+	if self.config.DisableNeighborSummary {
+		// Use classic method
 		response, err = self.bgpProtocolsNeighbors()
+	} else {
+
+		// First try neighbors summary
+		response, err = self.summaryNeighbors()
+		if err != nil {
+			// Inform user that this did not work
+			log.Println(
+				"Could not use neighbors-summary endpoint.",
+				"If this capability was disabled intentionally, consider setting",
+				"`disable_neighbor_summary = true` in your `source.X.birdwatcher`",
+				"section.",
+			)
+			log.Println(err)
+
+			// Try again with classic approach
+			response, err = self.bgpProtocolsNeighbors()
+		}
 	}
 
+	// Handle other errors
 	if err != nil {
 		return nil, err
 	}
