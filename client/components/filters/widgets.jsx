@@ -18,7 +18,8 @@ import {FILTER_GROUP_COMMUNITIES,
 export class RouteserversSelect extends React.Component {
   render() {
     // Nothing to do if we don't have filters
-    if (this.props.available.length == 0) {
+    if (this.props.available.length == 0 &&
+        this.props.applied.length == 0) {
       return null;
     }
 
@@ -85,7 +86,8 @@ export class RouteserversSelect extends React.Component {
 export class PeersFilterSelect extends React.Component {
   render() {
     // Nothing to do if we don't have filters
-    if (this.props.available.length == 0) {
+    if (this.props.available.length == 0 &&
+        this.props.applied.length == 0) {
       return null;
     }
 
@@ -161,10 +163,16 @@ class _CommunitiesSelect extends React.Component {
 
   render() {
     // Nothing to do if we don't have filters
-    if (this.props.available.communities.length == 0 &&
-        this.props.available.ext.length == 0 &&
-        this.props.available.large.length == 0) {
-      return null;
+    const hasAvailable = this.props.available.communities.length > 0 ||
+        this.props.available.ext.length > 0 ||
+        this.props.available.large.length > 0;
+
+    const hasApplied = this.props.applied.communities.length > 0 ||
+        this.props.applied.ext.length > 0 ||
+        this.props.applied.large.length > 0;
+
+    if (!hasApplied && !hasAvailable) {
+      return null; // nothing to do here.
     }
 
     const communitiesAvailable = this.props.available.communities.sort((a, b) => {
@@ -252,31 +260,32 @@ class _CommunitiesSelect extends React.Component {
           {appliedCommunities}
           {appliedExtCommunities}
           {appliedLargeCommunities}
-          <tr>
-            <td className="select-container" colSpan="2">
-              <select value="none"
-                      onChange={(e) => this.propagateChange(e.target.value)}
-                      className="form-control">
-                <option value="none" className="options-title">
-                  Select communities to match...
-                </option>
-                {communitiesOptions.length > 0 &&
-                  <optgroup label="Communities">
-                    {communitiesOptions}
-                  </optgroup>}
+          {hasAvailable &&
+              <tr>
+                <td className="select-container" colSpan="2">
+                  <select value="none"
+                          onChange={(e) => this.propagateChange(e.target.value)}
+                          className="form-control">
+                    <option value="none" className="options-title">
+                      Select communities to match...
+                    </option>
+                    {communitiesOptions.length > 0 &&
+                      <optgroup label="Communities">
+                        {communitiesOptions}
+                      </optgroup>}
 
-                {extCommunitiesOptions.length > 0 &&
-                  <optgroup label="Ext. Communities">
-                    {extCommunitiesOptions}
-                  </optgroup>}
+                    {extCommunitiesOptions.length > 0 &&
+                      <optgroup label="Ext. Communities">
+                        {extCommunitiesOptions}
+                      </optgroup>}
 
-                {largeCommunitiesOptions.length > 0 &&
-                  <optgroup label="Large Communities">
-                    {largeCommunitiesOptions}
-                  </optgroup>}
-              </select>
-            </td>
-          </tr>
+                    {largeCommunitiesOptions.length > 0 &&
+                      <optgroup label="Large Communities">
+                        {largeCommunitiesOptions}
+                      </optgroup>}
+                  </select>
+                </td>
+              </tr>}
         </tbody>
       </table>
     );

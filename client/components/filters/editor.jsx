@@ -68,7 +68,7 @@ class FiltersEditor extends React.Component {
   }
 
   render() {
-    if (!hasFilters(this.props.available)) {
+    if (!hasFilters(this.props.available) && !hasFilters(this.props.applied)) {
       return null;
     }
 
@@ -88,7 +88,10 @@ class FiltersEditor extends React.Component {
 
         {(this.props.availableCommunities.communities.length > 0 ||
          this.props.availableCommunities.ext.length > 0 ||
-         this.props.availableCommunities.large.length > 0 ) && <h2>Communities</h2>}
+         this.props.availableCommunities.large.length > 0 ||
+         this.props.appliedCommunities.communities.length > 0 ||
+         this.props.appliedCommunities.ext.length > 0 ||
+         this.props.appliedCommunities.large.length > 0) && <h2>Communities</h2>}
         <CommunitiesSelect onChange={(group, value) => this.addFilter(group, value)}
                            onRemove={(group, value) => this.removeFilter(group, value)}
                            available={this.props.availableCommunities}
