@@ -78,6 +78,9 @@ func apiLookupPrefixGlobal(
 		filtersAvailable.UpdateFromLookupRoute(r)
 	}
 
+	// Remove applied filters from available
+	filtersAvailable = filtersAvailable.Sub(filters)
+
 	// Homogenize results
 	sort.Sort(imported)
 	sort.Sort(filtered)

@@ -64,6 +64,9 @@ func apiRoutesListReceived(
 		filtersAvailable.UpdateFromRoute(r)
 	}
 
+	// Remove applied filters from available
+	filtersAvailable = filtersAvailable.Sub(filters)
+
 	// Paginate results
 	page := apiQueryMustInt(req, "page", 0)
 	pageSize := AliceConfig.Ui.Pagination.RoutesAcceptedPageSize
@@ -129,6 +132,9 @@ func apiRoutesListFiltered(
 		filtersAvailable.UpdateFromRoute(r)
 	}
 
+	// Remove applied filters from available
+	filtersAvailable = filtersAvailable.Sub(filters)
+
 	// Paginate results
 	page := apiQueryMustInt(req, "page", 0)
 	pageSize := AliceConfig.Ui.Pagination.RoutesFilteredPageSize
@@ -193,6 +199,9 @@ func apiRoutesListNotExported(
 		routes = append(routes, r)
 		filtersAvailable.UpdateFromRoute(r)
 	}
+
+	// Remove applied filters from available
+	filtersAvailable = filtersAvailable.Sub(filters)
 
 	// Paginate results
 	page := apiQueryMustInt(req, "page", 0)
