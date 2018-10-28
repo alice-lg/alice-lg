@@ -68,7 +68,7 @@ export function decodeFiltersApplied(params) {
 /*
  * Merge filters
  */
-export function mergeFilters(a, b) {
+function _mergeFilters(a, b) {
   let groups = cloneFilters(initialFilterState);
   let setCmp = [];
   setCmp[FILTER_GROUP_SOURCES] = cmpFilterValue;
@@ -82,6 +82,14 @@ export function mergeFilters(a, b) {
   }
 
   return groups;
+}
+
+export function mergeFilters(a, ...other) {
+  let result = a;
+  for (const filters of other) {
+    result = _mergeFilters(result, filters);
+  }
+  return result;
 }
 
 /*
