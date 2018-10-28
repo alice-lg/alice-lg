@@ -542,3 +542,43 @@ func TestSearchFiltersSub(t *testing.T) {
 	}
 
 }
+
+func TestSearchFiltersMergeProperties(t *testing.T) {
+	filtering := NewSearchFilters()
+	group := filtering.GetGroupByKey(SEARCH_KEY_ASNS)
+
+	group.AddFilter(&SearchFilter{
+		Name:  "Tech Inc. Solutions GmbH",
+		Value: 23042})
+
+	group.AddFilter(&SearchFilter{
+		Name:  "Offline.net",
+		Value: 1119})
+
+	offlineNet := group.Filters[1]
+	offlineNet.Cardinality = 9001
+
+	other := NewSearchFilters()
+	otherGroup := other.GetGroupByKey(SEARCH_KEY_ASNS)
+
+	otherGroup.AddFilter(&SearchFilter{
+		Value: 1119})
+
+	other.MergeProperties(filtering)
+
+	filter := otherGroup.Filters[0]
+
+	t.Log(filter)
+	if filter.Value != 1119 {
+		t.Error("Expected filter value shoud be 1119, got:", filter.Value)
+	}
+
+	if filter.Cardinality < 9000 {
+		t.Error("Expected cardinatlity property to be set")
+	}
+
+	if filter.Name == "" {
+		t.Error("Filter name should have been merged")
+	}
+
+}

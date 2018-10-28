@@ -518,3 +518,18 @@ func (self *SearchFilters) Sub(other *SearchFilters) *SearchFilters {
 
 	return &result
 }
+
+func (self *SearchFilters) MergeProperties(other *SearchFilters) {
+	for id, group := range *self {
+		otherGroup := (*other)[id]
+		for _, filter := range group.Filters {
+			otherFilter := otherGroup.FindFilter(filter)
+			if otherFilter == nil {
+				log.Println("Filter merge failed; filter not present on other side")
+				continue
+			}
+			filter.Name = otherFilter.Name
+			filter.Cardinality = otherFilter.Cardinality
+		}
+	}
+}
