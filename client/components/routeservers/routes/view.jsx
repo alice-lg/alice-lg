@@ -15,6 +15,7 @@ import {fetchRoutesReceived,
 import {makeLinkProps} from './urls'
 
 import {filtersEqual} from 'components/filters/groups'
+import {mergeFilters} from 'components/filters/state'
 
 // Constants
 import {ROUTES_RECEIVED,
@@ -271,6 +272,11 @@ export default connect(
                     state.routes.filteredRequested &&
                     !state.routes.filteredLoading
     };
+    const filtersApplied = mergeFilters(
+        state.routes.receivedFiltersApplied,
+        state.routes.filteredFiltersApplied,
+        state.routes.notExportedFiltersApplied
+    );
     return({
       filterQuery: state.routes.filterQuery,
       routes: {
@@ -278,7 +284,7 @@ export default connect(
           [ROUTES_FILTERED]:     filtered,
           [ROUTES_NOT_EXPORTED]: notExported
       },
-      filtersApplied: state.routes.filtersApplied,
+      filtersApplied: filtersApplied,
       routing: state.routing.locationBeforeTransitions
     });
   }
