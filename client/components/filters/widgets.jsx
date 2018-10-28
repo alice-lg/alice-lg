@@ -15,7 +15,26 @@ import {FILTER_GROUP_COMMUNITIES,
  from './groups'
 
 
-export class RouteserversSelect extends React.Component {
+/*
+ * Add a title to the widget, if something needs to be rendered
+ */
+const withTitle = (title) => (Widget) => (class WidgetWithTitle extends Widget {
+  render() {
+    const result = super.render();
+    if (result == null) {
+      return null;
+    }
+    return (
+      <div className="filter-editor-widget">
+        <h2>{title}</h2>
+        {result}
+      </div>
+    )
+  }
+});
+
+
+class _RouteserversSelect extends React.Component {
   render() {
     // Nothing to do if we don't have filters
     if (this.props.available.length == 0 &&
@@ -82,8 +101,10 @@ export class RouteserversSelect extends React.Component {
   }
 }
 
+export const RouteserversSelect = withTitle("Route Server")(_RouteserversSelect);
 
-export class PeersFilterSelect extends React.Component {
+
+class _PeersFilterSelect extends React.Component {
   render() {
     // Nothing to do if we don't have filters
     if (this.props.available.length == 0 &&
@@ -151,8 +172,10 @@ export class PeersFilterSelect extends React.Component {
   }
 }
 
+export const PeersFilterSelect = withTitle("Neighbor")(_PeersFilterSelect);
 
-class _CommunitiesSelect extends React.Component {
+
+class __CommunitiesSelect extends React.Component {
   propagateChange(value) {
     // Decode value
     const [group, community] = value.split(",", 2);
@@ -292,11 +315,12 @@ class _CommunitiesSelect extends React.Component {
   }
 }
 
-export const CommunitiesSelect = connect(
+const _CommunitiesSelect = connect(
   (state) => ({
     communities: state.config.bgp_communities,
   })
-)(_CommunitiesSelect);
+)(__CommunitiesSelect);
 
+export const CommunitiesSelect = withTitle("Communities")(_CommunitiesSelect);
 
 

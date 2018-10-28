@@ -115,6 +115,7 @@ function _handleFetchRoutesRequest(type, state, payload) {
   const nextState = Object.assign({}, state, {
     [stype+'Loading']: true,
     [stype+'Requested']: true,
+    [stype+'FiltersAvailable']: initialFilterState,
   });
 
   return nextState;
