@@ -568,7 +568,6 @@ func TestSearchFiltersMergeProperties(t *testing.T) {
 
 	filter := otherGroup.Filters[0]
 
-	t.Log(filter)
 	if filter.Value != 1119 {
 		t.Error("Expected filter value shoud be 1119, got:", filter.Value)
 	}

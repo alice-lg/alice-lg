@@ -36,7 +36,7 @@ func apiLookupPrefixGlobal(
 	t0 := time.Now()
 
 	// Get additional filter criteria
-	filters, err := api.FiltersFromQuery(req.URL.Query())
+	filtersApplied, err := api.FiltersFromQuery(req.URL.Query())
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func apiLookupPrefixGlobal(
 	filtersAvailable := api.NewSearchFilters()
 	for _, r := range routes {
 
-		if !filters.MatchRoute(r) {
+		if !filtersApplied.MatchRoute(r) {
 			continue // Exclude route from results set
 		}
 
@@ -79,7 +79,8 @@ func apiLookupPrefixGlobal(
 	}
 
 	// Remove applied filters from available
-	filtersAvailable = filtersAvailable.Sub(filters)
+	filtersApplied.MergeProperties(filtersAvailable)
+	filtersAvailable = filtersAvailable.Sub(filtersApplied)
 
 	// Homogenize results
 	sort.Sort(imported)
@@ -127,7 +128,7 @@ func apiLookupPrefixGlobal(
 		},
 		FilterableResponse: api.FilterableResponse{
 			FiltersAvailable: filtersAvailable,
-			FiltersApplied:   filters,
+			FiltersApplied:   filtersApplied,
 		},
 	}
 
