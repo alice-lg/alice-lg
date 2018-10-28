@@ -225,24 +225,37 @@ export default connect(
                                          state: "up"});
     }
 
-    let received = {
+    const received = {
       loading:      state.routes.receivedLoading,
       totalResults: state.routes.receivedTotalResults,
       apiStatus:    state.routes.receivedApiStatus
     };
-    let filtered = {
+    const filtered = {
       loading:      state.routes.filteredLoading,
       totalResults: state.routes.filteredTotalResults,
       apiStatus:    state.routes.filteredApiStatus
     };
-    let notExported = {
+    const notExported = {
       loading:      state.routes.notExportedLoading,
       totalResults: state.routes.notExportedTotalResults,
       apiStatus:    state.routes.notExportedApiStatus
     };
-    let anyLoading = state.routes.receivedLoading ||
+    const anyLoading = state.routes.receivedLoading ||
                      state.routes.filteredLoading ||
                      state.routes.notExportedLoading;
+  
+    const filtersApplied = mergeFilters(
+        state.routes.receivedFiltersApplied,
+        state.routes.filteredFiltersApplied,
+        state.routes.notExportedFiltersApplied
+    );
+
+    const filtersAvailable = mergeFilters(
+        state.routes.receivedFiltersAvailable,
+        state.routes.filteredFiltersAvailable,
+        state.routes.notExportedFiltersAvailable
+    );
+
     return({
       filterValue: state.routes.filterValue,
       routes: {
@@ -259,12 +272,8 @@ export default connect(
 
       anyLoading: anyLoading,
 
-      filtersApplied: state.routes.filtersApplied,
-      filtersAvailable: mergeFilters(
-        state.routes.receivedFiltersAvailable,
-        state.routes.filteredFiltersAvailable,
-        state.routes.notExportedFiltersAvailable
-      ),
+      filtersApplied: filtersApplied,
+      filtersAvailable: filtersAvailable,
 
       linkProps: {
         routing: state.routing.locationBeforeTransitions,
@@ -278,7 +287,7 @@ export default connect(
 
         query: state.routes.filterValue,
 
-        filtersApplied: state.routes.filtersApplied,
+        filtersApplied: filtersApplied,
       },
 
       relatedPeers: relatedPeers

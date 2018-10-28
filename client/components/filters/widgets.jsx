@@ -51,21 +51,17 @@ class _RouteserversSelect extends React.Component {
     const appliedFilter = this.props.applied[0] || {value: undefined};
 
     if (appliedFilter.value !== undefined) {
-      const filter = _.findWhere(sortedFiltersAvailable, {
-        value: appliedFilter.value
-      });
-
       // Just render this, with a button for removal
       return (
         <table className="select-ctrl">
           <tbody>
             <tr>
               <td className="select-container">
-                {filter.name}
+                {appliedFilter.name}
               </td>
               <td>
                 <button className="btn btn-remove"
-                        onClick={() => this.props.onRemove(filter.value)}>
+                        onClick={() => this.props.onRemove(appliedFilter.value)}>
                   <i className="fa fa-times" />
                 </button>
               </td>
@@ -121,9 +117,6 @@ class _PeersFilterSelect extends React.Component {
     const appliedFilter = this.props.applied[0] || {value: undefined};
 
     if (appliedFilter.value !== undefined) {
-      const filter = _.findWhere(sortedFiltersAvailable, {
-        value: appliedFilter.value
-      });
 
       // Just render this, with a button for removal
       return (
@@ -131,11 +124,11 @@ class _PeersFilterSelect extends React.Component {
           <tbody>
             <tr>
               <td className="select-container">
-                {filter.name}
+                {appliedFilter.name}
               </td>
               <td>
                 <button className="btn btn-remove"
-                        onClick={() => this.props.onRemove(filter.value)}>
+                        onClick={() => this.props.onRemove(appliedFilter.value)}>
                   <i className="fa fa-times" />
                 </button>
               </td>

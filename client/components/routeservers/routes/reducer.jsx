@@ -24,8 +24,6 @@ const LOCATION_CHANGE = '@@router/LOCATION_CHANGE'
 
 const initialState = {
 
-  filtersApplied: initialFilterState,
-
   received: [],
   receivedLoading: false,
   receivedRequested: false,
@@ -35,6 +33,7 @@ const initialState = {
   receivedTotalPages: 0,
   receivedTotalResults: 0,
   receivedApiStatus: {},
+  receivedFiltersApplied: initialFilterState,
   receivedFiltersAvailable: initialFilterState,
 
   filtered: [],
@@ -46,6 +45,7 @@ const initialState = {
   filteredTotalPages: 0,
   filteredTotalResults: 0,
   filteredApiStatus: {},
+  filteredFiltersApplied: initialFilterState,
   filteredFiltersAvailable: initialFilterState,
 
   notExported: [],
@@ -57,6 +57,7 @@ const initialState = {
   notExportedTotalPages: 0,
   notExportedTotalResults: 0,
   notExportedApiStatus: {},
+  notExportedFiltersApplied: initialFilterState,
   notExportedFiltersAvailable: initialFilterState,
 
   // Derived state from location
@@ -103,7 +104,10 @@ function _handleLocationChange(state, payload) {
     notExportedPage: notExportedPage,
 
     loadNotExported: loadNotExported,
-    filtersApplied: filtersApplied,
+
+    receivedFiltersApplied:    filtersApplied,
+    filteredFiltersApplied:    filtersApplied,
+    notExportedFiltersApplied: filtersApplied,
   });
 
   return nextState;
@@ -139,6 +143,7 @@ function _handleFetchRoutesSuccess(type, state, payload) {
     [stype+'Loading']: false,
 
     [stype+'FiltersAvailable']: payload.filtersAvailable,
+    [stype+'FiltersApplied']: payload.filtersApplied,
   });
 
   return nextState;
