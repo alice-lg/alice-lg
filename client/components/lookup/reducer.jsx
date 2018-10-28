@@ -104,6 +104,7 @@ const _loadQueryResult = function(state, payload) {
 
     // Filters available
     filtersAvailable: results.filters_available,
+    filtersApplied: results.filters_applied,
 
     // Pagination
     pageImported:        imported.pagination.page,

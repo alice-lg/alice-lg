@@ -50,19 +50,23 @@ func apiRoutesListReceived(
 	routes := api.Routes{}
 
 	// Apply other (commmunity) filters
-	filters, err := api.FiltersFromQuery(req.URL.Query())
+	filtersApplied, err := api.FiltersFromQuery(req.URL.Query())
 	if err != nil {
 		return nil, err
 	}
 
 	filtersAvailable := api.NewSearchFilters()
 	for _, r := range allRoutes {
-		if !filters.MatchRoute(r) {
+		if !filtersApplied.MatchRoute(r) {
 			continue // Exclude route from results set
 		}
 		routes = append(routes, r)
 		filtersAvailable.UpdateFromRoute(r)
 	}
+
+	// Remove applied filters from available
+	filtersApplied.MergeProperties(filtersAvailable)
+	filtersAvailable = filtersAvailable.Sub(filtersApplied)
 
 	// Paginate results
 	page := apiQueryMustInt(req, "page", 0)
@@ -83,7 +87,7 @@ func apiRoutesListReceived(
 		},
 		FilterableResponse: api.FilterableResponse{
 			FiltersAvailable: filtersAvailable,
-			FiltersApplied:   filters,
+			FiltersApplied:   filtersApplied,
 		},
 		Pagination: pagination,
 	}
@@ -115,19 +119,23 @@ func apiRoutesListFiltered(
 	routes := api.Routes{}
 
 	// Apply other (commmunity) filters
-	filters, err := api.FiltersFromQuery(req.URL.Query())
+	filtersApplied, err := api.FiltersFromQuery(req.URL.Query())
 	if err != nil {
 		return nil, err
 	}
 
 	filtersAvailable := api.NewSearchFilters()
 	for _, r := range allRoutes {
-		if !filters.MatchRoute(r) {
+		if !filtersApplied.MatchRoute(r) {
 			continue // Exclude route from results set
 		}
 		routes = append(routes, r)
 		filtersAvailable.UpdateFromRoute(r)
 	}
+
+	// Remove applied filters from available
+	filtersApplied.MergeProperties(filtersAvailable)
+	filtersAvailable = filtersAvailable.Sub(filtersApplied)
 
 	// Paginate results
 	page := apiQueryMustInt(req, "page", 0)
@@ -148,7 +156,7 @@ func apiRoutesListFiltered(
 		},
 		FilterableResponse: api.FilterableResponse{
 			FiltersAvailable: filtersAvailable,
-			FiltersApplied:   filters,
+			FiltersApplied:   filtersApplied,
 		},
 		Pagination: pagination,
 	}
@@ -180,19 +188,23 @@ func apiRoutesListNotExported(
 	routes := api.Routes{}
 
 	// Apply other (commmunity) filters
-	filters, err := api.FiltersFromQuery(req.URL.Query())
+	filtersApplied, err := api.FiltersFromQuery(req.URL.Query())
 	if err != nil {
 		return nil, err
 	}
 
 	filtersAvailable := api.NewSearchFilters()
 	for _, r := range allRoutes {
-		if !filters.MatchRoute(r) {
+		if !filtersApplied.MatchRoute(r) {
 			continue // Exclude route from results set
 		}
 		routes = append(routes, r)
 		filtersAvailable.UpdateFromRoute(r)
 	}
+
+	// Remove applied filters from available
+	filtersApplied.MergeProperties(filtersAvailable)
+	filtersAvailable = filtersAvailable.Sub(filtersApplied)
 
 	// Paginate results
 	page := apiQueryMustInt(req, "page", 0)
@@ -213,7 +225,7 @@ func apiRoutesListNotExported(
 		},
 		FilterableResponse: api.FilterableResponse{
 			FiltersAvailable: filtersAvailable,
-			FiltersApplied:   filters,
+			FiltersApplied:   filtersApplied,
 		},
 		Pagination: pagination,
 	}

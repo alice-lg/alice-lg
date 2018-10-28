@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"log"
 	"net/url"
 )
 
@@ -20,6 +21,14 @@ API Search
 * Handle filter criteria
 
 */
+type Filterable interface {
+	MatchSourceId(sourceId int) bool
+	MatchAsn(asn int) bool
+	MatchCommunity(community Community) bool
+	MatchExtCommunity(community ExtCommunity) bool
+	MatchLargeCommunity(community Community) bool
+}
+
 type FilterValue interface{}
 
 type SearchFilter struct {
@@ -28,6 +37,66 @@ type SearchFilter struct {
 	Value       FilterValue `json:"value"`
 }
 
+type SearchFilterCmpFunc func(a FilterValue, b FilterValue) bool
+
+func searchFilterCmpInt(a FilterValue, b FilterValue) bool {
+	return a.(int) == b.(int)
+}
+
+func searchFilterCmpCommunity(a FilterValue, b FilterValue) bool {
+	ca := a.(Community)
+	cb := b.(Community)
+
+	if len(ca) != len(cb) {
+		return false
+	}
+
+	// Compare components
+	for i, _ := range ca {
+		if ca[i] != cb[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
+func searchFilterCmpExtCommunity(a FilterValue, b FilterValue) bool {
+	ca := a.(ExtCommunity)
+	cb := b.(ExtCommunity)
+
+	if len(ca) != len(cb) || len(ca) != 3 || len(cb) != 3 {
+		return false
+	}
+
+	return ca[0] == cb[0] && ca[1] == cb[1] && ca[2] == cb[2]
+}
+
+func (self *SearchFilter) Equal(other *SearchFilter) bool {
+	var cmp SearchFilterCmpFunc
+	switch other.Value.(type) {
+	case Community:
+		cmp = searchFilterCmpCommunity
+		break
+	case ExtCommunity:
+		cmp = searchFilterCmpExtCommunity
+		break
+	case int:
+		cmp = searchFilterCmpInt
+	}
+
+	if cmp == nil {
+		log.Println("Unknown search filter value type")
+		return false
+	}
+
+	return cmp(self.Value, other.Value)
+}
+
+/*
+ Search Filter Groups
+*/
+
 type SearchFilterGroup struct {
 	Key string `json:"key"`
 
@@ -35,12 +104,59 @@ type SearchFilterGroup struct {
 	filtersIdx map[string]int
 }
 
-type Filterable interface {
-	MatchSourceId(sourceId int) bool
-	MatchAsn(asn int) bool
-	MatchCommunity(community Community) bool
-	MatchExtCommunity(community ExtCommunity) bool
-	MatchLargeCommunity(community Community) bool
+func (self *SearchFilterGroup) FindFilter(filter *SearchFilter) *SearchFilter {
+	for _, f := range self.Filters {
+		if f.Equal(filter) == true {
+			return f
+		}
+	}
+	return nil
+}
+
+func (self *SearchFilterGroup) Contains(filter *SearchFilter) bool {
+	return self.FindFilter(filter) != nil
+}
+
+func (self *SearchFilterGroup) GetFilterByValue(value interface{}) *SearchFilter {
+	// I've tried it with .(fmt.Stringer), but int does not implement this...
+	// So whatever. I'm using the trick of letting Sprintf choose the right
+	// conversion. If this is too expensive, we need to refactor this.
+	// TODO: profile this.
+	idx, ok := self.filtersIdx[fmt.Sprintf("%v", value)]
+	if !ok {
+		return nil // We don't have this particular filter
+	}
+
+	return self.Filters[idx]
+}
+
+func (self *SearchFilterGroup) AddFilter(filter *SearchFilter) {
+	// Check if a filter with this value is present, if not:
+	// append and update index; otherwise incrementc cardinality
+	if presentFilter := self.GetFilterByValue(filter.Value); presentFilter != nil {
+		presentFilter.Cardinality++
+		return
+	}
+
+	// Insert filter
+	idx := len(self.Filters)
+	filter.Cardinality = 1
+	self.Filters = append(self.Filters, filter)
+	self.filtersIdx[fmt.Sprintf("%v", filter.Value)] = idx
+}
+
+func (self *SearchFilterGroup) AddFilters(filters []*SearchFilter) {
+	for _, filter := range filters {
+		self.AddFilter(filter)
+	}
+}
+
+func (self *SearchFilterGroup) rebuildIndex() {
+	self.filtersIdx = map[string]int{}
+
+	for i, filter := range self.Filters {
+		self.filtersIdx[fmt.Sprintf("%v", filter.Value)] = i
+	}
 }
 
 /*
@@ -212,40 +328,6 @@ func (self *SearchFilters) GetGroupByKey(key string) *SearchFilterGroup {
 	return nil
 }
 
-func (self *SearchFilterGroup) GetFilterByValue(value interface{}) *SearchFilter {
-	// I've tried it with .(fmt.Stringer), but int does not implement this...
-	// So whatever. I'm using the trick of letting Sprintf choose the right
-	// conversion. If this is too expensive, we need to refactor this.
-	// TODO: profile this.
-	idx, ok := self.filtersIdx[fmt.Sprintf("%v", value)]
-	if !ok {
-		return nil // We don't have this particular filter
-	}
-
-	return self.Filters[idx]
-}
-
-func (self *SearchFilterGroup) AddFilter(filter *SearchFilter) {
-	// Check if a filter with this value is present, if not:
-	// append and update index; otherwise incrementc cardinality
-	if presentFilter := self.GetFilterByValue(filter.Value); presentFilter != nil {
-		presentFilter.Cardinality++
-		return
-	}
-
-	// Insert filter
-	idx := len(self.Filters)
-	filter.Cardinality = 1
-	self.Filters = append(self.Filters, filter)
-	self.filtersIdx[fmt.Sprintf("%v", filter.Value)] = idx
-}
-
-func (self *SearchFilterGroup) AddFilters(filters []*SearchFilter) {
-	for _, filter := range filters {
-		self.AddFilter(filter)
-	}
-}
-
 /*
  Update filter struct to include route:
   - Extract ASN, source, bgp communites,
@@ -410,4 +492,44 @@ func (self *SearchFilters) MatchRoute(route Filterable) bool {
 	}
 
 	return true
+}
+
+func (self *SearchFilters) Sub(other *SearchFilters) *SearchFilters {
+	result := make(SearchFilters, len(*self))
+
+	for id, group := range *self {
+		otherGroup := (*other)[id]
+		diff := &SearchFilterGroup{
+			Key:     group.Key,
+			Filters: []*SearchFilter{},
+		}
+
+		// Combine filters
+		for _, f := range group.Filters {
+			if otherGroup.Contains(f) {
+				continue // Let's skip this
+			}
+			diff.Filters = append(diff.Filters, f)
+		}
+
+		diff.rebuildIndex()
+		result[id] = diff
+	}
+
+	return &result
+}
+
+func (self *SearchFilters) MergeProperties(other *SearchFilters) {
+	for id, group := range *self {
+		otherGroup := (*other)[id]
+		for _, filter := range group.Filters {
+			otherFilter := otherGroup.FindFilter(filter)
+			if otherFilter == nil {
+				log.Println("Filter merge failed; filter not present on other side")
+				continue
+			}
+			filter.Name = otherFilter.Name
+			filter.Cardinality = otherFilter.Cardinality
+		}
+	}
 }

@@ -15,10 +15,30 @@ import {FILTER_GROUP_COMMUNITIES,
  from './groups'
 
 
-export class RouteserversSelect extends React.Component {
+/*
+ * Add a title to the widget, if something needs to be rendered
+ */
+const withTitle = (title) => (Widget) => (class WidgetWithTitle extends Widget {
+  render() {
+    const result = super.render();
+    if (result == null) {
+      return null;
+    }
+    return (
+      <div className="filter-editor-widget">
+        <h2>{title}</h2>
+        {result}
+      </div>
+    )
+  }
+});
+
+
+class _RouteserversSelect extends React.Component {
   render() {
     // Nothing to do if we don't have filters
-    if (this.props.available.length == 0) {
+    if (this.props.available.length == 0 &&
+        this.props.applied.length == 0) {
       return null;
     }
 
@@ -31,21 +51,17 @@ export class RouteserversSelect extends React.Component {
     const appliedFilter = this.props.applied[0] || {value: undefined};
 
     if (appliedFilter.value !== undefined) {
-      const filter = _.findWhere(sortedFiltersAvailable, {
-        value: appliedFilter.value
-      });
-
       // Just render this, with a button for removal
       return (
         <table className="select-ctrl">
           <tbody>
             <tr>
               <td className="select-container">
-                {filter.name}
+                {appliedFilter.name}
               </td>
               <td>
                 <button className="btn btn-remove"
-                        onClick={() => this.props.onRemove(filter.value)}>
+                        onClick={() => this.props.onRemove(appliedFilter.value)}>
                   <i className="fa fa-times" />
                 </button>
               </td>
@@ -81,11 +97,14 @@ export class RouteserversSelect extends React.Component {
   }
 }
 
+export const RouteserversSelect = withTitle("Route Server")(_RouteserversSelect);
 
-export class PeersFilterSelect extends React.Component {
+
+class _PeersFilterSelect extends React.Component {
   render() {
     // Nothing to do if we don't have filters
-    if (this.props.available.length == 0) {
+    if (this.props.available.length == 0 &&
+        this.props.applied.length == 0) {
       return null;
     }
 
@@ -98,9 +117,6 @@ export class PeersFilterSelect extends React.Component {
     const appliedFilter = this.props.applied[0] || {value: undefined};
 
     if (appliedFilter.value !== undefined) {
-      const filter = _.findWhere(sortedFiltersAvailable, {
-        value: appliedFilter.value
-      });
 
       // Just render this, with a button for removal
       return (
@@ -108,11 +124,11 @@ export class PeersFilterSelect extends React.Component {
           <tbody>
             <tr>
               <td className="select-container">
-                {filter.name}
+                {appliedFilter.name}
               </td>
               <td>
                 <button className="btn btn-remove"
-                        onClick={() => this.props.onRemove(filter.value)}>
+                        onClick={() => this.props.onRemove(appliedFilter.value)}>
                   <i className="fa fa-times" />
                 </button>
               </td>
@@ -149,8 +165,10 @@ export class PeersFilterSelect extends React.Component {
   }
 }
 
+export const PeersFilterSelect = withTitle("Neighbor")(_PeersFilterSelect);
 
-class _CommunitiesSelect extends React.Component {
+
+class __CommunitiesSelect extends React.Component {
   propagateChange(value) {
     // Decode value
     const [group, community] = value.split(",", 2);
@@ -161,10 +179,16 @@ class _CommunitiesSelect extends React.Component {
 
   render() {
     // Nothing to do if we don't have filters
-    if (this.props.available.communities.length == 0 &&
-        this.props.available.ext.length == 0 &&
-        this.props.available.large.length == 0) {
-      return null;
+    const hasAvailable = this.props.available.communities.length > 0 ||
+        this.props.available.ext.length > 0 ||
+        this.props.available.large.length > 0;
+
+    const hasApplied = this.props.applied.communities.length > 0 ||
+        this.props.applied.ext.length > 0 ||
+        this.props.applied.large.length > 0;
+
+    if (!hasApplied && !hasAvailable) {
+      return null; // nothing to do here.
     }
 
     const communitiesAvailable = this.props.available.communities.sort((a, b) => {
@@ -252,42 +276,44 @@ class _CommunitiesSelect extends React.Component {
           {appliedCommunities}
           {appliedExtCommunities}
           {appliedLargeCommunities}
-          <tr>
-            <td className="select-container" colSpan="2">
-              <select value="none"
-                      onChange={(e) => this.propagateChange(e.target.value)}
-                      className="form-control">
-                <option value="none" className="options-title">
-                  Select communities to match...
-                </option>
-                {communitiesOptions.length > 0 &&
-                  <optgroup label="Communities">
-                    {communitiesOptions}
-                  </optgroup>}
+          {hasAvailable &&
+              <tr>
+                <td className="select-container" colSpan="2">
+                  <select value="none"
+                          onChange={(e) => this.propagateChange(e.target.value)}
+                          className="form-control">
+                    <option value="none" className="options-title">
+                      Select communities to match...
+                    </option>
+                    {communitiesOptions.length > 0 &&
+                      <optgroup label="Communities">
+                        {communitiesOptions}
+                      </optgroup>}
 
-                {extCommunitiesOptions.length > 0 &&
-                  <optgroup label="Ext. Communities">
-                    {extCommunitiesOptions}
-                  </optgroup>}
+                    {extCommunitiesOptions.length > 0 &&
+                      <optgroup label="Ext. Communities">
+                        {extCommunitiesOptions}
+                      </optgroup>}
 
-                {largeCommunitiesOptions.length > 0 &&
-                  <optgroup label="Large Communities">
-                    {largeCommunitiesOptions}
-                  </optgroup>}
-              </select>
-            </td>
-          </tr>
+                    {largeCommunitiesOptions.length > 0 &&
+                      <optgroup label="Large Communities">
+                        {largeCommunitiesOptions}
+                      </optgroup>}
+                  </select>
+                </td>
+              </tr>}
         </tbody>
       </table>
     );
   }
 }
 
-export const CommunitiesSelect = connect(
+const _CommunitiesSelect = connect(
   (state) => ({
     communities: state.config.bgp_communities,
   })
-)(_CommunitiesSelect);
+)(__CommunitiesSelect);
 
+export const CommunitiesSelect = withTitle("Communities")(_CommunitiesSelect);
 
 

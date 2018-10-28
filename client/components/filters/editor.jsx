@@ -68,32 +68,29 @@ class FiltersEditor extends React.Component {
   }
 
   render() {
-    if (!hasFilters(this.props.available)) {
+    if (!hasFilters(this.props.available) && !hasFilters(this.props.applied)) {
       return null;
     }
+    /*
 
+
+    */
     return (
       <div className="card lookup-filters-editor">
-        {this.props.availableSources.length > 0 && <h2>Route server</h2>}
         <RouteserversSelect onChange={(value) => this.addFilter(FILTER_GROUP_SOURCES, value)}
                             onRemove={(value) => this.removeFilter(FILTER_GROUP_SOURCES, value)}
                             available={this.props.availableSources}
                             applied={this.props.appliedSources} />
 
-        {this.props.availableAsns.length > 0 && <h2>Neighbor</h2>}
         <PeersFilterSelect onChange={(value) => this.addFilter(FILTER_GROUP_ASNS, value)}
                            onRemove={(value) => this.removeFilter(FILTER_GROUP_ASNS, value)}
                            available={this.props.availableAsns}
                            applied={this.props.appliedAsns} />
 
-        {(this.props.availableCommunities.communities.length > 0 ||
-         this.props.availableCommunities.ext.length > 0 ||
-         this.props.availableCommunities.large.length > 0 ) && <h2>Communities</h2>}
         <CommunitiesSelect onChange={(group, value) => this.addFilter(group, value)}
                            onRemove={(group, value) => this.removeFilter(group, value)}
                            available={this.props.availableCommunities}
                            applied={this.props.appliedCommunities} />
-
       </div>
     );
   }

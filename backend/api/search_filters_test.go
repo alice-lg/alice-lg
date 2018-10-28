@@ -51,6 +51,111 @@ func makeTestLookupRoute() *LookupRoute {
 	return route
 }
 
+func TestSearchFilterCmpInt(t *testing.T) {
+	if searchFilterCmpInt(23, 23) != true {
+		t.Error("23 == 23 should be true")
+	}
+	if searchFilterCmpInt(23, 42) == true {
+		t.Error("23 == 42 should be false")
+	}
+}
+
+func TestSearchFilterCmpCommunity(t *testing.T) {
+	// Standard communities
+	if searchFilterCmpCommunity(Community{23, 42}, Community{23, 42}) != true {
+		t.Error("23:42 == 23:42 should be true")
+	}
+	if searchFilterCmpCommunity(Community{23, 42}, Community{42, 23}) == true {
+		t.Error("23:42 == 42:23 should be false")
+	}
+
+	// Large communities
+	if searchFilterCmpCommunity(Community{1000, 23, 42}, Community{1000, 23, 42}) != true {
+		t.Error("1000:23:42 == 1000:23:42 should be true")
+	}
+	if searchFilterCmpCommunity(Community{1000, 23, 42}, Community{1111, 42, 23}) == true {
+		t.Error("1000:23:42 == 1111:42:23 should be false")
+	}
+
+	// Length missmatch
+	if searchFilterCmpCommunity(Community{1000, 23, 42}, Community{42, 23}) == true {
+		t.Error("1000:23:42 == 42:23 should be false")
+	}
+}
+
+func TestSearchFilterEqual(t *testing.T) {
+	// Int values (ASNS, SourceId)
+	a := &SearchFilter{Value: 23}
+	b := &SearchFilter{Value: 23}
+	c := &SearchFilter{Value: 42}
+
+	if a.Equal(b) == false {
+		t.Error("filter[23] == filter[23] should be true")
+	}
+
+	if a.Equal(c) {
+		t.Error("filter[23] == filter[42] should be false")
+	}
+
+	// Communities
+	a = &SearchFilter{Value: Community{23, 42}}
+	b = &SearchFilter{Value: Community{23, 42}}
+	c = &SearchFilter{Value: Community{42, 23}}
+
+	if a.Equal(b) == false {
+		t.Error("filter[23:42] == filter[23:42] should be true")
+	}
+
+	if a.Equal(c) {
+		t.Error("filter[23:42] == filter[42:23] should be false")
+	}
+
+	// Ext. Communities
+	a = &SearchFilter{Value: ExtCommunity{"ro", 23, 42}}
+	b = &SearchFilter{Value: ExtCommunity{"ro", 23, 42}}
+	c = &SearchFilter{Value: ExtCommunity{"rt", 42, 23}}
+
+	if a.Equal(b) == false {
+		t.Error("filter[ro:23:42] == filter[ro:23:42] should be true")
+	}
+
+	if a.Equal(c) {
+		t.Error("filter[ro:23:42] == filter[rt:42:23] should be false")
+	}
+
+	// Large communities
+	a = &SearchFilter{Value: Community{1000, 23, 42}}
+	b = &SearchFilter{Value: Community{1000, 23, 42}}
+	c = &SearchFilter{Value: Community{1111, 42, 23}}
+
+	if a.Equal(b) == false {
+		t.Error("filter[23:42] == filter[23:42] should be true")
+	}
+
+	if a.Equal(c) {
+		t.Error("filter[23:42] == filter[42:23] should be false")
+	}
+}
+
+func TestSearchFilterGroupContains(t *testing.T) {
+	group := SearchFilterGroup{
+		Filters: []*SearchFilter{
+			&SearchFilter{Value: Community{1000, 23, 42}},
+			&SearchFilter{Value: Community{1001, 24, 43}},
+		},
+	}
+
+	f := &SearchFilter{Value: Community{1001, 24, 43}}
+	if group.Contains(f) == false {
+		t.Error("Group should contain filter.")
+	}
+
+	f = &SearchFilter{Value: Community{1111, 24, 43}}
+	if group.Contains(f) {
+		t.Error("Group should not contain filter.")
+	}
+}
+
 func TestSearchFilterGetGroupsByKey(t *testing.T) {
 	filtering := NewSearchFilters()
 
@@ -371,4 +476,108 @@ func TestSearchFilterRouteLargeCommunities(t *testing.T) {
 func TestSearchFilterLookupRouteLargeCommunities(t *testing.T) {
 	route := makeTestLookupRoute()
 	testSearchFilterLargeCommunities(route, t)
+}
+
+// Subtract other
+func TestSearchFiltersSub(t *testing.T) {
+	query := "asns=2342,23042&communities=23:42&large_communities=42:23:42&sources=1,2,3&q=foo"
+	values, err := url.ParseQuery(query)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	a, err := FiltersFromQuery(values)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	query = "asns=2342,10&large_communities=42:23:42&sources=1,2,3&q=foo"
+	values, err = url.ParseQuery(query)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	b, err := FiltersFromQuery(values)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// Modify some filters
+	g := a.GetGroupByKey(SEARCH_KEY_ASNS)
+	g.Filters[1].Cardinality = 9001
+
+	t.Log(a)
+	t.Log(b)
+
+	c := a.Sub(b)
+
+	// Check diff
+	g = c.GetGroupByKey(SEARCH_KEY_ASNS)
+	if len(g.Filters) != 1 {
+		t.Error("There should be now only be one filter")
+	}
+
+	if g.Filters[0].Cardinality != 9001 {
+		t.Error("This should be the modified filter")
+	}
+
+	if g.Filters[0].Value != 23042 {
+		t.Error("This should be the modified filter")
+	}
+
+	// Should still contain community filter
+	g = c.GetGroupByKey(SEARCH_KEY_COMMUNITIES)
+	if len(g.Filters) != 1 {
+		t.Error("The community filter should not have been touched")
+	}
+
+	// The large community filter should have been removed
+	g = c.GetGroupByKey(SEARCH_KEY_LARGE_COMMUNITIES)
+	if len(g.Filters) != 0 {
+		t.Error("The large community filter is not removed")
+	}
+
+}
+
+func TestSearchFiltersMergeProperties(t *testing.T) {
+	filtering := NewSearchFilters()
+	group := filtering.GetGroupByKey(SEARCH_KEY_ASNS)
+
+	group.AddFilter(&SearchFilter{
+		Name:  "Tech Inc. Solutions GmbH",
+		Value: 23042})
+
+	group.AddFilter(&SearchFilter{
+		Name:  "Offline.net",
+		Value: 1119})
+
+	offlineNet := group.Filters[1]
+	offlineNet.Cardinality = 9001
+
+	other := NewSearchFilters()
+	otherGroup := other.GetGroupByKey(SEARCH_KEY_ASNS)
+
+	otherGroup.AddFilter(&SearchFilter{
+		Value: 1119})
+
+	other.MergeProperties(filtering)
+
+	filter := otherGroup.Filters[0]
+
+	if filter.Value != 1119 {
+		t.Error("Expected filter value shoud be 1119, got:", filter.Value)
+	}
+
+	if filter.Cardinality < 9000 {
+		t.Error("Expected cardinatlity property to be set")
+	}
+
+	if filter.Name == "" {
+		t.Error("Filter name should have been merged")
+	}
+
 }
