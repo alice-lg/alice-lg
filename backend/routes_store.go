@@ -234,11 +234,10 @@ func filterRoutesByPrefix(
 	prefix string,
 	state string,
 ) api.LookupRoutes {
-
 	results := api.LookupRoutes{}
 	for _, route := range routes {
 		// Naiive filtering:
-		if strings.HasPrefix(route.Network, prefix) {
+		if strings.HasPrefix(strings.ToLower(route.Network), prefix) {
 			lookup := routeToLookupRoute(source, state, route)
 			results = append(results, lookup)
 		}
@@ -334,6 +333,9 @@ func (self *RoutesStore) LookupPrefixAt(
 func (self *RoutesStore) LookupPrefix(prefix string) api.LookupRoutes {
 	result := api.LookupRoutes{}
 	responses := []chan api.LookupRoutes{}
+
+	// Normalize prefix to lower case
+	prefix = strings.ToLower(prefix)
 
 	// Dispatch
 	self.RLock()
