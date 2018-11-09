@@ -152,7 +152,7 @@ class _PeersFilterSelect extends React.Component {
             <td className="select-container">
               <select className="form-control"
                       onChange={(e) => this.props.onChange(e.target.value)}
-                      value={appliedFilter.value}> 
+                      value={appliedFilter.value}>
                 <option className="options-title"
                         value="none">Show only results from AS...</option>
                 {optionsAvailable}
@@ -227,7 +227,7 @@ class __CommunitiesSelect extends React.Component {
     const extCommunitiesOptions = extCommunitiesAvailable.map((filter) => {
       const name = makeReadableCommunity(this.props.communities, filter.value);
       const cls = `select-bgp-community-0-${filter.value[0]} ` +
-        `select-bgp-community-1-${filter.value[1]}` +
+        `select-bgp-community-1-${filter.value[1]} ` +
         `select-bgp_community-2-${filter.value[2]}`;
       return makeOption(FILTER_GROUP_EXT_COMMUNITIES, name, filter, cls);
     });
@@ -235,7 +235,7 @@ class __CommunitiesSelect extends React.Component {
     const largeCommunitiesOptions = largeCommunitiesAvailable.map((filter) => {
       const name = makeReadableCommunity(this.props.communities, filter.value);
       const cls = `select-bgp-community-0-${filter.value[0]} ` +
-        `select-bgp-community-1-${filter.value[1]}` +
+        `select-bgp-community-1-${filter.value[1]} ` +
         `select-bgp_community-2-${filter.value[2]}`;
       return makeOption(FILTER_GROUP_LARGE_COMMUNITIES, name, filter, cls);
     });
