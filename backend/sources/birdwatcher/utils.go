@@ -2,6 +2,7 @@ package birdwatcher
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/alice-lg/alice-lg/backend/api"
 )
@@ -22,4 +23,31 @@ func getNeighbourById(neighbours api.Neighbours, id string) (*api.Neighbour, err
 		Description: "Unknown neighbour",
 	}
 	return unknown, fmt.Errorf("Neighbour not found")
+}
+
+/*
+LockMap: Uses the sync.Map to manage locks, accessed by a key.
+TODO: Maybe this would be a nice generic helper
+*/
+type LockMap struct {
+	locks *sync.Map
+}
+
+func NewLockMap() *LockMap {
+	return &LockMap{
+		locks: &sync.Map{},
+	}
+}
+
+func (self *LockMap) Lock(key string) {
+	mutex, _ := self.locks.LoadOrStore(key, &sync.Mutex{})
+	mutex.(*sync.Mutex).Lock()
+}
+
+func (self *LockMap) Unlock(key string) {
+	mutex, ok := self.locks.Load(key)
+	if !ok {
+		return // Nothing to unlock
+	}
+	mutex.(*sync.Mutex).Unlock()
 }

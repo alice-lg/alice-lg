@@ -6,7 +6,6 @@ import (
 
 	"log"
 	"sort"
-	"sync"
 )
 
 const (
@@ -27,9 +26,7 @@ type Birdwatcher struct {
 	routesNotExportedCache *caches.RoutesCache
 
 	// Mutices:
-	routesFetchMutex map[string]*sync.Mutex
-
-	sync.Mutex
+	routesFetchMutex *LockMap
 }
 
 func NewBirdwatcher(config Config) *Birdwatcher {
@@ -72,7 +69,7 @@ func NewBirdwatcher(config Config) *Birdwatcher {
 		routesFilteredCache:    routesFilteredCache,
 		routesNotExportedCache: routesNotExportedCache,
 
-		routesFetchMutex: map[string]*sync.Mutex{},
+		routesFetchMutex: NewLockMap(),
 	}
 	return birdwatcher
 }
@@ -309,14 +306,8 @@ func (self *Birdwatcher) RoutesRequired(
 ) (*api.RoutesResponse, error) {
 	// Allow only one concurrent request for this neighbor
 	// to our backend server.
-	_, ok := self.routesFetchMutex[neighborId]
-	if !ok {
-		self.Lock() // Guard write access
-		self.routesFetchMutex[neighborId] = &sync.Mutex{}
-		self.Unlock()
-	}
-	self.routesFetchMutex[neighborId].Lock()
-	defer self.routesFetchMutex[neighborId].Unlock()
+	self.routesFetchMutex.Lock(neighborId)
+	defer self.routesFetchMutex.Unlock(neighborId)
 
 	// Check if we have a cache hit
 	response := self.routesRequiredCache.Get(neighborId)
