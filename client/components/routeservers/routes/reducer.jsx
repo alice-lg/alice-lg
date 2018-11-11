@@ -33,8 +33,8 @@ const initialState = {
   receivedTotalPages: 0,
   receivedTotalResults: 0,
   receivedApiStatus: {},
-  receivedFiltersApplied: initialFilterState,
-  receivedFiltersAvailable: initialFilterState,
+  receivedFiltersApplied: cloneFilters(initialFilterState),
+  receivedFiltersAvailable: cloneFilters(initialFilterState),
 
   filtered: [],
   filteredLoading: false,
@@ -45,8 +45,8 @@ const initialState = {
   filteredTotalPages: 0,
   filteredTotalResults: 0,
   filteredApiStatus: {},
-  filteredFiltersApplied: initialFilterState,
-  filteredFiltersAvailable: initialFilterState,
+  filteredFiltersApplied: cloneFilters(initialFilterState),
+  filteredFiltersAvailable: cloneFilters(initialFilterState),
 
   notExported: [],
   notExportedLoading: false,
@@ -57,8 +57,8 @@ const initialState = {
   notExportedTotalPages: 0,
   notExportedTotalResults: 0,
   notExportedApiStatus: {},
-  notExportedFiltersApplied: initialFilterState,
-  notExportedFiltersAvailable: initialFilterState,
+  notExportedFiltersApplied: cloneFilters(initialFilterState),
+  notExportedFiltersAvailable: cloneFilters(initialFilterState),
 
   // Derived state from location
   loadNotExported: false,
@@ -142,8 +142,8 @@ function _handleFetchRoutesSuccess(type, state, payload) {
 
     [stype+'Loading']: false,
 
-    [stype+'FiltersAvailable']: payload.filtersAvailable,
-    [stype+'FiltersApplied']: payload.filtersApplied,
+    [stype+'FiltersAvailable']: cloneFilters(payload.filtersAvailable),
+    [stype+'FiltersApplied']:   cloneFilters(payload.filtersApplied),
   });
 
   return nextState;

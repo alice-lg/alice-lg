@@ -243,7 +243,7 @@ export default connect(
     const anyLoading = state.routes.receivedLoading ||
                      state.routes.filteredLoading ||
                      state.routes.notExportedLoading;
-  
+
     const filtersApplied = mergeFilters(
         state.routes.receivedFiltersApplied,
         state.routes.filteredFiltersApplied,

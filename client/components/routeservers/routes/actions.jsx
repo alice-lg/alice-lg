@@ -46,14 +46,20 @@ function routesRequest(type) {
 }
 
 function routesSuccess(type) {
-  return (routes, pagination, filtersAvailable, filtersApplied, apiStatus) => ({
+  const rtype = {
+    [FETCH_ROUTES_RECEIVED_SUCCESS]: 'imported',
+    [FETCH_ROUTES_FILTERED_SUCCESS]: 'filtered',
+    [FETCH_ROUTES_NOT_EXPORTED_SUCCESS]: 'not_exported',
+  }[type];
+
+  return (data) => ({
     type: type,
     payload: {
-      routes: routes,
-      pagination: pagination,
-      filtersAvailable: filtersAvailable,
-      filtersApplied: filtersApplied,
-      apiStatus: apiStatus
+      routes: data[rtype],
+      pagination: data.pagination,
+      filtersApplied: data.filters_applied,
+      filtersAvailable: data.filters_available,
+      apiStatus: data.api,
     }
   });
 }
@@ -66,6 +72,24 @@ function routesError(type) {
     }
   });
 };
+
+// Action Creators: Routes Received
+export const fetchRoutesReceivedRequest = routesRequest(FETCH_ROUTES_RECEIVED_REQUEST);
+export const fetchRoutesReceivedSuccess = routesSuccess(FETCH_ROUTES_RECEIVED_SUCCESS);
+export const fetchRoutesReceivedError   = routesError(FETCH_ROUTES_RECEIVED_ERROR);
+export const fetchRoutesReceived        = fetchRoutes(ROUTES_RECEIVED);
+
+// Action Creators: Routes Filtered
+export const fetchRoutesFilteredRequest = routesRequest(FETCH_ROUTES_FILTERED_REQUEST);
+export const fetchRoutesFilteredSuccess = routesSuccess(FETCH_ROUTES_FILTERED_SUCCESS);
+export const fetchRoutesFilteredError   = routesError(FETCH_ROUTES_FILTERED_ERROR);
+export const fetchRoutesFiltered        = fetchRoutes(ROUTES_FILTERED);
+
+// Action Creators: Routes Filtered
+export const fetchRoutesNotExportedRequest = routesRequest(FETCH_ROUTES_NOT_EXPORTED_REQUEST);
+export const fetchRoutesNotExportedSuccess = routesSuccess(FETCH_ROUTES_NOT_EXPORTED_SUCCESS);
+export const fetchRoutesNotExportedError   = routesError(FETCH_ROUTES_NOT_EXPORTED_ERROR);
+export const fetchRoutesNotExported        = fetchRoutes(ROUTES_NOT_EXPORTED);
 
 function fetchRoutes(type) {
   const requestAction = {
@@ -86,25 +110,13 @@ function fetchRoutes(type) {
     [ROUTES_NOT_EXPORTED]: fetchRoutesNotExportedError
   }[type];
 
-  const rtype = {
-    [ROUTES_RECEIVED]: 'imported',
-    [ROUTES_FILTERED]: 'filtered',
-    [ROUTES_NOT_EXPORTED]: 'not_exported',
-  }[type];
-
   return (rsId, pId, page, query, filters) => {
     return (dispatch) => {
       dispatch(requestAction());
-
       axios.get(routesUrl(type, rsId, pId, page, query, filters))
         .then(
           ({data}) => {
-            dispatch(successAction(
-              data[rtype],
-              data.pagination,
-              data.filters_available,
-              data.filters_applied,
-              data.api));
+            dispatch(successAction(data));
           },
           (error) => {
             dispatch(errorAction(error));
@@ -113,24 +125,6 @@ function fetchRoutes(type) {
     }
   }
 };
-
-// Action Creators: Routes Received
-export const fetchRoutesReceivedRequest = routesRequest(FETCH_ROUTES_RECEIVED_REQUEST);
-export const fetchRoutesReceivedSuccess = routesSuccess(FETCH_ROUTES_RECEIVED_SUCCESS);
-export const fetchRoutesReceivedError   = routesError(FETCH_ROUTES_RECEIVED_ERROR);
-export const fetchRoutesReceived        = fetchRoutes(ROUTES_RECEIVED);
-
-// Action Creators: Routes Filtered
-export const fetchRoutesFilteredRequest = routesRequest(FETCH_ROUTES_FILTERED_REQUEST);
-export const fetchRoutesFilteredSuccess = routesSuccess(FETCH_ROUTES_FILTERED_SUCCESS);
-export const fetchRoutesFilteredError   = routesError(FETCH_ROUTES_FILTERED_ERROR);
-export const fetchRoutesFiltered        = fetchRoutes(ROUTES_FILTERED);
-
-// Action Creators: Routes Filtered
-export const fetchRoutesNotExportedRequest = routesRequest(FETCH_ROUTES_NOT_EXPORTED_REQUEST);
-export const fetchRoutesNotExportedSuccess = routesSuccess(FETCH_ROUTES_NOT_EXPORTED_SUCCESS);
-export const fetchRoutesNotExportedError   = routesError(FETCH_ROUTES_NOT_EXPORTED_ERROR);
-export const fetchRoutesNotExported        = fetchRoutes(ROUTES_NOT_EXPORTED);
 
 // Action Creators: Set Filter Query
 export function setFilterQueryValue(value) {

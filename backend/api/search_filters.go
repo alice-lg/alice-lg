@@ -525,7 +525,7 @@ func (self *SearchFilters) MergeProperties(other *SearchFilters) {
 		for _, filter := range group.Filters {
 			otherFilter := otherGroup.FindFilter(filter)
 			if otherFilter == nil {
-				log.Println("Filter merge failed; filter not present on other side")
+				// Filter not present on other side, ignore this.
 				continue
 			}
 			filter.Name = otherFilter.Name
