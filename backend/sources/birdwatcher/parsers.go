@@ -4,6 +4,7 @@ package birdwatcher
 
 import (
 	"fmt"
+	"log"
 	"sort"
 	"strconv"
 	"time"
@@ -282,7 +283,15 @@ func parseExtBgpCommunities(data interface{}) []api.ExtCommunity {
 
 	for _, c := range ldata {
 		cdata := c.([]interface{})
-		communities = append(communities, api.ExtCommunity(cdata))
+		if len(cdata) != 3 {
+			log.Println("Ignoring malformed ext community:", cdata)
+			continue
+		}
+		communities = append(communities, api.ExtCommunity{
+			cdata[0],
+			int(cdata[1].(float64)),
+			int(cdata[2].(float64)),
+		})
 	}
 
 	return communities
