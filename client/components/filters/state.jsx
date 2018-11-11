@@ -101,7 +101,8 @@ function mergeFilterSet(inSet, a, b) {
     const present = inSet(result, f);
     if (present) {
       // Update filter cardinality
-      present.cardinality = Math.max(f.cardinality, present.cardinality);
+      // present.cardinality = Math.max(f.cardinality, present.cardinality);
+      present.cardinality += f.cardinality;
       continue;
     }
     result.push(f);
