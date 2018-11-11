@@ -195,12 +195,11 @@ class __CommunitiesSelect extends React.Component {
       return (a.value[0] - b.value[0]) * 100000 + (a.value[1] - b.value[1]);
     });
 
-    /*
     const extCommunitiesAvailable = this.props.available.ext.sort((a, b) => {
       return (a.value[1] - b.value[1]) * 100000 + (a.value[2] - b.value[2]);
     });
-    */
-    const extCommunitiesAvailable = []; // They don't work. for now.
+
+    // const extCommunitiesAvailable = []; // They don't work. for now.
 
     const largeCommunitiesAvailable = this.props.available.large.sort((a, b) => {
       return (a.value[0] - b.value[0]) * 10000000000 +
