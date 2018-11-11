@@ -348,21 +348,21 @@ func (self *SearchFilters) UpdateFromLookupRoute(route *LookupRoute) {
 
 	// Add communities
 	communities := self.GetGroupByKey(SEARCH_KEY_COMMUNITIES)
-	for _, c := range route.Bgp.Communities {
+	for _, c := range route.Bgp.Communities.Unique() {
 		communities.AddFilter(&SearchFilter{
 			Name:  c.String(),
 			Value: c,
 		})
 	}
 	extCommunities := self.GetGroupByKey(SEARCH_KEY_EXT_COMMUNITIES)
-	for _, c := range route.Bgp.ExtCommunities {
+	for _, c := range route.Bgp.ExtCommunities.Unique() {
 		extCommunities.AddFilter(&SearchFilter{
 			Name:  c.String(),
 			Value: c,
 		})
 	}
 	largeCommunities := self.GetGroupByKey(SEARCH_KEY_LARGE_COMMUNITIES)
-	for _, c := range route.Bgp.LargeCommunities {
+	for _, c := range route.Bgp.LargeCommunities.Unique() {
 		largeCommunities.AddFilter(&SearchFilter{
 			Name:  c.String(),
 			Value: c,
@@ -376,21 +376,21 @@ func (self *SearchFilters) UpdateFromRoute(route *Route) {
 
 	// Add communities
 	communities := self.GetGroupByKey(SEARCH_KEY_COMMUNITIES)
-	for _, c := range route.Bgp.Communities {
+	for _, c := range route.Bgp.Communities.Unique() {
 		communities.AddFilter(&SearchFilter{
 			Name:  c.String(),
 			Value: c,
 		})
 	}
 	extCommunities := self.GetGroupByKey(SEARCH_KEY_EXT_COMMUNITIES)
-	for _, c := range route.Bgp.ExtCommunities {
+	for _, c := range route.Bgp.ExtCommunities.Unique() {
 		extCommunities.AddFilter(&SearchFilter{
 			Name:  c.String(),
 			Value: c,
 		})
 	}
 	largeCommunities := self.GetGroupByKey(SEARCH_KEY_LARGE_COMMUNITIES)
-	for _, c := range route.Bgp.LargeCommunities {
+	for _, c := range route.Bgp.LargeCommunities.Unique() {
 		largeCommunities.AddFilter(&SearchFilter{
 			Name:  c.String(),
 			Value: c,
