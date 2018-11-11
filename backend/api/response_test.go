@@ -121,3 +121,24 @@ func TestHasCommunity(t *testing.T) {
 		t.Error("23:42 should not be present in large commnuties")
 	}
 }
+
+func TestUniqueCommunities(t *testing.T) {
+	all := Communities{Community{23, 42}, Community{42, 123}, Community{23, 42}}
+	unique := all.Unique()
+	if len(unique) != 2 {
+		t.Error("len(unique) should be < len(all)")
+	}
+	t.Log("All:", all, "Unique:", unique)
+}
+
+func TestUniqueExtCommunities(t *testing.T) {
+	all := ExtCommunities{
+		ExtCommunity{"rt", 23, 42},
+		ExtCommunity{"ro", 42, 123},
+		ExtCommunity{"rt", 23, 42}}
+	unique := all.Unique()
+	if len(unique) != 2 {
+		t.Error("len(unique) should be < len(all)")
+	}
+	t.Log("All:", all, "Unique:", unique)
+}

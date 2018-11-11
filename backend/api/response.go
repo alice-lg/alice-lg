@@ -118,6 +118,27 @@ func (com Community) String() string {
 	return res[1:]
 }
 
+type Communities []Community
+
+/*
+Deduplicate communities
+*/
+func (communities Communities) Unique() Communities {
+	seen := map[string]bool{}
+	result := make(Communities, 0, len(communities))
+
+	for _, com := range communities {
+		key := com.String()
+		if _, ok := seen[key]; !ok {
+			// We have not seen this community yet
+			result = append(result, com)
+			seen[key] = true
+		}
+	}
+
+	return result
+}
+
 type ExtCommunity []interface{}
 
 func (com ExtCommunity) String() string {
@@ -128,13 +149,31 @@ func (com ExtCommunity) String() string {
 	return res[1:]
 }
 
+type ExtCommunities []ExtCommunity
+
+func (communities ExtCommunities) Unique() ExtCommunities {
+	seen := map[string]bool{}
+	result := make(ExtCommunities, 0, len(communities))
+
+	for _, com := range communities {
+		key := com.String()
+		if _, ok := seen[key]; !ok {
+			// We have not seen this community yet
+			result = append(result, com)
+			seen[key] = true
+		}
+	}
+
+	return result
+}
+
 type BgpInfo struct {
 	Origin           string         `json:"origin"`
 	AsPath           []int          `json:"as_path"`
 	NextHop          string         `json:"next_hop"`
-	Communities      []Community    `json:"communities"`
-	LargeCommunities []Community    `json:"large_communities"`
-	ExtCommunities   []ExtCommunity `json:"ext_communities"`
+	Communities      Communities    `json:"communities"`
+	LargeCommunities Communities    `json:"large_communities"`
+	ExtCommunities   ExtCommunities `json:"ext_communities"`
 	LocalPref        int            `json:"local_pref"`
 	Med              int            `json:"med"`
 }
