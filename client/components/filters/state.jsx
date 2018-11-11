@@ -15,13 +15,13 @@ import {decodeFiltersSources,
         decodeFiltersLargeCommunities}
   from 'components/filters/encoding'
 
-export const initialFilterState = [
+export const initializeFilterState = () => ([
   {"key": "sources", "filters": []},
   {"key": "asns", "filters": []},
   {"key": "communities", "filters": []},
   {"key": "ext_communities", "filters": []},
   {"key": "large_communities", "filters": []},
-];
+]);
 
 export function cloneFilters(filters) {
   const nextFilters = [
@@ -54,7 +54,7 @@ export function cloneFilters(filters) {
  * Decode filters applied from params
  */
 export function decodeFiltersApplied(params) {
-  let groups = cloneFilters(initialFilterState);
+  const groups = initializeFilterState();
 
   groups[FILTER_GROUP_SOURCES].filters =           decodeFiltersSources(params);
   groups[FILTER_GROUP_ASNS].filters =              decodeFiltersAsns(params);
@@ -69,7 +69,7 @@ export function decodeFiltersApplied(params) {
  * Merge filters
  */
 function _mergeFilters(a, b) {
-  let groups = cloneFilters(initialFilterState);
+  let groups = initializeFilterState();
   let setCmp = [];
   setCmp[FILTER_GROUP_SOURCES] = cmpFilterValue;
   setCmp[FILTER_GROUP_ASNS] = cmpFilterValue;
@@ -85,9 +85,9 @@ function _mergeFilters(a, b) {
 }
 
 export function mergeFilters(a, ...other) {
-  let result = a;
+  let result = cloneFilters(a);
   for (const filters of other) {
-    result = _mergeFilters(result, filters);
+    result = _mergeFilters(result, cloneFilters(filters));
   }
   return result;
 }

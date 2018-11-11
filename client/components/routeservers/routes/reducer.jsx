@@ -17,7 +17,7 @@ import {ROUTES_RECEIVED,
 
 import {SET_FILTER_QUERY_VALUE} from './actions'
 
-import {cloneFilters, decodeFiltersApplied, initialFilterState}
+import {cloneFilters, decodeFiltersApplied, initializeFilterState}
   from 'components/filters/state'
 
 const LOCATION_CHANGE = '@@router/LOCATION_CHANGE'
@@ -33,8 +33,8 @@ const initialState = {
   receivedTotalPages: 0,
   receivedTotalResults: 0,
   receivedApiStatus: {},
-  receivedFiltersApplied: cloneFilters(initialFilterState),
-  receivedFiltersAvailable: cloneFilters(initialFilterState),
+  receivedFiltersApplied: initializeFilterState(),
+  receivedFiltersAvailable: initializeFilterState(),
 
   filtered: [],
   filteredLoading: false,
@@ -45,8 +45,8 @@ const initialState = {
   filteredTotalPages: 0,
   filteredTotalResults: 0,
   filteredApiStatus: {},
-  filteredFiltersApplied: cloneFilters(initialFilterState),
-  filteredFiltersAvailable: cloneFilters(initialFilterState),
+  filteredFiltersApplied: initializeFilterState(),
+  filteredFiltersAvailable: initializeFilterState(),
 
   notExported: [],
   notExportedLoading: false,
@@ -57,8 +57,8 @@ const initialState = {
   notExportedTotalPages: 0,
   notExportedTotalResults: 0,
   notExportedApiStatus: {},
-  notExportedFiltersApplied: cloneFilters(initialFilterState),
-  notExportedFiltersAvailable: cloneFilters(initialFilterState),
+  notExportedFiltersApplied: initializeFilterState(),
+  notExportedFiltersAvailable: initializeFilterState(),
 
   // Derived state from location
   loadNotExported: false,
@@ -119,7 +119,7 @@ function _handleFetchRoutesRequest(type, state, payload) {
   const nextState = Object.assign({}, state, {
     [stype+'Loading']: true,
     [stype+'Requested']: true,
-    [stype+'FiltersAvailable']: initialFilterState,
+    [stype+'FiltersAvailable']: initializeFilterState(),
   });
 
   return nextState;

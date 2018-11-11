@@ -12,7 +12,9 @@ import {
   RESET,
 } from './actions'
 
-import {cloneFilters, decodeFiltersApplied, initialFilterState}
+import {cloneFilters,
+        decodeFiltersApplied,
+        initializeFilterState}
   from 'components/filters/state'
 
 const LOCATION_CHANGE = '@@router/LOCATION_CHANGE'
@@ -23,8 +25,8 @@ const initialState = {
 
   anchor: "",
 
-  filtersAvailable: initialFilterState,
-  filtersApplied: initialFilterState,
+  filtersAvailable: initializeFilterState(),
+  filtersApplied: initializeFilterState(),
 
   routesImported: [],
   routesFiltered: [],
