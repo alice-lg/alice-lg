@@ -313,6 +313,6 @@ const _CommunitiesSelect = connect(
   })
 )(__CommunitiesSelect);
 
-export const CommunitiesSelect = withTitle("Communities")(_CommunitiesSelect);
+export const CommunitiesSelect = withTitle("BGP Communities")(_CommunitiesSelect);
 
 
