@@ -227,7 +227,7 @@ class __CommunitiesSelect extends React.Component {
       const name = makeReadableCommunity(this.props.communities, filter.value);
       const cls = `select-bgp-community-0-${filter.value[0]} ` +
         `select-bgp-community-1-${filter.value[1]} ` +
-        `select-bgp_community-2-${filter.value[2]}`;
+        `select-bgp-community-2-${filter.value[2]}`;
       return makeOption(FILTER_GROUP_EXT_COMMUNITIES, name, filter, cls);
     });
 
@@ -235,7 +235,7 @@ class __CommunitiesSelect extends React.Component {
       const name = makeReadableCommunity(this.props.communities, filter.value);
       const cls = `select-bgp-community-0-${filter.value[0]} ` +
         `select-bgp-community-1-${filter.value[1]} ` +
-        `select-bgp_community-2-${filter.value[2]}`;
+        `select-bgp-community-2-${filter.value[2]}`;
       return makeOption(FILTER_GROUP_LARGE_COMMUNITIES, name, filter, cls);
     });
 
