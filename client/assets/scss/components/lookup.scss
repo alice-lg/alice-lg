@@ -1,4 +1,15 @@
 
+.lookup-container {
+    h2 {
+        text-transform: uppercase;
+        color: #337ab7;
+        font-size: 14px;
+        line-height: 1;
+        margin-top: 0px;
+    }
+}
+
+
 .lookup-result-summary {
     ul {
       list-style: none;
@@ -16,7 +27,8 @@
     margin: 30px 20px;
 
     h3 {
-        font-weight: bold;
+        font-weight: normal;
+        font-style: italic;
         color: #337ab7;
         margin-top: 15px;
         font-size: 14px;

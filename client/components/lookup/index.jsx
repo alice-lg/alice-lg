@@ -11,6 +11,8 @@ import {replace} from 'react-router-redux'
 
 import {setLookupQueryValue} from './actions'
 
+import Content from 'components/content'
+
 import LookupResults from './results'
 import SearchInput from 'components/search-input'
 
@@ -72,6 +74,7 @@ class Lookup extends React.Component {
     return (
       <div className="lookup-container">
         <div className="card">
+          <h2><Content id="lookup.title">Search on all route servers</Content></h2>
           <SearchInput
             ref="searchInput"
             id="lookup-search-input"
