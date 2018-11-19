@@ -1,6 +1,7 @@
 
 DOCKER_IMAGE := alice-lg-golang:latest
 DOCKER_EXEC := docker run --rm -t -i \
+	--user 1000 \
 	-v `pwd`/../:/go/src/github.com/alice-lg/alice-lg \
 	alice-lg-golang:latest /bin/sh -c 
 
