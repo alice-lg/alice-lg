@@ -282,7 +282,7 @@ class __CommunitiesSelect extends React.Component {
                           onChange={(e) => this.propagateChange(e.target.value)}
                           className="form-control">
                     <option value="none" className="options-title">
-                      Select communities to match...
+                      Select BGP Communities to match...
                     </option>
                     {communitiesOptions.length > 0 &&
                       <optgroup label="Communities">

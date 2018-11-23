@@ -79,7 +79,7 @@ class Lookup extends React.Component {
             ref="searchInput"
             id="lookup-search-input"
             value={this.props.queryValue}
-            placeholder="Search for prefixes, peers or ASNs on all route servers"
+            placeholder="Search for Prefixes, Peers or ASNs on all Route Servers"
             onChange={(e) => this.doLookup(e.target.value)}  />
         </div>
 

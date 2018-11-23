@@ -375,7 +375,7 @@ class Protocols extends React.Component {
       return (
         <div className="card">
           <p className="help-block">
-            No neighbours could be found.
+            No neighbors could be found.
           </p>
         </div>
       );

@@ -85,7 +85,7 @@ class Indicator extends React.Component {
           <p>&gt; This is taking really long...</p>}
 
         {this.state.displayMessages >= 40 &&
-          <p>&gt; I heared there will be cake if you keep on waiting just a
+          <p>&gt; I heard there will be cake if you keep on waiting just a
              bit longer!</p>}
 
         {this.state.displayMessages >= 60 &&

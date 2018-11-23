@@ -51,7 +51,7 @@ class RouteserversPage extends React.Component {
             <div className="card">
               <SearchInput
                 value={this.props.filterValue}
-                placeholder="Filter by Neighbour, ASN or Description"
+                placeholder="Filter by Neighbor, ASN or Description"
                 onChange={(e) => this.setFilter(e.target.value)}
               />
             </div>
