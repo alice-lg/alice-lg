@@ -544,7 +544,6 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 			continue
 		}
 
-		fmt.Println("Section Name:", section.Name())
 		// Derive source-id from name
 		sourceId := section.Name()[len("source:"):]
 
