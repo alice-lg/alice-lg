@@ -90,6 +90,6 @@ class ErrorsPage extends React.Component {
 export default connect(
   (state) => ({
       error: state.errors.error,
-      routeservers: state.routeservers.all,
+      routeservers: state.routeservers.byId,
   })
 )(ErrorsPage);

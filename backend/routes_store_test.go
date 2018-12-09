@@ -72,14 +72,14 @@ func makeTestRoutesStore() *RoutesStore {
 
 	// Build mapping based on source instances:
 	//   rs : <response>
-	statusMap := make(map[int]StoreStatus)
-	routesMap := map[int]*api.RoutesResponse{
-		1: rs1RoutesResponse,
+	statusMap := make(map[string]StoreStatus)
+	routesMap := map[string]*api.RoutesResponse{
+		"rs1": rs1RoutesResponse,
 	}
 
-	configMap := map[int]*SourceConfig{
-		1: &SourceConfig{
-			Id:   1,
+	configMap := map[string]*SourceConfig{
+		"rs1": &SourceConfig{
+			Id:   "rs1",
 			Name: "rs1.test",
 			Type: SOURCE_BIRDWATCHER,
 
@@ -129,7 +129,7 @@ func TestLookupPrefixAt(t *testing.T) {
 	store := makeTestRoutesStore()
 
 	query := "193.200."
-	results := store.LookupPrefixAt(1, query)
+	results := store.LookupPrefixAt("rs1", query)
 
 	prefixes := <-results
 
@@ -173,7 +173,7 @@ func TestLookupNeighboursPrefixesAt(t *testing.T) {
 	store := makeTestRoutesStore()
 
 	// Query
-	results := store.LookupNeighboursPrefixesAt(1, []string{
+	results := store.LookupNeighboursPrefixesAt("rs1", []string{
 		"ID163_AS31078",
 	})
 
@@ -193,7 +193,7 @@ func TestLookupNeighboursPrefixesAt(t *testing.T) {
 func TestLookupPrefixForNeighbours(t *testing.T) {
 	// Construct a neighbours lookup result
 	neighbours := api.NeighboursLookupResults{
-		1: api.Neighbours{
+		"rs1": api.Neighbours{
 			&api.Neighbour{
 				Id: "ID163_AS31078",
 			},

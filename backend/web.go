@@ -71,13 +71,20 @@ func webRegisterAssets(ui UiConfig, router *httprouter.Router) error {
 			io.WriteString(res, themedHtml)
 		})
 
-	// ...and as catch all
-	router.GET("/alice/*path",
-		func(res http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
-			// ditto here
-			themedHtml := theme.PrepareClientHtml(indexHtml)
-			io.WriteString(res, themedHtml)
-		})
+	// ...and all alice related paths aswell
+	alicePaths := []string{
+		"/routeservers/*path",
+		"/search/*path",
+	}
+	for _, path := range alicePaths {
+		// respond with app html
+		router.GET(path,
+			func(res http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
+				// ditto here
+				themedHtml := theme.PrepareClientHtml(indexHtml)
+				io.WriteString(res, themedHtml)
+			})
+	}
 
 	return nil
 }

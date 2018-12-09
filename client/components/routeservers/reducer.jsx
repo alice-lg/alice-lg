@@ -20,7 +20,9 @@ const LOCATION_CHANGE = '@@router/LOCATION_CHANGE'
 const initialState = {
 
   all: [],
-  selectedRsId: 0,
+  byId: {},
+
+  selectedRsId: "",
 
   groups: [],
   isGrouped: false,
@@ -119,19 +121,21 @@ const _updateProtocol = function(state, payload) {
 
 const _loadRouteservers = function(state, routeservers) {
   // Caclulate grouping
+  const byId = {};
   let groups = [];
   for (const rs of routeservers) {
+    byId[rs.id] = rs;
     if (groups.indexOf(rs.group) == -1) {
       groups.push(rs.group);
     }
   }
 
-  const selectedGroup = _groupForRsId(
-    routeservers, state.selectedRsId
-  );
+  const selectedGroup = _groupForRsId(byId, state.selectedRsId);
 
   return Object.assign({}, state, {
-    all: routeservers,
+    all:  routeservers,
+    byId: byId,
+
     groups: groups,
     isGrouped: groups.length > 1,
     selectedGroup: selectedGroup,
@@ -142,19 +146,18 @@ const _loadRouteservers = function(state, routeservers) {
 
 const _restoreStatefromLocation = function(state, location) {
   const path = location.pathname.split("/");
-  if(path.length < 3) {
+  if(path.length < 2) {
     return state; // nothing to do here
   }
-  const [_, resource, rid, ...rest] = path;
+  const [resource, routeserverId, ...rest] = path;
 
   if (resource != "routeservers") {
     return state;
   }
-  const routeserverId = parseInt(rid, 10);
 
   let selectedGroup = state.selectedGroup;
   if (state.all.length > 0) {
-    selectedGroup = _groupForRsId(state.all, routeserverId);
+    selectedGroup = _groupForRsId(state.byId, routeserverId);
   }
 
   return Object.assign({}, state, {

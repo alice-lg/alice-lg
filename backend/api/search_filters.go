@@ -22,7 +22,7 @@ API Search
 
 */
 type Filterable interface {
-	MatchSourceId(sourceId int) bool
+	MatchSourceId(sourceId string) bool
 	MatchAsn(asn int) bool
 	MatchCommunity(community Community) bool
 	MatchExtCommunity(community ExtCommunity) bool
@@ -165,7 +165,7 @@ func (self *SearchFilterGroup) rebuildIndex() {
 type SearchFilterComparator func(route Filterable, value interface{}) bool
 
 func searchFilterMatchSource(route Filterable, value interface{}) bool {
-	sourceId, ok := value.(int)
+	sourceId, ok := value.(string)
 	if !ok {
 		return false
 	}
@@ -417,7 +417,7 @@ func FiltersFromQuery(query url.Values) (*SearchFilters, error) {
 		value := query.Get(key)
 		switch key {
 		case SEARCH_KEY_SOURCES:
-			filters, err := parseQueryValueList(parseIntValue, value)
+			filters, err := parseQueryValueList(parseStringValue, value)
 			if err != nil {
 				return nil, err
 			}

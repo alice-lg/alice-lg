@@ -22,7 +22,7 @@ type Route struct {
 }
 
 // Implement Filterable interface for routes
-func (self *Route) MatchSourceId(id int) bool {
+func (self *Route) MatchSourceId(id string) bool {
 	return true // A route has no source info so we exclude this filter
 }
 
@@ -120,7 +120,7 @@ type LookupRoute struct {
 }
 
 // Implement Filterable interface for lookup routes
-func (self *LookupRoute) MatchSourceId(id int) bool {
+func (self *LookupRoute) MatchSourceId(id string) bool {
 	return self.Routeserver.Id == id
 }
 
