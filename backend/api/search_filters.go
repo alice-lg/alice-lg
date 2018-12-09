@@ -43,6 +43,10 @@ func searchFilterCmpInt(a FilterValue, b FilterValue) bool {
 	return a.(int) == b.(int)
 }
 
+func searchFilterCmpString(a FilterValue, b FilterValue) bool {
+	return a.(string) == b.(string)
+}
+
 func searchFilterCmpCommunity(a FilterValue, b FilterValue) bool {
 	ca := a.(Community)
 	cb := b.(Community)
@@ -83,6 +87,10 @@ func (self *SearchFilter) Equal(other *SearchFilter) bool {
 		break
 	case int:
 		cmp = searchFilterCmpInt
+		break
+	case string:
+		cmp = searchFilterCmpString
+		break
 	}
 
 	if cmp == nil {

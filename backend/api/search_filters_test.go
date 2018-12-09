@@ -84,7 +84,7 @@ func TestSearchFilterCmpCommunity(t *testing.T) {
 }
 
 func TestSearchFilterEqual(t *testing.T) {
-	// Int values (ASNS, SourceId)
+	// Int values (ASNS)
 	a := &SearchFilter{Value: 23}
 	b := &SearchFilter{Value: 23}
 	c := &SearchFilter{Value: 42}
@@ -95,6 +95,19 @@ func TestSearchFilterEqual(t *testing.T) {
 
 	if a.Equal(c) {
 		t.Error("filter[23] == filter[42] should be false")
+	}
+
+	// String values (sources)
+	a = &SearchFilter{Value: "rs-foo"}
+	b = &SearchFilter{Value: "rs-foo"}
+	c = &SearchFilter{Value: "rs-bar"}
+
+	if a.Equal(b) == false {
+		t.Error("filter['rs-foo'] == filter['rs-foo'] should be true")
+	}
+
+	if a.Equal(c) {
+		t.Error("filter['rs-foo'] == filter['rs-bar'] should be false")
 	}
 
 	// Communities
