@@ -80,6 +80,7 @@ type PaginationConfig struct {
 
 type SourceConfig struct {
 	Id    string
+	Order int
 	Name  string
 	Group string
 
@@ -536,6 +537,7 @@ func getUiConfig(config *ini.File) (UiConfig, error) {
 func getSources(config *ini.File) ([]*SourceConfig, error) {
 	sources := []*SourceConfig{}
 
+	order := 0
 	sourceSections := config.ChildSections("source")
 	for _, section := range sourceSections {
 		if !isSourceBase(section) {
@@ -575,6 +577,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 
 		config := &SourceConfig{
 			Id:         sourceId,
+			Order:      order,
 			Name:       sourceName,
 			Group:      sourceGroup,
 			Blackholes: sourceBlackholes,
@@ -599,6 +602,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 
 		// Add to list of sources
 		sources = append(sources, config)
+		order++
 	}
 
 	return sources, nil

@@ -120,7 +120,7 @@ class RoutesPage extends React.Component {
   componentDidMount() {
     // Assert neighbors for RS are loaded
     this.props.dispatch(
-      loadRouteserverProtocol(parseInt(this.props.params.routeserverId))
+      loadRouteserverProtocol(this.props.params.routeserverId)
     );
   }
 
@@ -214,7 +214,7 @@ class RoutesPage extends React.Component {
 export default connect(
   (state, props) => {
     const protocolId = props.params.protocolId;
-    const rsId = parseInt(props.params.routeserverId, 10);
+    const rsId = props.params.routeserverId;
     const neighbors = state.routeservers.protocols[rsId];
     const neighbor = _.findWhere(neighbors, {id: protocolId});
 

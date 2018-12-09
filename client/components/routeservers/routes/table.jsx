@@ -60,7 +60,7 @@ class RoutesTable extends React.Component {
 
 export default connect(
   (state, props) => {
-    const rsId = parseInt(props.routeserverId, 10);
+    const rsId = props.routeserverId;
     const blackholes = state.config.blackholes[rsId];
     return {
       blackholes:         blackholes,

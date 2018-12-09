@@ -342,14 +342,14 @@ const NeighboursTable = connect(
 class Protocols extends React.Component {
   componentDidMount() {
     this.props.dispatch(
-      loadRouteserverProtocol(parseInt(this.props.routeserverId))
+      loadRouteserverProtocol(this.props.routeserverId)
     );
   }
 
   componentWillReceiveProps(nextProps) {
     if(this.props.routeserverId != nextProps.routeserverId) {
       this.props.dispatch(
-        loadRouteserverProtocol(parseInt(nextProps.routeserverId))
+        loadRouteserverProtocol(nextProps.routeserverId)
       );
     }
   }
@@ -365,7 +365,7 @@ class Protocols extends React.Component {
     }
 
 
-    let protocol = this.props.protocols[parseInt(this.props.routeserverId)];
+    let protocol = this.props.protocols[this.props.routeserverId];
     if(!protocol) {
       return null;
     }

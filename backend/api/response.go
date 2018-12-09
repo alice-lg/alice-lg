@@ -101,6 +101,23 @@ type Routeserver struct {
 	Name       string   `json:"name"`
 	Group      string   `json:"group"`
 	Blackholes []string `json:"blackholes"`
+
+	Order int `json:"-"`
+}
+
+type Routeservers []Routeserver
+
+// Implement sorting interface for routeservers
+func (rs Routeservers) Len() int {
+	return len(rs)
+}
+
+func (rs Routeservers) Less(i, j int) bool {
+	return rs[i].Order < rs[j].Order
+}
+
+func (rs Routeservers) Swap(i, j int) {
+	rs[i], rs[j] = rs[j], rs[i]
 }
 
 type RouteserversResponse struct {

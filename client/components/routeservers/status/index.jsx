@@ -16,7 +16,7 @@ class Details extends React.Component {
     }
 
     // Get routeserver name
-    let rs = this.props.routeservers[parseInt(this.props.routeserverId)];
+    let rs = this.props.routeservers[this.props.routeserverId];
     if (!rs) {
       return null;
     }
@@ -74,7 +74,7 @@ class Details extends React.Component {
 export default connect(
   (state) => {
     return {
-      routeservers: state.routeservers.all,
+      routeservers: state.routeservers.byId,
       details: state.routeservers.details
     }
   }

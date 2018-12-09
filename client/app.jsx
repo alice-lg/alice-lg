@@ -58,7 +58,7 @@ import combinedReducer from './reducer/app-reducer'
 
 // Setup routing
 const browserHistory = useRouterHistory(createHistory)({
-  basename: '/alice'
+  basename: '/'
 });
 
 
