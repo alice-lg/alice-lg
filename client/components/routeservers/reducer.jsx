@@ -22,7 +22,7 @@ const initialState = {
   all: [],
   byId: {},
 
-  selectedRsId: "",
+  selectedRsId: "unknown",
 
   groups: [],
   isGrouped: false,
@@ -130,7 +130,10 @@ const _loadRouteservers = function(state, routeservers) {
     }
   }
 
-  const selectedGroup = _groupForRsId(byId, state.selectedRsId);
+  let selectedGroup = _groupForRsId(byId, state.selectedRsId);
+  if (state.selectedRsId == "unknown") {
+    selectedGroup = routeservers[0].group;
+  }
 
   return Object.assign({}, state, {
     all:  routeservers,
