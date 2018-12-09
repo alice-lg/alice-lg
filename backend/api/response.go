@@ -16,7 +16,7 @@ type ErrorResponse struct {
 	Message       string `json:"message"`
 	Code          int    `json:"code"`
 	Tag           string `json:"tag"`
-	RouteserverId int    `json:"routeserver_id"`
+	RouteserverId string `json:"routeserver_id"`
 }
 
 // Cache aware api response
@@ -97,7 +97,7 @@ type StatusResponse struct {
 
 // Routeservers
 type Routeserver struct {
-	Id         int      `json:"id"`
+	Id         string   `json:"id"`
 	Name       string   `json:"name"`
 	Group      string   `json:"group"`
 	Blackholes []string `json:"blackholes"`

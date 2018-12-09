@@ -47,7 +47,7 @@ func endpoint(wrapped apiEndpoint) httprouter.Handle {
 			// Get affected rs id
 			rsId, paramErr := validateSourceId(params.ByName("id"))
 			if paramErr != nil {
-				rsId = -1
+				rsId = "unknown"
 			}
 
 			// Make error response

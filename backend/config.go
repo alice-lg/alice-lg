@@ -79,7 +79,7 @@ type PaginationConfig struct {
 }
 
 type SourceConfig struct {
-	Id    int
+	Id    string
 	Name  string
 	Group string
 
@@ -99,6 +99,16 @@ type Config struct {
 	Ui      UiConfig
 	Sources []*SourceConfig
 	File    string
+}
+
+// Get source by id
+func (self *Config) SourceById(sourceId string) *SourceConfig {
+	for _, sourceConfig := range self.Sources {
+		if sourceConfig.Id == sourceId {
+			return sourceConfig
+		}
+	}
+	return nil
 }
 
 // Get sources keys form ini
@@ -527,11 +537,14 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 	sources := []*SourceConfig{}
 
 	sourceSections := config.ChildSections("source")
-	sourceId := 0
 	for _, section := range sourceSections {
 		if !isSourceBase(section) {
 			continue
 		}
+
+		fmt.Println("Section Name:", section.Name())
+		// Derive source-id from name
+		sourceId := section.Name()[len("source:"):]
 
 		// Try to get child configs and determine
 		// Source type
@@ -586,8 +599,6 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 
 		// Add to list of sources
 		sources = append(sources, config)
-
-		sourceId += 1
 	}
 
 	return sources, nil

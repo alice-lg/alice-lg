@@ -52,4 +52,4 @@ func (self *NeighboursResponse) CacheTtl() time.Duration {
 	return self.Api.Ttl.Sub(now)
 }
 
-type NeighboursLookupResults map[int]Neighbours
+type NeighboursLookupResults map[string]Neighbours

@@ -43,7 +43,7 @@ func makeTestLookupRoute() *LookupRoute {
 			Description: "Security Solutions Ltd.",
 		},
 		Routeserver: Routeserver{
-			Id:   3,
+			Id:   "3",
 			Name: "test.rs.ixp",
 		},
 	}
@@ -256,7 +256,7 @@ func TestSearchFilterCompareRoute(t *testing.T) {
 	route := makeTestLookupRoute()
 
 	// Source
-	if searchFilterMatchSource(route, 3) != true {
+	if searchFilterMatchSource(route, "3") != true {
 		t.Error("Route should have sourceId 3")
 	}
 	if searchFilterMatchSource(route, 23) == true {

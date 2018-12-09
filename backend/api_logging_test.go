@@ -11,7 +11,7 @@ func TestApiLogSourceError(t *testing.T) {
 	conf := &Config{
 		Sources: []*SourceConfig{
 			&SourceConfig{
-				Id:   0,
+				Id:   "rs1v4",
 				Name: "rs1.example.net (IPv4)",
 			},
 		},
@@ -19,7 +19,7 @@ func TestApiLogSourceError(t *testing.T) {
 
 	AliceConfig = conf
 
-	apiLogSourceError("foo.bar", 0, 23, "Test")
-	apiLogSourceError("foo.bam", 0, err)
-	apiLogSourceError("foo.baz", 0, 23, 42, "foo", err)
+	apiLogSourceError("foo.bar", "rs1v4", 23, "Test")
+	apiLogSourceError("foo.bam", "rs1v4", err)
+	apiLogSourceError("foo.baz", "rs1v4", 23, 42, "foo", err)
 }
