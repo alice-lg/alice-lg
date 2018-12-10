@@ -86,5 +86,11 @@ func webRegisterAssets(ui UiConfig, router *httprouter.Router) error {
 			})
 	}
 
+	// ...install a catch all for /alice for graceful backwards compatibility
+	router.GET("/alice/*path",
+		func(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+			http.Redirect(res, req, "/", 301)
+		})
+
 	return nil
 }
