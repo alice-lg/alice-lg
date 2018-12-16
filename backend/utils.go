@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+var REGEX_MATCH_IP_PREFIX = regexp.MustCompile(`([a-f0-9/]+[\.:]*)+`)
+
 /*
  Case Insensitive Contains
 */
@@ -42,7 +44,7 @@ func MaybePrefix(s string) bool {
 	}
 
 	// Test using regex
-	matches := regexp.MustCompile(`([a-f0-9/]+[\.:]?)+`).FindAllStringIndex(s, -1)
+	matches := REGEX_MATCH_IP_PREFIX.FindAllStringIndex(s, -1)
 	if len(matches) == 1 {
 		return true
 	}

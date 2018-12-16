@@ -10,6 +10,8 @@ import (
 	"github.com/alice-lg/alice-lg/backend/api"
 )
 
+var REGEX_MATCH_ASLOOKUP = regexp.MustCompile(`(?i)^AS(\d+)`)
+
 type NeighboursIndex map[string]*api.Neighbour
 
 type NeighboursStore struct {
@@ -195,8 +197,8 @@ func (self *NeighboursStore) LookupNeighboursAt(
 	self.RUnlock()
 
 	asn := -1
-	if regex := regexp.MustCompile(`(?i)^AS(\d+)`); regex.MatchString(query) {
-		groups := regex.FindStringSubmatch(query)
+	if REGEX_MATCH_ASLOOKUP.MatchString(query) {
+		groups := REGEX_MATCH_ASLOOKUP.FindStringSubmatch(query)
 		if a, err := strconv.Atoi(groups[1]); err == nil {
 			asn = a
 		}
