@@ -34,10 +34,10 @@ export function  makeLinkProps(props) {
 
   let pagination = "";
   if (pr) {
-    pagination += `pr=${pr}`
+    pagination += `pr=${pr}&`;
   }
   if (pf) {
-    pagination += `pf=${pf}`
+    pagination += `pf=${pf}&`;
   }
 
   let filtering = "";
@@ -47,7 +47,7 @@ export function  makeLinkProps(props) {
 
   const query = props.routing.query.q || "";
 
-  const search = `?${pagination}&q=${query}${filtering}`;
+  const search = `?${pagination}q=${query}${filtering}`;
   let hash = null;
   if (props.anchor) {
     hash = `#routes-${props.anchor}`;
