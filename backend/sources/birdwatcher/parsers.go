@@ -4,6 +4,7 @@ package birdwatcher
 
 import (
 	"fmt"
+	"log"
 	"sort"
 	"strconv"
 	"time"
@@ -165,12 +166,11 @@ func parseNeighbours(bird ClientResponse, config Config) (api.Neighbours, error)
 			State:       mustString(protocol["state"], "unknown"),
 			Description: mustString(protocol["description"], "no description"),
 			//TODO make these changes configurable
-			RoutesReceived:     mustInt(routes["imported"], 0),
-			RoutesExported:     mustInt(routes["exported"], 0), //TODO protocol_exported?
-			RoutesFiltered:     mustInt(routes["filtered"], 0),
-			RoutesPreferred:    mustInt(routes["preferred"], 0),
-			RoutesAccepted:     mustInt(routes["pipe_imported"], mustInt(routes["imported"], 0)),
-			RoutesPipeFiltered: mustInt(routes["pipe_filtered"], mustInt(routes["filtered"], 0)),
+			RoutesReceived:  mustInt(routes["imported"], 0),
+			RoutesExported:  mustInt(routes["exported"], 0), //TODO protocol_exported?
+			RoutesFiltered:  mustInt(routes["filtered"], 0),
+			RoutesPreferred: mustInt(routes["preferred"], 0),
+			RoutesAccepted:  mustInt(routes["pipe_imported"], mustInt(routes["imported"], 0)),
 
 			Uptime:    uptime,
 			LastError: lastError,
@@ -282,7 +282,15 @@ func parseExtBgpCommunities(data interface{}) []api.ExtCommunity {
 
 	for _, c := range ldata {
 		cdata := c.([]interface{})
-		communities = append(communities, api.ExtCommunity(cdata))
+		if len(cdata) != 3 {
+			log.Println("Ignoring malformed ext community:", cdata)
+			continue
+		}
+		communities = append(communities, api.ExtCommunity{
+			cdata[0],
+			int(cdata[1].(float64)),
+			int(cdata[2].(float64)),
+		})
 	}
 
 	return communities

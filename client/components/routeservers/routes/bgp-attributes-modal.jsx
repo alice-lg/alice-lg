@@ -9,7 +9,7 @@ import {connect} from 'react-redux'
 
 import Modal, {Header, Body, Footer} from 'components/modals/modal'
 
-import BgpCommunitiyLabel 
+import BgpCommunitiyLabel
   from 'components/routeservers/communities/label'
 
 import {hideBgpAttributesModal}
@@ -33,6 +33,15 @@ class BgpAttributesModal extends React.Component {
     const communities = attrs.bgp.communities;
     const extCommunities = attrs.bgp.ext_communities;
     const largeCommunities = attrs.bgp.large_communities;
+
+    // As communities can be repeated, we can not use them
+    // directly as keys, but may have to prepend a suffix.
+    const communityKeyCnt = {};
+    const communityKey = (community) => {
+      const k = community.join(":");
+      communityKeyCnt[k] = (communityKeyCnt[k]||0) + 1;
+      return `${k}+${communityKeyCnt[k]}`;
+    };
 
     return (
       <Modal className="bgp-attributes-modal"
@@ -68,21 +77,21 @@ class BgpAttributesModal extends React.Component {
                 <tr>
                   <th>Communities:</th>
                   <td>
-                    {communities.map((c) => <BgpCommunitiyLabel community={c} key={c} />)}
+                    {communities.map((c) => <BgpCommunitiyLabel community={c} key={communityKey(c)} />)}
                   </td>
                 </tr>}
             {extCommunities.length > 0 &&
               <tr>
                 <th>Ext. Communities:</th>
                 <td>
-                    {extCommunities.map((c) => <BgpCommunitiyLabel community={c} key={c} />)}
+                    {extCommunities.map((c) => <BgpCommunitiyLabel community={c} key={communityKey(c)} />)}
                 </td>
               </tr>}
             {largeCommunities.length > 0 &&
                 <tr>
                   <th>Large Communities:</th>
                   <td>
-                    {largeCommunities.map((c) => <BgpCommunitiyLabel community={c} key={c} />)}
+                    {largeCommunities.map((c) => <BgpCommunitiyLabel community={c} key={communityKey(c)} />)}
                   </td>
                 </tr>}
            </tbody>

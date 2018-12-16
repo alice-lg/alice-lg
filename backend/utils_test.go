@@ -17,6 +17,7 @@ func TestMaybePrefix(t *testing.T) {
 	}{
 		{"10.0.0", true},
 		{"23.42.11.42/23", true},
+		{"fa42:2342::/32", true},
 		{"200", true},
 		{"2001:", true},
 		{"A", true},

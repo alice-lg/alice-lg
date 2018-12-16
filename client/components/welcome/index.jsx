@@ -1,6 +1,7 @@
 
 import React from 'react'
 import {connect} from 'react-redux'
+import {replace} from 'react-router-redux'
 
 import PageHeader from 'components/page-header'
 
@@ -34,7 +35,19 @@ const LookupWidget = connect(
 )(LookupView);
 
 
-export default class Welcome extends React.Component {
+class Welcome extends React.Component {
+  componentDidMount() {
+    // Check if there is a query already set
+    if (this.props.query != "") {
+      // We should redirect to the search page
+      const destination = {
+        pathname: "/search",
+        search: `?q=${this.props.query}`
+      };
+      this.props.dispatch(replace(destination));
+    }
+  }
+
   render() {
     return (
       <div className="welcome-page">
@@ -52,4 +65,9 @@ export default class Welcome extends React.Component {
   }
 }
 
+export default connect(
+  (state) => ({
+    query: state.lookup.query,
+  })
+)(Welcome);
 

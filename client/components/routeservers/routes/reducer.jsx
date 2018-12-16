@@ -17,6 +17,9 @@ import {ROUTES_RECEIVED,
 
 import {SET_FILTER_QUERY_VALUE} from './actions'
 
+import {cloneFilters, decodeFiltersApplied, initializeFilterState}
+  from 'components/filters/state'
+
 const LOCATION_CHANGE = '@@router/LOCATION_CHANGE'
 
 const initialState = {
@@ -30,6 +33,8 @@ const initialState = {
   receivedTotalPages: 0,
   receivedTotalResults: 0,
   receivedApiStatus: {},
+  receivedFiltersApplied: initializeFilterState(),
+  receivedFiltersAvailable: initializeFilterState(),
 
   filtered: [],
   filteredLoading: false,
@@ -40,6 +45,8 @@ const initialState = {
   filteredTotalPages: 0,
   filteredTotalResults: 0,
   filteredApiStatus: {},
+  filteredFiltersApplied: initializeFilterState(),
+  filteredFiltersAvailable: initializeFilterState(),
 
   notExported: [],
   notExportedLoading: false,
@@ -50,6 +57,8 @@ const initialState = {
   notExportedTotalPages: 0,
   notExportedTotalResults: 0,
   notExportedApiStatus: {},
+  notExportedFiltersApplied: initializeFilterState(),
+  notExportedFiltersAvailable: initializeFilterState(),
 
   // Derived state from location
   loadNotExported: false,
@@ -83,6 +92,9 @@ function _handleLocationChange(state, payload) {
   // Determine on demand loading state
   const loadNotExported = parseInt(query["ne"] || 0, 10) === 1 ? true : false;
 
+  // Restore filters applied from location
+  const filtersApplied = decodeFiltersApplied(query);
+
   const nextState = Object.assign({}, state, {
     filterQuery: filterQuery,
     filterValue: filterQuery, // location overrides form
@@ -92,6 +104,10 @@ function _handleLocationChange(state, payload) {
     notExportedPage: notExportedPage,
 
     loadNotExported: loadNotExported,
+
+    receivedFiltersApplied:    filtersApplied,
+    filteredFiltersApplied:    filtersApplied,
+    notExportedFiltersApplied: filtersApplied,
   });
 
   return nextState;
@@ -103,11 +119,11 @@ function _handleFetchRoutesRequest(type, state, payload) {
   const nextState = Object.assign({}, state, {
     [stype+'Loading']: true,
     [stype+'Requested']: true,
+    [stype+'FiltersAvailable']: initializeFilterState(),
   });
 
   return nextState;
 }
-
 
 function _handleFetchRoutesSuccess(type, state, payload) {
   const stype = _stateType(type);
@@ -124,7 +140,10 @@ function _handleFetchRoutesSuccess(type, state, payload) {
 
     [stype+'ApiStatus']: apiStatus,
 
-    [stype+'Loading']: false
+    [stype+'Loading']: false,
+
+    [stype+'FiltersAvailable']: cloneFilters(payload.filtersAvailable),
+    [stype+'FiltersApplied']:   cloneFilters(payload.filtersApplied),
   });
 
   return nextState;

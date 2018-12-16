@@ -51,15 +51,15 @@ func makeTestNeighboursStore() *NeighboursStore {
 
 	// Create store
 	store := &NeighboursStore{
-		neighboursMap: map[int]NeighboursIndex{
-			1: rs1,
-			2: rs2,
+		neighboursMap: map[string]NeighboursIndex{
+			"rs1": rs1,
+			"rs2": rs2,
 		},
-		statusMap: map[int]StoreStatus{
-			1: StoreStatus{
+		statusMap: map[string]StoreStatus{
+			"rs1": StoreStatus{
 				State: STATE_READY,
 			},
-			2: StoreStatus{
+			"rs2": StoreStatus{
 				State: STATE_INIT,
 			},
 		},
@@ -71,11 +71,11 @@ func makeTestNeighboursStore() *NeighboursStore {
 func TestGetSourceState(t *testing.T) {
 	store := makeTestNeighboursStore()
 
-	if store.SourceState(1) != STATE_READY {
+	if store.SourceState("rs1") != STATE_READY {
 		t.Error("Expected Source(1) to be STATE_READY")
 	}
 
-	if store.SourceState(2) == STATE_READY {
+	if store.SourceState("rs2") == STATE_READY {
 		t.Error("Expected Source(2) to be NOT STATE_READY")
 	}
 }
@@ -83,7 +83,7 @@ func TestGetSourceState(t *testing.T) {
 func TestGetNeighbourAt(t *testing.T) {
 	store := makeTestNeighboursStore()
 
-	neighbour := store.GetNeighbourAt(1, "ID2233_AS2343")
+	neighbour := store.GetNeighbourAt("rs1", "ID2233_AS2343")
 	if neighbour.Id != "ID2233_AS2343" {
 		t.Error("Expected another peer in GetNeighbourAt")
 	}
@@ -91,7 +91,7 @@ func TestGetNeighbourAt(t *testing.T) {
 
 func TestGetNeighbors(t *testing.T) {
 	store := makeTestNeighboursStore()
-	neighbors := store.GetNeighborsAt(2)
+	neighbors := store.GetNeighborsAt("rs2")
 
 	if len(neighbors) != 2 {
 		t.Error("Expected 2 neighbors, got:", len(neighbors))
@@ -104,7 +104,7 @@ func TestGetNeighbors(t *testing.T) {
 			neighbors[0])
 	}
 
-	neighbors = store.GetNeighborsAt(3)
+	neighbors = store.GetNeighborsAt("rs3")
 	if len(neighbors) != 0 {
 		t.Error("Unknown source should have yielded zero results")
 	}
@@ -119,7 +119,7 @@ func TestNeighbourLookupAt(t *testing.T) {
 		"ID2233_AS2343",
 	}
 
-	neighbours := store.LookupNeighboursAt(1, "peer 1")
+	neighbours := store.LookupNeighboursAt("rs1", "peer 1")
 
 	// Make index
 	index := NeighboursIndex{}
@@ -144,7 +144,7 @@ func TestNeighbourLookup(t *testing.T) {
 	results := store.LookupNeighbours("Cloudfoo")
 
 	// Peer should be present at RS2
-	neighbours, ok := results[2]
+	neighbours, ok := results["rs2"]
 	if !ok {
 		t.Error("Lookup on rs2 unsuccessful.")
 	}

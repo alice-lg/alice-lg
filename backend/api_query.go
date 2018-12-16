@@ -39,15 +39,18 @@ func apiQueryFilterNextHopGateway(
 	req *http.Request, param string, routes api.Routes,
 ) api.Routes {
 	query := req.URL.Query()
-	q, ok := query[param]
+	queryParam, ok := query[param]
 	if !ok {
 		return routes
 	}
 
+	// Normalize to lowercase
+	queryString := strings.ToLower(queryParam[0])
+
 	results := make(api.Routes, 0, len(routes))
 	for _, r := range routes {
-		if strings.HasPrefix(r.Network, q[0]) ||
-			strings.HasPrefix(r.Gateway, q[0]) {
+		if strings.HasPrefix(strings.ToLower(r.Network), queryString) ||
+			strings.HasPrefix(strings.ToLower(r.Gateway), queryString) {
 			results = append(results, r)
 		}
 	}

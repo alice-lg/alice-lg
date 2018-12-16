@@ -11,6 +11,8 @@ import {replace} from 'react-router-redux'
 
 import {setLookupQueryValue} from './actions'
 
+import Content from 'components/content'
+
 import LookupResults from './results'
 import SearchInput from 'components/search-input'
 
@@ -52,7 +54,7 @@ class Lookup extends React.Component {
       pathname: "/search",
       search: `?q=${q}`
     };
-    
+
     // Set lookup params
     this.props.dispatch(setLookupQueryValue(q));
     this.debouncedDispatch(replace(destination));
@@ -72,11 +74,12 @@ class Lookup extends React.Component {
     return (
       <div className="lookup-container">
         <div className="card">
+          <h2><Content id="lookup.title">Search on all route servers</Content></h2>
           <SearchInput
             ref="searchInput"
             id="lookup-search-input"
             value={this.props.queryValue}
-            placeholder="Search for prefixes, peers or ASNs on all route servers"
+            placeholder="Search for Prefixes, Peers or ASNs on all Route Servers"
             onChange={(e) => this.doLookup(e.target.value)}  />
         </div>
 
@@ -101,11 +104,11 @@ export default connect(
       error: state.lookup.error,
       routes: {
         filtered: {
-          loading: lookup.isLoading, 
+          loading: lookup.isLoading,
           totalResults: lookup.totalRoutesFiltered,
         },
         received: {
-          loading: lookup.isLoading, 
+          loading: lookup.isLoading,
           totalResults: lookup.totalRoutesImported,
         },
         notExported: {

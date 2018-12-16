@@ -12,39 +12,12 @@ import {
   RESET,
 } from './actions'
 
-import {
-  APPLY_FILTER,
-} from './filter-actions'
-
-import {
-  FILTER_GROUP_SOURCES,
-  FILTER_GROUP_ASNS,
-  FILTER_GROUP_COMMUNITIES,
-  FILTER_GROUP_EXT_COMMUNITIES,
-  FILTER_GROUP_LARGE_COMMUNITIES,
-} from './filter-groups'
-
-import {
-  decodeFiltersSources,
-  decodeFiltersAsns,
-  decodeFiltersCommunities,
-  decodeFiltersExtCommunities,
-  decodeFiltersLargeCommunities,
-} from './filter-encoding'
-
-import {
-  cloneFilters
-} from './state'
+import {cloneFilters,
+        decodeFiltersApplied,
+        initializeFilterState}
+  from 'components/filters/state'
 
 const LOCATION_CHANGE = '@@router/LOCATION_CHANGE'
-
-const initialFilterState = [
-  {"key": "sources", "filters": []},
-  {"key": "asns", "filters": []},
-  {"key": "communities", "filters": []},
-  {"key": "ext_communities", "filters": []},
-  {"key": "large_communities", "filters": []},
-];
 
 const initialState = {
   query: "",
@@ -52,8 +25,8 @@ const initialState = {
 
   anchor: "",
 
-  filtersAvailable: initialFilterState,
-  filtersApplied: initialFilterState,
+  filtersAvailable: initializeFilterState(),
+  filtersApplied: initializeFilterState(),
 
   routesImported: [],
   routesFiltered: [],
@@ -87,21 +60,6 @@ const getScrollAnchor = function(hash) {
   return hash.substr(hash.indexOf('-')+1);
 }
 
-/*
- * Decode filters applied from params
- */
-const _decodeFiltersApplied = function(params) {
-  let groups = cloneFilters(initialFilterState);
-
-  groups[FILTER_GROUP_SOURCES].filters =           decodeFiltersSources(params);
-  groups[FILTER_GROUP_ASNS].filters =              decodeFiltersAsns(params);
-  groups[FILTER_GROUP_COMMUNITIES].filters =       decodeFiltersCommunities(params);
-  groups[FILTER_GROUP_EXT_COMMUNITIES].filters =   decodeFiltersExtCommunities(params);
-  groups[FILTER_GROUP_LARGE_COMMUNITIES].filters = decodeFiltersLargeCommunities(params);
-
-  return groups;
-}
-
 
 /*
  * Restore lookup query state from location paramenters
@@ -114,7 +72,7 @@ const _handleLocationChange = function(state, payload) {
   const anchor = getScrollAnchor(payload.hash);
 
   // Restore filters applied from location
-  const filtersApplied = _decodeFiltersApplied(params);
+  const filtersApplied = decodeFiltersApplied(params);
 
   return Object.assign({}, state, {
     anchor: anchor,
@@ -148,6 +106,7 @@ const _loadQueryResult = function(state, payload) {
 
     // Filters available
     filtersAvailable: results.filters_available,
+    filtersApplied: results.filters_applied,
 
     // Pagination
     pageImported:        imported.pagination.page,
@@ -182,6 +141,7 @@ export default function reducer(state=initialState, action) {
         queryValue: action.payload.query,
         isLoading: true
       });
+
     case LOAD_RESULTS_SUCCESS:
       if (state.query != action.payload.query) {
         return state;

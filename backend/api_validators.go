@@ -8,20 +8,11 @@ import (
 )
 
 // Helper: Validate source Id
-func validateSourceId(id string) (int, error) {
-	rsId, err := strconv.Atoi(id)
-	if err != nil {
-		return 0, err
+func validateSourceId(id string) (string, error) {
+	if len(id) > 15 {
+		return "unknown", fmt.Errorf("Source ID too long with length: %d", len(id))
 	}
-
-	if rsId < 0 {
-		return 0, fmt.Errorf("Source id may not be negative")
-	}
-	if rsId >= len(AliceConfig.Sources) {
-		return 0, fmt.Errorf("Source id not within [0, %d]", len(AliceConfig.Sources)-1)
-	}
-
-	return rsId, nil
+	return id, nil
 }
 
 // Helper: Validate query string

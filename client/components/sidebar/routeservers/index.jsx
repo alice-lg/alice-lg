@@ -64,9 +64,14 @@ class RouteserversList extends React.Component {
   }
 
   render() {
-    const rsGroup = _.where(this.props.routeservers, {
-        group: this.props.selectedGroup,
-    });
+    let rsGroup = [];
+    if (this.props.selectedGroup != "") {
+      rsGroup = _.where(this.props.routeservers, {
+          group: this.props.selectedGroup,
+      });
+    } else {
+      rsGroup = _.values(this.props.routeservers);
+    }
 
     const routeservers = rsGroup.map((rs) =>
       <li key={rs.id}>

@@ -1,7 +1,7 @@
 package birdwatcher
 
 type Config struct {
-	Id   int
+	Id   string
 	Name string
 
 	Api             string `ini:"api"`

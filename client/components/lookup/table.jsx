@@ -89,7 +89,7 @@ class LookupRoutesTable extends React.Component {
 
     let routesView = routes.map((r,i) => {
       return (
-        <tr key={`${r.network}_${i}`}>
+        <tr key={i}>
           {routesColumnsOrder.map(col => {
             return (<RouteColumn key={col}
                                  onClick={() => this.showAttributesModal(r)}

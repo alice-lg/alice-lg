@@ -1,9 +1,16 @@
 
 # Changelog
 
+## 3.4.0 (2018-12-09)
+
+* Removed baseUrl from frontend
+
+* Introduced static routeserver ids
+
+
 ## 3.0.0 (2018-10-03)
 
-## Breaking changes:
+### Breaking changes:
 
 * The API endpoints is now include the API version,
   e.g. /api/v1/status, /api/v1/routeservers, ...

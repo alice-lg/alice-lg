@@ -10,12 +10,14 @@ import (
 	"github.com/alice-lg/alice-lg/backend/api"
 )
 
+var REGEX_MATCH_ASLOOKUP = regexp.MustCompile(`(?i)^AS(\d+)`)
+
 type NeighboursIndex map[string]*api.Neighbour
 
 type NeighboursStore struct {
-	neighboursMap   map[int]NeighboursIndex
-	configMap       map[int]*SourceConfig
-	statusMap       map[int]StoreStatus
+	neighboursMap   map[string]NeighboursIndex
+	configMap       map[string]*SourceConfig
+	statusMap       map[string]StoreStatus
 	refreshInterval time.Duration
 
 	sync.RWMutex
@@ -24,9 +26,9 @@ type NeighboursStore struct {
 func NewNeighboursStore(config *Config) *NeighboursStore {
 
 	// Build source mapping
-	neighboursMap := make(map[int]NeighboursIndex)
-	configMap := make(map[int]*SourceConfig)
-	statusMap := make(map[int]StoreStatus)
+	neighboursMap := make(map[string]NeighboursIndex)
+	configMap := make(map[string]*SourceConfig)
+	statusMap := make(map[string]StoreStatus)
 
 	for _, source := range config.Sources {
 		sourceId := source.Id
@@ -75,7 +77,7 @@ func (self *NeighboursStore) init() {
 	}
 }
 
-func (self *NeighboursStore) SourceStatus(sourceId int) StoreStatus {
+func (self *NeighboursStore) SourceStatus(sourceId string) StoreStatus {
 	self.RLock()
 	status := self.statusMap[sourceId]
 	self.RUnlock()
@@ -84,7 +86,7 @@ func (self *NeighboursStore) SourceStatus(sourceId int) StoreStatus {
 }
 
 // Get state by source Id
-func (self *NeighboursStore) SourceState(sourceId int) int {
+func (self *NeighboursStore) SourceState(sourceId string) int {
 	status := self.SourceStatus(sourceId)
 	return status.State
 }
@@ -158,7 +160,7 @@ func (self *NeighboursStore) update() {
 	)
 }
 
-func (self *NeighboursStore) GetNeighborsAt(sourceId int) api.Neighbours {
+func (self *NeighboursStore) GetNeighborsAt(sourceId string) api.Neighbours {
 	self.RLock()
 	neighborsIdx := self.neighboursMap[sourceId]
 	self.RUnlock()
@@ -173,7 +175,7 @@ func (self *NeighboursStore) GetNeighborsAt(sourceId int) api.Neighbours {
 }
 
 func (self *NeighboursStore) GetNeighbourAt(
-	sourceId int,
+	sourceId string,
 	id string,
 ) *api.Neighbour {
 	// Lookup neighbour on RS
@@ -185,7 +187,7 @@ func (self *NeighboursStore) GetNeighbourAt(
 }
 
 func (self *NeighboursStore) LookupNeighboursAt(
-	sourceId int,
+	sourceId string,
 	query string,
 ) api.Neighbours {
 	results := api.Neighbours{}
@@ -195,8 +197,8 @@ func (self *NeighboursStore) LookupNeighboursAt(
 	self.RUnlock()
 
 	asn := -1
-	if regex := regexp.MustCompile(`(?i)^AS(\d+)`); regex.MatchString(query) {
-		groups := regex.FindStringSubmatch(query)
+	if REGEX_MATCH_ASLOOKUP.MatchString(query) {
+		groups := REGEX_MATCH_ASLOOKUP.FindStringSubmatch(query)
 		if a, err := strconv.Atoi(groups[1]); err == nil {
 			asn = a
 		}

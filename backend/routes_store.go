@@ -10,9 +10,9 @@ import (
 )
 
 type RoutesStore struct {
-	routesMap map[int]*api.RoutesResponse
-	statusMap map[int]StoreStatus
-	configMap map[int]*SourceConfig
+	routesMap map[string]*api.RoutesResponse
+	statusMap map[string]StoreStatus
+	configMap map[string]*SourceConfig
 
 	refreshInterval time.Duration
 	lastRefresh     time.Time
@@ -23,9 +23,9 @@ type RoutesStore struct {
 func NewRoutesStore(config *Config) *RoutesStore {
 
 	// Build mapping based on source instances
-	routesMap := make(map[int]*api.RoutesResponse)
-	statusMap := make(map[int]StoreStatus)
-	configMap := make(map[int]*SourceConfig)
+	routesMap := make(map[string]*api.RoutesResponse)
+	statusMap := make(map[string]StoreStatus)
+	configMap := make(map[string]*SourceConfig)
 
 	for _, source := range config.Sources {
 		id := source.Id
@@ -234,11 +234,10 @@ func filterRoutesByPrefix(
 	prefix string,
 	state string,
 ) api.LookupRoutes {
-
 	results := api.LookupRoutes{}
 	for _, route := range routes {
 		// Naiive filtering:
-		if strings.HasPrefix(route.Network, prefix) {
+		if strings.HasPrefix(strings.ToLower(route.Network), prefix) {
 			lookup := routeToLookupRoute(source, state, route)
 			results = append(results, lookup)
 		}
@@ -266,7 +265,7 @@ func filterRoutesByNeighbourIds(
 
 // Single RS lookup by neighbour id
 func (self *RoutesStore) LookupNeighboursPrefixesAt(
-	sourceId int,
+	sourceId string,
 	neighbourIds []string,
 ) chan api.LookupRoutes {
 	response := make(chan api.LookupRoutes)
@@ -299,7 +298,7 @@ func (self *RoutesStore) LookupNeighboursPrefixesAt(
 
 // Single RS lookup
 func (self *RoutesStore) LookupPrefixAt(
-	sourceId int,
+	sourceId string,
 	prefix string,
 ) chan api.LookupRoutes {
 
@@ -334,6 +333,9 @@ func (self *RoutesStore) LookupPrefixAt(
 func (self *RoutesStore) LookupPrefix(prefix string) api.LookupRoutes {
 	result := api.LookupRoutes{}
 	responses := []chan api.LookupRoutes{}
+
+	// Normalize prefix to lower case
+	prefix = strings.ToLower(prefix)
 
 	// Dispatch
 	self.RLock()

@@ -37,7 +37,7 @@ func apiNeighborsList(_req *http.Request, params httprouter.Params) (api.Respons
 			Neighbours: neighbors,
 		}
 	} else {
-		source := AliceConfig.Sources[rsId].getInstance()
+		source := AliceConfig.SourceById(rsId).getInstance()
 		neighborsResponse, err = source.Neighbours()
 		if err != nil {
 			apiLogSourceError("neighbors", rsId, err)

@@ -31,6 +31,11 @@ import RoutesLoadingIndicator from './loading-indicator'
 
 import {filterableColumnsText} from './utils'
 
+import FiltersEditor from 'components/filters/editor'
+import {mergeFilters} from 'components/filters/state'
+
+import {makeLinkProps} from './urls'
+
 // Actions
 import {setFilterQueryValue}
   from './actions'
@@ -73,7 +78,7 @@ const RoutesViewEmpty = (props) => {
   if (!props.loadNotExported) {
     return null; // There may be routes matching the query in there!
   }
-  
+
   const hasContent = props.routes.received.totalResults > 0 ||
                      props.routes.filtered.totalResults > 0 ||
                      props.routes.notExported.totalResults > 0;
@@ -95,7 +100,7 @@ const RoutesViewEmpty = (props) => {
 class RoutesPage extends React.Component {
   constructor(props) {
     super(props);
-    
+
     // Create debounced dispatch, as we don't want to flood
     // the server with API queries
     this.debouncedDispatch = debounce(this.props.dispatch, 350);
@@ -115,7 +120,7 @@ class RoutesPage extends React.Component {
   componentDidMount() {
     // Assert neighbors for RS are loaded
     this.props.dispatch(
-      loadRouteserverProtocol(parseInt(this.props.params.routeserverId))
+      loadRouteserverProtocol(this.props.params.routeserverId)
     );
   }
 
@@ -125,7 +130,7 @@ class RoutesPage extends React.Component {
       cacheStatus = null;
     }
 
-    // We have to shift the layout a bit, to make room for 
+    // We have to shift the layout a bit, to make room for
     // the related peers tabs
     let pageClass = "routeservers-page";
     if (this.props.relatedPeers.length > 1) {
@@ -167,7 +172,7 @@ class RoutesPage extends React.Component {
 
             <QuickLinks routes={this.props.routes} />
 
-            <RoutesViewEmpty routes={this.props.routes} 
+            <RoutesViewEmpty routes={this.props.routes}
                              loadNotExported={this.props.loadNotExported} />
 
             <RoutesView
@@ -193,6 +198,10 @@ class RoutesPage extends React.Component {
               <Status routeserverId={this.props.params.routeserverId}
                       cacheStatus={cacheStatus} />
             </div>
+            <FiltersEditor makeLinkProps={makeLinkProps}
+                           linkProps={this.props.linkProps}
+                           filtersApplied={this.props.filtersApplied}
+                           filtersAvailable={this.props.filtersAvailable} />
           </div>
         </div>
       </div>
@@ -205,7 +214,7 @@ class RoutesPage extends React.Component {
 export default connect(
   (state, props) => {
     const protocolId = props.params.protocolId;
-    const rsId = parseInt(props.params.routeserverId, 10);
+    const rsId = props.params.routeserverId;
     const neighbors = state.routeservers.protocols[rsId];
     const neighbor = _.findWhere(neighbors, {id: protocolId});
 
@@ -216,24 +225,37 @@ export default connect(
                                          state: "up"});
     }
 
-    let received = {
+    const received = {
       loading:      state.routes.receivedLoading,
       totalResults: state.routes.receivedTotalResults,
       apiStatus:    state.routes.receivedApiStatus
     };
-    let filtered = {
+    const filtered = {
       loading:      state.routes.filteredLoading,
       totalResults: state.routes.filteredTotalResults,
       apiStatus:    state.routes.filteredApiStatus
     };
-    let notExported = {
+    const notExported = {
       loading:      state.routes.notExportedLoading,
       totalResults: state.routes.notExportedTotalResults,
       apiStatus:    state.routes.notExportedApiStatus
     };
-    let anyLoading = state.routes.receivedLoading ||
+    const anyLoading = state.routes.receivedLoading ||
                      state.routes.filteredLoading ||
                      state.routes.notExportedLoading;
+
+    const filtersApplied = mergeFilters(
+        state.routes.receivedFiltersApplied,
+        state.routes.filteredFiltersApplied,
+        state.routes.notExportedFiltersApplied
+    );
+
+    const filtersAvailable = mergeFilters(
+        state.routes.receivedFiltersAvailable,
+        state.routes.filteredFiltersAvailable,
+        state.routes.notExportedFiltersAvailable
+    );
+
     return({
       filterValue: state.routes.filterValue,
       routes: {
@@ -247,8 +269,26 @@ export default connect(
       routing: state.routing.locationBeforeTransitions,
       loadNotExported: state.routes.loadNotExported ||
                        !state.config.noexport_load_on_demand,
-       
+
       anyLoading: anyLoading,
+
+      filtersApplied: filtersApplied,
+      filtersAvailable: filtersAvailable,
+
+      linkProps: {
+        routing: state.routing.locationBeforeTransitions,
+
+        loadNotExported: state.routes.loadNotExported,
+
+        page:            0,
+        pageReceived:    0, // Reset pagination on filter change
+        pageFiltered:    0,
+        pageNotExported: 0,
+
+        query: state.routes.filterValue,
+
+        filtersApplied: filtersApplied,
+      },
 
       relatedPeers: relatedPeers
     });

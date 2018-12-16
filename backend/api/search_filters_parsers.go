@@ -36,6 +36,12 @@ func parseIntValue(value string) (*SearchFilter, error) {
 	}, nil
 }
 
+func parseStringValue(value string) (*SearchFilter, error) {
+	return &SearchFilter{
+		Value: value,
+	}, nil
+}
+
 func parseCommunityValue(value string) (*SearchFilter, error) {
 	components := strings.Split(value, ":")
 	community := make(Community, len(components))

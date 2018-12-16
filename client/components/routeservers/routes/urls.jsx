@@ -1,4 +1,6 @@
 
+import {filtersUrlEncode} from 'components/filters/encoding'
+
 export const makeLinkProps = function(props) {
   const linkPage = parseInt(props.page, 10);
 
@@ -23,10 +25,19 @@ export const makeLinkProps = function(props) {
       break;
   }
 
-  const query = props.routing.query.q || "";
+  let filtering = "";
+  if (props.filtersApplied) {
+    filtering = filtersUrlEncode(props.filtersApplied);
+  }
 
-  const search = `?ne=${ne}&pr=${pr}&pf=${pf}&pn=${pn}&q=${query}`;
-  const hash   = `#${props.anchor}`;
+  const query = props.routing.query.q || "";
+  const search = `?ne=${ne}&pr=${pr}&pf=${pf}&pn=${pn}&q=${query}${filtering}`;
+
+  let hash = null;
+  if (props.anchor) {
+    hash = `#${props.anchor}`;
+  }
+
   const linkTo = {
     pathname: props.routing.pathname,
     hash:     hash,

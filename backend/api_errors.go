@@ -24,7 +24,7 @@ const (
 	CONNECTION_TIMEOUT_CODE = 101
 )
 
-func apiErrorResponse(routeserverId int, err error) api.ErrorResponse {
+func apiErrorResponse(routeserverId string, err error) api.ErrorResponse {
 	code := GENERIC_ERROR_CODE
 	message := err.Error()
 	tag := GENERIC_ERROR_TAG

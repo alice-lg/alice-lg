@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"log"
 	"net/url"
 )
 
@@ -20,11 +21,89 @@ API Search
 * Handle filter criteria
 
 */
+type Filterable interface {
+	MatchSourceId(sourceId string) bool
+	MatchAsn(asn int) bool
+	MatchCommunity(community Community) bool
+	MatchExtCommunity(community ExtCommunity) bool
+	MatchLargeCommunity(community Community) bool
+}
+
+type FilterValue interface{}
+
 type SearchFilter struct {
 	Cardinality int         `json:"cardinality"`
 	Name        string      `json:"name"`
-	Value       interface{} `json:"value"`
+	Value       FilterValue `json:"value"`
 }
+
+type SearchFilterCmpFunc func(a FilterValue, b FilterValue) bool
+
+func searchFilterCmpInt(a FilterValue, b FilterValue) bool {
+	return a.(int) == b.(int)
+}
+
+func searchFilterCmpString(a FilterValue, b FilterValue) bool {
+	return a.(string) == b.(string)
+}
+
+func searchFilterCmpCommunity(a FilterValue, b FilterValue) bool {
+	ca := a.(Community)
+	cb := b.(Community)
+
+	if len(ca) != len(cb) {
+		return false
+	}
+
+	// Compare components
+	for i, _ := range ca {
+		if ca[i] != cb[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
+func searchFilterCmpExtCommunity(a FilterValue, b FilterValue) bool {
+	ca := a.(ExtCommunity)
+	cb := b.(ExtCommunity)
+
+	if len(ca) != len(cb) || len(ca) != 3 || len(cb) != 3 {
+		return false
+	}
+
+	return ca[0] == cb[0] && ca[1] == cb[1] && ca[2] == cb[2]
+}
+
+func (self *SearchFilter) Equal(other *SearchFilter) bool {
+	var cmp SearchFilterCmpFunc
+	switch other.Value.(type) {
+	case Community:
+		cmp = searchFilterCmpCommunity
+		break
+	case ExtCommunity:
+		cmp = searchFilterCmpExtCommunity
+		break
+	case int:
+		cmp = searchFilterCmpInt
+		break
+	case string:
+		cmp = searchFilterCmpString
+		break
+	}
+
+	if cmp == nil {
+		log.Println("Unknown search filter value type")
+		return false
+	}
+
+	return cmp(self.Value, other.Value)
+}
+
+/*
+ Search Filter Groups
+*/
 
 type SearchFilterGroup struct {
 	Key string `json:"key"`
@@ -33,50 +112,105 @@ type SearchFilterGroup struct {
 	filtersIdx map[string]int
 }
 
+func (self *SearchFilterGroup) FindFilter(filter *SearchFilter) *SearchFilter {
+	for _, f := range self.Filters {
+		if f.Equal(filter) == true {
+			return f
+		}
+	}
+	return nil
+}
+
+func (self *SearchFilterGroup) Contains(filter *SearchFilter) bool {
+	return self.FindFilter(filter) != nil
+}
+
+func (self *SearchFilterGroup) GetFilterByValue(value interface{}) *SearchFilter {
+	// I've tried it with .(fmt.Stringer), but int does not implement this...
+	// So whatever. I'm using the trick of letting Sprintf choose the right
+	// conversion. If this is too expensive, we need to refactor this.
+	// TODO: profile this.
+	idx, ok := self.filtersIdx[fmt.Sprintf("%v", value)]
+	if !ok {
+		return nil // We don't have this particular filter
+	}
+
+	return self.Filters[idx]
+}
+
+func (self *SearchFilterGroup) AddFilter(filter *SearchFilter) {
+	// Check if a filter with this value is present, if not:
+	// append and update index; otherwise incrementc cardinality
+	if presentFilter := self.GetFilterByValue(filter.Value); presentFilter != nil {
+		presentFilter.Cardinality++
+		return
+	}
+
+	// Insert filter
+	idx := len(self.Filters)
+	filter.Cardinality = 1
+	self.Filters = append(self.Filters, filter)
+	self.filtersIdx[fmt.Sprintf("%v", filter.Value)] = idx
+}
+
+func (self *SearchFilterGroup) AddFilters(filters []*SearchFilter) {
+	for _, filter := range filters {
+		self.AddFilter(filter)
+	}
+}
+
+func (self *SearchFilterGroup) rebuildIndex() {
+	self.filtersIdx = map[string]int{}
+
+	for i, filter := range self.Filters {
+		self.filtersIdx[fmt.Sprintf("%v", filter.Value)] = i
+	}
+}
+
 /*
  Search comparators
 */
-type SearchFilterComparator func(route *LookupRoute, value interface{}) bool
+type SearchFilterComparator func(route Filterable, value interface{}) bool
 
-func searchFilterMatchSource(route *LookupRoute, value interface{}) bool {
-	sourceId, ok := value.(int)
+func searchFilterMatchSource(route Filterable, value interface{}) bool {
+	sourceId, ok := value.(string)
 	if !ok {
 		return false
 	}
-	return route.Routeserver.Id == sourceId
+	return route.MatchSourceId(sourceId)
 }
 
-func searchFilterMatchAsn(route *LookupRoute, value interface{}) bool {
+func searchFilterMatchAsn(route Filterable, value interface{}) bool {
 	asn, ok := value.(int)
 	if !ok {
 		return false
 	}
 
-	return route.Neighbour.Asn == asn
+	return route.MatchAsn(asn)
 }
 
-func searchFilterMatchCommunity(route *LookupRoute, value interface{}) bool {
+func searchFilterMatchCommunity(route Filterable, value interface{}) bool {
 	community, ok := value.(Community)
 	if !ok {
 		return false
 	}
-	return route.Bgp.HasCommunity(community)
+	return route.MatchCommunity(community)
 }
 
-func searchFilterMatchExtCommunity(route *LookupRoute, value interface{}) bool {
+func searchFilterMatchExtCommunity(route Filterable, value interface{}) bool {
 	community, ok := value.(ExtCommunity)
 	if !ok {
 		return false
 	}
-	return route.Bgp.HasExtCommunity(community)
+	return route.MatchExtCommunity(community)
 }
 
-func searchFilterMatchLargeCommunity(route *LookupRoute, value interface{}) bool {
+func searchFilterMatchLargeCommunity(route Filterable, value interface{}) bool {
 	community, ok := value.(Community)
 	if !ok {
 		return false
 	}
-	return route.Bgp.HasLargeCommunity(community)
+	return route.MatchLargeCommunity(community)
 }
 
 func selectCmpFuncByKey(key string) SearchFilterComparator {
@@ -104,7 +238,7 @@ func selectCmpFuncByKey(key string) SearchFilterComparator {
 	return cmp
 }
 
-func (self *SearchFilterGroup) MatchAny(route *LookupRoute) bool {
+func (self *SearchFilterGroup) MatchAny(route Filterable) bool {
 	// Check if we have any filter to match
 	if len(self.Filters) == 0 {
 		return true // no filter, everything matches
@@ -126,7 +260,7 @@ func (self *SearchFilterGroup) MatchAny(route *LookupRoute) bool {
 	return false
 }
 
-func (self *SearchFilterGroup) MatchAll(route *LookupRoute) bool {
+func (self *SearchFilterGroup) MatchAll(route Filterable) bool {
 	// Check if we have any filter to match
 	if len(self.Filters) == 0 {
 		return true // no filter, everything matches. Like above.
@@ -202,46 +336,12 @@ func (self *SearchFilters) GetGroupByKey(key string) *SearchFilterGroup {
 	return nil
 }
 
-func (self *SearchFilterGroup) GetFilterByValue(value interface{}) *SearchFilter {
-	// I've tried it with .(fmt.Stringer), but int does not implement this...
-	// So whatever. I'm using the trick of letting Sprintf choose the right
-	// conversion. If this is too expensive, we need to refactor this.
-	// TODO: profile this.
-	idx, ok := self.filtersIdx[fmt.Sprintf("%v", value)]
-	if !ok {
-		return nil // We don't have this particular filter
-	}
-
-	return self.Filters[idx]
-}
-
-func (self *SearchFilterGroup) AddFilter(filter *SearchFilter) {
-	// Check if a filter with this value is present, if not:
-	// append and update index; otherwise incrementc cardinality
-	if presentFilter := self.GetFilterByValue(filter.Value); presentFilter != nil {
-		presentFilter.Cardinality++
-		return
-	}
-
-	// Insert filter
-	idx := len(self.Filters)
-	filter.Cardinality = 1
-	self.Filters = append(self.Filters, filter)
-	self.filtersIdx[fmt.Sprintf("%v", filter.Value)] = idx
-}
-
-func (self *SearchFilterGroup) AddFilters(filters []*SearchFilter) {
-	for _, filter := range filters {
-		self.AddFilter(filter)
-	}
-}
-
 /*
  Update filter struct to include route:
   - Extract ASN, source, bgp communites,
   - Find Filter in group, increment result count if required.
 */
-func (self *SearchFilters) UpdateFromRoute(route *LookupRoute) {
+func (self *SearchFilters) UpdateFromLookupRoute(route *LookupRoute) {
 	// Add source
 	self.GetGroupByKey(SEARCH_KEY_SOURCES).AddFilter(&SearchFilter{
 		Name:  route.Routeserver.Name,
@@ -256,21 +356,49 @@ func (self *SearchFilters) UpdateFromRoute(route *LookupRoute) {
 
 	// Add communities
 	communities := self.GetGroupByKey(SEARCH_KEY_COMMUNITIES)
-	for _, c := range route.Bgp.Communities {
+	for _, c := range route.Bgp.Communities.Unique() {
 		communities.AddFilter(&SearchFilter{
 			Name:  c.String(),
 			Value: c,
 		})
 	}
 	extCommunities := self.GetGroupByKey(SEARCH_KEY_EXT_COMMUNITIES)
-	for _, c := range route.Bgp.ExtCommunities {
+	for _, c := range route.Bgp.ExtCommunities.Unique() {
 		extCommunities.AddFilter(&SearchFilter{
 			Name:  c.String(),
 			Value: c,
 		})
 	}
 	largeCommunities := self.GetGroupByKey(SEARCH_KEY_LARGE_COMMUNITIES)
-	for _, c := range route.Bgp.LargeCommunities {
+	for _, c := range route.Bgp.LargeCommunities.Unique() {
+		largeCommunities.AddFilter(&SearchFilter{
+			Name:  c.String(),
+			Value: c,
+		})
+	}
+}
+
+// This is the same as above, but only the communities
+// are considered.
+func (self *SearchFilters) UpdateFromRoute(route *Route) {
+
+	// Add communities
+	communities := self.GetGroupByKey(SEARCH_KEY_COMMUNITIES)
+	for _, c := range route.Bgp.Communities.Unique() {
+		communities.AddFilter(&SearchFilter{
+			Name:  c.String(),
+			Value: c,
+		})
+	}
+	extCommunities := self.GetGroupByKey(SEARCH_KEY_EXT_COMMUNITIES)
+	for _, c := range route.Bgp.ExtCommunities.Unique() {
+		extCommunities.AddFilter(&SearchFilter{
+			Name:  c.String(),
+			Value: c,
+		})
+	}
+	largeCommunities := self.GetGroupByKey(SEARCH_KEY_LARGE_COMMUNITIES)
+	for _, c := range route.Bgp.LargeCommunities.Unique() {
 		largeCommunities.AddFilter(&SearchFilter{
 			Name:  c.String(),
 			Value: c,
@@ -297,7 +425,7 @@ func FiltersFromQuery(query url.Values) (*SearchFilters, error) {
 		value := query.Get(key)
 		switch key {
 		case SEARCH_KEY_SOURCES:
-			filters, err := parseQueryValueList(parseIntValue, value)
+			filters, err := parseQueryValueList(parseStringValue, value)
 			if err != nil {
 				return nil, err
 			}
@@ -345,7 +473,7 @@ func FiltersFromQuery(query url.Values) (*SearchFilters, error) {
  Match a route. Check if route matches all filters.
  Unless all filters are blank.
 */
-func (self *SearchFilters) MatchRoute(route *LookupRoute) bool {
+func (self *SearchFilters) MatchRoute(route Filterable) bool {
 	sources := self.GetGroupByKey(SEARCH_KEY_SOURCES)
 	if !sources.MatchAny(route) {
 		return false
@@ -372,4 +500,44 @@ func (self *SearchFilters) MatchRoute(route *LookupRoute) bool {
 	}
 
 	return true
+}
+
+func (self *SearchFilters) Sub(other *SearchFilters) *SearchFilters {
+	result := make(SearchFilters, len(*self))
+
+	for id, group := range *self {
+		otherGroup := (*other)[id]
+		diff := &SearchFilterGroup{
+			Key:     group.Key,
+			Filters: []*SearchFilter{},
+		}
+
+		// Combine filters
+		for _, f := range group.Filters {
+			if otherGroup.Contains(f) {
+				continue // Let's skip this
+			}
+			diff.Filters = append(diff.Filters, f)
+		}
+
+		diff.rebuildIndex()
+		result[id] = diff
+	}
+
+	return &result
+}
+
+func (self *SearchFilters) MergeProperties(other *SearchFilters) {
+	for id, group := range *self {
+		otherGroup := (*other)[id]
+		for _, filter := range group.Filters {
+			otherFilter := otherGroup.FindFilter(filter)
+			if otherFilter == nil {
+				// Filter not present on other side, ignore this.
+				continue
+			}
+			filter.Name = otherFilter.Name
+			filter.Cardinality = otherFilter.Cardinality
+		}
+	}
 }

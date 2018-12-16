@@ -5,7 +5,7 @@ import {
   FILTER_GROUP_COMMUNITIES,
   FILTER_GROUP_EXT_COMMUNITIES,
   FILTER_GROUP_LARGE_COMMUNITIES,
-} from './filter-groups'
+} from './groups'
 
 
 function _makeFilter(value) {
@@ -21,7 +21,7 @@ export function decodeFiltersSources(params) {
     return []; // No params available
   }
   const sources = params.sources.split(",");
-  return sources.map((sid) => _makeFilter(parseInt(sid, 10)));
+  return sources.map((sid) => _makeFilter(sid));
 }
 
 export function decodeFiltersAsns(params) {
