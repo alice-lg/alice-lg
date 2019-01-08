@@ -5,4 +5,5 @@ type Config struct {
 	Name 			string
 
 	Host            string `ini:"api"`
+	Insecure 		bool `ini:"insecure"`
 }
