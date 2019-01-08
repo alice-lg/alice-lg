@@ -1,0 +1,8 @@
+github.com/GeertJohan/go.rice v0.0.0-20181229193832-0af3f3b09a0a h1:QgnJzkfb29JXtLXJN8alxzPWZhiNcAYZOa06dU5O46w=
+github.com/GeertJohan/go.rice v0.0.0-20181229193832-0af3f3b09a0a/go.mod h1:DgrzXonpdQbfN3uYaGz1EG4Sbhyum/MMIn6Cphlh2bw=
+github.com/daaku/go.zipexe v0.0.0-20150329023125-a5fe2436ffcb h1:tUf55Po0vzOendQ7NWytcdK0VuzQmfAgvGBUOQvN0WA=
+github.com/daaku/go.zipexe v0.0.0-20150329023125-a5fe2436ffcb/go.mod h1:U0vRfAucUOohvdCxt5MWLF+TePIL0xbCkbKIiV8TQCE=
+github.com/go-ini/ini v1.41.0 h1:526aoxDtxRHFQKMZfcX2OG9oOI8TJ5yPLM0Mkno/uTY=
+github.com/go-ini/ini v1.41.0/go.mod h1:ByCAeIL28uOIIG0E3PJtZPDL8WnHpFKFOtgjp+3Ies8=
+github.com/julienschmidt/httprouter v1.2.0 h1:TDTW5Yz1mjftljbcKqRcrYhd4XeOoI98t+9HbQbYf7g=
+github.com/julienschmidt/httprouter v1.2.0/go.mod h1:SYymIcj16QtmaHHD7aYtjjsJG7VTCxuUUipMqKk8s4w=
