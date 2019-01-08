@@ -5,4 +5,6 @@ require (
 	github.com/daaku/go.zipexe v0.0.0-20150329023125-a5fe2436ffcb // indirect
 	github.com/go-ini/ini v1.41.0
 	github.com/julienschmidt/httprouter v1.2.0
+	github.com/osrg/gobgp v2.0.0+incompatible
+	google.golang.org/grpc v1.17.0
 )
