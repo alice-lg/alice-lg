@@ -8,12 +8,14 @@ import (
 
 	"github.com/alice-lg/alice-lg/backend/sources"
 	"github.com/alice-lg/alice-lg/backend/sources/birdwatcher"
+	"github.com/alice-lg/alice-lg/backend/sources/gobgp"
 
 	"github.com/go-ini/ini"
 )
 
 const SOURCE_UNKNOWN = 0
 const SOURCE_BIRDWATCHER = 1
+const SOURCE_GOBGP = 2
 
 type ServerConfig struct {
 	Listen                         string `ini:"listen_http"`
@@ -90,6 +92,7 @@ type SourceConfig struct {
 	// Source configurations
 	Type        int
 	Birdwatcher birdwatcher.Config
+	GoBGP 		gobgp.Config
 
 	// Source instance
 	instance sources.Source
@@ -133,6 +136,8 @@ func getBackendType(section *ini.Section) int {
 	name := section.Name()
 	if strings.HasSuffix(name, "birdwatcher") {
 		return SOURCE_BIRDWATCHER
+	} else if strings.HasSuffix(name, "gobgp") {
+		return SOURCE_GOBGP
 	}
 
 	return SOURCE_UNKNOWN
@@ -671,6 +676,8 @@ func (self *SourceConfig) getInstance() sources.Source {
 	switch self.Type {
 	case SOURCE_BIRDWATCHER:
 		instance = birdwatcher.NewBirdwatcher(self.Birdwatcher)
+	case SOURCE_GOBGP:
+		instance = gobgp.NewGoBGP(self.GoBGP)
 	}
 
 	self.instance = instance
