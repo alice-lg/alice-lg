@@ -8,6 +8,9 @@ import (
 
 	"log"
 	"fmt"
+	"context"
+	"time"
+	"io"
 	_ "sort"
 )
 
@@ -29,8 +32,6 @@ func NewGoBGP(config Config) *GoBGP {
 
 	dialOpts := make([]grpc.DialOption,0)
 
-	log.Printf("%+v\n", config)
-
 	if config.Insecure {
 		dialOpts  = append(dialOpts,grpc.WithInsecure())
 	} else {
@@ -41,11 +42,8 @@ func NewGoBGP(config Config) *GoBGP {
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
-	defer conn.Close()
 
 	client := api.NewGobgpApiClient(conn)
-
-	
 
 
 	// Cache settings:
@@ -80,12 +78,75 @@ func NewGoBGP(config Config) *GoBGP {
 }
 
 func (gobgp *GoBGP) Status() (*aliceapi.StatusResponse, error) {
-	return nil,fmt.Errorf("Not implemented")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+
+	resp, err := gobgp.client.GetBgp(ctx, &api.GetBgpRequest{})
+	if err != nil {
+		return nil, err
+	}
+
+	response := aliceapi.StatusResponse{}
+	response.Status.RouterId = resp.Global.RouterId
+	response.Status.Backend = "gobgp"
+	return &response,nil
 }
 
 // Get bird BGP protocols
 func (gobgp *GoBGP) Neighbours() (*aliceapi.NeighboursResponse, error) {
-	return nil,fmt.Errorf("Not implemented")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	response := aliceapi.NeighboursResponse{}
+	response.Neighbours = make(aliceapi.Neighbours,0)
+
+	resp, err := gobgp.client.ListPeer(ctx, &api.ListPeerRequest{})
+	if err != nil {
+		return nil, err
+	}
+	for {
+	    _resp, err := resp.Recv()
+	    if err == io.EOF {
+	        break
+	    }
+
+	    neigh := aliceapi.Neighbour{}
+	    neigh.Address = _resp.Peer.State.NeighborAddress
+	    neigh.Asn = int(_resp.Peer.State.PeerAs)
+	    neigh.State = _resp.Peer.State.SessionState.String()
+	    neigh.Description = _resp.Peer.State.Description
+	    //neigh.LastError = _resp.Peer.State.Messages.String()
+
+	    response.Neighbours = append(response.Neighbours, &neigh)
+	    log.Printf("%+v\n", neigh)
+	}
+
+	log.Printf("%+v\n", response)
+
+/*	*/
+
+/*type Neighbour struct {
+	Id string `json:"id"`
+
+	// Mandatory fields
+	Address         string        `json:"address"`
+	Asn             int           `json:"asn"`
+	State           string        `json:"state"`
+	Description     string        `json:"description"`
+	RoutesReceived  int           `json:"routes_received"`
+	RoutesFiltered  int           `json:"routes_filtered"`
+	RoutesExported  int           `json:"routes_exported"`
+	RoutesPreferred int           `json:"routes_preferred"`
+	RoutesAccepted  int           `json:"routes_accepted"`
+	Uptime          time.Duration `json:"uptime"`
+	LastError       string        `json:"last_error"`
+
+	// Original response
+	Details map[string]interface{} `json:"details"`
+}
+*/
+	return &response, nil
 }
 
 // Get neighbors from neighbors summary
