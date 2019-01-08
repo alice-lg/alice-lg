@@ -21,12 +21,16 @@ endif
 
 
 LDFLAGS=-ldflags="-X main.version=$(APP_VERSION)"
+FILES=$(shell find . -depth 1 ! -name "*_test.go" -name "*.go")
 
 all: $(TARGET)
 	@echo "Built $(VERSION) @ $(TARGET)"
 
 deps:
 	go get -v .
+
+osx-dev: deps
+	go run $(FILES)
 
 osx: deps
 	GOARCH=$(ARCH) GOOS=darwin go build $(LDFLAGS) -o $(PROG)-osx-$(ARCH)
