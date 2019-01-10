@@ -173,26 +173,26 @@ RoutesNotExported() API.
 A route deduplication is applied.
 */
 
-func (gobgp *GoBGP) RoutesRequired(neighborId string,) (*aliceapi.RoutesResponse, error) {
+func (gobgp *GoBGP) RoutesRequired(neighbourId string,) (*aliceapi.RoutesResponse, error) {
 	return nil,fmt.Errorf("Not implemented RoutesRequired")
 }
 
 
 // Get all received routes
-func (gobgp *GoBGP) RoutesReceived(neighborId string,) (*aliceapi.RoutesResponse, error) {
-	return gobgp.GetRoutes(neighborId),nil
+func (gobgp *GoBGP) RoutesReceived(neighbourId string,) (*aliceapi.RoutesResponse, error) {
+	return gobgp.GetRoutes(neighbourId),nil
 }
 
 
 // Get all filtered routes
-func (gobgp *GoBGP) RoutesFiltered(neighborId string,) (*aliceapi.RoutesResponse, error) {
+func (gobgp *GoBGP) RoutesFiltered(neighbourId string,) (*aliceapi.RoutesResponse, error) {
 	rr := aliceapi.RoutesResponse{}
 	return &rr,nil
 	//return rr,fmt.Errorf("Not implemented RoutesFiltered")
 }
 
 // Get all not exported routes
-func (gobgp *GoBGP) RoutesNotExported(neighborId string,) (*aliceapi.RoutesResponse, error) {
+func (gobgp *GoBGP) RoutesNotExported(neighbourId string,) (*aliceapi.RoutesResponse, error) {
 	return nil,fmt.Errorf("Not implemented RoutesNotExported")
 }
 
