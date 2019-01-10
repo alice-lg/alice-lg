@@ -77,6 +77,9 @@ func (gobgp *GoBGP) GetRoutes(neighborId string) (*aliceapi.RoutesResponse) {
 				    	r.Primary = path.Best
 
 				    	attrs, _ := apiutil.GetNativePathAttributes(path)
+
+				    	r.Bgp.LargeCommunities = make(aliceapi.Communities,0)
+				    	r.Bgp.ExtCommunities = make(aliceapi.ExtCommunities,0)
 				    	for _, attr := range attrs {
 				    		switch attr.(type) {
 				    			case *bgp.PathAttributeMultiExitDisc:
@@ -112,7 +115,17 @@ func (gobgp *GoBGP) GetRoutes(neighborId string) (*aliceapi.RoutesResponse) {
 										_community := aliceapi.Community{int((0xffff0000&community)>>16),int(0xffff&community)}
 										r.Bgp.Communities = append(r.Bgp.Communities, _community)
 									}
-				    				
+
+								case *bgp.PathAttributeExtendedCommunities:
+									communities := attr.(*bgp.PathAttributeExtendedCommunities)
+									for _, community := range communities.Value {
+										log.Printf("%+s\n", community)	
+									}
+								case *bgp.PathAttributeLargeCommunities:
+									communities := attr.(*bgp.PathAttributeLargeCommunities) 
+									for _, community := range communities.Values {
+										log.Printf("%+s\n", community)
+									}
 				    		}
 				    	}
 
