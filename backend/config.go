@@ -602,6 +602,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 			}
 			backendConfig.MapTo(&c)
 			config.Birdwatcher = c
+			
 		case SOURCE_GOBGP:
 			c := gobgp.Config{
 				Id: config.Id,

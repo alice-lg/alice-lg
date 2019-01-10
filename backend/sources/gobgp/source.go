@@ -4,6 +4,7 @@ import (
 	aliceapi "github.com/alice-lg/alice-lg/backend/api"
 	"github.com/alice-lg/alice-lg/backend/caches"
 	api "github.com/osrg/gobgp/api"
+
 	"google.golang.org/grpc"
 
 	"log"
@@ -101,7 +102,7 @@ func (gobgp *GoBGP) Neighbours() (*aliceapi.NeighboursResponse, error) {
 	response := aliceapi.NeighboursResponse{}
 	response.Neighbours = make(aliceapi.Neighbours,0)
 
-	resp, err := gobgp.client.ListPeer(ctx, &api.ListPeerRequest{})
+	resp, err := gobgp.client.ListPeer(ctx, &api.ListPeerRequest{EnableAdvertised: true})
 	if err != nil {
 		return nil, err
 	}
@@ -112,56 +113,51 @@ func (gobgp *GoBGP) Neighbours() (*aliceapi.NeighboursResponse, error) {
 	    }
 
 	    neigh := aliceapi.Neighbour{}
+
 	    neigh.Address = _resp.Peer.State.NeighborAddress
 	    neigh.Asn = int(_resp.Peer.State.PeerAs)
-	    neigh.State = _resp.Peer.State.SessionState.String()
-	    neigh.Description = _resp.Peer.State.Description
-	    //neigh.LastError = _resp.Peer.State.Messages.String()
+	    switch _resp.Peer.State.SessionState {
+	    case api.PeerState_ESTABLISHED:
+	    	neigh.State = "up"
+	    default:
+	    	neigh.State = "down"
+	    }
+	    neigh.Description = _resp.Peer.Conf.Description
+	    
+	    neigh.Id = fmt.Sprintf("%d_%s",neigh.Asn, neigh.Address)
+
 
 	    response.Neighbours = append(response.Neighbours, &neigh)
-	    log.Printf("%+v\n", neigh)
+	    for _, afiSafi := range _resp.Peer.AfiSafis {
+	    	neigh.RoutesReceived += int(afiSafi.State.Received)
+	    	neigh.RoutesExported += int(afiSafi.State.Advertised)
+	    	neigh.RoutesAccepted += int(afiSafi.State.Accepted)
+	    	neigh.RoutesFiltered += (neigh.RoutesReceived-neigh.RoutesAccepted)
+	    }
+
+
+		if _resp.Peer.Timers.State.Uptime != nil {
+			neigh.Uptime = time.Now().Sub(time.Unix(_resp.Peer.Timers.State.Uptime.Seconds,int64(_resp.Peer.Timers.State.Uptime.Nanos)))
+		}
+
 	}
 
-	log.Printf("%+v\n", response)
-
-/*	*/
-
-/*type Neighbour struct {
-	Id string `json:"id"`
-
-	// Mandatory fields
-	Address         string        `json:"address"`
-	Asn             int           `json:"asn"`
-	State           string        `json:"state"`
-	Description     string        `json:"description"`
-	RoutesReceived  int           `json:"routes_received"`
-	RoutesFiltered  int           `json:"routes_filtered"`
-	RoutesExported  int           `json:"routes_exported"`
-	RoutesPreferred int           `json:"routes_preferred"`
-	RoutesAccepted  int           `json:"routes_accepted"`
-	Uptime          time.Duration `json:"uptime"`
-	LastError       string        `json:"last_error"`
-
-	// Original response
-	Details map[string]interface{} `json:"details"`
-}
-*/
 	return &response, nil
 }
 
 // Get neighbors from neighbors summary
 func (gobgp *GoBGP) summaryNeighbors() (*aliceapi.NeighboursResponse, error) {
-	return nil,fmt.Errorf("Not implemented")
+	return nil,fmt.Errorf("Not implemented summaryNeighbors")
 }
 
 // Get neighbors from protocols
 func (gobgp *GoBGP) bgpProtocolsNeighbors() (*aliceapi.NeighboursResponse, error) {
-	return nil,fmt.Errorf("Not implemented")
+	return nil,fmt.Errorf("Not implemented protocols")
 }
 
 // Get filtered and exported routes
 func (gobgp *GoBGP) Routes(neighbourId string) (*aliceapi.RoutesResponse, error) {
-	return nil,fmt.Errorf("Not implemented")
+	return gobgp.GetRoutes(neighbourId),nil
 }
 
 /*
@@ -178,32 +174,34 @@ A route deduplication is applied.
 */
 
 func (gobgp *GoBGP) RoutesRequired(neighborId string,) (*aliceapi.RoutesResponse, error) {
-	return nil,fmt.Errorf("Not implemented")
+	return nil,fmt.Errorf("Not implemented RoutesRequired")
 }
 
 
 // Get all received routes
 func (gobgp *GoBGP) RoutesReceived(neighborId string,) (*aliceapi.RoutesResponse, error) {
-	return nil,fmt.Errorf("Not implemented")
+	return gobgp.GetRoutes(neighborId),nil
 }
 
 
 // Get all filtered routes
 func (gobgp *GoBGP) RoutesFiltered(neighborId string,) (*aliceapi.RoutesResponse, error) {
-	return nil,fmt.Errorf("Not implemented")
+	rr := aliceapi.RoutesResponse{}
+	return &rr,nil
+	//return rr,fmt.Errorf("Not implemented RoutesFiltered")
 }
 
 // Get all not exported routes
 func (gobgp *GoBGP) RoutesNotExported(neighborId string,) (*aliceapi.RoutesResponse, error) {
-	return nil,fmt.Errorf("Not implemented")
+	return nil,fmt.Errorf("Not implemented RoutesNotExported")
 }
 
 // Make routes lookup
 func (gobgp *GoBGP) LookupPrefix(prefix string) (*aliceapi.RoutesLookupResponse, error) {
-	return nil,fmt.Errorf("Not implemented")
+	return nil,fmt.Errorf("Not implemented LookupPrefix")
 }
 
 func (gobgp *GoBGP) AllRoutes() (*aliceapi.RoutesResponse, error) {
-	return nil,fmt.Errorf("Not implemented")
+	return gobgp.GetRoutes(""),nil
 }
 
