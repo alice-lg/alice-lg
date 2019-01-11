@@ -20,7 +20,12 @@ func apiStatus(_req *http.Request, params httprouter.Params) (api.Response, erro
 	if err != nil {
 		return nil, err
 	}
-	source := AliceConfig.SourceById(rsId).getInstance()
+
+	source := AliceConfig.SourceInstanceById(rsId)
+	if source == nil {
+		return nil, SOURCE_NOT_FOUND_ERROR
+	}
+
 	result, err := source.Status()
 	if err != nil {
 		apiLogSourceError("status", rsId, err)
