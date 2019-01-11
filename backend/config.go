@@ -112,6 +112,17 @@ func (self *Config) SourceById(sourceId string) *SourceConfig {
 	return nil
 }
 
+// Get instance by id
+func (self *Config) SourceInstanceById(sourceId string) sources.Source {
+	sourceConfig := self.SourceById(sourceId)
+	if sourceConfig == nil {
+		return nil // Nothing to do here.
+	}
+
+	// Get instance from config
+	return sourceConfig.getInstance()
+}
+
 // Get sources keys form ini
 func getSourcesKeys(config *ini.File) []string {
 	sources := []string{}
