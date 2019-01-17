@@ -3,7 +3,7 @@ __"No, no! The adventures first, explanations take such a dreadful time."__
 _Lewis Carroll, Alice's Adventures in Wonderland & Through the Looking-Glass_
 
 Take a look at an Alice-LG production examples at:
-- https://lg-beta.de-cix.net/
+- https://lg.de-cix.net/
 - https://lg.ecix.net/
 
 And checkout the API at:
@@ -23,7 +23,7 @@ Currently Alice-LG supports the following APIs:
 Normally you would first install the [birdwatcher API](https://github.com/ecix/birdwatcher) directly on the machine(s) where you run [BIRD](http://bird.network.cz/) on
 and then install Alice-LG on a seperate public facing server and point her to the afore mentioned [birdwatcher API](https://github.com/ecix/birdwatcher).
 
-This project was a direct result of the [RIPE IXP Tools Hackathon](https://atlas.ripe.net/hackathon/ixp-tools/) 
+This project was a direct result of the [RIPE IXP Tools Hackathon](https://atlas.ripe.net/hackathon/ixp-tools/)
 just prior to [RIPE73](https://ripe73.ripe.net/) in Madrid, Spain.
 
 Major thanks to Barry O'Donovan who built the original [INEX Bird's Eye](https://github.com/inex/birdseye) BIRD API of which Alice-LG is a spinnoff
@@ -63,17 +63,17 @@ Your Alice-LG source will now be located at `~/go/src/github.com/alice-lg/alice-
 
 ## Configuration
 
-An example configuration can be found at 
-[etc/alicelg/alice.example.conf](https://github.com/ecix/alice-lg/blob/readme_update/etc/alicelg/alice.example.conf).
+An example configuration can be found at
+[etc/alice-lg/alice.example.conf](https://github.com/alice-lg/alice-lg/blob/readme_update/etc/alice-lg/alice.example.conf).
 
 You can copy it to any of the following locations:
 
-    etc/alicelg/alice.conf        # local
-    etc/alicelg/alice.local.conf  # local
-    /etc/alicelg/alice.conf       # global
+    etc/alice-lg/alice.conf        # local
+    etc/alice-lg/alice.local.conf  # local
+    /etc/alice-lg/alice.conf       # global
 
 
-You will have to edit the configuration file as you need to point Alice-LG to the correct [APIs](https://github.com/ecix/birdwatcher):
+You will have to edit the configuration file as you need to point Alice-LG to the correct [APIs](https://github.com/alice-lg/birdwatcher):
 
 ```ini
 [source.0]
@@ -127,15 +127,15 @@ In your alice.conf, you now can specify a theme by setting:
 
 with the optional parameter (the "mountpoint" of the theme)
     url_base = /theme
-    
 
-You can put assets (images, fonts, javscript, css) in 
+
+You can put assets (images, fonts, javscript, css) in
 this folder.
 
 Stylesheets and Javascripts are automatically included in
 the client's html and are served from the backend.
 
-Alice provides early stages of an extension API, which is for now 
+Alice provides early stages of an extension API, which is for now
 only used to modify the content of the welcome screen,
 by providing a javascript in your theme containing:
 
@@ -146,7 +146,7 @@ Alice.updateContent({
         tagline: "powered by Alice"
     }
 });
-    
+
 ```
 
 For an example check out: https://github.com/alice-lg/alice-theme-example
@@ -154,7 +154,7 @@ For an example check out: https://github.com/alice-lg/alice-theme-example
 ## Hacking
 
 The client is a Single Page React Application.
-All sources are available in `client/`. 
+All sources are available in `client/`.
 
 Install build tools as needed:
 

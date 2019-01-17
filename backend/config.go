@@ -621,9 +621,9 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 // Try to load configfiles as specified in the files
 // list. For example:
 //
-//    ./etc/alicelg/alice.conf
-//    /etc/alicelg/alice.conf
-//    ./etc/alicelg/alice.local.conf
+//    ./etc/alice-lg/alice.conf
+//    /etc/alice-lg/alice.conf
+//    ./etc/alice-lg/alice.local.conf
 //
 func loadConfig(file string) (*Config, error) {
 
