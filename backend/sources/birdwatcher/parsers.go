@@ -158,6 +158,16 @@ func parseNeighbours(bird ClientResponse, config Config) (api.Neighbours, error)
 		uptime := parseRelativeServerTime(protocol["state_changed"], config)
 		lastError := mustString(protocol["last_error"], "")
 
+		routesReceived := float64(0)
+		if routes != nil {
+			if _, ok := routes["imported"]; ok {
+				routesReceived = routesReceived + routes["imported"].(float64)
+			}
+			if _, ok := routes["filtered"]; ok {
+				routesReceived = routesReceived + routes["filtered"].(float64)
+			}
+		}
+
 		neighbour := &api.Neighbour{
 			Id: protocolId,
 
@@ -166,11 +176,11 @@ func parseNeighbours(bird ClientResponse, config Config) (api.Neighbours, error)
 			State:       mustString(protocol["state"], "unknown"),
 			Description: mustString(protocol["description"], "no description"),
 			//TODO make these changes configurable
-			RoutesReceived:  mustInt(routes["imported"], 0),
-			RoutesExported:  mustInt(routes["exported"], 0), //TODO protocol_exported?
-			RoutesFiltered:  mustInt(routes["filtered"], 0),
-			RoutesPreferred: mustInt(routes["preferred"], 0),
-			RoutesAccepted:  mustInt(routes["pipe_imported"], mustInt(routes["imported"], 0)),
+			RoutesReceived:     mustInt(routesReceived, 0),
+			RoutesAccepted:     mustInt(routes["imported"], 0),
+			RoutesFiltered:     mustInt(routes["filtered"], 0),
+			RoutesExported:     mustInt(routes["exported"], 0), //TODO protocol_exported?
+			RoutesPreferred:    mustInt(routes["preferred"], 0),
 
 			Uptime:    uptime,
 			LastError: lastError,
@@ -184,42 +194,6 @@ func parseNeighbours(bird ClientResponse, config Config) (api.Neighbours, error)
 	sort.Sort(neighbours)
 
 	return neighbours, nil
-}
-
-// Get neighbors from summary endpoint
-func parseNeighborSummary(
-	bird ClientResponse, config Config,
-) (api.Neighbours, error) {
-	birdNeighbors := bird["neighbors"].([]interface{})
-
-	neighbors := make(api.Neighbours, 0, len(birdNeighbors))
-
-	for _, b := range birdNeighbors {
-		n := b.(map[string]interface{})
-
-		uptime := parseRelativeServerTime(n["state_changed"], config)
-
-		// Parse neighbor from response
-		neighbor := &api.Neighbour{
-			Id:             mustString(n["id"], "unknown"),
-			Address:        mustString(n["neighbor"], "unknown"),
-			Asn:            mustInt(n["asn"], 0),
-			State:          mustString(n["state"], "unknown"),
-			Uptime:         uptime,
-			Description:    mustString(n["description"], "unknown"),
-			LastError:      mustString(n["last_error"], ""),
-			RoutesReceived: mustInt(n["routes_received"], -1),
-			RoutesAccepted: mustInt(n["routes_accepted"], -1),
-			RoutesFiltered: mustInt(n["routes_filtered"], -1),
-			RoutesExported: mustInt(n["routes_exported"], -1),
-		}
-
-		neighbors = append(neighbors, neighbor)
-	}
-
-	sort.Sort(neighbors)
-
-	return neighbors, nil
 }
 
 // Parse route bgp info

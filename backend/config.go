@@ -605,6 +605,8 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 				ServerTime:      "2006-01-02T15:04:05.999999999Z07:00",
 				ServerTimeShort: "2006-01-02",
 				ServerTimeExt:   "Mon, 02 Jan 2006 15:04:05 -0700",
+
+				Type:               backendConfig.Key("type").MustString("No type specified"),
 			}
 			backendConfig.MapTo(&c)
 			config.Birdwatcher = c
