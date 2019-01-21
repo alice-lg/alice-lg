@@ -10,7 +10,7 @@ ARCH=amd64
 
 SYSTEM_INIT=systemd
 
-# == END BUILD CONFIGURATION == 
+# == END BUILD CONFIGURATION ==
 
 VERSION=$(shell cat ./VERSION)
 
@@ -42,16 +42,16 @@ backend_dev: client_dev
 backend_prod: client_prod
 	$(MAKE) -C backend/ bundle
 	$(MAKE) -C backend/ linux
-	
+
 
 alice: client_prod backend_prod
 	mv backend/alice-lg-* bin/
 
 
-dist: clean alice 
+dist: clean alice
 
-	mkdir -p $(DIST)opt/ecix/alicelg/bin
-	mkdir -p $(DIST)etc/alicelg
+	mkdir -p $(DIST)opt/alice-lg/alice-lg/bin
+	mkdir -p $(DIST)etc/alice-lg
 
 	# Adding post install script
 	cp install/scripts/after_install $(DIST)/.
@@ -67,10 +67,10 @@ else
 endif
 
 	# Copy example configuration
-	cp etc/alicelg/alice.example.conf $(DIST)/etc/alicelg/alice.example.conf
+	cp etc/alice-lg/alice.example.conf $(DIST)/etc/alice-lg/alice.example.conf
 
 	# Copy application
-	cp bin/$(PROG)-linux-$(ARCH) DIST/opt/ecix/alicelg/bin/.
+	cp bin/$(PROG)-linux-$(ARCH) DIST/opt/ecix/alice-lg/bin/.
 
 
 rpm: dist
@@ -81,7 +81,7 @@ rpm: dist
 	# Create RPM from dist
 	fpm -s dir -t rpm -n $(PROG) -v $(VERSION) -C $(DIST) \
 		--architecture $(ARCH) \
-		--config-files /etc/alicelg/alice.example.conf \
+		--config-files /etc/alice-lg/alice.example.conf \
 		--after-install $(DIST)/after_install \
 		opt/ etc/
 
@@ -102,7 +102,7 @@ remote_rpm: build_server dist
 	scp -r $(DIST) $(BUILD_SERVER):$(REMOTE_DIST)
 	ssh $(BUILD_SERVER) -- fpm -s dir -t rpm -n $(PROG) -v $(VERSION) -C $(REMOTE_DIST) \
 		--architecture $(ARCH) \
-		--config-files /etc/alicelg/alice.example.conf \
+		--config-files /etc/alice-lg/alice.example.conf \
 		--after-install $(REMOTE_DIST)/after_install \
 		opt/ etc/
 

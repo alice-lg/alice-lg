@@ -28,9 +28,8 @@ DIST/
 
 var/
 
-etc/alicelg/alice.conf
+etc/alice-lg/alice.conf
 
 .DS_Store
 
 *coverage*
-

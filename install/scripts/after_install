@@ -5,12 +5,11 @@
 # Create the required user and set permissions
 #
 
-SERVICE=alicelg
+SERVICE=alice-lg
 
 echo "[i] Post install $SERVICE"
 echo "[i] Creating user and updating permissions"
-useradd --system -d /opt/ecix/$SERVICE $SERVICE
+useradd --system -d /opt/alice-lg/$SERVICE $SERVICE
 
 echo "[i] Fixing permissions"
-chown -R $SERVICE:$SERVICE /opt/ecix/$SERVICE
-
+chown -R $SERVICE:$SERVICE /opt/alice-lg/$SERVICE
