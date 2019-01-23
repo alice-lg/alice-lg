@@ -64,7 +64,7 @@ Your Alice-LG source will now be located at `~/go/src/github.com/alice-lg/alice-
 ## Configuration
 
 An example configuration can be found at
-[etc/alice-lg/alice.example.conf](https://github.com/alice-lg/alice-lg/blob/readme_update/etc/alice-lg/alice.example.conf).
+[etc/alice-lg/alice.conf.example](https://github.com/alice-lg/alice-lg/blob/readme_update/etc/alice-lg/alice.conf.example).
 
 You can copy it to any of the following locations:
 

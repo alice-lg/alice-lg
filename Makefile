@@ -67,10 +67,10 @@ else
 endif
 
 	# Copy example configuration
-	cp etc/alice-lg/alice.example.conf $(DIST)/etc/alice-lg/alice.example.conf
+	cp etc/alice-lg/alice.conf.example $(DIST)/etc/alice-lg/alice.conf.example
 
 	# Copy application
-	cp bin/$(PROG)-linux-$(ARCH) DIST/opt/ecix/alice-lg/bin/.
+	cp bin/$(PROG)-linux-$(ARCH) DIST/opt/alice-lg/alice-lg/bin/.
 
 
 rpm: dist
@@ -81,7 +81,7 @@ rpm: dist
 	# Create RPM from dist
 	fpm -s dir -t rpm -n $(PROG) -v $(VERSION) -C $(DIST) \
 		--architecture $(ARCH) \
-		--config-files /etc/alice-lg/alice.example.conf \
+		--config-files /etc/alice-lg/alice.conf.example \
 		--after-install $(DIST)/after_install \
 		opt/ etc/
 
@@ -102,7 +102,7 @@ remote_rpm: build_server dist
 	scp -r $(DIST) $(BUILD_SERVER):$(REMOTE_DIST)
 	ssh $(BUILD_SERVER) -- fpm -s dir -t rpm -n $(PROG) -v $(VERSION) -C $(REMOTE_DIST) \
 		--architecture $(ARCH) \
-		--config-files /etc/alice-lg/alice.example.conf \
+		--config-files /etc/alice-lg/alice.conf.example \
 		--after-install $(REMOTE_DIST)/after_install \
 		opt/ etc/
 

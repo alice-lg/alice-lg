@@ -9,7 +9,7 @@ import (
 
 func TestLoadConfigs(t *testing.T) {
 
-	config, err := loadConfig("../etc/alice-lg/alice.example.conf")
+	config, err := loadConfig("../etc/alice-lg/alice.conf.example")
 	if err != nil {
 		t.Error("Could not load test config:", err)
 	}
@@ -39,7 +39,7 @@ func TestLoadConfigs(t *testing.T) {
 
 func TestSourceConfigDefaultsOverride(t *testing.T) {
 
-	config, err := loadConfig("../etc/alice-lg/alice.example.conf")
+	config, err := loadConfig("../etc/alice-lg/alice.conf.example")
 	if err != nil {
 		t.Error("Could not load test config:", err)
 	}
@@ -55,7 +55,7 @@ func TestSourceConfigDefaultsOverride(t *testing.T) {
 	if rs1.Birdwatcher.ServerTime == rs2.Birdwatcher.ServerTime {
 		t.Error("Server times should be different between",
 			"source 1 and 2 in example configuration",
-			"(alice.example.conf)")
+			"(alice.conf.example)")
 	}
 
 	// Check presence of timezone, default: UTC (rs1)
@@ -70,7 +70,7 @@ func TestSourceConfigDefaultsOverride(t *testing.T) {
 }
 
 func TestRejectAndNoexportReasons(t *testing.T) {
-	config, err := loadConfig("../etc/alice-lg/alice.example.conf")
+	config, err := loadConfig("../etc/alice-lg/alice.conf.example")
 	if err != nil {
 		t.Error("Could not load test config:", err)
 	}
@@ -97,7 +97,7 @@ func TestRejectAndNoexportReasons(t *testing.T) {
 }
 
 func TestBlackholeParsing(t *testing.T) {
-	config, err := loadConfig("../etc/alice-lg/alice.example.conf")
+	config, err := loadConfig("../etc/alice-lg/alice.conf.example")
 	if err != nil {
 		t.Error("Could not load test config:", err)
 	}
@@ -116,7 +116,7 @@ func TestBlackholeParsing(t *testing.T) {
 }
 
 func TestOwnASN(t *testing.T) {
-	config, err := loadConfig("../etc/alice-lg/alice.example.conf")
+	config, err := loadConfig("../etc/alice-lg/alice.conf.example")
 	if err != nil {
 		t.Error("Could not load test config:", err)
 	}
@@ -127,7 +127,7 @@ func TestOwnASN(t *testing.T) {
 }
 
 func TestRpkiConfig(t *testing.T) {
-	config, err := loadConfig("../etc/alice-lg/alice.example.conf")
+	config, err := loadConfig("../etc/alice-lg/alice.conf.example")
 	if err != nil {
 		t.Error("Could not load test config:", err)
 	}
@@ -157,7 +157,7 @@ func TestRpkiConfig(t *testing.T) {
 }
 
 func TestRejectCandidatesConfig(t *testing.T) {
-	config, err := loadConfig("../etc/alice-lg/alice.example.conf")
+	config, err := loadConfig("../etc/alice-lg/alice.conf.example")
 	if err != nil {
 		t.Error("Could not load test config:", err)
 		return
