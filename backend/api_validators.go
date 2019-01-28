@@ -9,7 +9,7 @@ import (
 
 // Helper: Validate source Id
 func validateSourceId(id string) (string, error) {
-	if len(id) > 15 {
+	if len(id) > 42 {
 		return "unknown", fmt.Errorf("Source ID too long with length: %d", len(id))
 	}
 	return id, nil
