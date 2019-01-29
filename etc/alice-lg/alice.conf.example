@@ -1,7 +1,15 @@
+# ======================================
+# Alice-LG configuration example
+# ======================================
+
 [server]
+# configures the built-in webserver and provides global application settings
 listen_http = 127.0.0.1:7340
 enable_prefix_lookup = true
+# enable the prefix-lookup endpoint / the global search feature
 asn = 9033
+# this ASN is used as a fallback value in the RPKI feature and for route
+# filtering evaluation with large BGP communities
 
 [theme]
 path = /path/to/my/alice/theme/files
@@ -9,7 +17,7 @@ path = /path/to/my/alice/theme/files
 url_base = /theme
 
 [pagination]
-# Routes can be paginated, which comes in handy with
+# Routes tables can be paginated, which comes in handy with
 # peers announcing a lot of routes. Set to 0 to disable
 # pagination.
 routes_filtered_page_size = 250
@@ -17,6 +25,8 @@ routes_accepted_page_size = 250
 routes_not_exported_page_size = 250
 
 [rejection_reasons]
+# a pair of a large BGP community value and a string to signal the processing
+# results of route filtering
 9033:65666:1 = An IP Bogon was detected
 9033:65666:2 = Prefix is longer than 64
 9033:65666:3 = Prefix is longer than 24
@@ -32,7 +42,7 @@ routes_not_exported_page_size = 250
 
 #
 # Optional: Define communities which might be filtered
-#           in the future.      
+#           in the future.
 [rejection_candidates]
 communities = 6695:1102:14, 6695:1102:15, 23:42:46
 
@@ -40,6 +50,8 @@ communities = 6695:1102:14, 6695:1102:15, 23:42:46
 load_on_demand = true # Default: false
 
 [noexport_reasons]
+# a pair of a large BGP community value and a string to signal the processing
+# results of route distribution and the distribution policy applied to a route
 9033:65667:1 = The target peer policy is Fairly-open and the sender ASN is an exception
 9033:65667:2 = The target peer policy is Selective and the sender ASN is no exception
 9033:65667:3 = The target peer policy is set to restrictive
@@ -52,6 +64,8 @@ load_on_demand = true # Default: false
 
 
 [rpki]
+# shows rpki validation status in the client, based on the presence of a large
+# BGP community on the route
 enabled = true
 
 # Optional, falling back to defaults as defined in:
@@ -64,7 +78,7 @@ invalid     = 23042:1000:4-*
 
 # Define other known bgp communities
 [bgp_communities]
-1:23 = some tag 
+1:23 = some tag
 9033:65666:1 = ip bogon detected
 # Wildcards are supported aswell:
 0:* = do not redistribute to AS$1
@@ -140,8 +154,8 @@ api = http://rs1.example.com:29186/
 # disable_neighbor_summary = true
 
 # Optional: Examples for time format
-# Please see https://golang.org/pkg/time/#pkg-constants for an 
-# explanation on how time parsing in go works. 
-servertime = 2006-01-02T15:04:05Z07:00 
+# Please see https://golang.org/pkg/time/#pkg-constants for an
+# explanation on how time parsing in go works.
+servertime = 2006-01-02T15:04:05Z07:00
 servertime_short = 02.01.2006
 servertime_ext = Mon, 02 Jan 2006 15:04:05 -0700
