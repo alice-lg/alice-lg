@@ -286,6 +286,10 @@ func (self *MultiTableBirdwatcher) Neighbours() (*api.NeighboursResponse, error)
 
 		// Sum up all routes from all peers for a table
 		for _, protocol := range tree[table].(map[string]interface{}) {
+			// Skip peers that are not up (start/down)
+			if protocol.(map[string]interface{})["state"].(string) != "up" {
+				continue
+			}
 			allRoutesImported += int64(protocol.(map[string]interface{})["routes"].(map[string]interface{})["imported"].(float64))
 
 			pipeName := self.getMasterPipeName(table)
@@ -323,6 +327,10 @@ func (self *MultiTableBirdwatcher) Neighbours() (*api.NeighboursResponse, error)
 				// all peers. Therefore we already know the amount of filtered routes and don't have
 				// to query birdwatcher again.
 				for _, protocol := range tree[table].(map[string]interface{}) {
+					// Skip peers that are not up (start/down)
+					if protocol.(map[string]interface{})["state"].(string) != "up" {
+						continue
+					}
 					filtered[protocol.(map[string]interface{})["protocol"].(string)] = int(protocol.(map[string]interface{})["routes"].(map[string]interface{})["imported"].(float64))
 				}
 			} else {
