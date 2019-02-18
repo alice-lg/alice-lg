@@ -394,8 +394,9 @@ func (self *MultiTableBirdwatcher) Routes(neighbourId string) (*api.RoutesRespon
 // Get all received routes
 func (self *MultiTableBirdwatcher) RoutesReceived(neighborId string) (*api.RoutesResponse, error) {
 	// Check if we have a cache hit
-	response := self.routesReceivedCache.Get(neighborId)
+	response := self.routesRequiredCache.Get(neighborId)
 	if response != nil {
+		response.Filtered = nil
 		return response, nil
 	}
 
@@ -410,17 +411,15 @@ func (self *MultiTableBirdwatcher) RoutesReceived(neighborId string) (*api.Route
 		Imported: routes.Imported,
 	}
 
-	// Cache result
-	self.routesReceivedCache.Set(neighborId, response)
-
 	return response, nil
 }
 
 // Get all filtered routes
 func (self *MultiTableBirdwatcher) RoutesFiltered(neighborId string) (*api.RoutesResponse, error) {
 	// Check if we have a cache hit
-	response := self.routesFilteredCache.Get(neighborId)
+	response := self.routesRequiredCache.Get(neighborId)
 	if response != nil {
+		response.Imported = nil
 		return response, nil
 	}
 
@@ -434,9 +433,6 @@ func (self *MultiTableBirdwatcher) RoutesFiltered(neighborId string) (*api.Route
 		Api:      routes.Api,
 		Filtered: routes.Filtered,
 	}
-
-	// Cache result
-	self.routesFilteredCache.Set(neighborId, response)
 
 	return response, nil
 }

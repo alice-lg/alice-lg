@@ -21,8 +21,6 @@ type GenericBirdwatcher struct {
 
 	// Caches: Routes
 	routesRequiredCache    *caches.RoutesCache
-	routesReceivedCache    *caches.RoutesCache
-	routesFilteredCache    *caches.RoutesCache
 	routesNotExportedCache *caches.RoutesCache
 
 	// Mutices:
@@ -43,10 +41,6 @@ func NewBirdwatcher(config Config) Birdwatcher {
 	neighborsCache := caches.NewNeighborsCache(neighborsCacheDisable)
 	routesRequiredCache := caches.NewRoutesCache(
 		routesCacheDisabled, routesCacheMaxSize)
-	routesReceivedCache := caches.NewRoutesCache(
-		routesCacheDisabled, routesCacheMaxSize)
-	routesFilteredCache := caches.NewRoutesCache(
-		routesCacheDisabled, routesCacheMaxSize)
 	routesNotExportedCache := caches.NewRoutesCache(
 		routesCacheDisabled, routesCacheMaxSize)
 
@@ -61,8 +55,6 @@ func NewBirdwatcher(config Config) Birdwatcher {
 		singleTableBirdwatcher.neighborsCache = neighborsCache
 
 		singleTableBirdwatcher.routesRequiredCache = routesRequiredCache
-		singleTableBirdwatcher.routesReceivedCache = routesReceivedCache
-		singleTableBirdwatcher.routesFilteredCache = routesFilteredCache
 		singleTableBirdwatcher.routesNotExportedCache = routesNotExportedCache
 
 		singleTableBirdwatcher.routesFetchMutex = NewLockMap()
@@ -77,8 +69,6 @@ func NewBirdwatcher(config Config) Birdwatcher {
 		multiTableBirdwatcher.neighborsCache = neighborsCache
 
 		multiTableBirdwatcher.routesRequiredCache = routesRequiredCache
-		multiTableBirdwatcher.routesReceivedCache = routesReceivedCache
-		multiTableBirdwatcher.routesFilteredCache = routesFilteredCache
 		multiTableBirdwatcher.routesNotExportedCache = routesNotExportedCache
 
 		multiTableBirdwatcher.routesFetchMutex = NewLockMap()
