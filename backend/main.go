@@ -47,6 +47,9 @@ func main() {
 		AliceNeighboursStore.Start()
 	}
 
+	// Start the Housekeeping
+	go Housekeeping(AliceConfig)
+
 	// Setup request routing
 	router := httprouter.New()
 

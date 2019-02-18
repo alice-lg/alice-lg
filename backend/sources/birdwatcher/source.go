@@ -145,6 +145,13 @@ func (self *GenericBirdwatcher) filterRoutesByDuplicates(routes api.Routes, filt
 	return routes
 }
 
+func (self *GenericBirdwatcher) ExpireCaches() int {
+	count := self.routesRequiredCache.Expire()
+	count += self.routesNotExportedCache.Expire()
+
+	return count
+}
+
 func (self *GenericBirdwatcher) Status() (*api.StatusResponse, error) {
 	// Query birdwatcher
 	bird, err := self.client.GetJson("/status")
