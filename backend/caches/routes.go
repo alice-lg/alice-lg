@@ -57,6 +57,10 @@ func (self *RoutesCache) Get(neighborId string) *api.RoutesResponse {
 }
 
 func (self *RoutesCache) Set(neighborId string, response *api.RoutesResponse) {
+	if self.disabled {
+		return
+	}
+
 	self.Lock()
 	defer self.Unlock()
 
