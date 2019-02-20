@@ -603,6 +603,19 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 		// Set backend
 		switch backendType {
 		case SOURCE_BIRDWATCHER:
+			sourceType := backendConfig.Key("type").MustString("")
+			peerTablePrefix := backendConfig.Key("peer_table_prefix").MustString("T")
+			pipeProtocolPrefix := backendConfig.Key("pipe_protocol_prefix").MustString("M")
+
+			if sourceType != "single_table" &&
+				sourceType != "multi_table" {
+				log.Fatal("Configuration error (birdwatcher source) unknown birdwatcher type:", sourceType)
+			}
+
+			log.Println("Adding birdwatcher source of type", sourceType,
+				"with peer_table_prefix", peerTablePrefix,
+				"and pipe_protocol_prefix", pipeProtocolPrefix)
+
 			c := birdwatcher.Config{
 				Id:   config.Id,
 				Name: config.Name,
@@ -612,8 +625,11 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 				ServerTimeShort: "2006-01-02",
 				ServerTimeExt:   "Mon, 02 Jan 2006 15:04:05 -0700",
 
-				Type:               backendConfig.Key("type").MustString("No type specified"),
+				Type:               sourceType,
+				PeerTablePrefix:    peerTablePrefix,
+				PipeProtocolPrefix: pipeProtocolPrefix,
 			}
+
 			backendConfig.MapTo(&c)
 			config.Birdwatcher = c
 		}
