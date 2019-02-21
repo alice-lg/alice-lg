@@ -17,7 +17,7 @@ func main() {
 
 	// Handle commandline parameters
 	configFilenameFlag := flag.String(
-		"config", "/etc/alicelg/alice.conf",
+		"config", "/etc/alice-lg/alice.conf",
 		"Alice looking glass configuration file",
 	)
 

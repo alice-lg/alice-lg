@@ -119,6 +119,10 @@ func parseBirdwatcherStatus(bird ClientResponse, config Config) (api.Status, err
 		config.Timezone,
 	)
 
+	if config.ShowLastReboot == false {
+		lastReboot = time.Time{}
+	}
+
 	lastReconfig, _ := parseServerTime(
 		birdStatus["last_reconfig"],
 		config.ServerTimeExt,

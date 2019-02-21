@@ -115,6 +115,17 @@ func (self *Config) SourceById(sourceId string) *SourceConfig {
 	return nil
 }
 
+// Get instance by id
+func (self *Config) SourceInstanceById(sourceId string) sources.Source {
+	sourceConfig := self.SourceById(sourceId)
+	if sourceConfig == nil {
+		return nil // Nothing to do here.
+	}
+
+	// Get instance from config
+	return sourceConfig.getInstance()
+}
+
 // Get sources keys form ini
 func getSourcesKeys(config *ini.File) []string {
 	sources := []string{}
@@ -624,9 +635,9 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 // Try to load configfiles as specified in the files
 // list. For example:
 //
-//    ./etc/alicelg/alice.conf
-//    /etc/alicelg/alice.conf
-//    ./etc/alicelg/alice.local.conf
+//    ./etc/alice-lg/alice.conf
+//    /etc/alice-lg/alice.conf
+//    ./etc/alice-lg/alice.local.conf
 //
 func loadConfig(file string) (*Config, error) {
 

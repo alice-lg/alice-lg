@@ -51,9 +51,9 @@ func endpoint(wrapped apiEndpoint) httprouter.Handle {
 			}
 
 			// Make error response
-			result = apiErrorResponse(rsId, err)
+			result, status := apiErrorResponse(rsId, err)
 			payload, _ := json.Marshal(result)
-			http.Error(res, string(payload), http.StatusInternalServerError)
+			http.Error(res, string(payload), status)
 			return
 		}
 

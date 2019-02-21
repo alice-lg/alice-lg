@@ -14,7 +14,7 @@ image:
 	docker build . -t $(DOCKER_IMAGE) 
 
 deps: image
-	$(DOCKER_EXEC) "npm install"
+	$(DOCKER_EXEC) "yarn install"
 
 client: stop deps
 	@echo "Building alice UI"
