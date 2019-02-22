@@ -373,9 +373,10 @@ func (self *MultiTableBirdwatcher) Neighbours() (*api.NeighboursResponse, error)
 
 // Get filtered and exported routes
 func (self *MultiTableBirdwatcher) Routes(neighbourId string) (*api.RoutesResponse, error) {
+	response := &api.RoutesResponse{}
 	// Fetch required routes first (received and filtered)
 	// However: Store in separate cache for faster access
-	response, err := self.fetchRequiredRoutes(neighbourId)
+	required, err := self.fetchRequiredRoutes(neighbourId)
 	if err != nil {
 		return nil, err
 	}
@@ -386,6 +387,9 @@ func (self *MultiTableBirdwatcher) Routes(neighbourId string) (*api.RoutesRespon
 		return nil, err
 	}
 
+	response.Api = required.Api
+	response.Imported = required.Imported
+	response.Filtered = required.Filtered
 	response.NotExported = notExported
 
 	return response, nil
@@ -393,10 +397,13 @@ func (self *MultiTableBirdwatcher) Routes(neighbourId string) (*api.RoutesRespon
 
 // Get all received routes
 func (self *MultiTableBirdwatcher) RoutesReceived(neighborId string) (*api.RoutesResponse, error) {
+	response := &api.RoutesResponse{}
+
 	// Check if we have a cache hit
-	response := self.routesRequiredCache.Get(neighborId)
-	if response != nil {
-		response.Filtered = nil
+	cachedRoutes := self.routesRequiredCache.Get(neighborId)
+	if cachedRoutes != nil {
+		response.Api = cachedRoutes.Api
+		response.Imported = cachedRoutes.Imported
 		return response, nil
 	}
 
@@ -406,20 +413,21 @@ func (self *MultiTableBirdwatcher) RoutesReceived(neighborId string) (*api.Route
 		return nil, err
 	}
 
-	response = &api.RoutesResponse{
-		Api:      routes.Api,
-		Imported: routes.Imported,
-	}
+	response.Api = routes.Api
+	response.Imported = routes.Imported
 
 	return response, nil
 }
 
 // Get all filtered routes
 func (self *MultiTableBirdwatcher) RoutesFiltered(neighborId string) (*api.RoutesResponse, error) {
+	response := &api.RoutesResponse{}
+
 	// Check if we have a cache hit
-	response := self.routesRequiredCache.Get(neighborId)
-	if response != nil {
-		response.Imported = nil
+	cachedRoutes := self.routesRequiredCache.Get(neighborId)
+	if cachedRoutes != nil {
+		response.Api = cachedRoutes.Api
+		response.Filtered = cachedRoutes.Filtered
 		return response, nil
 	}
 
@@ -429,10 +437,8 @@ func (self *MultiTableBirdwatcher) RoutesFiltered(neighborId string) (*api.Route
 		return nil, err
 	}
 
-	response = &api.RoutesResponse{
-		Api:      routes.Api,
-		Filtered: routes.Filtered,
-	}
+	response.Api = routes.Api
+	response.Filtered = routes.Filtered
 
 	return response, nil
 }

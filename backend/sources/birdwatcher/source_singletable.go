@@ -179,8 +179,10 @@ func (self *SingleTableBirdwatcher) Neighbours() (*api.NeighboursResponse, error
 
 // Get filtered and exported routes
 func (self *SingleTableBirdwatcher) Routes(neighbourId string) (*api.RoutesResponse, error) {
+	response := &api.RoutesResponse{}
+
 	// Fetch required routes first (received and filtered)
-	response, err := self.fetchRequiredRoutes(neighbourId)
+	required, err := self.fetchRequiredRoutes(neighbourId)
 	if err != nil {
 		return nil, err
 	}
@@ -191,6 +193,9 @@ func (self *SingleTableBirdwatcher) Routes(neighbourId string) (*api.RoutesRespo
 		return nil, err
 	}
 
+	response.Api = required.Api
+	response.Imported = required.Imported
+	response.Filtered = required.Filtered
 	response.NotExported = notExported
 
 	return response, nil
@@ -198,10 +203,13 @@ func (self *SingleTableBirdwatcher) Routes(neighbourId string) (*api.RoutesRespo
 
 // Get all received routes
 func (self *SingleTableBirdwatcher) RoutesReceived(neighborId string) (*api.RoutesResponse, error) {
+	response := &api.RoutesResponse{}
+
 	// Check if we hit the cache
-	response := self.routesRequiredCache.Get(neighborId)
-	if response != nil {
-		response.Filtered = nil
+	cachedRoutes := self.routesRequiredCache.Get(neighborId)
+	if cachedRoutes != nil {
+		response.Api = cachedRoutes.Api
+		response.Imported = cachedRoutes.Imported
 		return response, nil
 	}
 
@@ -212,20 +220,21 @@ func (self *SingleTableBirdwatcher) RoutesReceived(neighborId string) (*api.Rout
 		return nil, err
 	}
 
-	response = &api.RoutesResponse{
-		Api:      routes.Api,
-		Imported: routes.Imported,
-	}
+	response.Api = routes.Api
+	response.Imported = routes.Imported
 
 	return response, nil
 }
 
 // Get all filtered routes
 func (self *SingleTableBirdwatcher) RoutesFiltered(neighborId string) (*api.RoutesResponse, error) {
+	response := &api.RoutesResponse{}
+
 	// Check if we hit the cache
-	response := self.routesRequiredCache.Get(neighborId)
-	if response != nil {
-		response.Imported = nil
+	cachedRoutes := self.routesRequiredCache.Get(neighborId)
+	if cachedRoutes != nil {
+		response.Api = cachedRoutes.Api
+		response.Filtered = cachedRoutes.Filtered
 		return response, nil
 	}
 
@@ -236,10 +245,8 @@ func (self *SingleTableBirdwatcher) RoutesFiltered(neighborId string) (*api.Rout
 		return nil, err
 	}
 
-	response = &api.RoutesResponse{
-		Api:      routes.Api,
-		Filtered: routes.Filtered,
-	}
+	response.Api = routes.Api
+	response.Filtered = routes.Filtered
 
 	return response, nil
 }
