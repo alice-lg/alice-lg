@@ -262,8 +262,8 @@ func parseExtBgpCommunities(data interface{}) []api.ExtCommunity {
 		}
 		communities = append(communities, api.ExtCommunity{
 			cdata[0],
-			int(cdata[1].(float64)),
-			int(cdata[2].(float64)),
+			cdata[1],
+			cdata[2],
 		})
 	}
 
