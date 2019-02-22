@@ -23,124 +23,155 @@ var families []api.Family = []api.Family{api.Family{
 	},
 }
 
-func (gobgp *GoBGP) GetRoutes(neighborId string) (*aliceapi.RoutesResponse) {
-	rr := aliceapi.RoutesResponse{}
-	rr.Imported = make(aliceapi.Routes,0)
-	rr.Filtered = make(aliceapi.Routes,0)
-	rr.NotExported = make(aliceapi.Routes,0)
+func NewRoutesResponse() (aliceapi.RoutesResponse) {
+	routes := aliceapi.RoutesResponse{}
+	routes.Imported = make(aliceapi.Routes,0)
+	routes.Filtered = make(aliceapi.Routes,0)
+	routes.NotExported = make(aliceapi.Routes,0)
+	return routes
+}
 
+func generatePeerId(peer *api.Peer) string {
+	return fmt.Sprintf("%d_%s",peer.State.PeerAs, peer.State.NeighborAddress)
+}
+
+func (gobgp *GoBGP) lookupNeighbour(neighborId string) (*api.Peer,error) {
+
+	peers, err := gobgp.GetNeighbours()
+	if err != nil {
+		return nil, err
+	}
+	for _, peer := range peers {
+	    peerId := generatePeerId(peer)
+	    if neighborId == "" || peerId == neighborId { 
+	    	return peer,nil
+	    }
+	}
+
+	return nil, fmt.Errorf("Could not lookup neighbour")
+}
+
+
+func (gobgp *GoBGP) GetNeighbours() ([]*api.Peer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-
-	// Go over all peers
-
 	peerStream, err := gobgp.client.ListPeer(ctx, &api.ListPeerRequest{EnableAdvertised: true})
 	if err != nil {
-		return nil
+		return nil,err
 	}
+
+	peers := make([]*api.Peer,0)
+
 	for {
 	    peer, err := peerStream.Recv()
 	    if err == io.EOF {
 	        break
 	    }
+	    peers = append(peers, peer.Peer)
+    }
+    return peers,nil
+}
+func (gobgp *GoBGP) GetRoutes(peer *api.Peer, tableType api.TableType, rr *aliceapi.RoutesResponse) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
 
-	    peerId := fmt.Sprintf("%d_%s",peer.Peer.State.PeerAs, peer.Peer.State.NeighborAddress)
-	    if neighborId == "" || peerId == neighborId { 
+	for _, family := range families {
 
-	    	for _, family := range families {
+		pathStream, err := gobgp.client.ListPath(ctx, &api.ListPathRequest{
+			Name: peer.State.NeighborAddress,
+			TableType: tableType,
+			Family: &family,
+		})
 
-				pathStream, err := gobgp.client.ListPath(ctx, &api.ListPathRequest{
-					Name: peer.Peer.State.NeighborAddress,
-					TableType: api.TableType_ADJ_IN,
-					Family: &family,
-				})
+		if err != nil {
+			return nil
+		}
 
-				if err != nil {
-					return nil
-				}
+		for {
+		    _path, err := pathStream.Recv()
+		    if err == io.EOF {
+		        break
+		    }
+		    
 
-				for {
-				    _path, err := pathStream.Recv()
-				    if err == io.EOF {
-				        break
-				    }
-				    
+		    for _, path := range _path.Destination.Paths {
 
-				    for _, path := range _path.Destination.Paths {
-				    	r := aliceapi.Route{}
-				    	r.Id = fmt.Sprintf("%d_%s", path.Identifier, _path.Destination.Prefix)
-				    	r.NeighbourId = peerId
-				    	r.Network = _path.Destination.Prefix
-				    	r.Interface = "Unknown"
-				    	r.Age = time.Now().Sub(time.Unix(path.Age.GetSeconds(),int64(path.Age.GetNanos())))
-				    	r.Primary = path.Best
+		    	log.Printf("%+v", _path)
 
-				    	attrs, _ := apiutil.GetNativePathAttributes(path)
 
-				    	r.Bgp.LargeCommunities = make(aliceapi.Communities,0)
-				    	r.Bgp.ExtCommunities = make(aliceapi.ExtCommunities,0)
-				    	for _, attr := range attrs {
-				    		switch attr.(type) {
-				    			case *bgp.PathAttributeMultiExitDisc:
-				    				med := attr.(*bgp.PathAttributeMultiExitDisc)
-				    				r.Bgp.Med = int(med.Value)
-				    			case *bgp.PathAttributeNextHop:
-				    				nh := attr.(*bgp.PathAttributeNextHop)
-				    				r.Gateway = nh.Value.String()
-				    				r.Bgp.NextHop = nh.Value.String()
-				    			case *bgp.PathAttributeLocalPref:
-				    				lp := attr.(*bgp.PathAttributeLocalPref)
-				    				r.Bgp.LocalPref = int(lp.Value)
-				    			case *bgp.PathAttributeOrigin:
-				    				origin := attr.(*bgp.PathAttributeOrigin)
-									switch origin.Value {
-									case bgp.BGP_ORIGIN_ATTR_TYPE_IGP:
-										r.Bgp.Origin = "IGP"
-									case bgp.BGP_ORIGIN_ATTR_TYPE_EGP:
-										r.Bgp.Origin = "EGP"
-									case bgp.BGP_ORIGIN_ATTR_TYPE_INCOMPLETE:
-										r.Bgp.Origin = "Incomplete"
-									}
-								case *bgp.PathAttributeAsPath:
-									aspath := attr.(*bgp.PathAttributeAsPath)
-									for _, aspth := range aspath.Value {
-										for _, as := range aspth.GetAS() {
-											r.Bgp.AsPath = append(r.Bgp.AsPath, int(as))
-										}
-									}
-								case *bgp.PathAttributeCommunities:
-									communities := attr.(*bgp.PathAttributeCommunities)
-									for _, community := range communities.Value {
-										_community := aliceapi.Community{int((0xffff0000&community)>>16),int(0xffff&community)}
-										r.Bgp.Communities = append(r.Bgp.Communities, _community)
-									}
+		    	r := aliceapi.Route{}
+		    	r.Id = fmt.Sprintf("%d_%s", path.Identifier, _path.Destination.Prefix)
+		    	r.NeighbourId = generatePeerId(peer)
+		    	r.Network = _path.Destination.Prefix
+		    	r.Interface = "Unknown"
+		    	r.Age = time.Now().Sub(time.Unix(path.Age.GetSeconds(),int64(path.Age.GetNanos())))
+		    	r.Primary = path.Best
 
-								case *bgp.PathAttributeExtendedCommunities:
-									communities := attr.(*bgp.PathAttributeExtendedCommunities)
-									for _, community := range communities.Value {
-										log.Printf("%+s\n", community)	
-									}
-								case *bgp.PathAttributeLargeCommunities:
-									communities := attr.(*bgp.PathAttributeLargeCommunities) 
-									for _, community := range communities.Values {
-										log.Printf("%+s\n", community)
-									}
-				    		}
-				    	}
+		    	attrs, _ := apiutil.GetNativePathAttributes(path)
 
-				    	r.Metric = (r.Bgp.LocalPref + r.Bgp.Med)
+		    	r.Bgp.Communities = make(aliceapi.Communities,0)
+		    	r.Bgp.LargeCommunities = make(aliceapi.Communities,0)
+		    	r.Bgp.ExtCommunities = make(aliceapi.ExtCommunities,0)
+		    	for _, attr := range attrs {
+		    		switch attr.(type) {
+		    			case *bgp.PathAttributeMultiExitDisc:
+		    				med := attr.(*bgp.PathAttributeMultiExitDisc)
+		    				r.Bgp.Med = int(med.Value)
+		    			case *bgp.PathAttributeNextHop:
+		    				nh := attr.(*bgp.PathAttributeNextHop)
+		    				r.Gateway = nh.Value.String()
+		    				r.Bgp.NextHop = nh.Value.String()
+		    			case *bgp.PathAttributeLocalPref:
+		    				lp := attr.(*bgp.PathAttributeLocalPref)
+		    				r.Bgp.LocalPref = int(lp.Value)
+		    			case *bgp.PathAttributeOrigin:
+		    				origin := attr.(*bgp.PathAttributeOrigin)
+							switch origin.Value {
+							case bgp.BGP_ORIGIN_ATTR_TYPE_IGP:
+								r.Bgp.Origin = "IGP"
+							case bgp.BGP_ORIGIN_ATTR_TYPE_EGP:
+								r.Bgp.Origin = "EGP"
+							case bgp.BGP_ORIGIN_ATTR_TYPE_INCOMPLETE:
+								r.Bgp.Origin = "Incomplete"
+							}
+						case *bgp.PathAttributeAsPath:
+							aspath := attr.(*bgp.PathAttributeAsPath)
+							for _, aspth := range aspath.Value {
+								for _, as := range aspth.GetAS() {
+									r.Bgp.AsPath = append(r.Bgp.AsPath, int(as))
+								}
+							}
+						case *bgp.PathAttributeCommunities:
+							communities := attr.(*bgp.PathAttributeCommunities)
+							for _, community := range communities.Value {
+								_community := aliceapi.Community{int((0xffff0000&community)>>16),int(0xffff&community)}
+								r.Bgp.Communities = append(r.Bgp.Communities, _community)
+							}
 
-				    	if path.Filtered {
-				    		rr.Filtered = append(rr.Filtered, &r)
-				    	}  else {
-				    		rr.Imported = append(rr.Imported, &r)
-				    	}
-				    }
-				}
-			}
+						case *bgp.PathAttributeExtendedCommunities:
+							communities := attr.(*bgp.PathAttributeExtendedCommunities)
+							for _, community := range communities.Value {
+								log.Printf("%+s\n", community)	
+							}
+						case *bgp.PathAttributeLargeCommunities:
+							communities := attr.(*bgp.PathAttributeLargeCommunities) 
+							for _, community := range communities.Values {
+								log.Printf("%+s\n", community)
+							}
+		    		}
+		    	}
+
+		    	r.Metric = (r.Bgp.LocalPref + r.Bgp.Med)
+
+		    	if path.Filtered {
+		    		rr.Filtered = append(rr.Filtered, &r)
+		    	}  else {
+		    		rr.Imported = append(rr.Imported, &r)
+		    	}
+		    }
 		}
 	}
 	log.Printf("%+v", rr)
-	return &rr
+	return nil
 }

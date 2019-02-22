@@ -157,7 +157,17 @@ func (gobgp *GoBGP) bgpProtocolsNeighbors() (*aliceapi.NeighboursResponse, error
 
 // Get filtered and exported routes
 func (gobgp *GoBGP) Routes(neighbourId string) (*aliceapi.RoutesResponse, error) {
-	return gobgp.GetRoutes(neighbourId),nil
+	neigh, err := gobgp.lookupNeighbour(neighbourId)
+	if err != nil {
+		return nil, err
+	}
+
+	routes := NewRoutesResponse();
+	err = gobgp.GetRoutes(neigh,api.TableType_ADJ_IN,&routes)
+	if err != nil {
+		return nil, err
+	}
+	return &routes,nil
 }
 
 /*
@@ -180,19 +190,47 @@ func (gobgp *GoBGP) RoutesRequired(neighbourId string,) (*aliceapi.RoutesRespons
 
 // Get all received routes
 func (gobgp *GoBGP) RoutesReceived(neighbourId string,) (*aliceapi.RoutesResponse, error) {
-	return gobgp.GetRoutes(neighbourId),nil
+	neigh, err := gobgp.lookupNeighbour(neighbourId)
+	if err != nil {
+		return nil, err
+	}
+
+	routes := NewRoutesResponse();
+	err = gobgp.GetRoutes(neigh,api.TableType_ADJ_IN,&routes)
+	if err != nil {
+		return nil, err
+	}
+	return &routes,nil
 }
 
 
 // Get all filtered routes
 func (gobgp *GoBGP) RoutesFiltered(neighbourId string,) (*aliceapi.RoutesResponse, error) {
-	rr := aliceapi.RoutesResponse{}
-	return &rr,nil
-	//return rr,fmt.Errorf("Not implemented RoutesFiltered")
+	neigh, err := gobgp.lookupNeighbour(neighbourId)
+	if err != nil {
+		return nil, err
+	}
+	routes := NewRoutesResponse();
+	err = gobgp.GetRoutes(neigh,api.TableType_ADJ_IN,&routes)
+	if err != nil {
+		return nil, err
+	}
+	return &routes,nil
 }
 
 // Get all not exported routes
 func (gobgp *GoBGP) RoutesNotExported(neighbourId string,) (*aliceapi.RoutesResponse, error) {
+	neigh, err := gobgp.lookupNeighbour(neighbourId)
+	if err != nil {
+		return nil, err
+	}
+	routes := NewRoutesResponse();
+	err = gobgp.GetRoutes(neigh,api.TableType_ADJ_OUT,&routes)
+	if err != nil {
+		return nil, err
+	}
+	return &routes,nil
+
 	return nil,fmt.Errorf("Not implemented RoutesNotExported")
 }
 
@@ -202,6 +240,19 @@ func (gobgp *GoBGP) LookupPrefix(prefix string) (*aliceapi.RoutesLookupResponse,
 }
 
 func (gobgp *GoBGP) AllRoutes() (*aliceapi.RoutesResponse, error) {
-	return gobgp.GetRoutes(""),nil
+	routes := NewRoutesResponse();
+	peers, err := gobgp.GetNeighbours()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, peer := range peers {
+		err = gobgp.GetRoutes(peer,api.TableType_ADJ_IN,&routes)
+		if err != nil {
+			log.Print(err)
+		}
+	}
+
+	return &routes, nil
 }
 
