@@ -65,15 +65,7 @@ func parseExtCommunityValue(value string) (*SearchFilter, error) {
 	community := make(ExtCommunity, len(components))
 
 	for i, c := range components {
-		if i == 0 {
-			community[i] = c
-		} else {
-			v, err := strconv.Atoi(c)
-			if err != nil {
-				return nil, err
-			}
-			community[i] = v
-		}
+		community[i] = c
 	}
 
 	return &SearchFilter{

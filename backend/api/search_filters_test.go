@@ -13,7 +13,7 @@ func makeTestRoute() *Route {
 				Community{111, 11},
 			},
 			ExtCommunities: []ExtCommunity{
-				ExtCommunity{"ro", 23, 123},
+				ExtCommunity{"ro", "23", "123"},
 			},
 			LargeCommunities: []Community{
 				Community{1000, 23, 42},
@@ -32,7 +32,7 @@ func makeTestLookupRoute() *LookupRoute {
 				Community{111, 11},
 			},
 			ExtCommunities: []ExtCommunity{
-				ExtCommunity{"ro", 23, 123},
+				ExtCommunity{"ro", "23", "123"},
 			},
 			LargeCommunities: []Community{
 				Community{1000, 23, 42},
@@ -124,9 +124,9 @@ func TestSearchFilterEqual(t *testing.T) {
 	}
 
 	// Ext. Communities
-	a = &SearchFilter{Value: ExtCommunity{"ro", 23, 42}}
-	b = &SearchFilter{Value: ExtCommunity{"ro", 23, 42}}
-	c = &SearchFilter{Value: ExtCommunity{"rt", 42, 23}}
+	a = &SearchFilter{Value: ExtCommunity{"ro", "23", "42"}}
+	b = &SearchFilter{Value: ExtCommunity{"ro", "23", "42"}}
+	c = &SearchFilter{Value: ExtCommunity{"rt", "42", "23"}}
 
 	if a.Equal(b) == false {
 		t.Error("filter[ro:23:42] == filter[ro:23:42] should be true")
@@ -293,10 +293,10 @@ func TestSearchFilterCompareRoute(t *testing.T) {
 	}
 
 	// Ext. Communities
-	if searchFilterMatchExtCommunity(route, ExtCommunity{"ro", 23, 123}) != true {
+	if searchFilterMatchExtCommunity(route, ExtCommunity{"ro", "23", "123"}) != true {
 		t.Error("Route should have community ro:23:123")
 	}
-	if searchFilterMatchExtCommunity(route, ExtCommunity{"rt", 42, 111}) == true {
+	if searchFilterMatchExtCommunity(route, ExtCommunity{"rt", "42", "111"}) == true {
 		t.Error("Route should not have community rt:42:111")
 	}
 
