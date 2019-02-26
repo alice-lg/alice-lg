@@ -32,7 +32,7 @@ func NewRoutesResponse() (aliceapi.RoutesResponse) {
 }
 
 func generatePeerId(peer *api.Peer) string {
-	return fmt.Sprintf("%d_%s",peer.State.PeerAs, peer.State.NeighborAddress)
+	return PeerHash(peer)
 }
 
 func (gobgp *GoBGP) lookupNeighbour(neighborId string) (*api.Peer,error) {
@@ -88,22 +88,24 @@ func (gobgp *GoBGP) GetRoutes(peer *api.Peer, tableType api.TableType, rr *alice
 			return nil
 		}
 
+		rib := make([]*api.Destination,0)
 		for {
 		    _path, err := pathStream.Recv()
 		    if err == io.EOF {
 		        break
+		    } else if err != nil {
+		    	log.Print(err)
+		    	return err
 		    }
-		    
+		    rib = append(rib, _path.Destination)
+		}
 
-		    for _, path := range _path.Destination.Paths {
-
-		    	log.Printf("%+v", _path)
-
-
+	    for _, d := range rib {
+	    	for _, path := range d.Paths {
 		    	r := aliceapi.Route{}
-		    	r.Id = fmt.Sprintf("%d_%s", path.Identifier, _path.Destination.Prefix)
+		    	r.Id = fmt.Sprintf("%d_%s", path.Identifier, d.Prefix)
 		    	r.NeighbourId = generatePeerId(peer)
-		    	r.Network = _path.Destination.Prefix
+		    	r.Network = d.Prefix
 		    	r.Interface = "Unknown"
 		    	r.Age = time.Now().Sub(time.Unix(path.Age.GetSeconds(),int64(path.Age.GetNanos())))
 		    	r.Primary = path.Best
@@ -152,18 +154,19 @@ func (gobgp *GoBGP) GetRoutes(peer *api.Peer, tableType api.TableType, rr *alice
 						case *bgp.PathAttributeExtendedCommunities:
 							communities := attr.(*bgp.PathAttributeExtendedCommunities)
 							for _, community := range communities.Value {
-								log.Printf("%+s\n", community)	
+								if _community, ok := community.(*bgp.TwoOctetAsSpecificExtended); ok {
+									r.Bgp.ExtCommunities = append(r.Bgp.ExtCommunities, aliceapi.ExtCommunity{_community.AS, _community.LocalAdmin})	
+								}
 							}
 						case *bgp.PathAttributeLargeCommunities:
 							communities := attr.(*bgp.PathAttributeLargeCommunities) 
 							for _, community := range communities.Values {
-								log.Printf("%+s\n", community)
+								r.Bgp.LargeCommunities = append(r.Bgp.LargeCommunities, aliceapi.Community{int(community.ASN), int(community.LocalData1), int(community.LocalData2)})
 							}
 		    		}
 		    	}
 
 		    	r.Metric = (r.Bgp.LocalPref + r.Bgp.Med)
-
 		    	if path.Filtered {
 		    		rr.Filtered = append(rr.Filtered, &r)
 		    	}  else {
@@ -172,6 +175,6 @@ func (gobgp *GoBGP) GetRoutes(peer *api.Peer, tableType api.TableType, rr *alice
 		    }
 		}
 	}
-	log.Printf("%+v", rr)
+	
 	return nil
 }

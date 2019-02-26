@@ -124,7 +124,7 @@ func (gobgp *GoBGP) Neighbours() (*aliceapi.NeighboursResponse, error) {
 	    }
 	    neigh.Description = _resp.Peer.Conf.Description
 	    
-	    neigh.Id = fmt.Sprintf("%d_%s",neigh.Asn, neigh.Address)
+	    neigh.Id = PeerHash(_resp.Peer)
 
 
 	    response.Neighbours = append(response.Neighbours, &neigh)
@@ -147,6 +147,7 @@ func (gobgp *GoBGP) Neighbours() (*aliceapi.NeighboursResponse, error) {
 
 // Get neighbors from neighbors summary
 func (gobgp *GoBGP) summaryNeighbors() (*aliceapi.NeighboursResponse, error) {
+
 	return nil,fmt.Errorf("Not implemented summaryNeighbors")
 }
 
@@ -183,8 +184,22 @@ RoutesNotExported() API.
 A route deduplication is applied.
 */
 
+func (gobgp *GoBGP) getRoutes(neighbourId string,) (*aliceapi.RoutesResponse, error) {
+	neigh, err := gobgp.lookupNeighbour(neighbourId)
+	if err != nil {
+		return nil, err
+	}
+
+	routes := NewRoutesResponse();
+	err = gobgp.GetRoutes(neigh,api.TableType_ADJ_IN,&routes)
+	if err != nil {
+		return nil, err
+	}
+	return &routes,nil
+}
+
 func (gobgp *GoBGP) RoutesRequired(neighbourId string,) (*aliceapi.RoutesResponse, error) {
-	return nil,fmt.Errorf("Not implemented RoutesRequired")
+	return gobgp.getRoutes(neighbourId)
 }
 
 
@@ -200,22 +215,16 @@ func (gobgp *GoBGP) RoutesReceived(neighbourId string,) (*aliceapi.RoutesRespons
 	if err != nil {
 		return nil, err
 	}
+	routes.Filtered = nil
 	return &routes,nil
 }
 
 
 // Get all filtered routes
 func (gobgp *GoBGP) RoutesFiltered(neighbourId string,) (*aliceapi.RoutesResponse, error) {
-	neigh, err := gobgp.lookupNeighbour(neighbourId)
-	if err != nil {
-		return nil, err
-	}
-	routes := NewRoutesResponse();
-	err = gobgp.GetRoutes(neigh,api.TableType_ADJ_IN,&routes)
-	if err != nil {
-		return nil, err
-	}
-	return &routes,nil
+	routes, err := gobgp.getRoutes(neighbourId)
+	routes.Imported = nil
+	return routes, err
 }
 
 // Get all not exported routes
@@ -225,13 +234,12 @@ func (gobgp *GoBGP) RoutesNotExported(neighbourId string,) (*aliceapi.RoutesResp
 		return nil, err
 	}
 	routes := NewRoutesResponse();
-	err = gobgp.GetRoutes(neigh,api.TableType_ADJ_OUT,&routes)
+	err = gobgp.GetRoutes(neigh,api.TableType_LOCAL,&routes)
 	if err != nil {
 		return nil, err
 	}
+	routes.Imported = nil
 	return &routes,nil
-
-	return nil,fmt.Errorf("Not implemented RoutesNotExported")
 }
 
 // Make routes lookup
@@ -239,6 +247,11 @@ func (gobgp *GoBGP) LookupPrefix(prefix string) (*aliceapi.RoutesLookupResponse,
 	return nil,fmt.Errorf("Not implemented LookupPrefix")
 }
 
+
+/*
+AllRoutes: 
+	Here a routes dump (filtered, received) is returned, which is used to learn all prefixes to build up a local store for searching.
+*/
 func (gobgp *GoBGP) AllRoutes() (*aliceapi.RoutesResponse, error) {
 	routes := NewRoutesResponse();
 	peers, err := gobgp.GetNeighbours()

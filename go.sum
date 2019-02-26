@@ -1,6 +1,8 @@
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 github.com/GeertJohan/go.rice v0.0.0-20181229193832-0af3f3b09a0a h1:QgnJzkfb29JXtLXJN8alxzPWZhiNcAYZOa06dU5O46w=
 github.com/GeertJohan/go.rice v0.0.0-20181229193832-0af3f3b09a0a/go.mod h1:DgrzXonpdQbfN3uYaGz1EG4Sbhyum/MMIn6Cphlh2bw=
+github.com/Netnod/gobgp v2.0.0+incompatible h1:HNS9LlIdLKG9vDlyGGkdEEWlvg7XrBqeCsLI5aCokww=
+github.com/Netnod/gobgp v2.0.0+incompatible/go.mod h1:3nV4IxumgQWTcmCIRAdfoB74YRw1FOUqaDMKdK2ZAZI=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/daaku/go.zipexe v0.0.0-20150329023125-a5fe2436ffcb h1:tUf55Po0vzOendQ7NWytcdK0VuzQmfAgvGBUOQvN0WA=
 github.com/daaku/go.zipexe v0.0.0-20150329023125-a5fe2436ffcb/go.mod h1:U0vRfAucUOohvdCxt5MWLF+TePIL0xbCkbKIiV8TQCE=
