@@ -238,7 +238,7 @@ func (gobgp *GoBGP) RoutesNotExported(neighbourId string,) (*aliceapi.RoutesResp
 	if err != nil {
 		return nil, err
 	}
-	routes.Imported = nil
+	routes.NotExported = routes.Filtered
 	return &routes,nil
 }
 
