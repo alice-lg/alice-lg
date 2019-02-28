@@ -223,6 +223,9 @@ func (gobgp *GoBGP) RoutesReceived(neighbourId string,) (*aliceapi.RoutesRespons
 // Get all filtered routes
 func (gobgp *GoBGP) RoutesFiltered(neighbourId string,) (*aliceapi.RoutesResponse, error) {
 	routes, err := gobgp.getRoutes(neighbourId)
+	if err != nil {
+		log.Print(err)
+	}
 	routes.Imported = nil
 	return routes, err
 }
