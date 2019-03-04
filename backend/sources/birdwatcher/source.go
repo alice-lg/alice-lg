@@ -5,7 +5,9 @@ import (
 	"github.com/alice-lg/alice-lg/backend/caches"
 	"github.com/alice-lg/alice-lg/backend/sources"
 
+	"fmt"
 	"sort"
+	"time"
 )
 
 type Birdwatcher interface {
@@ -145,6 +147,47 @@ func (self *GenericBirdwatcher) filterRoutesByDuplicates(routes api.Routes, filt
 	return routes
 }
 
+func (self *GenericBirdwatcher) filterRoutesByNeighborId(routes api.Routes, neighborId string) api.Routes {
+	result_routes := make(api.Routes, 0, len(routes))
+
+	// Choose routes with next_hop == gateway of this neighbour
+	for _, route := range routes {
+		if route.Details["from_protocol"] == neighborId {
+			result_routes = append(result_routes, route)
+		}
+	}
+
+	// Sort routes for deterministic ordering
+	sort.Sort(result_routes)
+	routes = result_routes
+
+	return routes
+}
+
+func (self *GenericBirdwatcher) fetchProtocolsShort() (*api.ApiStatus, map[string]interface{}, error) {
+	// Query birdwatcher
+	timeout := 2 * time.Second
+	if self.config.NeighborsRefreshTimeout > 0 {
+		timeout = time.Duration(self.config.NeighborsRefreshTimeout) * time.Second
+	}
+	bird, err := self.client.GetJsonTimeout(timeout, "/protocols/short?uncached=true")
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Use api status from first request
+	apiStatus, err := parseApiStatus(bird, self.config)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if _, ok := bird["protocols"]; !ok {
+		return nil, nil, fmt.Errorf("Failed to fetch protocols")
+	}
+
+	return &apiStatus, bird, nil
+}
+
 func (self *GenericBirdwatcher) ExpireCaches() int {
 	count := self.routesRequiredCache.Expire()
 	count += self.routesNotExportedCache.Expire()
@@ -177,6 +220,28 @@ func (self *GenericBirdwatcher) Status() (*api.StatusResponse, error) {
 	}
 
 	return response, nil
+}
+
+// Get live neighbor status
+func (self *GenericBirdwatcher) NeighboursStatus() (*api.NeighboursStatusResponse, error) {
+	// Query birdwatcher
+	apiStatus, birdProtocols, err := self.fetchProtocolsShort()
+	if err != nil {
+		return nil, err
+	}
+
+	// Parse the neighbors short
+	neighbours, err := parseNeighboursShort(birdProtocols, self.config)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &api.NeighboursStatusResponse{
+		Api:        *apiStatus,
+		Neighbours: neighbours,
+	}
+
+	return response, nil // dereference for now
 }
 
 // Make routes lookup

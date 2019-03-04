@@ -21,6 +21,7 @@ type ServerConfig struct {
 	NeighboursStoreRefreshInterval int    `ini:"neighbours_store_refresh_interval"`
 	RoutesStoreRefreshInterval     int    `ini:"routes_store_refresh_interval"`
 	Asn                            int    `ini:"asn"`
+	EnableNeighborsStatusRefresh   bool   `ini:"enable_neighbors_status_refresh"`
 }
 
 type HousekeepingConfig struct {
