@@ -1,6 +1,13 @@
 
 # Changelog
 
+## 3.5.1 (2019-03-07)
+
+* Enhance the neighbors store to perform uncached requests for peer status
+  on every request. A timeout with fallback to cached data is applied in order
+  too keep the response times low.
+* Add caching to Neighbors()
+
 ## 3.5.0 (2019-02-22)
 
 Support for birdwatcher route server API implementation version 1.13.0 and above.  
