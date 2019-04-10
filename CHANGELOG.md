@@ -1,6 +1,16 @@
 
 # Changelog
 
+## 3.4.4 (2019-01-29)
+
+* Loading indicators in frontend for received routes and filtered routes
+* Consequent use of 'alice-lg' instead of 'alicelg'
+* Use yarn to manage node dependencies
+* Improved error handling on misconfigured or unavailable sources
+* Fix issues related to pagination of results
+* Make search for IPv6 prefixes with netmask work
+* Add example for routeserver ids as strings to config and overall improvement
+
 ## 3.4.0 (2018-12-09)
 
 * Removed baseUrl from frontend
@@ -47,5 +57,4 @@
 ## 2.2.6 (2018-01-31)
 
 * Improved logging of missing birdwatcher modules
-* Fixed bugs and improved Documentation 
-
+* Fixed bugs and improved documentation

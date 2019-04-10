@@ -73,7 +73,7 @@ endif
 	cp etc/alice-lg/alice.example.conf $(DIST)/etc/alice-lg/alice.example.conf
 
 	# Copy application
-	cp bin/$(PROG)-linux-$(ARCH) DIST/opt/ecix/alice-lg/bin/.
+	cp bin/$(PROG)-linux-$(ARCH) DIST/opt/alice-lg/alice-lg/bin/.
 
 
 rpm: dist
