@@ -1,16 +1,19 @@
 
 # Changelog
 
-## 3.5.1 (2019-03-07)
+
+## 4.0.1 (2019-03-07)
 
 * Enhance the neighbors store to perform uncached requests for peer status
   on every request. A timeout with fallback to cached data is applied in order
   too keep the response times low.
 * Add caching to Neighbors()
 
-## 3.5.0 (2019-02-22)
+## 4.0.0 (2019-02-22)
 
-Support for birdwatcher route server API implementation version 1.13.0 and above.  
+Breaking Changes: Birdwatcher 2.0
+
+Support for birdwatcher route server API implementation version 2.0.0 and above.  
 This new implementation of birdwatcher only provides the direct output of the
 birdc comands and eliminates complex endpoints that fetch data from multiple
 birdc responses. The aggregation of data, based on the particular route server
