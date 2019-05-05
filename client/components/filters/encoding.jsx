@@ -38,8 +38,7 @@ function _decodeCommunity(community) {
 }
 
 function _decodeExtCommunity(community) {
-  const parts = community.split(":");
-  return [parts[0]].concat(parts.slice(1).map((p) => parseInt(p, 10)));
+  return community.split(":");
 }
 
 export function decodeFiltersCommunities(params) {

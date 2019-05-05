@@ -53,9 +53,9 @@ func TestParseExtCommunityValue(t *testing.T) {
 	com := filter.Value.(ExtCommunity)
 
 	if com[0].(string) != "rt" &&
-		com[1].(int) != 23 &&
-		com[2].(int) != 42 {
-		t.Error("Expected community to be: ['rt', 23, 42] but got:", com)
+		com[1].(string) != "23" &&
+		com[2].(string) != "42" {
+		t.Error("Expected community to be: ['rt', '23', '42'] but got:", com)
 	}
 
 }

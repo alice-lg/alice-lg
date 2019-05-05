@@ -15,10 +15,11 @@ var REGEX_MATCH_ASLOOKUP = regexp.MustCompile(`(?i)^AS(\d+)`)
 type NeighboursIndex map[string]*api.Neighbour
 
 type NeighboursStore struct {
-	neighboursMap   map[string]NeighboursIndex
-	configMap       map[string]*SourceConfig
-	statusMap       map[string]StoreStatus
-	refreshInterval time.Duration
+	neighboursMap         map[string]NeighboursIndex
+	configMap             map[string]*SourceConfig
+	statusMap             map[string]StoreStatus
+	refreshInterval       time.Duration
+	refreshNeighborStatus bool
 
 	sync.RWMutex
 }
@@ -48,11 +49,14 @@ func NewNeighboursStore(config *Config) *NeighboursStore {
 		refreshInterval = time.Duration(5) * time.Minute
 	}
 
+	refreshNeighborStatus := config.Server.EnableNeighborsStatusRefresh
+
 	store := &NeighboursStore{
 		neighboursMap:   neighboursMap,
 		statusMap:       statusMap,
 		configMap:       configMap,
 		refreshInterval: refreshInterval,
+		refreshNeighborStatus: refreshNeighborStatus,
 	}
 	return store
 }
@@ -165,9 +169,32 @@ func (self *NeighboursStore) GetNeighborsAt(sourceId string) api.Neighbours {
 	neighborsIdx := self.neighboursMap[sourceId]
 	self.RUnlock()
 
+	var neighborsStatus map[string]api.NeighbourStatus
+	if self.refreshNeighborStatus {
+		sourceConfig := self.configMap[sourceId]
+		source := sourceConfig.getInstance()
+
+		neighborsStatusData, err := source.NeighboursStatus()
+		if err == nil {
+			neighborsStatus = make(map[string]api.NeighbourStatus, len(neighborsStatusData.Neighbours))
+
+			for _, neighbor := range neighborsStatusData.Neighbours {
+				neighborsStatus[neighbor.Id] = *neighbor
+			}
+		}
+	}
+
 	neighbors := make(api.Neighbours, 0, len(neighborsIdx))
 
 	for _, neighbor := range neighborsIdx {
+		if self.refreshNeighborStatus {
+			if _, ok := neighborsStatus[neighbor.Id]; ok {
+				self.Lock()
+				neighbor.State = neighborsStatus[neighbor.Id].State
+				self.Unlock()
+			}
+		}
+
 		neighbors = append(neighbors, neighbor)
 	}
 

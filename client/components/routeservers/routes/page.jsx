@@ -175,22 +175,26 @@ class RoutesPage extends React.Component {
             <RoutesViewEmpty routes={this.props.routes}
                              loadNotExported={this.props.loadNotExported} />
 
+
             <RoutesView
                 type={ROUTES_FILTERED}
                 routeserverId={this.props.params.routeserverId}
                 protocolId={this.props.params.protocolId} />
+
+            {this.props.receivedLoading && <RoutesLoadingIndicator />}
 
             <RoutesView
                 type={ROUTES_RECEIVED}
                 routeserverId={this.props.params.routeserverId}
                 protocolId={this.props.params.protocolId} />
 
+            {this.props.notExportedLoading && <RoutesLoadingIndicator />}
+
             <RoutesView
                 type={ROUTES_NOT_EXPORTED}
                 routeserverId={this.props.params.routeserverId}
                 protocolId={this.props.params.protocolId} />
 
-            <RoutesLoadingIndicator />
 
           </div>
           <div className="col-lg-3 col-md-12 col-aside-details">
@@ -290,7 +294,12 @@ export default connect(
         filtersApplied: filtersApplied,
       },
 
-      relatedPeers: relatedPeers
+      relatedPeers: relatedPeers,
+
+      // Loding indicator helper
+      receivedLoading:    state.routes.receivedLoading,
+      filteredLoading:    state.routes.filteredLoading,
+      notExportedLoading: state.routes.notExportedLoading
     });
   }
 )(RoutesPage);

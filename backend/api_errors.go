@@ -6,30 +6,51 @@ package main
 // to internal IP addresses.
 
 import (
+	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/alice-lg/alice-lg/backend/api"
 )
 
+type ResourceNotFoundError struct{}
+
+func (self *ResourceNotFoundError) Error() string {
+	return "resource not found"
+}
+
+var SOURCE_NOT_FOUND_ERROR = &ResourceNotFoundError{}
+
 const (
 	GENERIC_ERROR_TAG      = "GENERIC_ERROR"
 	CONNECTION_REFUSED_TAG = "CONNECTION_REFUSED"
 	CONNECTION_TIMEOUT_TAG = "CONNECTION_TIMEOUT"
+	RESOURCE_NOT_FOUND_TAG = "NOT_FOUND"
 )
 
 const (
 	GENERIC_ERROR_CODE      = 42
 	CONNECTION_REFUSED_CODE = 100
 	CONNECTION_TIMEOUT_CODE = 101
+	RESOURCE_NOT_FOUND_CODE = 404
 )
 
-func apiErrorResponse(routeserverId string, err error) api.ErrorResponse {
+const (
+	ERROR_STATUS              = http.StatusInternalServerError
+	RESOURCE_NOT_FOUND_STATUS = http.StatusNotFound
+)
+
+func apiErrorResponse(routeserverId string, err error) (api.ErrorResponse, int) {
 	code := GENERIC_ERROR_CODE
 	message := err.Error()
 	tag := GENERIC_ERROR_TAG
+	status := ERROR_STATUS
 
 	switch e := err.(type) {
+	case *ResourceNotFoundError:
+		tag = RESOURCE_NOT_FOUND_TAG
+		code = RESOURCE_NOT_FOUND_CODE
+		status = RESOURCE_NOT_FOUND_STATUS
 	case *url.Error:
 		if strings.Contains(message, "connection refused") {
 			tag = CONNECTION_REFUSED_TAG
@@ -47,5 +68,5 @@ func apiErrorResponse(routeserverId string, err error) api.ErrorResponse {
 		Tag:           tag,
 		Message:       message,
 		RouteserverId: routeserverId,
-	}
+	}, status
 }

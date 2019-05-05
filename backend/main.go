@@ -17,7 +17,7 @@ func main() {
 
 	// Handle commandline parameters
 	configFilenameFlag := flag.String(
-		"config", "/etc/alicelg/alice.conf",
+		"config", "/etc/alice-lg/alice.conf",
 		"Alice looking glass configuration file",
 	)
 
@@ -46,6 +46,9 @@ func main() {
 	if AliceConfig.Server.EnablePrefixLookup == true {
 		AliceNeighboursStore.Start()
 	}
+
+	// Start the Housekeeping
+	go Housekeeping(AliceConfig)
 
 	// Setup request routing
 	router := httprouter.New()
