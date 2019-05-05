@@ -1,6 +1,35 @@
 
 # Changelog
 
+## 3.5.0 (2019-02-22)
+
+Support for birdwatcher route server API implementation version 1.13.0 and above.  
+This new implementation of birdwatcher only provides the direct output of the
+birdc comands and eliminates complex endpoints that fetch data from multiple
+birdc responses. The aggregation of data, based on the particular route server
+setup in use is now implemented in Alice-LG.
+Therefore the birdwatcher source can be configured with a new config parameter
+'type', which specifies a processing strategy for the ingested data which
+corresponds to a particular layout of the routing daemon (BIRD) configuration
+(e.g. single-table, multi-table or something even more custom). For developers
+it is made easy to add new configuration types.
+
+The neighbor summary has been removed, since much of it's data can be requested
+from the new birdwatcher endpoints in alternative ways.
+
+The config option from birdwatcher "PeerTablePrefix" and "PipeProtocolPrefix"
+have been carried over to Alice-LG. These constants may be defined on a
+per route server basis and are used to generate the request URLs for the
+route server (birdwatcher) API in case of multi-table setup.
+
+In addition this version contains the following bug-fixes and features:
+* Fix a bug in Neighbors(), a peer that is down would cause a runtime error
+* Fix the cache, it would still store entries even if disabled
+* Fix a bug affecting the cache (subsequent modification of entries)
+* Remove additional caches to avoid duplicate caching and save memory
+* Save memory by periodically expiring entries with a housekeeping routine
+* Change extended communities format to (string, string, string)
+
 ## 3.4.4 (2019-01-29)
 
 * Loading indicators in frontend for received routes and filtered routes

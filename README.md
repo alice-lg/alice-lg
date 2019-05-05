@@ -18,10 +18,10 @@ And checkout the API at:
 Alice-LG is a BGP looking glass which gets its data from external APIs.
 
 Currently Alice-LG supports the following APIs:
-- [birdwatcher API](https://github.com/ecix/birdwatcher) for [BIRD](http://bird.network.cz/)
+- [birdwatcher API](https://github.com/alice-lg/birdwatcher) for [BIRD](http://bird.network.cz/)
 
-Normally you would first install the [birdwatcher API](https://github.com/ecix/birdwatcher) directly on the machine(s) where you run [BIRD](http://bird.network.cz/) on
-and then install Alice-LG on a seperate public facing server and point her to the afore mentioned [birdwatcher API](https://github.com/ecix/birdwatcher).
+Normally you would first install the [birdwatcher API](https://github.com/alice-lg/birdwatcher) directly on the machine(s) where you run [BIRD](http://bird.network.cz/) on
+and then install Alice-LG on a seperate public facing server and point her to the afore mentioned [birdwatcher API](https://github.com/alice-lg/birdwatcher).
 
 This project was a direct result of the [RIPE IXP Tools Hackathon](https://atlas.ripe.net/hackathon/ixp-tools/)
 just prior to [RIPE73](https://ripe73.ripe.net/) in Madrid, Spain.
@@ -76,16 +76,21 @@ You can copy it to any of the following locations:
 You will have to edit the configuration file as you need to point Alice-LG to the correct [APIs](https://github.com/alice-lg/birdwatcher):
 
 ```ini
-[source.0]
+[source.rs1-example-v4]
 name = rs1.example.com (IPv4)
-[source.0.birdwatcher]
+[source.rs1-example-v4.birdwatcher]
 api = http://rs1.example.com:29184/
 # show_last_reboot = true
 # timezone = UTC
+# type = single_table / multi_table
+type = multi_table
+# not needed for single_table
+peer_table_prefix = T
+pipe_protocol_prefix = M
 
-[source.1]
+[source.rs1-example-v6]
 name = rs1.example.com (IPv6)
-[source.1.birdwatcher]
+[source.rs1-example-v6.birdwatcher]
 api = http://rs1.example.com:29186/
 ```
 

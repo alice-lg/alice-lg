@@ -23,6 +23,11 @@ type ServerConfig struct {
 	Asn                            int    `ini:"asn"`
 }
 
+type HousekeepingConfig struct {
+	Interval           int  `ini:"interval"`
+	ForceReleaseMemory bool `ini:"force_release_memory"`
+}
+
 type RejectionsConfig struct {
 	Reasons BgpCommunities
 }
@@ -96,10 +101,11 @@ type SourceConfig struct {
 }
 
 type Config struct {
-	Server  ServerConfig
-	Ui      UiConfig
-	Sources []*SourceConfig
-	File    string
+	Server       ServerConfig
+	Housekeeping HousekeepingConfig
+	Ui           UiConfig
+	Sources      []*SourceConfig
+	File         string
 }
 
 // Get source by id
@@ -597,6 +603,19 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 		// Set backend
 		switch backendType {
 		case SOURCE_BIRDWATCHER:
+			sourceType := backendConfig.Key("type").MustString("")
+			peerTablePrefix := backendConfig.Key("peer_table_prefix").MustString("T")
+			pipeProtocolPrefix := backendConfig.Key("pipe_protocol_prefix").MustString("M")
+
+			if sourceType != "single_table" &&
+				sourceType != "multi_table" {
+				log.Fatal("Configuration error (birdwatcher source) unknown birdwatcher type:", sourceType)
+			}
+
+			log.Println("Adding birdwatcher source of type", sourceType,
+				"with peer_table_prefix", peerTablePrefix,
+				"and pipe_protocol_prefix", pipeProtocolPrefix)
+
 			c := birdwatcher.Config{
 				Id:   config.Id,
 				Name: config.Name,
@@ -605,7 +624,12 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 				ServerTime:      "2006-01-02T15:04:05.999999999Z07:00",
 				ServerTimeShort: "2006-01-02",
 				ServerTimeExt:   "Mon, 02 Jan 2006 15:04:05 -0700",
+
+				Type:               sourceType,
+				PeerTablePrefix:    peerTablePrefix,
+				PipeProtocolPrefix: pipeProtocolPrefix,
 			}
+
 			backendConfig.MapTo(&c)
 			config.Birdwatcher = c
 		}
@@ -650,6 +674,9 @@ func loadConfig(file string) (*Config, error) {
 	server := ServerConfig{}
 	parsedConfig.Section("server").MapTo(&server)
 
+	housekeeping := HousekeepingConfig{}
+	parsedConfig.Section("housekeeping").MapTo(&housekeeping)
+
 	// Get all sources
 	sources, err := getSources(parsedConfig)
 	if err != nil {
@@ -663,10 +690,11 @@ func loadConfig(file string) (*Config, error) {
 	}
 
 	config := &Config{
-		Server:  server,
-		Ui:      ui,
-		Sources: sources,
-		File:    file,
+		Server:       server,
+		Housekeeping: housekeeping,
+		Ui:           ui,
+		Sources:      sources,
+		File:         file,
 	}
 
 	return config, nil

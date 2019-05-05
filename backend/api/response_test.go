@@ -72,7 +72,7 @@ func TestCommunityStringify(t *testing.T) {
 		t.Error("Expected 23:42, got:", com.String())
 	}
 
-	extCom := ExtCommunity{"ro", 42, 123}
+	extCom := ExtCommunity{"ro", "42", "123"}
 	if extCom.String() != "ro:42:123" {
 		t.Error("Expected ro:42:123, but got:", extCom.String())
 	}
@@ -88,8 +88,8 @@ func TestHasCommunity(t *testing.T) {
 			Community{42, 23},
 		},
 		ExtCommunities: []ExtCommunity{
-			ExtCommunity{"rt", 23, 42},
-			ExtCommunity{"ro", 123, 456},
+			ExtCommunity{"rt", "23", "42"},
+			ExtCommunity{"ro", "123", "456"},
 		},
 		LargeCommunities: []Community{
 			Community{1000, 23, 42},
@@ -105,11 +105,11 @@ func TestHasCommunity(t *testing.T) {
 		t.Error("Expected community 111:11 to be not present")
 	}
 
-	if bgp.HasExtCommunity(ExtCommunity{"ro", 123, 456}) == false {
+	if bgp.HasExtCommunity(ExtCommunity{"ro", "123", "456"}) == false {
 		t.Error("Expected ro:123:456 in ext community set")
 	}
 
-	if bgp.HasExtCommunity(ExtCommunity{"ro", 111, 11}) != false {
+	if bgp.HasExtCommunity(ExtCommunity{"ro", "111", "11"}) != false {
 		t.Error("Expected ro:111:111 not in ext community set")
 	}
 
@@ -133,9 +133,9 @@ func TestUniqueCommunities(t *testing.T) {
 
 func TestUniqueExtCommunities(t *testing.T) {
 	all := ExtCommunities{
-		ExtCommunity{"rt", 23, 42},
-		ExtCommunity{"ro", 42, 123},
-		ExtCommunity{"rt", 23, 42}}
+		ExtCommunity{"rt", "23", "42"},
+		ExtCommunity{"ro", "42", "123"},
+		ExtCommunity{"rt", "23", "42"}}
 	unique := all.Unique()
 	if len(unique) != 2 {
 		t.Error("len(unique) should be < len(all)")

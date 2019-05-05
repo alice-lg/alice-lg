@@ -5,6 +5,7 @@ import (
 )
 
 type Source interface {
+	ExpireCaches() int
 	Status() (*api.StatusResponse, error)
 	Neighbours() (*api.NeighboursResponse, error)
 	Routes(neighbourId string) (*api.RoutesResponse, error)

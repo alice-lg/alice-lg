@@ -45,5 +45,9 @@ func (self *NeighborsCache) Get() *api.NeighboursResponse {
 }
 
 func (self *NeighborsCache) Set(response *api.NeighboursResponse) {
+	if self.disabled {
+		return
+	}
+
 	self.response = response
 }
