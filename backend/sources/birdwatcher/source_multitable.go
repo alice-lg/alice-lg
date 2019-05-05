@@ -262,6 +262,12 @@ func (self *MultiTableBirdwatcher) fetchRequiredRoutes(neighborId string) (*api.
 
 // Get neighbors from protocols
 func (self *MultiTableBirdwatcher) Neighbours() (*api.NeighboursResponse, error) {
+	// Check if we hit the cache
+	response := self.neighborsCache.Get()
+	if response != nil {
+		return response, nil
+	}
+
 	// Query birdwatcher
 	apiStatus, birdProtocols, err := self.fetchProtocols()
 	if err != nil {
@@ -363,10 +369,13 @@ func (self *MultiTableBirdwatcher) Neighbours() (*api.NeighboursResponse, error)
 		}
 	}
 
-	response := &api.NeighboursResponse{
+	response = &api.NeighboursResponse{
 		Api:        *apiStatus,
 		Neighbours: neighbours,
 	}
+
+	// Cache result
+	self.neighborsCache.Set(response)
 
 	return response, nil // dereference for now
 }

@@ -8,6 +8,7 @@ type Source interface {
 	ExpireCaches() int
 	Status() (*api.StatusResponse, error)
 	Neighbours() (*api.NeighboursResponse, error)
+	NeighboursStatus() (*api.NeighboursStatusResponse, error)
 	Routes(neighbourId string) (*api.RoutesResponse, error)
 	RoutesReceived(neighbourId string) (*api.RoutesResponse, error)
 	RoutesFiltered(neighbourId string) (*api.RoutesResponse, error)

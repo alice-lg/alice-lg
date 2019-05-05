@@ -52,3 +52,30 @@ func (self *NeighboursResponse) CacheTtl() time.Duration {
 }
 
 type NeighboursLookupResults map[string]Neighbours
+
+
+type NeighboursStatus []*NeighbourStatus
+
+type NeighbourStatus struct {
+	Id    string        `json:"id"`
+	State string        `json:"state"`
+	Since time.Duration `json:"uptime"`
+}
+
+// Implement sorting interface for status
+func (neighbours NeighboursStatus) Len() int {
+	return len(neighbours)
+}
+
+func (neighbours NeighboursStatus) Less(i, j int) bool {
+	return neighbours[i].Id < neighbours[j].Id
+}
+
+func (neighbours NeighboursStatus) Swap(i, j int) {
+	neighbours[i], neighbours[j] = neighbours[j], neighbours[i]
+}
+
+type NeighboursStatusResponse struct {
+	Api        ApiStatus        `json:"api"`
+	Neighbours NeighboursStatus `json:"neighbours"`
+}

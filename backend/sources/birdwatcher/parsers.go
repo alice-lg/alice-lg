@@ -200,6 +200,31 @@ func parseNeighbours(bird ClientResponse, config Config) (api.Neighbours, error)
 	return neighbours, nil
 }
 
+// Parse neighbours response
+func parseNeighboursShort(bird ClientResponse, config Config) (api.NeighboursStatus, error) {
+	neighbours := api.NeighboursStatus{}
+	protocols := bird["protocols"].(map[string]interface{})
+
+	// Iterate over protocols map:
+	for protocolId, proto := range protocols {
+		protocol := proto.(map[string]interface{})
+
+		uptime := parseRelativeServerTime(protocol["since"], config)
+
+		neighbour := &api.NeighbourStatus{
+			Id:          protocolId,
+			State:       mustString(protocol["state"], "unknown"),
+			Since:       uptime,
+		}
+
+		neighbours = append(neighbours, neighbour)
+	}
+
+	sort.Sort(neighbours)
+
+	return neighbours, nil
+}
+
 // Parse route bgp info
 func parseRouteBgpInfo(data interface{}) api.BgpInfo {
 	bgpData, ok := data.(map[string]interface{})
