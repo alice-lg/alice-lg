@@ -57,6 +57,10 @@ func (self *RoutesCache) Get(neighborId string) *api.RoutesResponse {
 }
 
 func (self *RoutesCache) Set(neighborId string, response *api.RoutesResponse) {
+	if self.disabled {
+		return
+	}
+
 	self.Lock()
 	defer self.Unlock()
 
@@ -69,4 +73,22 @@ func (self *RoutesCache) Set(neighborId string, response *api.RoutesResponse) {
 
 	self.accessedAt[neighborId] = time.Now()
 	self.responses[neighborId] = response
+}
+
+func (self *RoutesCache) Expire() int {
+	self.Lock()
+	defer self.Unlock()
+
+	expiredKeys := []string{}
+	for key, response := range self.responses {
+		if response.CacheTtl() < 0 {
+			expiredKeys = append(expiredKeys, key)
+		}
+	}
+
+	for _, key := range expiredKeys {
+		delete(self.responses, key)
+	}
+
+	return len(expiredKeys)
 }
