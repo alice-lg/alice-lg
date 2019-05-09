@@ -82,7 +82,7 @@ func (gobgp *GoBGP) GetRoutes(peer *api.Peer, tableType api.TableType, rr *alice
 			Name: peer.State.NeighborAddress,
 			TableType: tableType,
 			Family: &family,
-			PolicyOptions: &api.ListPathRequest_PolicyOptions{ApplyPolicies:true},
+			EnableFiltered: true,
 		})
 
 		if err != nil {

@@ -78,6 +78,50 @@ func NewGoBGP(config Config) *GoBGP {
 	}
 }
 
+func (gobgp *GoBGP) ExpireCaches() int {
+	count := gobgp.routesRequiredCache.Expire()
+	count += gobgp.routesNotExportedCache.Expire()
+
+	return count
+}
+
+func (gobgp *GoBGP) NeighboursStatus() (*aliceapi.NeighboursStatusResponse, error) {
+	fmt.Printf("NeighboursStatus\n")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	response := aliceapi.NeighboursStatusResponse{}
+	response.Neighbours = make(aliceapi.NeighboursStatus,0)
+
+	resp, err := gobgp.client.ListPeer(ctx, &api.ListPeerRequest{})
+	if err != nil {
+		return nil, err
+	}
+	for {
+	    _resp, err := resp.Recv()
+	    if err == io.EOF {
+	        break
+	    }
+
+	    ns := aliceapi.NeighbourStatus{}
+	    ns.Id = PeerHash(_resp.Peer)
+
+	    switch _resp.Peer.State.SessionState {
+	    case api.PeerState_ESTABLISHED:
+	    	ns.State = "up"
+	    default:
+	    	ns.State = "down"
+	    }
+
+		if _resp.Peer.Timers.State.Uptime != nil {
+			ns.Since = time.Now().Sub(time.Unix(_resp.Peer.Timers.State.Uptime.Seconds,int64(_resp.Peer.Timers.State.Uptime.Nanos)))
+		}
+
+	}
+	return &response,nil
+}
+
+
 func (gobgp *GoBGP) Status() (*aliceapi.StatusResponse, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
@@ -94,7 +138,6 @@ func (gobgp *GoBGP) Status() (*aliceapi.StatusResponse, error) {
 	return &response,nil
 }
 
-// Get bird BGP protocols
 func (gobgp *GoBGP) Neighbours() (*aliceapi.NeighboursResponse, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
@@ -237,7 +280,7 @@ func (gobgp *GoBGP) RoutesNotExported(neighbourId string,) (*aliceapi.RoutesResp
 		return nil, err
 	}
 	routes := NewRoutesResponse();
-	err = gobgp.GetRoutes(neigh,api.TableType_LOCAL,&routes)
+	err = gobgp.GetRoutes(neigh,api.TableType_ADJ_OUT,&routes)
 	if err != nil {
 		return nil, err
 	}
