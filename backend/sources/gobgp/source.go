@@ -4,6 +4,7 @@ import (
 	aliceapi "github.com/alice-lg/alice-lg/backend/api"
 	"github.com/alice-lg/alice-lg/backend/caches"
 	api "github.com/osrg/gobgp/api"
+	"google.golang.org/grpc/credentials"
 
 	"google.golang.org/grpc"
 
@@ -32,11 +33,14 @@ type GoBGP struct {
 func NewGoBGP(config Config) *GoBGP {
 
 	dialOpts := make([]grpc.DialOption,0)
-
 	if config.Insecure {
 		dialOpts  = append(dialOpts,grpc.WithInsecure())
 	} else {
-		//TODO: We need credentials...
+		creds, err := credentials.NewClientTLSFromFile(config.TLSCert, config.TLSCommonName)
+	    if err != nil {
+	        log.Fatalf("could not load tls cert: %s", err)
+	    }
+		dialOpts = append(dialOpts, grpc.WithTransportCredentials(creds))
 	}
 
 	conn, err := grpc.Dial(config.Host, dialOpts...)
