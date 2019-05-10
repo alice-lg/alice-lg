@@ -27,7 +27,7 @@ all: $(TARGET)
 	@echo "Built $(VERSION) @ $(TARGET)"
 
 deps:
-	go get -v .
+	GO111MODULE=on go get -u -v .
 
 osx-dev: deps
 	go run $(FILES)
