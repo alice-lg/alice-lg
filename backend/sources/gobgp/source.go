@@ -133,6 +133,10 @@ func (gobgp *GoBGP) Status() (*api.StatusResponse, error) {
 
 	response := api.StatusResponse{}
 	response.Status.RouterId = resp.Global.RouterId
+	response.Status.LastReboot = time.Unix(resp.Global.StartedAt.Seconds, int64(resp.Global.StartedAt.Nanos))
+	response.Status.LastReconfig = time.Unix(resp.Global.ReconfiguredAt.Seconds, int64(resp.Global.ReconfiguredAt.Nanos))
+	response.Status.Version = resp.Global.Version.Version
+	response.Status.Message = "Daemon is up and running"
 	response.Status.Backend = "gobgp"
 	return &response, nil
 }
