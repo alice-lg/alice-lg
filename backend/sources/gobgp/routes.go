@@ -81,7 +81,8 @@ func (gobgp *GoBGP) GetRoutes(peer *gobgpapi.Peer, tableType gobgpapi.TableType,
 		})
 
 		if err != nil {
-			return nil
+			log.Print(err)
+			continue
 		}
 
 		rib := make([]*gobgpapi.Destination, 0)
