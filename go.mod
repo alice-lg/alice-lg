@@ -6,7 +6,7 @@ require (
 	github.com/go-ini/ini v1.41.0
 	github.com/golang/protobuf v1.2.0
 	github.com/julienschmidt/httprouter v1.2.0
-	github.com/osrg/gobgp v2.0.0+incompatible
+	github.com/osrg/gobgp v0.0.0-20190502094614-fd6618fed499
 	github.com/sirupsen/logrus v1.3.0
 	github.com/smartystreets/goconvey v0.0.0-20190330032615-68dc04aab96a // indirect
 	github.com/stretchr/testify v1.2.2
