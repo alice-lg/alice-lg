@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	_ "sort"
 	"time"
 )
 
