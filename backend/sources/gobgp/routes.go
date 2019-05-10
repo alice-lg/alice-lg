@@ -42,7 +42,7 @@ func (gobgp *GoBGP) lookupNeighbour(neighborId string) (*api.Peer,error) {
 		return nil, err
 	}
 	for _, peer := range peers {
-	    peerId := generatePeerId(peer)
+	    peerId := PeerHash(peer)
 	    if neighborId == "" || peerId == neighborId { 
 	    	return peer,nil
 	    }
@@ -105,7 +105,7 @@ func (gobgp *GoBGP) GetRoutes(peer *api.Peer, tableType api.TableType, rr *alice
 	    	for _, path := range d.Paths {
 		    	r := aliceapi.Route{}
 		    	r.Id = fmt.Sprintf("%d_%s", path.Identifier, d.Prefix)
-		    	r.NeighbourId = generatePeerId(peer)
+		    	r.NeighbourId = PeerHash(peer)
 		    	r.Network = d.Prefix
 		    	r.Interface = "Unknown"
 		    	r.Age = time.Now().Sub(time.Unix(path.Age.GetSeconds(),int64(path.Age.GetNanos())))
