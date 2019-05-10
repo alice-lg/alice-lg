@@ -30,22 +30,22 @@ deps:
 	GO111MODULE=on go get -v .
 
 osx-dev: deps
-	go run $(FILES)
+	GO111MODULE=on go run $(FILES)
 
 osx: deps
-	GOARCH=$(ARCH) GOOS=darwin go build $(LDFLAGS) -o $(PROG)-osx-$(ARCH)
+	GO111MODULE=on GOARCH=$(ARCH) GOOS=darwin go build $(LDFLAGS) -o $(PROG)-osx-$(ARCH)
 
 linux: deps
-	GOARCH=$(ARCH) GOOS=linux go build $(LDFLAGS) -o $(PROG)-linux-$(ARCH)
+	GO111MODULE=on GOARCH=$(ARCH) GOOS=linux go build $(LDFLAGS) -o $(PROG)-linux-$(ARCH)
 
 bundle:
 	rice embed-go
 
 test:
-	go test -v
-	cd api/ && go test -v
-	cd caches/ && go test -v
-	cd sources/birdwatcher && go test -v
+	GO111MODULE=on go test -v
+	cd api/ && GO111MODULE=on go test -v
+	cd caches/ && GO111MODULE=on go test -v
+	cd sources/birdwatcher && GO111MODULE=on go test -v
 
 
 dev: clean all
