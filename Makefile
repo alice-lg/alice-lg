@@ -38,6 +38,9 @@ client_prod:
 backend_dev: client_dev
 	$(MAKE) -C backend/
 
+dev: 
+	$(MAKE) -C backend/ osx-dev
+
 
 backend_prod: client_prod
 	$(MAKE) -C backend/ bundle
