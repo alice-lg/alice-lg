@@ -159,29 +159,31 @@ func (gobgp *GoBGP) Neighbours() (*api.NeighboursResponse, error) {
 		}
 
 		neigh := api.Neighbour{}
+		if _resp != nil {
 
-		neigh.Address = _resp.Peer.State.NeighborAddress
-		neigh.Asn = int(_resp.Peer.State.PeerAs)
-		switch _resp.Peer.State.SessionState {
-		case gobgpapi.PeerState_ESTABLISHED:
-			neigh.State = "up"
-		default:
-			neigh.State = "down"
-		}
-		neigh.Description = _resp.Peer.Conf.Description
+			neigh.Address = _resp.Peer.State.NeighborAddress
+			neigh.Asn = int(_resp.Peer.State.PeerAs)
+			switch _resp.Peer.State.SessionState {
+			case gobgpapi.PeerState_ESTABLISHED:
+				neigh.State = "up"
+			default:
+				neigh.State = "down"
+			}
+			neigh.Description = _resp.Peer.Conf.Description
 
-		neigh.Id = PeerHash(_resp.Peer)
+			neigh.Id = PeerHash(_resp.Peer)
 
-		response.Neighbours = append(response.Neighbours, &neigh)
-		for _, afiSafi := range _resp.Peer.AfiSafis {
-			neigh.RoutesReceived += int(afiSafi.State.Received)
-			neigh.RoutesExported += int(afiSafi.State.Advertised)
-			neigh.RoutesAccepted += int(afiSafi.State.Accepted)
-			neigh.RoutesFiltered += (neigh.RoutesReceived - neigh.RoutesAccepted)
-		}
+			response.Neighbours = append(response.Neighbours, &neigh)
+			for _, afiSafi := range _resp.Peer.AfiSafis {
+				neigh.RoutesReceived += int(afiSafi.State.Received)
+				neigh.RoutesExported += int(afiSafi.State.Advertised)
+				neigh.RoutesAccepted += int(afiSafi.State.Accepted)
+				neigh.RoutesFiltered += (neigh.RoutesReceived - neigh.RoutesAccepted)
+			}
 
-		if _resp.Peer.Timers.State.Uptime != nil {
-			neigh.Uptime = time.Now().Sub(time.Unix(_resp.Peer.Timers.State.Uptime.Seconds, int64(_resp.Peer.Timers.State.Uptime.Nanos)))
+			if _resp.Peer.Timers.State.Uptime != nil {
+				neigh.Uptime = time.Now().Sub(time.Unix(_resp.Peer.Timers.State.Uptime.Seconds, int64(_resp.Peer.Timers.State.Uptime.Nanos)))
+			}
 		}
 
 	}

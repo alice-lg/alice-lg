@@ -63,7 +63,10 @@ func (gobgp *GoBGP) GetNeighbours() ([]*gobgpapi.Peer, error) {
 		if err == io.EOF {
 			break
 		}
-		peers = append(peers, peer.Peer)
+
+		if peer != nil {
+			peers = append(peers, peer.Peer)
+		}
 	}
 	return peers, nil
 }
