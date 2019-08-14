@@ -7,6 +7,7 @@ import (
 	"log"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/alice-lg/alice-lg/backend/api"
@@ -177,14 +178,14 @@ func parseNeighbours(bird ClientResponse, config Config) (api.Neighbours, error)
 
 			Address:     mustString(protocol["neighbor_address"], "error"),
 			Asn:         mustInt(protocol["neighbor_as"], 0),
-			State:       mustString(protocol["state"], "unknown"),
+			State:       strings.ToLower(mustString(protocol["state"], "unknown")),
 			Description: mustString(protocol["description"], "no description"),
 			//TODO make these changes configurable
-			RoutesReceived:     mustInt(routesReceived, 0),
-			RoutesAccepted:     mustInt(routes["imported"], 0),
-			RoutesFiltered:     mustInt(routes["filtered"], 0),
-			RoutesExported:     mustInt(routes["exported"], 0), //TODO protocol_exported?
-			RoutesPreferred:    mustInt(routes["preferred"], 0),
+			RoutesReceived:  mustInt(routesReceived, 0),
+			RoutesAccepted:  mustInt(routes["imported"], 0),
+			RoutesFiltered:  mustInt(routes["filtered"], 0),
+			RoutesExported:  mustInt(routes["exported"], 0), //TODO protocol_exported?
+			RoutesPreferred: mustInt(routes["preferred"], 0),
 
 			Uptime:    uptime,
 			LastError: lastError,
@@ -212,9 +213,9 @@ func parseNeighboursShort(bird ClientResponse, config Config) (api.NeighboursSta
 		uptime := parseRelativeServerTime(protocol["since"], config)
 
 		neighbour := &api.NeighbourStatus{
-			Id:          protocolId,
-			State:       mustString(protocol["state"], "unknown"),
-			Since:       uptime,
+			Id:    protocolId,
+			State: mustString(protocol["state"], "unknown"),
+			Since: uptime,
 		}
 
 		neighbours = append(neighbours, neighbour)
