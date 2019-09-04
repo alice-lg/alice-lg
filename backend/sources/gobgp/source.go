@@ -10,10 +10,11 @@ import (
 
 	"context"
 	"fmt"
-	"io"
 	"log"
 	"time"
 )
+
+var contextTimeout time.Duration = time.Second*30
 
 type GoBGP struct {
 	config Config
@@ -88,34 +89,28 @@ func (gobgp *GoBGP) ExpireCaches() int {
 }
 
 func (gobgp *GoBGP) NeighboursStatus() (*api.NeighboursStatusResponse, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
 
 	response := api.NeighboursStatusResponse{}
 	response.Neighbours = make(api.NeighboursStatus, 0)
 
-	resp, err := gobgp.client.ListPeer(ctx, &gobgpapi.ListPeerRequest{})
+	peers, err := gobgp.GetNeighbours()
 	if err != nil {
-		return nil, err
+		return nil,err
 	}
-	for {
-		_resp, err := resp.Recv()
-		if err == io.EOF {
-			break
-		}
 
+	for _, peer := range peers {
 		ns := api.NeighbourStatus{}
-		ns.Id = PeerHash(_resp.Peer)
+		ns.Id = PeerHash(peer)
 
-		switch _resp.Peer.State.SessionState {
+		switch peer.State.SessionState {
 		case gobgpapi.PeerState_ESTABLISHED:
 			ns.State = "up"
 		default:
 			ns.State = "down"
 		}
 
-		if _resp.Peer.Timers.State.Uptime != nil {
-			ns.Since = time.Now().Sub(time.Unix(_resp.Peer.Timers.State.Uptime.Seconds, int64(_resp.Peer.Timers.State.Uptime.Nanos)))
+		if peer.Timers.State.Uptime != nil {
+			ns.Since = time.Now().Sub(time.Unix(peer.Timers.State.Uptime.Seconds, int64(peer.Timers.State.Uptime.Nanos)))
 		}
 
 	}
@@ -123,7 +118,7 @@ func (gobgp *GoBGP) NeighboursStatus() (*api.NeighboursStatusResponse, error) {
 }
 
 func (gobgp *GoBGP) Status() (*api.StatusResponse, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), contextTimeout)
 	defer cancel()
 
 	resp, err := gobgp.client.GetBgp(ctx, &gobgpapi.GetBgpRequest{})
@@ -133,52 +128,48 @@ func (gobgp *GoBGP) Status() (*api.StatusResponse, error) {
 
 	response := api.StatusResponse{}
 	response.Status.RouterId = resp.Global.RouterId
+	response.Status.LastReboot = time.Unix(resp.Global.StartedAt.Seconds, int64(resp.Global.StartedAt.Nanos))
+	response.Status.LastReconfig = time.Unix(resp.Global.ReconfiguredAt.Seconds, int64(resp.Global.ReconfiguredAt.Nanos))
+	response.Status.Version = resp.Global.Version.Version
+	response.Status.Message = "Daemon is up and running"
 	response.Status.Backend = "gobgp"
 	return &response, nil
 }
 
 func (gobgp *GoBGP) Neighbours() (*api.NeighboursResponse, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
 	response := api.NeighboursResponse{}
 	response.Neighbours = make(api.Neighbours, 0)
-
-	resp, err := gobgp.client.ListPeer(ctx, &gobgpapi.ListPeerRequest{EnableAdvertised: true})
+	peers, err := gobgp.GetNeighbours()
 	if err != nil {
 		return nil, err
 	}
-	for {
-		_resp, err := resp.Recv()
-		if err == io.EOF {
-			break
-		}
 
+	for _, peer := range peers {
 		neigh := api.Neighbour{}
-
-		neigh.Address = _resp.Peer.State.NeighborAddress
-		neigh.Asn = int(_resp.Peer.State.PeerAs)
-		switch _resp.Peer.State.SessionState {
+		neigh.Address = peer.State.NeighborAddress
+		neigh.Asn = int(peer.State.PeerAs)
+		switch peer.State.SessionState {
 		case gobgpapi.PeerState_ESTABLISHED:
 			neigh.State = "up"
 		default:
 			neigh.State = "down"
 		}
-		neigh.Description = _resp.Peer.Conf.Description
+		neigh.Description = peer.Conf.Description
 
-		neigh.Id = PeerHash(_resp.Peer)
+		neigh.Id = PeerHash(peer)
 
-		response.Neighbours = append(response.Neighbours, &neigh)
-		for _, afiSafi := range _resp.Peer.AfiSafis {
+		for _, afiSafi := range peer.AfiSafis {
 			neigh.RoutesReceived += int(afiSafi.State.Received)
 			neigh.RoutesExported += int(afiSafi.State.Advertised)
 			neigh.RoutesAccepted += int(afiSafi.State.Accepted)
 			neigh.RoutesFiltered += (neigh.RoutesReceived - neigh.RoutesAccepted)
 		}
 
-		if _resp.Peer.Timers.State.Uptime != nil {
-			neigh.Uptime = time.Now().Sub(time.Unix(_resp.Peer.Timers.State.Uptime.Seconds, int64(_resp.Peer.Timers.State.Uptime.Nanos)))
+		if peer.Timers.State.Uptime != nil {
+			neigh.Uptime = time.Now().Sub(time.Unix(peer.Timers.State.Uptime.Seconds, int64(peer.Timers.State.Uptime.Nanos)))
 		}
+
+		response.Neighbours = append(response.Neighbours, &neigh)
 
 	}
 
@@ -298,11 +289,11 @@ func (gobgp *GoBGP) AllRoutes() (*api.RoutesResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	for _, peer := range peers {
 		err = gobgp.GetRoutes(peer, gobgpapi.TableType_ADJ_IN, &routes)
 		if err != nil {
 			log.Print(err)
+			break
 		}
 	}
 
