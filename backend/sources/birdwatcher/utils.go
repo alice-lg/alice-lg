@@ -2,6 +2,7 @@ package birdwatcher
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/alice-lg/alice-lg/backend/api"
@@ -50,4 +51,9 @@ func (self *LockMap) Unlock(key string) {
 		return // Nothing to unlock
 	}
 	mutex.(*sync.Mutex).Unlock()
+}
+
+func isProtocolUp(protocol string) bool {
+	protocol = strings.ToLower(protocol)
+	return protocol == "up"
 }
