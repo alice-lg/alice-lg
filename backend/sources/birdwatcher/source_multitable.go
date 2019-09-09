@@ -6,19 +6,18 @@ import (
 	"strings"
 
 	"fmt"
-	"sort"
 	"log"
+	"sort"
 )
-
 
 type MultiTableBirdwatcher struct {
 	GenericBirdwatcher
 }
 
-
 func (self *MultiTableBirdwatcher) getMasterPipeName(table string) string {
-	if strings.HasPrefix(table, self.config.PeerTablePrefix) {
-		return self.config.PipeProtocolPrefix + table[1:]
+	ptPrefix := self.config.PeerTablePrefix
+	if strings.HasPrefix(table, ptPrefix) {
+		return self.config.PipeProtocolPrefix + table[len(ptPrefix):]
 	} else {
 		return ""
 	}
@@ -50,7 +49,6 @@ func (self *MultiTableBirdwatcher) parseProtocolToTableTree(bird ClientResponse)
 
 	return response
 }
-
 
 func (self *MultiTableBirdwatcher) fetchProtocols() (*api.ApiStatus, map[string]interface{}, error) {
 	// Query birdwatcher
@@ -259,7 +257,6 @@ func (self *MultiTableBirdwatcher) fetchRequiredRoutes(neighborId string) (*api.
 	return response, nil
 }
 
-
 // Get neighbors from protocols
 func (self *MultiTableBirdwatcher) Neighbours() (*api.NeighboursResponse, error) {
 	// Check if we hit the cache
@@ -324,7 +321,7 @@ func (self *MultiTableBirdwatcher) Neighbours() (*api.NeighboursResponse, error)
 		if len(tree[table].(map[string]interface{})) == 1 {
 			// Single router
 			for _, protocol := range tree[table].(map[string]interface{}) {
-				filtered[protocol.(map[string]interface{})["protocol"].(string)] = int(allRoutesImported-pipeRoutesImported)
+				filtered[protocol.(map[string]interface{})["protocol"].(string)] = int(allRoutesImported - pipeRoutesImported)
 			}
 		} else {
 			// Multiple routers
@@ -497,7 +494,7 @@ func (self *MultiTableBirdwatcher) AllRoutes() (*api.RoutesResponse, error) {
 	}
 
 	response := &api.RoutesResponse{
-		Api:    apiStatus,
+		Api: apiStatus,
 	}
 
 	// Parse the routes

@@ -1,6 +1,10 @@
 
 # Changelog
 
+## 4.0.2 (2019-09-09)
+
+* Fixed issue with multitable bird: `getMasterPipeName` returned incorrect
+  pipe.
 
 ## 4.0.1 (2019-03-07)
 

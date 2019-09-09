@@ -24,7 +24,7 @@ class Status extends React.Component {
     if (rsStatus) {
       statusInfo.push(
         <div className="bird-version" key="status-version">
-          Bird {rsStatus.version}
+          {rsStatus.backend} {rsStatus.version}
         </div>
       );
     }
