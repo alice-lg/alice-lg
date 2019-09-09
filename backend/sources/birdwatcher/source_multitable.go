@@ -290,7 +290,7 @@ func (self *MultiTableBirdwatcher) Neighbours() (*api.NeighboursResponse, error)
 		// Sum up all routes from all peers for a table
 		for _, protocol := range tree[table].(map[string]interface{}) {
 			// Skip peers that are not up (start/down)
-			if protocol.(map[string]interface{})["state"].(string) != "up" {
+			if !isProtocolUp(protocol.(map[string]interface{})["state"].(string)) {
 				continue
 			}
 			allRoutesImported += int64(protocol.(map[string]interface{})["routes"].(map[string]interface{})["imported"].(float64))
@@ -331,7 +331,7 @@ func (self *MultiTableBirdwatcher) Neighbours() (*api.NeighboursResponse, error)
 				// to query birdwatcher again.
 				for _, protocol := range tree[table].(map[string]interface{}) {
 					// Skip peers that are not up (start/down)
-					if protocol.(map[string]interface{})["state"].(string) != "up" {
+					if !isProtocolUp(protocol.(map[string]interface{})["state"].(string)) {
 						continue
 					}
 					filtered[protocol.(map[string]interface{})["protocol"].(string)] = int(protocol.(map[string]interface{})["routes"].(map[string]interface{})["imported"].(float64))
