@@ -30,8 +30,8 @@ import (
 //     Routes       /api/v1/routeservers/:id/neighbors/:neighborId/routes
 //
 //   Querying
-//     LookupPrefix /api/v1/routeservers/:id/lookup/prefix?q=<prefix>
-//
+//     LookupPrefix   /api/v1/lookup/prefix?q=<prefix>
+//     LookupNeighbor /api/v1/lookup/neighbor?asn=1235
 
 type apiEndpoint func(*http.Request, httprouter.Params) (api.Response, error)
 

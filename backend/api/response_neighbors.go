@@ -11,18 +11,18 @@ type Neighbour struct {
 	Id string `json:"id"`
 
 	// Mandatory fields
-	Address         string             `json:"address"`
-	Asn             int                `json:"asn"`
-	State           string             `json:"state"`
-	Description     string             `json:"description"`
-	RoutesReceived  int                `json:"routes_received"`
-	RoutesFiltered  int                `json:"routes_filtered"`
-	RoutesExported  int                `json:"routes_exported"`
-	RoutesPreferred int                `json:"routes_preferred"`
-	RoutesAccepted  int                `json:"routes_accepted"`
-	Uptime          time.Duration      `json:"uptime"`
-	LastError       string             `json:"last_error"`
-	Related         []*RelatedNeighbor `json:"related"`
+	Address         string        `json:"address"`
+	Asn             int           `json:"asn"`
+	State           string        `json:"state"`
+	Description     string        `json:"description"`
+	RoutesReceived  int           `json:"routes_received"`
+	RoutesFiltered  int           `json:"routes_filtered"`
+	RoutesExported  int           `json:"routes_exported"`
+	RoutesPreferred int           `json:"routes_preferred"`
+	RoutesAccepted  int           `json:"routes_accepted"`
+	Uptime          time.Duration `json:"uptime"`
+	LastError       string        `json:"last_error"`
+	RouteServer     string        `json:"routeserver"`
 
 	// Original response
 	Details map[string]interface{} `json:"details"`
@@ -39,13 +39,6 @@ func (neighbours Neighbours) Less(i, j int) bool {
 
 func (neighbours Neighbours) Swap(i, j int) {
 	neighbours[i], neighbours[j] = neighbours[j], neighbours[i]
-}
-
-type RelatedNeighbor struct {
-	Id          string `json:"id"`
-	RouteServer string `json:"routeserver"`
-	Address     string `json:"address"`
-	State       string `json:"state"`
 }
 
 type NeighboursResponse struct {
