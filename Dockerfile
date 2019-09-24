@@ -36,11 +36,19 @@ RUN go install github.com/GeertJohan/go.rice/rice
 COPY --from=frontend /src/alice-lg/client/build client/build
 
 # Build backend
+WORKDIR /src/alice-lg
+ADD VERSION .
+
 WORKDIR /src/alice-lg/backend
 ADD backend .
 RUN rice embed-go
 
-RUN go build -o alice-lg-linux-amd64 -ldflags="-X main.version=4.0.3"
+# RUN go build -o alice-lg-linux-amd64 -ldflags="-X main.version=4.0.3"
+RUN make alpine
+
+FROM alpine:latest
+COPY --from=backend /src/alice-lg/backend/alice-lg-linux-amd64 /usr/bin/alice-lg
+RUN ls -lsha /usr/bin/alice-lg
 
 EXPOSE 7340:7340
-CMD ["/src/alice-lg/backend/alice-lg-linux-amd64"]
+CMD ["/usr/bin/alice-lg"]

@@ -23,20 +23,25 @@ endif
 LDFLAGS=-ldflags="-X main.version=$(APP_VERSION)"
 FILES=$(shell find . -depth 1 ! -name "*_test.go" -name "*.go")
 
-all: $(TARGET)
+all: deps $(TARGET)
 	@echo "Built $(VERSION) @ $(TARGET)"
 
 deps:
 	GO111MODULE=on go get -v .
 
-osx-dev: deps
+osx-dev:
 	GO111MODULE=on go run $(FILES)
 
-osx: deps
+osx:
 	GO111MODULE=on GOARCH=$(ARCH) GOOS=darwin go build $(LDFLAGS) -o $(PROG)-osx-$(ARCH)
 
-linux: deps
+linux:
 	GO111MODULE=on GOARCH=$(ARCH) GOOS=linux go build $(LDFLAGS) -o $(PROG)-linux-$(ARCH)
+
+alpine:
+	GO111MODULE=on CGO_ENABLED=0 GOOS=linux go build \
+		-a -installsuffix cgo \
+		$(LDFLAGS) -o $(PROG)-linux-$(ARCH)
 
 bundle:
 	rice embed-go
