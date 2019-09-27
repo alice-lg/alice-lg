@@ -46,6 +46,27 @@ type NeighboursResponse struct {
 	Neighbours Neighbours `json:"neighbours"`
 }
 
+// Implement Filterable interface
+func (self *Neighbour) MatchSourceId(id string) bool {
+	return self.RouteServer == id
+}
+
+func (self *Neighbour) MatchAsn(asn int) bool {
+	return self.Asn == asn
+}
+
+func (self *Neighbour) MatchCommunity(_community Community) bool {
+	return true // Ignore
+}
+
+func (self *Neighbour) MatchExtCommunity(_community Community) bool {
+	return true // Ignore
+}
+
+func (self *Neighbour) MatchLargeCommunity(_community Community) bool {
+	return true // Ignore
+}
+
 // Neighbours response is cacheable
 func (self *NeighboursResponse) CacheTtl() time.Duration {
 	now := time.Now().UTC()
