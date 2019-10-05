@@ -134,3 +134,10 @@ func apiLookupPrefixGlobal(
 
 	return response, nil
 }
+
+func apiLookupNeighborGlobal(
+	req *http.Request,
+	params httprouter.Params,
+) (api.Response, error) {
+	return nil, nil
+}

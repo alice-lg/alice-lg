@@ -192,7 +192,7 @@ func parseNeighbours(bird ClientResponse, config Config) (api.Neighbours, error)
 			Uptime:    uptime,
 			LastError: lastError,
 
-			RouteServer: rsId,
+			RouteServerId: rsId,
 
 			Details: protocol,
 		}

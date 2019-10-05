@@ -57,9 +57,3 @@ func apiNeighborsList(
 
 	return neighborsResponse, nil
 }
-
-// Handle related neighbors
-func apiNeighborsRelatedList(
-	req *http.Request,
-	params httprouter.Params,
-) (api.Response, error)
