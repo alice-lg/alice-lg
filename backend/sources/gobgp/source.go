@@ -167,6 +167,7 @@ func (gobgp *GoBGP) Neighbours() (*api.NeighboursResponse, error) {
 		neigh.Description = _resp.Peer.Conf.Description
 
 		neigh.Id = PeerHash(_resp.Peer)
+		neigh.RouteServer = gobgp.config.Id
 
 		response.Neighbours = append(response.Neighbours, &neigh)
 		for _, afiSafi := range _resp.Peer.AfiSafis {
