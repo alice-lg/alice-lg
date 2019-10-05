@@ -48,7 +48,7 @@ type NeighboursResponse struct {
 
 // Implement Filterable interface
 func (self *Neighbour) MatchSourceId(id string) bool {
-	return self.RouteServer == id
+	return self.RouteServerId == id
 }
 
 func (self *Neighbour) MatchAsn(asn int) bool {
