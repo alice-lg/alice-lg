@@ -22,7 +22,7 @@ type Neighbour struct {
 	RoutesAccepted  int           `json:"routes_accepted"`
 	Uptime          time.Duration `json:"uptime"`
 	LastError       string        `json:"last_error"`
-	RouteServer     string        `json:"routeserver"`
+	RouteServerId   string        `json:"routeserver_id"`
 
 	// Original response
 	Details map[string]interface{} `json:"details"`
