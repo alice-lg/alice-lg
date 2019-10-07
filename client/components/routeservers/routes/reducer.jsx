@@ -9,7 +9,11 @@ import {FETCH_ROUTES_RECEIVED_REQUEST,
 
         FETCH_ROUTES_NOT_EXPORTED_REQUEST,
         FETCH_ROUTES_NOT_EXPORTED_SUCCESS,
-        FETCH_ROUTES_NOT_EXPORTED_ERROR} from './actions'
+        FETCH_ROUTES_NOT_EXPORTED_ERROR,
+
+        FETCH_RELATED_PEERS_REQUEST,
+        FETCH_RELATED_PEERS_SUCCESS,
+        FETCH_RELATED_PEERS_ERROR} from './actions'
 
 import {ROUTES_RECEIVED,
         ROUTES_FILTERED,
@@ -62,6 +66,9 @@ const initialState = {
 
   // Derived state from location
   loadNotExported: false,
+
+  // Global related peers
+  allRelatedPeers: [],
 
   filterValue: "",
   filterQuery: "",
@@ -167,6 +174,25 @@ function _handleFilterQueryValueChange(state, payload) {
 }
 
 
+// Related Peers
+function _handleFetchRelatedPeersRequest(state, payload) {
+  return Object.assign({}, state, {
+    allRelatedPeers: [],
+  });
+}
+
+function _handleFetchRelatedPeersSuccess(state, payload) {
+  return Object.assign({}, state, {
+    allRelatedPeers: payload.neighbors,
+  });
+}
+
+function _handleFetchRelatedPeersError(state, payload) {
+  return Object.assign({}, state, {
+    allRelatedPeers: [],
+  });
+}
+
 export default function reducer(state=initialState, action) {
 
   switch(action.type) {
@@ -217,6 +243,14 @@ export default function reducer(state=initialState, action) {
       return _handleFetchRoutesError(ROUTES_NOT_EXPORTED,
                                      state,
                                      action.payload);
+
+    // Related Peers
+    case FETCH_RELATED_PEERS_REQUEST:
+      return _handleFetchRelatedPeersRequest(state, action.payload);
+    case FETCH_RELATED_PEERS_SUCCESS:
+      return _handleFetchRelatedPeersSuccess(state, action.payload);
+    case FETCH_RELATED_PEERS_ERROR:
+      return _handleFetchRelatedPeersError(state, action.payload);
   }
 
   return state;
