@@ -647,4 +647,13 @@ func TestNeighborFilterFromQuery(t *testing.T) {
 	if filter.name != "foo" {
 		t.Error("Unexpected name filter:", filter.name)
 	}
+
+	values, _ = url.ParseQuery("asn=")
+	filter = NeighborFilterFromQuery(values)
+	if filter.asn != 0 {
+		t.Error("Unexpected asn:", filter.asn)
+	}
+	if filter.name != "" {
+		t.Error("Unexpected name:", filter.name)
+	}
 }
