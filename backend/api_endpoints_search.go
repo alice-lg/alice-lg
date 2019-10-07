@@ -143,6 +143,8 @@ func apiLookupNeighborsGlobal(
 	filter := api.NeighborFilterFromQuery(req.URL.Query())
 	neighbors := AliceNeighboursStore.FilterNeighbors(filter)
 
+	sort.Sort(neighbors)
+
 	// Make response
 	response := &api.NeighboursResponse{
 		Api: api.ApiStatus{

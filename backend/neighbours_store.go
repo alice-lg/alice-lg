@@ -265,7 +265,7 @@ func (self *NeighboursStore) LookupNeighbours(
 func (self *NeighboursStore) FilterNeighborsAt(
 	sourceId string,
 	filter *api.NeighborFilter,
-) []*api.Neighbour {
+) api.Neighbours {
 	results := []*api.Neighbour{}
 
 	self.RLock()
@@ -287,7 +287,7 @@ func (self *NeighboursStore) FilterNeighborsAt(
 */
 func (self *NeighboursStore) FilterNeighbors(
 	filter *api.NeighborFilter,
-) []*api.Neighbour {
+) api.Neighbours {
 	results := []*api.Neighbour{}
 
 	// Get neighbors from all routeservers
