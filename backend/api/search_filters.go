@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"strconv"
 )
 
 const (
@@ -540,4 +541,48 @@ func (self *SearchFilters) MergeProperties(other *SearchFilters) {
 			filter.Cardinality = otherFilter.Cardinality
 		}
 	}
+}
+
+// The above filters apply for now for routes.
+// We are using a slightly simpler solution for neighbor queries.
+// At least for the time beeing.
+type NeighborFilter struct {
+	name string
+	asn  int
+}
+
+/*
+ Get neighbor filters from query parameters.
+ Right now we support filtering by name (partial match)
+ and ASN.
+
+ The latter is used to find related peers on all route servers.
+*/
+func NeighborFilterFromQuery(q url.Values) *NeighborFilter {
+	asn := 0
+	name := q.Get("name")
+	asnVal := q.Get("asn")
+	if asnVal != "" {
+		asn, _ = strconv.Atoi(asnVal)
+	}
+
+	filter := &NeighborFilter{
+		name: name,
+		asn:  asn,
+	}
+	return filter
+}
+
+/*
+ Match neighbor with filter: Check if the neighbor
+ in question has the required parameters.
+*/
+func (self *NeighborFilter) Match(neighbor *Neighbour) bool {
+	if self.name != "" && neighbor.MatchName(self.name) {
+		return true
+	}
+	if self.asn > 0 && neighbor.MatchAsn(self.asn) {
+		return true
+	}
+	return false
 }

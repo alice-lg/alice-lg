@@ -1,6 +1,7 @@
 package api
 
 import (
+	"strings"
 	"time"
 )
 
@@ -65,6 +66,13 @@ func (self *Neighbour) MatchExtCommunity(_community Community) bool {
 
 func (self *Neighbour) MatchLargeCommunity(_community Community) bool {
 	return true // Ignore
+}
+
+func (self *Neighbour) MatchName(name string) bool {
+	name = strings.ToLower(name)
+	neighName := strings.ToLower(self.Description)
+
+	return strings.Contains(neighName, name)
 }
 
 // Neighbours response is cacheable
