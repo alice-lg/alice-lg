@@ -574,6 +574,15 @@ func NeighborFilterFromQuery(q url.Values) *NeighborFilter {
 }
 
 /*
+ Decode query values from string.
+ This is intendet as a helper method to make testing easier.
+*/
+func NeighborFilterFromQueryString(q string) *NeighborFilter {
+	values, _ := url.ParseQuery(q)
+	return NeighborFilterFromQuery(values)
+}
+
+/*
  Match neighbor with filter: Check if the neighbor
  in question has the required parameters.
 */

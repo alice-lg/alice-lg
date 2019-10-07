@@ -637,9 +637,7 @@ func TestNeighborFilterMatch(t *testing.T) {
 
 func TestNeighborFilterFromQuery(t *testing.T) {
 	query := "asn=2342&name=foo"
-	values, _ := url.ParseQuery(query)
-
-	filter := NeighborFilterFromQuery(values)
+	filter := NeighborFilterFromQueryString(query)
 
 	if filter.asn != 2342 {
 		t.Error("Unexpected asn filter:", filter.asn)
@@ -648,8 +646,7 @@ func TestNeighborFilterFromQuery(t *testing.T) {
 		t.Error("Unexpected name filter:", filter.name)
 	}
 
-	values, _ = url.ParseQuery("asn=")
-	filter = NeighborFilterFromQuery(values)
+	filter = NeighborFilterFromQueryString(values)
 	if filter.asn != 0 {
 		t.Error("Unexpected asn:", filter.asn)
 	}
