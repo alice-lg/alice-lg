@@ -52,10 +52,10 @@ func NewNeighboursStore(config *Config) *NeighboursStore {
 	refreshNeighborStatus := config.Server.EnableNeighborsStatusRefresh
 
 	store := &NeighboursStore{
-		neighboursMap:   neighboursMap,
-		statusMap:       statusMap,
-		configMap:       configMap,
-		refreshInterval: refreshInterval,
+		neighboursMap:         neighboursMap,
+		statusMap:             statusMap,
+		configMap:             configMap,
+		refreshInterval:       refreshInterval,
 		refreshNeighborStatus: refreshNeighborStatus,
 	}
 	return store
@@ -252,6 +252,46 @@ func (self *NeighboursStore) LookupNeighbours(
 
 	for sourceId, _ := range self.neighboursMap {
 		results[sourceId] = self.LookupNeighboursAt(sourceId, query)
+	}
+
+	return results
+}
+
+/*
+ Filter neighbors from a single route server.
+*/
+func (self *NeighboursStore) FilterNeighborsAt(
+	sourceId string,
+	filter *api.NeighborFilter,
+) []*api.Neighbour {
+	results := []*api.Neighbour{}
+
+	self.RLock()
+	neighbors := self.neighboursMap[sourceId]
+	self.RUnlock()
+
+	// Apply filters
+	for _, neighbor := range neighbors {
+		if filter.Match(neighbor) {
+			results = append(results, neighbor)
+		}
+	}
+	return results
+}
+
+/*
+ Filter neighbors by name or by ASN.
+ Collect results from all routeservers.
+*/
+func (self *NeighboursStore) FilterNeighbors(
+	filter *api.NeighborFilter,
+) []*api.Neighbour {
+	results := []*api.Neighbour{}
+
+	// Get neighbors from all routeservers
+	for sourceId, _ := range self.neighboursMap {
+		rsResults := self.FilterNeighborsAt(sourceId, filter)
+		results = append(results, rsResults...)
 	}
 
 	return results

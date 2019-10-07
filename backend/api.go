@@ -111,6 +111,8 @@ func apiRegisterEndpoints(router *httprouter.Router) error {
 	if AliceConfig.Server.EnablePrefixLookup == true {
 		router.GET("/api/v1/lookup/prefix",
 			endpoint(apiLookupPrefixGlobal))
+		router.GET("/api/v1/lookup/neighbors",
+			endpoint(apiLookupNeighborsGlobal))
 	}
 
 	return nil

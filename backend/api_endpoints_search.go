@@ -14,7 +14,7 @@ func apiLookupPrefixGlobal(
 	req *http.Request,
 	params httprouter.Params,
 ) (api.Response, error) {
-	// TODO: This function is too long
+	// TODO: This function is way too long
 
 	// Get prefix to query
 	q, err := validateQueryString(req, "q")
@@ -135,7 +135,7 @@ func apiLookupPrefixGlobal(
 	return response, nil
 }
 
-func apiLookupNeighborGlobal(
+func apiLookupNeighborsGlobal(
 	req *http.Request,
 	params httprouter.Params,
 ) (api.Response, error) {
