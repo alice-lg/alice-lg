@@ -20,6 +20,7 @@ type NeighboursStore struct {
 	statusMap             map[string]StoreStatus
 	refreshInterval       time.Duration
 	refreshNeighborStatus bool
+	lastRefresh           time.Time
 
 	sync.RWMutex
 }
@@ -153,6 +154,7 @@ func (self *NeighboursStore) update() {
 			LastRefresh: time.Now(),
 			State:       STATE_READY,
 		}
+		self.lastRefresh = time.Now().UTC()
 		self.Unlock()
 		successCount++
 	}
@@ -321,4 +323,12 @@ func (self *NeighboursStore) Stats() NeighboursStoreStats {
 		RouteServers:    rsStats,
 	}
 	return storeStats
+}
+
+func (self *NeighboursStore) CachedAt() time.Time {
+	return self.lastRefresh
+}
+
+func (self *NeighboursStore) CacheTtl() time.Time {
+	return self.lastRefresh.Add(self.refreshInterval)
 }
