@@ -150,11 +150,11 @@ export function fetchRelatedPeersRequest(asn) {
   }
 }
 
-export function fetchRelatedPeersSuccess(asn, neighbors) {
+export function fetchRelatedPeersSuccess(asn, result) {
   return {
     type: FETCH_RELATED_PEERS_SUCCESS,
     payload: {
-      neighbors: neighbors,
+      neighbors: result.neighbours, // TODO: fix inconsistency.
       asn: asn,
     }
   }

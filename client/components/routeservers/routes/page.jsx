@@ -22,7 +22,8 @@ import SearchInput from 'components/search-input'
 
 import RoutesView   from './view'
 import QuickLinks   from './quick-links'
-import RelatedPeers from './related-peers'
+import {RelatedPeersTabs,
+        RelatedPeersCard} from './related-peers'
 
 import BgpAttributesModal
   from './bgp-attributes-modal'
@@ -37,7 +38,7 @@ import {mergeFilters} from 'components/filters/state'
 import {makeLinkProps} from './urls'
 
 // Actions
-import {setFilterQueryValue}
+import {setFilterQueryValue, fetchRelatedPeers}
   from './actions'
 import {loadRouteserverProtocol}
   from 'components/routeservers/actions'
@@ -122,6 +123,20 @@ class RoutesPage extends React.Component {
     this.props.dispatch(
       loadRouteserverProtocol(this.props.params.routeserverId)
     );
+
+    if (this.props.neighbor) {
+      this.props.dispatch(
+        fetchRelatedPeers(this.props.neighbor.asn)
+      );
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.neighbor && this.props.neighbor != prevProps.neighbor) {
+      this.props.dispatch(
+        fetchRelatedPeers(this.props.neighbor.asn)
+      );
+    }
   }
 
   render() {
@@ -133,7 +148,7 @@ class RoutesPage extends React.Component {
     // We have to shift the layout a bit, to make room for
     // the related peers tabs
     let pageClass = "routeservers-page";
-    if (this.props.relatedPeers.length > 1) {
+    if (this.props.localRelatedPeers.length > 1) {
       pageClass += " has-related-peers";
     }
 
@@ -161,9 +176,10 @@ class RoutesPage extends React.Component {
           <div className="col-main col-lg-9 col-md-12">
 
             <div className="card">
-              <RelatedPeers peers={this.props.relatedPeers}
-                            protocolId={this.props.params.protocolId}
-                            routeserverId={this.props.params.routeserverId} />
+              <RelatedPeersTabs
+                peers={this.props.localRelatedPeers}
+                protocolId={this.props.params.protocolId}
+                routeserverId={this.props.params.routeserverId} />
               <SearchInput
                 value={this.props.filterValue}
                 placeholder={filterPlaceholder}
@@ -206,6 +222,10 @@ class RoutesPage extends React.Component {
                            linkProps={this.props.linkProps}
                            filtersApplied={this.props.filtersApplied}
                            filtersAvailable={this.props.filtersAvailable} />
+            <RelatedPeersCard
+              neighbors={this.props.allRelatedPeers}
+              rsId={this.props.params.routeserverId} 
+              protocolId={this.props.params.protocolId} />
           </div>
         </div>
       </div>
@@ -213,6 +233,8 @@ class RoutesPage extends React.Component {
   }
 
 }
+
+
 
 
 export default connect(
@@ -223,10 +245,10 @@ export default connect(
     const neighbor = _.findWhere(neighbors, {id: protocolId});
 
     // Find related peers. Peers belonging to the same AS.
-    let relatedPeers = [];
+    let localRelatedPeers = [];
     if (neighbor) {
-      relatedPeers = _.where(neighbors, {asn: neighbor.asn,
-                                         state: "up"});
+      localRelatedPeers = _.where(
+        neighbors, {asn: neighbor.asn, state: "up"});
     }
 
     const received = {
@@ -261,9 +283,10 @@ export default connect(
     );
 
     return({
+      neighbor: neighbor,
       filterValue: state.routes.filterValue,
       routes: {
-          [ROUTES_RECEIVED]:     received,
+         [ROUTES_RECEIVED]:     received,
           [ROUTES_FILTERED]:     filtered,
           [ROUTES_NOT_EXPORTED]: notExported
       },
@@ -294,7 +317,8 @@ export default connect(
         filtersApplied: filtersApplied,
       },
 
-      relatedPeers: relatedPeers,
+      localRelatedPeers: localRelatedPeers,
+      allRelatedPeers: state.routes.allRelatedPeers,
 
       // Loding indicator helper
       receivedLoading:    state.routes.receivedLoading,

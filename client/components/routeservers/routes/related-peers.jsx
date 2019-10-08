@@ -8,7 +8,7 @@ import {makePeerLinkProps} from './urls'
 /*
  * Render related peers as tabs
  */
-export default function RelatedPeers(props) {
+export function RelatedPeersTabs(props) {
   if (props.peers.length < 2) {
     return null; // Nothing to do here.
   }
@@ -28,6 +28,34 @@ export default function RelatedPeers(props) {
     </ul>
   );
 
+}
+
+/*
+ * Render a card with related peers for the sidebar.
+ *
+ * This provides quick links to the same peer on other
+ * routeservers.
+ */
+export function RelatedPeersCard(props) {
+  let neighbors = props.neighbors;
+  if (!neighbors || neighbors.length < 2) {
+    return null; // nothing to render here.
+  }
+
+  // Exclude own neighbor
+  let related = [];
+  for neighbor in neighbors {
+    if (neighbor.routeserver_id == props.rsId &&
+        neighbor.id == props.protocolId) {
+          continue; // Skip current peer.
+    }
+  }
+
+  return (
+    <div className="card card-related-peers">
+      <h2 className="card-header">Related Neighbors</h2>
+    </div>
+  );
 }
 
 
