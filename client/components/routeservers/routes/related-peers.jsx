@@ -46,17 +46,17 @@ function PeerLink(props) {
 
   const pid = neighbor.id;
   const rid = neighbor.routeserver_id;
-  let peerUrl = `/routeservers/${rid}/protocols/${pid}/routes`;
+  let peerUrl;
 
   if (neighbor.state == "up") {
-    // Render link
-    return (
-      <a href={peerUrl}>{props.children}</a>
-    );
+    peerUrl = `/routeservers/${rid}/protocols/${pid}/routes`;
   } else {
-    // Only display the content
-    return (<span>{props.children}</span>);
+    peerUrl = `/routeservers/${rid}#sessions-down`;
   }
+  // Render link
+  return (
+    <a href={peerUrl}>{props.children}</a>
+  );
 }
 
 /*
@@ -64,21 +64,23 @@ function PeerLink(props) {
  */
 function RoutesStats(props) {
   const {peer} = props; 
+
+  if (peer.state != "up") {
+    return null; // Nothing to render 
+  }
+
   return (
     <div className="related-peers-routes-stats">
-      <span className="routes-received">
+      <span className="atooltip routes-received">
         {peer.routes_received}
         <i>Routes Received</i>
-      </span>
-      <span className="routes-accepted">
-        {peer.routes_accpted}
+      </span> / <span className="atooltip routes-accepted">
+        {peer.routes_accepted}
         <i>Routes Accepted</i>
-      </span>
-      <span className="routes-filtered">
+      </span> / <span className="atooltip routes-filtered">
         {peer.routes_filtered}
         <i>Routes Filtered</i>
-      </span>
-      <span className="routes-exported">
+      </span> / <span className="atooltip routes-exported">
         {peer.routes_exported}
         <i>Routes Exported</i>
       </span>
@@ -129,15 +131,14 @@ function RelatedPeersCardView(props) {
             <tbody>
               {related[rs.id].map(peer => (
                 <tr key={peer.id}>
-                  <td>
+                  <td className="peer-address">
                     <PeerLink to={peer}>{peer.address}</PeerLink>
                   </td>
-                  <td>
+                  <td className="peer-stats">
                     <RoutesStats peer={peer} />
                   </td>
-                  <td>
-                    {peer.state} for
-                    <RelativeTimestamp 
+                  <td className="uptime">
+                    {peer.state} for <RelativeTimestamp 
                       value={peer.uptime}
                       suffix={true} />
                   </td>
