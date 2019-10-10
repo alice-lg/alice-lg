@@ -311,6 +311,100 @@ $labelOffsetEnd:   -70px;
   }
 }
 
+// Related Peers Box
+.card-related-peers {
+    h2 {
+        color: #555;
+        font-weight: bold;
 
+        margin-top: 8px;
+        margin-bottom: 5px;
+
+        font-size: 12px;
+
+        text-transform: uppercase;
+
+        padding: 0;
+    }
+
+    h3 {
+        font-size: 14px;
+        margin: 10px 0px 0px 0px;
+        padding-bottom: 2px;
+        border-bottom: 1px solid #ccc;
+        color: black;
+    }
+
+    .related-peers-rs-peer {
+        margin: 5px 0px;
+        width: 100%;
+        td {
+        }
+    }
+}
+
+
+.card-related-peers {
+    table {
+        width: 100%;
+    }
+    .uptime {
+        text-align: right;
+    }
+    .peer-stats {
+        text-align: center;
+        cursor: default;
+        .routes-received {
+            color: green;
+        }
+        .routes-accepted {
+            color: green;
+        }
+        .routes-filtered {
+            color: orange;
+        }
+        .routes-exported {
+            
+        }
+    }
+}
+
+
+.atooltip {
+    position: relative;
+    display: inline-block;
+    cursor: default;
+}
+.atooltip i {
+    position: absolute;
+    font-style: normal;
+    width:140px;
+    color: #ffffff;
+    background: #000000;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    visibility: hidden;
+    border-radius: 6px;
+}
+.atooltip i:after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -8px;
+    width: 0; height: 0;
+    border-top: 8px solid #000000;
+    border-right: 8px solid transparent;
+    border-left: 8px solid transparent;
+}
+.atooltip:hover i {
+    visibility: visible;
+    opacity: 0.8;
+    bottom: 30px;
+    left: 50%;
+    margin-left: -76px;
+    z-index: 999;
+}
 
 
