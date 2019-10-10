@@ -59,6 +59,32 @@ function PeerLink(props) {
   }
 }
 
+/*
+ * Show routes received, accepted, filtered, exported
+ */
+function RoutesStats(props) {
+  const {peer} = props; 
+  return (
+    <div className="related-peers-routes-stats">
+      <span className="routes-received">
+        {peer.routes_received}
+        <i>Routes Received</i>
+      </span>
+      <span className="routes-accepted">
+        {peer.routes_accpted}
+        <i>Routes Accepted</i>
+      </span>
+      <span className="routes-filtered">
+        {peer.routes_filtered}
+        <i>Routes Filtered</i>
+      </span>
+      <span className="routes-exported">
+        {peer.routes_exported}
+        <i>Routes Exported</i>
+      </span>
+    </div>
+  );
+}
 
 
 /*
@@ -93,7 +119,6 @@ function RelatedPeersCardView(props) {
     relatedRs.push(props.routeservers[rsId]); 
   }
 
-
   return (
     <div className="card card-related-peers">
       <h2 className="card-header">Related Neighbors</h2>
@@ -108,12 +133,10 @@ function RelatedPeersCardView(props) {
                     <PeerLink to={peer}>{peer.address}</PeerLink>
                   </td>
                   <td>
-                    {peer.description}
+                    <RoutesStats peer={peer} />
                   </td>
                   <td>
-                    {peer.state}
-                  </td>
-                  <td>
+                    {peer.state} for
                     <RelativeTimestamp 
                       value={peer.uptime}
                       suffix={true} />
