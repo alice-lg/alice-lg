@@ -594,3 +594,63 @@ func TestSearchFiltersMergeProperties(t *testing.T) {
 	}
 
 }
+
+func TestNeighborFilterMatch(t *testing.T) {
+	n1 := &Neighbour{
+		Asn:         2342,
+		Description: "Foo Networks AB",
+	}
+	n2 := &Neighbour{
+		Asn:         42,
+		Description: "Bar Communications Inc.",
+	}
+
+	filter := &NeighborFilter{
+		asn: 42,
+	}
+	if filter.Match(n1) != false {
+		t.Error("Expected n1 not to match filter")
+	}
+	if filter.Match(n2) == false {
+		t.Error("Expected n2 to match filter")
+	}
+
+	filter = &NeighborFilter{
+		name: "network",
+	}
+	if filter.Match(n1) == false {
+		t.Error("Expected n1 to match filter")
+	}
+	if filter.Match(n2) != false {
+		t.Error("Expected n2 not to match filter")
+	}
+
+	filter = &NeighborFilter{
+		asn:  42,
+		name: "network",
+	}
+
+	if filter.Match(n1) == false || filter.Match(n2) == false {
+		t.Error("Expected filter to match both neighbors.")
+	}
+}
+
+func TestNeighborFilterFromQuery(t *testing.T) {
+	query := "asn=2342&name=foo"
+	filter := NeighborFilterFromQueryString(query)
+
+	if filter.asn != 2342 {
+		t.Error("Unexpected asn filter:", filter.asn)
+	}
+	if filter.name != "foo" {
+		t.Error("Unexpected name filter:", filter.name)
+	}
+
+	filter = NeighborFilterFromQueryString(values)
+	if filter.asn != 0 {
+		t.Error("Unexpected asn:", filter.asn)
+	}
+	if filter.name != "" {
+		t.Error("Unexpected name:", filter.name)
+	}
+}
