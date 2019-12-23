@@ -20,6 +20,7 @@ type NeighboursStore struct {
 	statusMap             map[string]StoreStatus
 	refreshInterval       time.Duration
 	refreshNeighborStatus bool
+	lastRefresh           time.Time
 
 	sync.RWMutex
 }
@@ -52,10 +53,10 @@ func NewNeighboursStore(config *Config) *NeighboursStore {
 	refreshNeighborStatus := config.Server.EnableNeighborsStatusRefresh
 
 	store := &NeighboursStore{
-		neighboursMap:   neighboursMap,
-		statusMap:       statusMap,
-		configMap:       configMap,
-		refreshInterval: refreshInterval,
+		neighboursMap:         neighboursMap,
+		statusMap:             statusMap,
+		configMap:             configMap,
+		refreshInterval:       refreshInterval,
 		refreshNeighborStatus: refreshNeighborStatus,
 	}
 	return store
@@ -153,6 +154,7 @@ func (self *NeighboursStore) update() {
 			LastRefresh: time.Now(),
 			State:       STATE_READY,
 		}
+		self.lastRefresh = time.Now().UTC()
 		self.Unlock()
 		successCount++
 	}
@@ -257,6 +259,46 @@ func (self *NeighboursStore) LookupNeighbours(
 	return results
 }
 
+/*
+ Filter neighbors from a single route server.
+*/
+func (self *NeighboursStore) FilterNeighborsAt(
+	sourceId string,
+	filter *api.NeighborFilter,
+) api.Neighbours {
+	results := []*api.Neighbour{}
+
+	self.RLock()
+	neighbors := self.neighboursMap[sourceId]
+	self.RUnlock()
+
+	// Apply filters
+	for _, neighbor := range neighbors {
+		if filter.Match(neighbor) {
+			results = append(results, neighbor)
+		}
+	}
+	return results
+}
+
+/*
+ Filter neighbors by name or by ASN.
+ Collect results from all routeservers.
+*/
+func (self *NeighboursStore) FilterNeighbors(
+	filter *api.NeighborFilter,
+) api.Neighbours {
+	results := []*api.Neighbour{}
+
+	// Get neighbors from all routeservers
+	for sourceId, _ := range self.neighboursMap {
+		rsResults := self.FilterNeighborsAt(sourceId, filter)
+		results = append(results, rsResults...)
+	}
+
+	return results
+}
+
 // Build some stats for monitoring
 func (self *NeighboursStore) Stats() NeighboursStoreStats {
 	totalNeighbours := 0
@@ -281,4 +323,12 @@ func (self *NeighboursStore) Stats() NeighboursStoreStats {
 		RouteServers:    rsStats,
 	}
 	return storeStats
+}
+
+func (self *NeighboursStore) CachedAt() time.Time {
+	return self.lastRefresh
+}
+
+func (self *NeighboursStore) CacheTtl() time.Time {
+	return self.lastRefresh.Add(self.refreshInterval)
 }

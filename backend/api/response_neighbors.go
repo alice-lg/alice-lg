@@ -1,6 +1,7 @@
 package api
 
 import (
+	"strings"
 	"time"
 )
 
@@ -22,6 +23,7 @@ type Neighbour struct {
 	RoutesAccepted  int           `json:"routes_accepted"`
 	Uptime          time.Duration `json:"uptime"`
 	LastError       string        `json:"last_error"`
+	RouteServerId   string        `json:"routeserver_id"`
 
 	// Original response
 	Details map[string]interface{} `json:"details"`
@@ -45,6 +47,34 @@ type NeighboursResponse struct {
 	Neighbours Neighbours `json:"neighbours"`
 }
 
+// Implement Filterable interface
+func (self *Neighbour) MatchSourceId(id string) bool {
+	return self.RouteServerId == id
+}
+
+func (self *Neighbour) MatchAsn(asn int) bool {
+	return self.Asn == asn
+}
+
+func (self *Neighbour) MatchCommunity(_community Community) bool {
+	return true // Ignore
+}
+
+func (self *Neighbour) MatchExtCommunity(_community Community) bool {
+	return true // Ignore
+}
+
+func (self *Neighbour) MatchLargeCommunity(_community Community) bool {
+	return true // Ignore
+}
+
+func (self *Neighbour) MatchName(name string) bool {
+	name = strings.ToLower(name)
+	neighName := strings.ToLower(self.Description)
+
+	return strings.Contains(neighName, name)
+}
+
 // Neighbours response is cacheable
 func (self *NeighboursResponse) CacheTtl() time.Duration {
 	now := time.Now().UTC()
@@ -52,7 +82,6 @@ func (self *NeighboursResponse) CacheTtl() time.Duration {
 }
 
 type NeighboursLookupResults map[string]Neighbours
-
 
 type NeighboursStatus []*NeighbourStatus
 

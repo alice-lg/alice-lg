@@ -20,6 +20,10 @@ export const FETCH_ROUTES_NOT_EXPORTED_REQUEST = "@routes/FETCH_ROUTES_NOT_EXPOR
 export const FETCH_ROUTES_NOT_EXPORTED_SUCCESS = "@routes/FETCH_ROUTES_NOT_EXPORTED_SUCCESS";
 export const FETCH_ROUTES_NOT_EXPORTED_ERROR   = "@routes/FETCH_ROUTES_NOT_EXPORTED_ERROR";
 
+export const FETCH_RELATED_PEERS_REQUEST = "@related-peers/FETCH_REQUEST";
+export const FETCH_RELATED_PEERS_SUCCESS = "@related-peers/FETCH_SUCCESS";
+export const FETCH_RELATED_PEERS_ERROR = "@related-peers/FETCH_ERROR";
+
 export const SET_FILTER_QUERY_VALUE = "@routes/SET_FILTER_QUERY_VALUE";
 
 // Url helper
@@ -136,3 +140,48 @@ export function setFilterQueryValue(value) {
   }
 }
 
+
+export function fetchRelatedPeersRequest(asn) {
+  return {
+    type: FETCH_RELATED_PEERS_REQUEST,
+    payload: {
+      asn: asn,
+    }
+  }
+}
+
+export function fetchRelatedPeersSuccess(asn, result) {
+  return {
+    type: FETCH_RELATED_PEERS_SUCCESS,
+    payload: {
+      neighbors: result.neighbours, // TODO: fix inconsistency.
+      asn: asn,
+    }
+  }
+}
+
+export function fetchRelatedPeersError(asn, error) {
+  return {
+    type: FETCH_RELATED_PEERS_ERROR,
+    payload: {
+      error: error,
+      asn: asn,
+    }
+  }
+}
+
+
+export function fetchRelatedPeers(asn) {
+  return (dispatch) => {
+    dispatch(fetchRelatedPeersRequest(asn));
+    axios.get(`/api/v1/lookup/neighbors?asn=${asn}`)
+      .then(
+        ({data}) => {
+          dispatch(fetchRelatedPeersSuccess(asn, data));
+        },
+        (error) => {
+          dispatch(fetchRelatedPeersError(asn, error));
+          // No global error handling if this fails.
+        });
+  }
+}

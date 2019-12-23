@@ -9,7 +9,10 @@ import (
 )
 
 // Handle get neighbors on routeserver
-func apiNeighborsList(_req *http.Request, params httprouter.Params) (api.Response, error) {
+func apiNeighborsList(
+	_req *http.Request,
+	params httprouter.Params,
+) (api.Response, error) {
 	rsId, err := validateSourceId(params.ByName("id"))
 	if err != nil {
 		return nil, err

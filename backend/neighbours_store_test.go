@@ -25,27 +25,37 @@ func makeTestNeighboursStore() *NeighboursStore {
 	// Populate neighbours
 	rs1 := NeighboursIndex{
 		"ID2233_AS2342": &api.Neighbour{
-			Id:          "ID2233_AS2342",
-			Description: "PEER AS2342 192.9.23.42 Customer Peer 1",
+			Id:            "ID2233_AS2342",
+			Asn:           2342,
+			Description:   "PEER AS2342 192.9.23.42 Customer Peer 1",
+			RouteServerId: "rs1",
 		},
 		"ID2233_AS2343": &api.Neighbour{
-			Id:          "ID2233_AS2343",
-			Description: "PEER AS2343 192.9.23.43 Different Peer 1",
+			Id:            "ID2233_AS2343",
+			Asn:           2343,
+			Description:   "PEER AS2343 192.9.23.43 Different Peer 1",
+			RouteServerId: "rs1",
 		},
 		"ID2233_AS2344": &api.Neighbour{
-			Id:          "ID2233_AS2344",
-			Description: "PEER AS2344 192.9.23.44 3rd Peer from the sun",
+			Id:            "ID2233_AS2344",
+			Asn:           2344,
+			Description:   "PEER AS2344 192.9.23.44 3rd Peer from the sun",
+			RouteServerId: "rs1",
 		},
 	}
 
 	rs2 := NeighboursIndex{
 		"ID2233_AS2342": &api.Neighbour{
-			Id:          "ID2233_AS2342",
-			Description: "PEER AS2342 192.9.23.42 Customer Peer 1",
+			Id:            "ID2233_AS2342",
+			Asn:           2342,
+			Description:   "PEER AS2342 192.9.23.42 Customer Peer 1",
+			RouteServerId: "rs2",
 		},
 		"ID2233_AS4223": &api.Neighbour{
-			Id:          "ID2233_AS4223",
-			Description: "PEER AS4223 192.9.42.23 Cloudfoo Inc.",
+			Id:            "ID2233_AS4223",
+			Asn:           4223,
+			Description:   "PEER AS4223 192.9.42.23 Cloudfoo Inc.",
+			RouteServerId: "rs2",
 		},
 	}
 
@@ -157,4 +167,20 @@ func TestNeighbourLookup(t *testing.T) {
 	if n.Id != "ID2233_AS4223" {
 		t.Error("Wrong peer in lookup response")
 	}
+}
+
+func TestNeighborFilter(t *testing.T) {
+	store := makeTestNeighboursStore()
+	filter := api.NeighborFilterFromQueryString("asn=2342")
+	neighbors := store.FilterNeighbors(filter)
+	if len(neighbors) != 2 {
+		t.Error("Expected two results")
+	}
+
+	filter = api.NeighborFilterFromQueryString("")
+	neighbors = store.FilterNeighbors(filter)
+	if len(neighbors) != 0 {
+		t.Error("Expected empty result set")
+	}
+
 }

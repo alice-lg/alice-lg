@@ -30,8 +30,8 @@ import (
 //     Routes       /api/v1/routeservers/:id/neighbors/:neighborId/routes
 //
 //   Querying
-//     LookupPrefix /api/v1/routeservers/:id/lookup/prefix?q=<prefix>
-//
+//     LookupPrefix   /api/v1/lookup/prefix?q=<prefix>
+//     LookupNeighbor /api/v1/lookup/neighbor?asn=1235
 
 type apiEndpoint func(*http.Request, httprouter.Params) (api.Response, error)
 
@@ -111,6 +111,8 @@ func apiRegisterEndpoints(router *httprouter.Router) error {
 	if AliceConfig.Server.EnablePrefixLookup == true {
 		router.GET("/api/v1/lookup/prefix",
 			endpoint(apiLookupPrefixGlobal))
+		router.GET("/api/v1/lookup/neighbors",
+			endpoint(apiLookupNeighborsGlobal))
 	}
 
 	return nil

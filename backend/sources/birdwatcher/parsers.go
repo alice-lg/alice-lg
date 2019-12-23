@@ -152,6 +152,7 @@ func parseRelativeServerTime(uptime interface{}, config Config) time.Duration {
 
 // Parse neighbours response
 func parseNeighbours(bird ClientResponse, config Config) (api.Neighbours, error) {
+	rsId := config.Id
 	neighbours := api.Neighbours{}
 	protocols := bird["protocols"].(map[string]interface{})
 
@@ -176,11 +177,12 @@ func parseNeighbours(bird ClientResponse, config Config) (api.Neighbours, error)
 		neighbour := &api.Neighbour{
 			Id: protocolId,
 
-			Address:     mustString(protocol["neighbor_address"], "error"),
-			Asn:         mustInt(protocol["neighbor_as"], 0),
-			State:       strings.ToLower(mustString(protocol["state"], "unknown")),
+			Address: mustString(protocol["neighbor_address"], "error"),
+			Asn:     mustInt(protocol["neighbor_as"], 0),
+			State: strings.ToLower(
+				mustString(protocol["state"], "unknown")),
 			Description: mustString(protocol["description"], "no description"),
-			//TODO make these changes configurable
+
 			RoutesReceived:  mustInt(routesReceived, 0),
 			RoutesAccepted:  mustInt(routes["imported"], 0),
 			RoutesFiltered:  mustInt(routes["filtered"], 0),
@@ -189,6 +191,8 @@ func parseNeighbours(bird ClientResponse, config Config) (api.Neighbours, error)
 
 			Uptime:    uptime,
 			LastError: lastError,
+
+			RouteServerId: rsId,
 
 			Details: protocol,
 		}

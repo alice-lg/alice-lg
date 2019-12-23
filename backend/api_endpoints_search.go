@@ -14,7 +14,7 @@ func apiLookupPrefixGlobal(
 	req *http.Request,
 	params httprouter.Params,
 ) (api.Response, error) {
-	// TODO: This function is too long
+	// TODO: This function is way too long
 
 	// Get prefix to query
 	q, err := validateQueryString(req, "q")
@@ -132,5 +132,29 @@ func apiLookupPrefixGlobal(
 		},
 	}
 
+	return response, nil
+}
+
+func apiLookupNeighborsGlobal(
+	req *http.Request,
+	params httprouter.Params,
+) (api.Response, error) {
+	// Query neighbors store
+	filter := api.NeighborFilterFromQuery(req.URL.Query())
+	neighbors := AliceNeighboursStore.FilterNeighbors(filter)
+
+	sort.Sort(neighbors)
+
+	// Make response
+	response := &api.NeighboursResponse{
+		Api: api.ApiStatus{
+			CacheStatus: api.CacheStatus{
+				CachedAt: AliceNeighboursStore.CachedAt(),
+			},
+			ResultFromCache: true, // You would not have guessed.
+			Ttl:             AliceNeighboursStore.CacheTtl(),
+		},
+		Neighbours: neighbors,
+	}
 	return response, nil
 }
