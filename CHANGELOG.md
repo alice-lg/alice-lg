@@ -1,6 +1,10 @@
 
 # Changelog
 
+## 4.1.0 (2019-12-23)
+
+* Added related neighbors feature
+
 ## 4.0.2, 4.0.3 (2019-09-09)
 
 * Fixed issue with multitable bird: `getMasterPipeName` returned incorrect
