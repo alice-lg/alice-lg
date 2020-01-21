@@ -48,6 +48,7 @@ source ~/.bash_profile
 # Install frontend build dependencies
 sudo yum install golang npm
 sudo npm install --global gulp-cli
+sudo npm install --global yarn
 
 go get github.com/GeertJohan/go.rice
 go get github.com/GeertJohan/go.rice/rice
