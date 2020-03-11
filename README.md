@@ -7,12 +7,12 @@ Take a look at an Alice-LG production examples at:
 - https://lg.ecix.net/
 
 And checkout the API at:
-- https://lg.ecix.net/api/config
-- https://lg.ecix.net/api/routeservers
-- https://lg.ecix.net/api/routeservers/0/status
-- https://lg.ecix.net/api/routeservers/0/neighbours
-- https://lg.ecix.net/api/routeservers/0/neighbours/ID109_AS31078/routes
-- https://lg.ecix.net/api/lookup/prefix?q=217.115.0.0
+- https://lg.de-cix.net/api/v1/config
+- https://lg.de-cix.net/api/v1/routeservers
+- https://lg.de-cix.net/api/v1/routeservers/0/status
+- https://lg.de-cix.net/api/v1/routeservers/0/neighbours
+- https://lg.de-cix.net/api/v1/routeservers/0/neighbours/ID109_AS31078/routes
+- https://lg.de-cix.net/api/v1/lookup/prefix?q=217.115.0.0
 
 ## Explanations
 Alice-LG is a BGP looking glass which gets its data from external APIs.
