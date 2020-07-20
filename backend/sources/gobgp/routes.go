@@ -48,7 +48,7 @@ func (gobgp *GoBGP) lookupNeighbour(neighborId string) (*gobgpapi.Peer, error) {
 }
 
 func (gobgp *GoBGP) GetNeighbours() ([]*gobgpapi.Peer, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(gobgp.config.ProcessingTimeout))
 	defer cancel()
 
 	peerStream, err := gobgp.client.ListPeer(ctx, &gobgpapi.ListPeerRequest{EnableAdvertised: true})
@@ -144,7 +144,7 @@ func (gobgp *GoBGP) parsePathIntoRoute(path *gobgpapi.Path, prefix string) (erro
 }
 
 func (gobgp *GoBGP) GetRoutes(peer *gobgpapi.Peer, tableType gobgpapi.TableType, response *api.RoutesResponse) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(gobgp.config.ProcessingTimeout))
 	defer cancel()
 
 	for _, family := range families {
