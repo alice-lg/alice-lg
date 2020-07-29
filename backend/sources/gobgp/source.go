@@ -88,7 +88,7 @@ func (gobgp *GoBGP) ExpireCaches() int {
 }
 
 func (gobgp *GoBGP) NeighboursStatus() (*api.NeighboursStatusResponse, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(gobgp.config.ProcessingTimeout))
 	defer cancel()
 
 	response := api.NeighboursStatusResponse{}
@@ -123,7 +123,7 @@ func (gobgp *GoBGP) NeighboursStatus() (*api.NeighboursStatusResponse, error) {
 }
 
 func (gobgp *GoBGP) Status() (*api.StatusResponse, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(gobgp.config.ProcessingTimeout))
 	defer cancel()
 
 	resp, err := gobgp.client.GetBgp(ctx, &gobgpapi.GetBgpRequest{})
@@ -138,7 +138,7 @@ func (gobgp *GoBGP) Status() (*api.StatusResponse, error) {
 }
 
 func (gobgp *GoBGP) Neighbours() (*api.NeighboursResponse, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(gobgp.config.ProcessingTimeout))
 	defer cancel()
 
 	response := api.NeighboursResponse{}
