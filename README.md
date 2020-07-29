@@ -87,6 +87,7 @@ You will have to edit the configuration file as you need to point Alice-LG to th
 name = rs1.example.com (IPv4)
 [source.rs1-example-v4.birdwatcher]
 api = http://rs1.example.com:29184/
+neighbors_refresh_timeout = 2
 # show_last_reboot = true
 # timezone = UTC
 # type = single_table / multi_table
@@ -112,10 +113,6 @@ group = AMS
 host = rs2.example.com:50051
 # ProcessingTimeout is a timeout in seconds configured per gRPC call to a given GoBGP daemon
 processing_timeout = 300
-type = multi_table
-peer_table_prefix = T
-pipe_protocol_prefix = M
-neighbors_refresh_timeout = 2
 ```
 
 ## Running
