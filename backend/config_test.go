@@ -2,6 +2,9 @@ package main
 
 import (
 	"testing"
+
+	"github.com/alice-lg/alice-lg/backend/sources/birdwatcher"
+	"github.com/alice-lg/alice-lg/backend/sources/gobgp"
 )
 
 // Test configuration loading and parsing
@@ -37,6 +40,42 @@ func TestLoadConfigs(t *testing.T) {
 	}
 }
 
+// TestSourceConfig checks that the proper backend type was identified for each
+// example routeserver
+func TestSourceConfig(t *testing.T) {
+
+	config, err := loadConfig("../etc/alice-lg/alice.example.conf")
+	if err != nil {
+		t.Error("Could not load test config:", err)
+	}
+
+	// Get sources
+	rs1 := config.Sources[0] // Birdwatcher v4
+	rs2 := config.Sources[1] // Birdwatcher v6
+	rs3 := config.Sources[2] // GoBGP
+
+	nilBirdwatcherConfig := birdwatcher.Config{}
+	if rs1.Birdwatcher == nilBirdwatcherConfig {
+		t.Errorf(
+			"Example routeserver %s should have been identified as a birdwatcher source but was not",
+			rs1.Name,
+		)
+	}
+	if rs2.Birdwatcher == nilBirdwatcherConfig {
+		t.Errorf(
+			"Example routeserver %s should have been identified as a birdwatcher source but was not",
+			rs2.Name,
+		)
+	}
+	nilGoBGPConfig := gobgp.Config{}
+	if rs3.GoBGP == nilGoBGPConfig {
+		t.Errorf(
+			"Example routeserver %s should have been identified as a gobgp source but was not",
+			rs3.Name,
+		)
+	}
+}
+
 func TestSourceConfigDefaultsOverride(t *testing.T) {
 
 	config, err := loadConfig("../etc/alice-lg/alice.example.conf")
@@ -45,8 +84,9 @@ func TestSourceConfigDefaultsOverride(t *testing.T) {
 	}
 
 	// Get sources
-	rs1 := config.Sources[0]
-	rs2 := config.Sources[1]
+	rs1 := config.Sources[0] // Birdwatcher v4
+	rs2 := config.Sources[1] // Birdwatcher v6
+	rs3 := config.Sources[2] // GoBGP
 
 	// Source 1 should be on default time
 	// Source 2 should have an override
@@ -66,6 +106,13 @@ func TestSourceConfigDefaultsOverride(t *testing.T) {
 
 	if rs2.Birdwatcher.Timezone != "Europe/Brussels" {
 		t.Error("Expected 'Europe/Brussels', got", rs2.Birdwatcher.Timezone)
+	}
+
+	if rs3.GoBGP.ProcessingTimeout != 300 {
+		t.Error(
+			"Expected GoBGP example to set 300s 'processing_timeout', got",
+			rs3.GoBGP.ProcessingTimeout,
+		)
 	}
 }
 

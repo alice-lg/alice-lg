@@ -98,7 +98,7 @@ type SourceConfig struct {
 	// Source configurations
 	Type        int
 	Birdwatcher birdwatcher.Config
-	GoBGP 		gobgp.Config
+	GoBGP       gobgp.Config
 
 	// Source instance
 	instance sources.Source
@@ -638,14 +638,20 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 
 			backendConfig.MapTo(&c)
 			config.Birdwatcher = c
-			
+
 		case SOURCE_GOBGP:
 			c := gobgp.Config{
-				Id: config.Id,
+				Id:   config.Id,
 				Name: config.Name,
 			}
 
 			backendConfig.MapTo(&c)
+			// Update defaults:
+			//  - processing_timeout
+			if c.ProcessingTimeout == 0 {
+				c.ProcessingTimeout = 300
+			}
+
 			config.GoBGP = c
 		}
 
