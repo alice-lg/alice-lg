@@ -1,5 +1,7 @@
 module github.com/alice-lg/alice-lg
 
+go 1.14
+
 require (
 	github.com/GeertJohan/go.rice v0.0.0-20181229193832-0af3f3b09a0a
 	github.com/daaku/go.zipexe v0.0.0-20150329023125-a5fe2436ffcb // indirect
