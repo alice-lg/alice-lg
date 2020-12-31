@@ -98,66 +98,101 @@ func (self *NeighboursStore) SourceState(sourceId string) int {
 
 // Update all neighbors
 func (self *NeighboursStore) update() {
+	type ResultType string
+	const(
+		Success = "Success"
+		Failure = "Failure"
+		Skipped = "Skipped"
+	)
+
+	type GetNeighboursResult struct {
+		sourceId string
+		result  ResultType
+	}
+
+	result := make(chan GetNeighboursResult)
+
 	successCount := 0
 	errorCount := 0
 	t0 := time.Now()
-	for sourceId, _ := range self.neighboursMap {
+	for sourceIdentifier, _ := range self.neighboursMap {
 		// Get current state
-		if self.statusMap[sourceId].State == STATE_UPDATING {
-			continue // nothing to do here. really.
-		}
-
-		// Start updating
-		self.Lock()
-		self.statusMap[sourceId] = StoreStatus{
-			State: STATE_UPDATING,
-		}
-		self.Unlock()
-
-		sourceConfig := self.configMap[sourceId]
-		source := sourceConfig.getInstance()
-
-		neighboursRes, err := source.Neighbours()
-		if err != nil {
-			log.Println(
-				"Refreshing the neighbors store failed for:",
-				sourceConfig.Name, "(", sourceConfig.Id, ")",
-				"with:", err,
-				"- NEXT STATE: ERROR",
-			)
-			// That's sad.
+		go func(sourceId string) {
 			self.Lock()
-			self.statusMap[sourceId] = StoreStatus{
-				State:       STATE_ERROR,
-				LastError:   err,
-				LastRefresh: time.Now(),
+			if self.statusMap[sourceId].State == STATE_UPDATING {
+				self.Unlock()
+				result <- GetNeighboursResult{
+					sourceId: sourceId,
+					result:   Skipped,
+				}
+			} else {
+				// Start updating
+				self.statusMap[sourceId] = StoreStatus{
+					State: STATE_UPDATING,
+				}
+				sourceConfig := self.configMap[sourceId]
+				instance := sourceConfig.getInstance()
+				self.Unlock()
+
+				neighboursRes, err := instance.Neighbours()
+				if err != nil {
+					log.Println(
+						"Refreshing the neighbors store failed for:",
+						sourceConfig.Name, "(", sourceConfig.Id, ")",
+						"with:", err,
+						"- NEXT STATE: ERROR",
+					)
+					// That's sad.
+					self.Lock()
+					self.statusMap[sourceId] = StoreStatus{
+						State:       STATE_ERROR,
+						LastError:   err,
+						LastRefresh: time.Now(),
+					}
+					self.Unlock()
+
+					result <- GetNeighboursResult{
+						sourceId: sourceId,
+						result:   Failure,
+					}
+				} else {
+					neighbours := neighboursRes.Neighbours
+
+					// Update data
+					// Make neighbours index
+					index := make(NeighboursIndex)
+					for _, neighbour := range neighbours {
+						index[neighbour.Id] = neighbour
+					}
+
+					self.Lock()
+					self.neighboursMap[sourceId] = index
+					// Update state
+					self.statusMap[sourceId] = StoreStatus{
+						LastRefresh: time.Now(),
+						State:       STATE_READY,
+					}
+					self.lastRefresh = time.Now().UTC()
+					self.Unlock()
+
+					result <- GetNeighboursResult{
+						sourceId: sourceId,
+						result:   Success,
+					}
+				}
 			}
-			self.Unlock()
-
-			errorCount++
-			continue
-		}
-
-		neighbours := neighboursRes.Neighbours
-
-		// Update data
-		// Make neighbours index
-		index := make(NeighboursIndex)
-		for _, neighbour := range neighbours {
-			index[neighbour.Id] = neighbour
-		}
-
-		self.Lock()
-		self.neighboursMap[sourceId] = index
-		// Update state
-		self.statusMap[sourceId] = StoreStatus{
-			LastRefresh: time.Now(),
-			State:       STATE_READY,
-		}
-		self.lastRefresh = time.Now().UTC()
-		self.Unlock()
-		successCount++
+		} (sourceIdentifier)
 	}
+
+	for i := 0; i < len(self.neighboursMap); i++ {
+		switch (<- result).result {
+		case Success:
+			successCount++
+		case Failure:
+			errorCount++
+		}
+	}
+	close(result)
 
 	refreshDuration := time.Since(t0)
 	log.Println(
