@@ -77,60 +77,95 @@ func (self *RoutesStore) init() {
 
 // Update all routes
 func (self *RoutesStore) update() {
+	type ResultType string
+	const(
+		Success = "Success"
+		Failure = "Failure"
+		Skipped = "Skipped"
+	)
+
+	type GetRoutesResult struct {
+		sourceId string
+		result  ResultType
+	}
+
+	result := make(chan GetRoutesResult)
 	successCount := 0
 	errorCount := 0
 	t0 := time.Now()
 
-	for sourceId, _ := range self.routesMap {
-		sourceConfig := self.configMap[sourceId]
-		source := sourceConfig.getInstance()
+	for sourceIdentifier, _ := range self.routesMap {
+		go func(sourceId string) {
+			from := time.Now()
 
-		// Get current update state
-		if self.statusMap[sourceId].State == STATE_UPDATING {
-			continue // nothing to do here
-		}
-
-		// Set update state
-		self.Lock()
-		self.statusMap[sourceId] = StoreStatus{
-			State: STATE_UPDATING,
-		}
-		self.Unlock()
-
-		routes, err := source.AllRoutes()
-		if err != nil {
-			log.Println(
-				"Refreshing the routes store failed for:", sourceConfig.Name,
-				"(", sourceConfig.Id, ")",
-				"with:", err,
-				"- NEXT STATE: ERROR",
-			)
-
+			// Get current update state
 			self.Lock()
-			self.statusMap[sourceId] = StoreStatus{
-				State:       STATE_ERROR,
-				LastError:   err,
-				LastRefresh: time.Now(),
+			if self.statusMap[sourceId].State == STATE_UPDATING {
+				self.Unlock()
+				// Nothing to do here
+				result <- GetRoutesResult{
+					sourceId: sourceId,
+					result: Skipped}
+			} else {
+				// Set update state
+				self.statusMap[sourceId] = StoreStatus{
+					State: STATE_UPDATING,
+				}
+				sourceConfig := self.configMap[sourceId]
+				instance := sourceConfig.getInstance()
+				self.Unlock()
+
+				routes, err := instance.AllRoutes()
+				if err != nil {
+					log.Println(
+						"Refreshing the routes store failed for:", sourceConfig.Name,
+						"(", sourceConfig.Id, ")",
+						"with:", err,
+						"- NEXT STATE: ERROR",
+					)
+
+					self.Lock()
+					self.statusMap[sourceId] = StoreStatus{
+						State:       STATE_ERROR,
+						LastError:   err,
+						LastRefresh: time.Now(),
+					}
+					self.Unlock()
+
+					result <- GetRoutesResult{
+						sourceId: sourceId,
+						result: Failure}
+				} else {
+					self.Lock()
+					// Update data
+					self.routesMap[sourceId] = routes
+					// Update state
+					self.statusMap[sourceId] = StoreStatus{
+						LastRefresh: time.Now(),
+						State:       STATE_READY,
+					}
+					self.lastRefresh = time.Now().UTC()
+					self.Unlock()
+					log.Println("Refreshed: ", sourceId, " filtered: ", len(routes.Filtered), " imported: ", len(routes.Imported), " not exported: ", len(routes.NotExported),
+						" from: ", from, " to: ", time.Now())
+
+					result <- GetRoutesResult{
+						sourceId: sourceId,
+						result: Success}
+				}
 			}
-			self.Unlock()
-
-			errorCount++
-			continue
-		}
-
-		self.Lock()
-		// Update data
-		self.routesMap[sourceId] = routes
-		// Update state
-		self.statusMap[sourceId] = StoreStatus{
-			LastRefresh: time.Now(),
-			State:       STATE_READY,
-		}
-		self.lastRefresh = time.Now().UTC()
-		self.Unlock()
-
-		successCount++
+		}(sourceIdentifier)
 	}
+
+	for i := 0; i < len(self.routesMap); i++ {
+		switch (<- result).result {
+		case Success:
+			successCount++
+		case Failure:
+			errorCount++
+		}
+	}
+	close(result)
 
 	refreshDuration := time.Since(t0)
 	log.Println(

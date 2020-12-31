@@ -108,15 +108,7 @@ func (self *MultiTableBirdwatcher) fetchReceivedRoutes(neighborId string) (*api.
 	return &apiStatus, received, nil
 }
 
-func (self *MultiTableBirdwatcher) fetchFilteredRoutes(neighborId string) (*api.ApiStatus, api.Routes, error) {
-	// Query birdwatcher
-	_, birdProtocols, err := self.fetchProtocols()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	protocols := birdProtocols["protocols"].(map[string]interface{})
-
+func (self *MultiTableBirdwatcher) fetchFilteredRoutes(neighborId string, protocols map[string]interface{}) (*api.ApiStatus, api.Routes, error) {
 	if _, ok := protocols[neighborId]; !ok {
 		return nil, nil, fmt.Errorf("Invalid Neighbor")
 	}
@@ -229,8 +221,16 @@ func (self *MultiTableBirdwatcher) fetchRequiredRoutes(neighborId string) (*api.
 		return nil, err
 	}
 
+	// Query birdwatcher
+	_, birdProtocols, err := self.fetchProtocols()
+	if err != nil {
+		return nil, err
+	}
+
+	protocols := birdProtocols["protocols"].(map[string]interface{})
+
 	// Second: get routes filtered
-	_, filteredRoutes, err := self.fetchFilteredRoutes(neighborId)
+	_, filteredRoutes, err := self.fetchFilteredRoutes(neighborId, protocols)
 	if err != nil {
 		return nil, err
 	}
@@ -481,6 +481,8 @@ func (self *MultiTableBirdwatcher) AllRoutes() (*api.RoutesResponse, error) {
 		return nil, err
 	}
 
+	protocols := birdProtocols["protocols"].(map[string]interface{})
+
 	// Fetch received routes first
 	birdImported, err := self.client.GetJson("/routes/table/master")
 	if err != nil {
@@ -510,7 +512,7 @@ func (self *MultiTableBirdwatcher) AllRoutes() (*api.RoutesResponse, error) {
 		learntFrom := mustString(protocolsData.(map[string]interface{})["learnt_from"], peer)
 
 		// Fetch filtered routes
-		_, filtered, err := self.fetchFilteredRoutes(protocolId)
+		_, filtered, err := self.fetchFilteredRoutes(protocolId, protocols)
 		if err != nil {
 			continue
 		}
