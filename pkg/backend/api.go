@@ -3,14 +3,13 @@ package backend
 import (
 	"compress/gzip"
 	"encoding/json"
-	"net/http"
-
 	"log"
+	"net/http"
 	"strings"
 
-	"github.com/alice-lg/alice-lg/pkg/backend/api"
-
 	"github.com/julienschmidt/httprouter"
+
+	"github.com/alice-lg/alice-lg/pkg/api"
 )
 
 // Alice LG Rest API
@@ -45,7 +44,7 @@ func endpoint(wrapped apiEndpoint) httprouter.Handle {
 		result, err := wrapped(req, params)
 		if err != nil {
 			// Get affected rs id
-			rsId, paramErr := validateSourceId(params.ByName("id"))
+			rsId, paramErr := validateSourceID(params.ByName("id"))
 			if paramErr != nil {
 				rsId = "unknown"
 			}

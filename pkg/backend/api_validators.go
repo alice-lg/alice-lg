@@ -8,7 +8,7 @@ import (
 )
 
 // Helper: Validate source Id
-func validateSourceId(id string) (string, error) {
+func validateSourceID(id string) (string, error) {
 	if len(id) > 42 {
 		return "unknown", fmt.Errorf("Source ID too long with length: %d", len(id))
 	}
@@ -20,16 +20,16 @@ func validateQueryString(req *http.Request, key string) (string, error) {
 	query := req.URL.Query()
 	values, ok := query[key]
 	if !ok {
-		return "", fmt.Errorf("Query param %s is missing.", key)
+		return "", fmt.Errorf("query param %s is missing", key)
 	}
 
 	if len(values) != 1 {
-		return "", fmt.Errorf("Query param %s is ambigous.", key)
+		return "", fmt.Errorf("query param %s is ambigous", key)
 	}
 
 	value := values[0]
 	if value == "" {
-		return "", fmt.Errorf("Query param %s may not be empty.", key)
+		return "", fmt.Errorf("query param %s may not be empty", key)
 	}
 
 	return value, nil

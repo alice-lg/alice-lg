@@ -5,9 +5,9 @@ Paginate api routes responses
 */
 
 import (
-	"github.com/alice-lg/alice-lg/backend/api"
-
 	"math"
+
+	"github.com/alice-lg/alice-lg/pkg/api"
 )
 
 func apiPaginateRoutes(

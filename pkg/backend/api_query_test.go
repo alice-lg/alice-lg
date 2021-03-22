@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/alice-lg/alice-lg/backend/api"
+	"github.com/alice-lg/alice-lg/pkg/api"
 )
 
 func makeQueryRequest(q string) *http.Request {

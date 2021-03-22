@@ -1,16 +1,17 @@
 package backend
 
 import (
-	"github.com/alice-lg/alice-lg/backend/api"
-	"github.com/julienschmidt/httprouter"
-
 	"net/http"
 	"time"
+
+	"github.com/julienschmidt/httprouter"
+
+	"github.com/alice-lg/alice-lg/pkg/api"
 )
 
 // Handle routes
 func apiRoutesList(_req *http.Request, params httprouter.Params) (api.Response, error) {
-	rsId, err := validateSourceId(params.ByName("id"))
+	rsId, err := validateSourceID(params.ByName("id"))
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +38,7 @@ func apiRoutesListReceived(
 	// Measure response time
 	t0 := time.Now()
 
-	rsId, err := validateSourceId(params.ByName("id"))
+	rsId, err := validateSourceID(params.ByName("id"))
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +111,7 @@ func apiRoutesListFiltered(
 ) (api.Response, error) {
 	t0 := time.Now()
 
-	rsId, err := validateSourceId(params.ByName("id"))
+	rsId, err := validateSourceID(params.ByName("id"))
 	if err != nil {
 		return nil, err
 	}
@@ -183,7 +184,7 @@ func apiRoutesListNotExported(
 ) (api.Response, error) {
 	t0 := time.Now()
 
-	rsId, err := validateSourceId(params.ByName("id"))
+	rsId, err := validateSourceID(params.ByName("id"))
 	if err != nil {
 		return nil, err
 	}

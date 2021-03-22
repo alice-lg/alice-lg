@@ -13,3 +13,9 @@ func InitConfig(filename string) error {
 	AliceConfig, err := loadConfig(*configFilenameFlag)
 	return err
 }
+
+// InitStores initializes the routes and neighbors cache
+func InitStores() {
+	AliceNeighboursStore = NewNeighboursStore(AliceConfig)
+	AliceRoutesStore = NewRoutesStore(AliceConfig)
+}

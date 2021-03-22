@@ -1,12 +1,13 @@
 package backend
 
 import (
-	"github.com/alice-lg/alice-lg/backend/api"
-	"github.com/julienschmidt/httprouter"
-
 	"net/http"
 	"sort"
 	"time"
+
+	"github.com/julienschmidt/httprouter"
+
+	"github.com/alice-lg/alice-lg/pkg/api"
 )
 
 // Handle global lookup

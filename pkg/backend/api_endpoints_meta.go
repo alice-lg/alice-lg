@@ -1,10 +1,11 @@
 package backend
 
 import (
-	"github.com/alice-lg/alice-lg/backend/api"
+	"net/http"
+
 	"github.com/julienschmidt/httprouter"
 
-	"net/http"
+	"github.com/alice-lg/alice-lg/pkg/api"
 )
 
 // Handle Status Endpoint, this is intended for
@@ -16,7 +17,7 @@ func apiStatusShow(_req *http.Request, _params httprouter.Params) (api.Response,
 
 // Handle status
 func apiStatus(_req *http.Request, params httprouter.Params) (api.Response, error) {
-	rsId, err := validateSourceId(params.ByName("id"))
+	rsId, err := validateSourceID(params.ByName("id"))
 	if err != nil {
 		return nil, err
 	}

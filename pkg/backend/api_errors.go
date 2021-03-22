@@ -10,17 +10,24 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/alice-lg/alice-lg/backend/api"
+	"github.com/alice-lg/alice-lg/pkg/api"
 )
 
+// ResourceNotFoundError is a 404 error
 type ResourceNotFoundError struct{}
 
-func (self *ResourceNotFoundError) Error() string {
+// Error implements the error interface and returns
+// the error message
+func (err *ResourceNotFoundError) Error() string {
 	return "resource not found"
 }
 
-var SOURCE_NOT_FOUND_ERROR = &ResourceNotFoundError{}
+// Variables
+var (
+	SOURCE_NOT_FOUND_ERROR = &ResourceNotFoundError{}
+)
 
+// Error Constants
 const (
 	GENERIC_ERROR_TAG      = "GENERIC_ERROR"
 	CONNECTION_REFUSED_TAG = "CONNECTION_REFUSED"
@@ -40,6 +47,7 @@ const (
 	RESOURCE_NOT_FOUND_STATUS = http.StatusNotFound
 )
 
+// Handle an error and create a error API response
 func apiErrorResponse(routeserverId string, err error) (api.ErrorResponse, int) {
 	code := GENERIC_ERROR_CODE
 	message := err.Error()

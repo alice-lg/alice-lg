@@ -1,9 +1,9 @@
 package backend
 
 import (
-	"github.com/alice-lg/alice-lg/backend/api"
-
 	"testing"
+
+	"github.com/alice-lg/alice-lg/pkg/api"
 )
 
 func TestApiRoutesPagination(t *testing.T) {
