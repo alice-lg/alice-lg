@@ -7,19 +7,21 @@ Take a look at an Alice-LG production examples at:
 - https://lg.ecix.net/
 
 And checkout the API at:
-- https://lg.ecix.net/api/config
-- https://lg.ecix.net/api/routeservers
-- https://lg.ecix.net/api/routeservers/0/status
-- https://lg.ecix.net/api/routeservers/0/neighbours
-- https://lg.ecix.net/api/routeservers/0/neighbours/ID109_AS31078/routes
-- https://lg.ecix.net/api/lookup/prefix?q=217.115.0.0
+- https://lg.de-cix.net/api/v1/config
+- https://lg.de-cix.net/api/v1/routeservers
+- https://lg.de-cix.net/api/v1/routeservers/0/status
+- https://lg.de-cix.net/api/v1/routeservers/0/neighbours
+- https://lg.de-cix.net/api/v1/routeservers/0/neighbours/ID109_AS31078/routes
+- https://lg.de-cix.net/api/v1/lookup/prefix?q=217.115.0.0
 
 ## Explanations
 Alice-LG is a BGP looking glass which gets its data from external APIs.
 
 Currently Alice-LG supports the following APIs:
 - [birdwatcher API](https://github.com/alice-lg/birdwatcher) for [BIRD](http://bird.network.cz/)
+- [GoBGP](https://osrg.github.io/gobgp/)
 
+### Birdwatcher
 Normally you would first install the [birdwatcher API](https://github.com/alice-lg/birdwatcher) directly on the machine(s) where you run [BIRD](http://bird.network.cz/) on
 and then install Alice-LG on a seperate public facing server and point her to the afore mentioned [birdwatcher API](https://github.com/alice-lg/birdwatcher).
 
@@ -27,6 +29,9 @@ This project was a direct result of the [RIPE IXP Tools Hackathon](https://atlas
 just prior to [RIPE73](https://ripe73.ripe.net/) in Madrid, Spain.
 
 Major thanks to Barry O'Donovan who built the original [INEX Bird's Eye](https://github.com/inex/birdseye) BIRD API of which Alice-LG is a spinnoff
+
+### GoBGP
+Alice-LG supports direct integration with GoBGP instances using gRPC.  See the configuration section for more detail.
 
 ## Building Alice-LG from scratch
 __These examples include setting up your Go environment, if you already have set that up then you can obviously skip that__
@@ -48,6 +53,7 @@ source ~/.bash_profile
 # Install frontend build dependencies
 sudo yum install golang npm
 sudo npm install --global gulp-cli
+sudo npm install --global yarn
 
 go get github.com/GeertJohan/go.rice
 go get github.com/GeertJohan/go.rice/rice
@@ -73,13 +79,15 @@ You can copy it to any of the following locations:
     /etc/alice-lg/alice.conf       # global
 
 
-You will have to edit the configuration file as you need to point Alice-LG to the correct [APIs](https://github.com/alice-lg/birdwatcher):
+You will have to edit the configuration file as you need to point Alice-LG to the correct backend source.  Multiple sources can be configured.
 
+[Birdwatcher](https://github.com/alice-lg/birdwatcher):
 ```ini
 [source.rs1-example-v4]
 name = rs1.example.com (IPv4)
 [source.rs1-example-v4.birdwatcher]
 api = http://rs1.example.com:29184/
+neighbors_refresh_timeout = 2
 # show_last_reboot = true
 # timezone = UTC
 # type = single_table / multi_table
@@ -92,6 +100,19 @@ pipe_protocol_prefix = M
 name = rs1.example.com (IPv6)
 [source.rs1-example-v6.birdwatcher]
 api = http://rs1.example.com:29186/
+```
+
+[GoBGP](https://osrg.github.io/gobgp/):
+```ini
+[source.rs2-example]
+name = rs2.example.com
+group = AMS
+
+[source.rs2-example.gobgp]
+# Host is the IP (or DNS name) and port for the remote GoBGP daemon
+host = rs2.example.com:50051
+# ProcessingTimeout is a timeout in seconds configured per gRPC call to a given GoBGP daemon
+processing_timeout = 300
 ```
 
 ## Running

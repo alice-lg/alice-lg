@@ -646,7 +646,7 @@ func TestNeighborFilterFromQuery(t *testing.T) {
 		t.Error("Unexpected name filter:", filter.name)
 	}
 
-	filter = NeighborFilterFromQueryString(values)
+	filter = NeighborFilterFromQueryString("")
 	if filter.asn != 0 {
 		t.Error("Unexpected asn:", filter.asn)
 	}
