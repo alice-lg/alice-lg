@@ -2,10 +2,12 @@ package backend
 
 import (
 	"log"
-	"time"
 	"runtime/debug"
+	"time"
 )
 
+// Housekeeping is a background task flushing
+// memory and expireing caches.
 func Housekeeping(config *Config) {
 	for {
 		if config.Housekeeping.Interval > 0 {
@@ -28,7 +30,5 @@ func Housekeeping(config *Config) {
 			log.Println("Freeing memory")
 			debug.FreeOSMemory()
 		}
-
 	}
 }
-

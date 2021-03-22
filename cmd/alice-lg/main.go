@@ -3,14 +3,13 @@ package main
 import (
 	"flag"
 	"log"
-	"net/http"
-
-	"github.com/julienschmidt/httprouter"
 
 	"github.com/alice-lg/alice-lg/pkg/backend"
 )
 
 func main() {
+	quit := make(chan bool)
+
 	// Handle commandline parameters
 	configFilenameFlag := flag.String(
 		"config", "/etc/alice-lg/alice.conf",
@@ -27,38 +26,25 @@ func main() {
 	// Say hi
 	printBanner()
 
-	log.Println("Using configuration:", AliceConfig.File)
+	log.Println("Using configuration:", backend.AliceConfig.File)
 
 	// Setup local routes store
-	AliceRoutesStore = NewRoutesStore(AliceConfig)
+	backend.InitStores()
 
-	if AliceConfig.Server.EnablePrefixLookup == true {
-		AliceRoutesStore.Start()
+	// Start stores
+	if backend.AliceConfig.Server.EnablePrefixLookup == true {
+		go backend.AliceRoutesStore.Start()
 	}
 
 	// Setup local neighbours store
-	AliceNeighboursStore = NewNeighboursStore(AliceConfig)
-	if AliceConfig.Server.EnablePrefixLookup == true {
-		AliceNeighboursStore.Start()
+	if backend.AliceConfig.Server.EnablePrefixLookup == true {
+		go backend.AliceNeighboursStore.Start()
 	}
 
 	// Start the Housekeeping
-	go Housekeeping(AliceConfig)
+	go backend.Housekeeping(backend.AliceConfig)
 
-	// Setup request routing
-	router := httprouter.New()
+	go backend.StartHTTPServer()
 
-	// Serve static content
-	err = webRegisterAssets(AliceConfig.Ui, router)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = apiRegisterEndpoints(router)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Start http server
-	log.Fatal(http.ListenAndServe(AliceConfig.Server.Listen, router))
+	<-quit
 }

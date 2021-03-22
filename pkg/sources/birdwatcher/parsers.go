@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/alice-lg/alice-lg/backend/api"
+	"github.com/alice-lg/alice-lg/pkg/api"
 )
 
 // Convert server time string to time

@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/alice-lg/alice-lg/backend/api"
+	"github.com/alice-lg/alice-lg/pkg/api"
 )
 
 var REGEX_MATCH_ASLOOKUP = regexp.MustCompile(`(?i)^AS(\d+)`)
@@ -329,6 +329,6 @@ func (self *NeighboursStore) CachedAt() time.Time {
 	return self.lastRefresh
 }
 
-func (self *NeighboursStore) CacheTtl() time.Time {
+func (self *NeighboursStore) CacheTTL() time.Time {
 	return self.lastRefresh.Add(self.refreshInterval)
 }

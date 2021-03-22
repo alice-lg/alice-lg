@@ -10,7 +10,8 @@ var (
 // InitConfig loads the configuration into the global
 // AliceConfig
 func InitConfig(filename string) error {
-	AliceConfig, err := loadConfig(*configFilenameFlag)
+	var err error
+	AliceConfig, err = loadConfig(filename)
 	return err
 }
 

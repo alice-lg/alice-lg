@@ -39,8 +39,11 @@ From: https://www.iana.org/assignments/bgp-well-known-communities/bgp-well-known
     0xFFFFFF05-0xFFFFFFFF   Unassigned
 */
 
+// BgpCommunities is a tree representation of BGP communities
 type BgpCommunities map[string]interface{}
 
+// MakeWellKnownBgpCommunities returns a BgpCommunities
+// map with well known communities.
 func MakeWellKnownBgpCommunities() BgpCommunities {
 	c := BgpCommunities{
 		"65535": BgpCommunities{
@@ -66,10 +69,11 @@ func MakeWellKnownBgpCommunities() BgpCommunities {
 	return c
 }
 
-func (self BgpCommunities) Lookup(community string) (string, error) {
+// Lookup searches for a label in the communities map
+func (c BgpCommunities) Lookup(community string) (string, error) {
 	path := strings.Split(community, ":")
 	var lookup interface{} // This is all much too dynamic...
-	lookup = self
+	lookup = c
 
 	for _, key := range path {
 		key = strings.TrimSpace(key)
@@ -100,10 +104,11 @@ func (self BgpCommunities) Lookup(community string) (string, error) {
 	return label, nil
 }
 
-func (self BgpCommunities) Set(community string, label string) {
+// Set assignes a label to a community
+func (c BgpCommunities) Set(community string, label string) {
 	path := strings.Split(community, ":")
 	var lookup interface{} // Again, this is all much too dynamic...
-	lookup = self
+	lookup = c
 
 	for _, key := range path[:len(path)-1] {
 		key = strings.TrimSpace(key)

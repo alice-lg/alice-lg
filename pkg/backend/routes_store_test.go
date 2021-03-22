@@ -9,15 +9,15 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	"github.com/alice-lg/alice-lg/backend/api"
-	"github.com/alice-lg/alice-lg/backend/sources/birdwatcher"
+	"github.com/alice-lg/alice-lg/pkg/api"
+	"github.com/alice-lg/alice-lg/pkg/sources/birdwatcher"
 )
 
 //
 // Api Tets Helpers
 //
 func loadTestRoutesResponse() *api.RoutesResponse {
-	file, err := os.Open("testdata/api/routes_response.json")
+	file, err := os.Open("../../testdata/api/routes_response.json")
 	if err != nil {
 		log.Panic("could not load test data:", err)
 	}
@@ -49,7 +49,7 @@ func testCheckPrefixesPresence(prefixes, resultset []string, t *testing.T) {
 
 	for _, prefix := range resultset {
 		// Check if prefixes are all accounted for
-		for net, _ := range presence {
+		for net := range presence {
 			if prefix == net {
 				presence[net] = true
 			}

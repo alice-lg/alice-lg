@@ -10,9 +10,7 @@ import (
 
 var REGEX_MATCH_IP_PREFIX = regexp.MustCompile(`([a-f0-9/]+[\.:]*)+`)
 
-/*
- Case Insensitive Contains
-*/
+// ContainsCi is like `strings.Contains` but case insensitive
 func ContainsCi(s, substr string) bool {
 	return strings.Contains(
 		strings.ToLower(s),
@@ -20,9 +18,8 @@ func ContainsCi(s, substr string) bool {
 	)
 }
 
-/*
- Check array membership
-*/
+// MemberOf checks if a key is present in
+// a list of strings.
 func MemberOf(list []string, key string) bool {
 	for _, v := range list {
 		if v == key {
@@ -32,9 +29,7 @@ func MemberOf(list []string, key string) bool {
 	return false
 }
 
-/*
- Check if something could be a prefix
-*/
+// MaybePrefix checks if something could be a prefix
 func MaybePrefix(s string) bool {
 	s = strings.ToLower(s)
 
@@ -52,11 +47,12 @@ func MaybePrefix(s string) bool {
 	return false
 }
 
-/*
- Since havin ints as keys in json is
- acutally undefined behaviour, we keep these interally
- but provide a string as a key for serialization
-*/
+// SerializeReasons asserts the bgp communitiy parts are
+// actually strings, because there are no such things as
+// integers as keys in json.
+// Serialization of this is undefined behaviour, so we
+// keep these interallybut provide a string as a key for
+// serialization
 func SerializeReasons(reasons map[int]string) map[string]string {
 	res := make(map[string]string)
 	for id, reason := range reasons {
@@ -65,10 +61,8 @@ func SerializeReasons(reasons map[int]string) map[string]string {
 	return res
 }
 
-/*
- Make trimmed list of CSV strings.
- Ommits empty values.
-*/
+// TrimmedStringList makes a trimmed list of CSV strings
+// ommitting empty values.
 func TrimmedStringList(s string) []string {
 	tokens := strings.Split(s, ",")
 	list := []string{}
@@ -82,10 +76,7 @@ func TrimmedStringList(s string) []string {
 	return list
 }
 
-/*
- Convert time.Duration to milliseconds
-*/
-
+// DurationMs converts time.Duration to milliseconds
 func DurationMs(d time.Duration) float64 {
 	return float64(d) / 1000.0 / 1000.0 // nano -> micro -> milli
 }

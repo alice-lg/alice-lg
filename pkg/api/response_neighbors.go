@@ -76,7 +76,7 @@ func (self *Neighbour) MatchName(name string) bool {
 }
 
 // Neighbours response is cacheable
-func (self *NeighboursResponse) CacheTtl() time.Duration {
+func (self *NeighboursResponse) CacheTTL() time.Duration {
 	now := time.Now().UTC()
 	return self.Api.Ttl.Sub(now)
 }

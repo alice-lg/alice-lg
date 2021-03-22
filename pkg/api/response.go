@@ -21,7 +21,7 @@ type ErrorResponse struct {
 
 // Cache aware api response
 type CacheableResponse interface {
-	CacheTtl() time.Duration
+	CacheTTL() time.Duration
 }
 
 // Config

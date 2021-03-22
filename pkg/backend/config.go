@@ -6,17 +6,22 @@ import (
 	"os"
 	"strings"
 
-	"github.com/alice-lg/alice-lg/backend/sources"
-	"github.com/alice-lg/alice-lg/backend/sources/birdwatcher"
-	"github.com/alice-lg/alice-lg/backend/sources/gobgp"
-
 	"github.com/go-ini/ini"
+
+	"github.com/alice-lg/alice-lg/pkg/sources"
+	"github.com/alice-lg/alice-lg/pkg/sources/birdwatcher"
+	"github.com/alice-lg/alice-lg/pkg/sources/gobgp"
 )
 
-const SOURCE_UNKNOWN = 0
-const SOURCE_BIRDWATCHER = 1
-const SOURCE_GOBGP = 2
+// Config Source Types
+const (
+	SOURCE_UNKNOWN     = 0
+	SOURCE_BIRDWATCHER = 1
+	SOURCE_GOBGP       = 2
+)
 
+// A ServerConfig holds the runtime configuration
+// for the backend.
 type ServerConfig struct {
 	Listen                         string `ini:"listen_http"`
 	EnablePrefixLookup             bool   `ini:"enable_prefix_lookup"`
@@ -26,24 +31,36 @@ type ServerConfig struct {
 	EnableNeighborsStatusRefresh   bool   `ini:"enable_neighbors_status_refresh"`
 }
 
+// HousekeepingConfig describes the housekeeping interval
+// and flags.
 type HousekeepingConfig struct {
 	Interval           int  `ini:"interval"`
 	ForceReleaseMemory bool `ini:"force_release_memory"`
 }
 
+// RejectionsConfig holds rejection reasons
+// associated with BGP communities
 type RejectionsConfig struct {
 	Reasons BgpCommunities
 }
 
+// NoexportsConfig holds no-export reasons
+// associated with BGP communities and behaviour
+// tweaks.
 type NoexportsConfig struct {
 	Reasons      BgpCommunities
 	LoadOnDemand bool `ini:"load_on_demand"`
 }
 
+// RejectCandidatesConfig holds reasons for rejection
+// candidates (e.g. routes that will be dropped if
+// a hard filtering would be applied.)
 type RejectCandidatesConfig struct {
 	Communities BgpCommunities
 }
 
+// RpkiConfig defines BGP communities describing the RPKI
+// validation state.
 type RpkiConfig struct {
 	// Define communities
 	Enabled    bool     `ini:"enabled"`
@@ -53,6 +70,7 @@ type RpkiConfig struct {
 	Invalid    []string `ini:"invalid"`
 }
 
+// UiConfig holds runtime settings for the web client
 type UiConfig struct {
 	RoutesColumns      map[string]string
 	RoutesColumnsOrder []string
@@ -75,17 +93,20 @@ type UiConfig struct {
 	Pagination PaginationConfig
 }
 
+// ThemeConfig describes a theme configuration
 type ThemeConfig struct {
 	Path     string `ini:"path"`
 	BasePath string `ini:"url_base"` // Optional, default: /theme
 }
 
+// PaginationConfig holds settings for route pagination
 type PaginationConfig struct {
 	RoutesFilteredPageSize    int `ini:"routes_filtered_page_size"`
 	RoutesAcceptedPageSize    int `ini:"routes_accepted_page_size"`
 	RoutesNotExportedPageSize int `ini:"routes_not_exported_page_size"`
 }
 
+// A SourceConfig is a generic source configuration
 type SourceConfig struct {
 	Id    string
 	Order int
@@ -104,6 +125,7 @@ type SourceConfig struct {
 	instance sources.Source
 }
 
+// Config is the application configuration
 type Config struct {
 	Server       ServerConfig
 	Housekeeping HousekeepingConfig
@@ -112,9 +134,9 @@ type Config struct {
 	File         string
 }
 
-// Get source by id
-func (self *Config) SourceById(sourceId string) *SourceConfig {
-	for _, sourceConfig := range self.Sources {
+// SourceById returns a source from the config by id
+func (cfg *Config) SourceById(sourceId string) *SourceConfig {
+	for _, sourceConfig := range cfg.Sources {
 		if sourceConfig.Id == sourceId {
 			return sourceConfig
 		}
@@ -122,9 +144,9 @@ func (self *Config) SourceById(sourceId string) *SourceConfig {
 	return nil
 }
 
-// Get instance by id
-func (self *Config) SourceInstanceById(sourceId string) sources.Source {
-	sourceConfig := self.SourceById(sourceId)
+// SourceInstanceById returns an instance by id
+func (cfg *Config) SourceInstanceById(sourceId string) sources.Source {
+	sourceConfig := cfg.SourceById(sourceId)
 	if sourceConfig == nil {
 		return nil // Nothing to do here.
 	}
@@ -431,11 +453,10 @@ func getRpkiConfig(config *ini.File) (RpkiConfig, error) {
 		tokens := []string{}
 		if len(rpki.Invalid) != 3 {
 			// This is wrong, we should have three parts (RS):1000:[range]
-			return rpki, fmt.Errorf("Unexpected rpki.Invalid configuration: %v", rpki.Invalid)
-		} else {
-			tokens = strings.Split(rpki.Invalid[2], "-")
+			return rpki, fmt.Errorf(
+				"unexpected rpki.Invalid configuration: %v", rpki.Invalid)
 		}
-
+		tokens = strings.Split(rpki.Invalid[2], "-")
 		rpki.Invalid = append([]string{rpki.Invalid[0], rpki.Invalid[1]}, tokens...)
 	}
 
@@ -722,20 +743,20 @@ func loadConfig(file string) (*Config, error) {
 }
 
 // Get source instance from config
-func (self *SourceConfig) getInstance() sources.Source {
-	if self.instance != nil {
-		return self.instance
+func (cfg *SourceConfig) getInstance() sources.Source {
+	if cfg.instance != nil {
+		return cfg.instance
 	}
 
 	var instance sources.Source
-	switch self.Type {
+	switch cfg.Type {
 	case SOURCE_BIRDWATCHER:
-		instance = birdwatcher.NewBirdwatcher(self.Birdwatcher)
+		instance = birdwatcher.NewBirdwatcher(cfg.Birdwatcher)
 	case SOURCE_GOBGP:
-		instance = gobgp.NewGoBGP(self.GoBGP)
+		instance = gobgp.NewGoBGP(cfg.GoBGP)
 	}
 
-	self.instance = instance
+	cfg.instance = instance
 	return instance
 }
 

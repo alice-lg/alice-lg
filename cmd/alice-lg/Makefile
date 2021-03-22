@@ -6,7 +6,7 @@
 PROG=alice-lg
 ARCH=amd64
 
-APP_VERSION=$(shell cat ../VERSION)
+APP_VERSION=$(shell cat ../../VERSION)
 VERSION=$(APP_VERSION)_$(shell git rev-parse --short HEAD)
 
 LOCAL_RPMS=RPMS

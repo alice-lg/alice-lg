@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// Store State Constants
 const (
 	STATE_INIT = iota
 	STATE_READY
@@ -11,6 +12,7 @@ const (
 	STATE_ERROR
 )
 
+// StoreStatus defines a status the store can be in
 type StoreStatus struct {
 	LastRefresh time.Time
 	LastError   error

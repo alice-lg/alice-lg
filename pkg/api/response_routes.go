@@ -65,7 +65,7 @@ type RoutesResponse struct {
 	NotExported Routes    `json:"not_exported"`
 }
 
-func (self *RoutesResponse) CacheTtl() time.Duration {
+func (self *RoutesResponse) CacheTTL() time.Duration {
 	now := time.Now().UTC()
 	return self.Api.Ttl.Sub(now)
 }

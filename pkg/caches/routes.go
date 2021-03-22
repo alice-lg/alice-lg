@@ -1,9 +1,10 @@
 package caches
 
 import (
-	"github.com/alice-lg/alice-lg/backend/api"
 	"sync"
 	"time"
+
+	"github.com/alice-lg/alice-lg/pkg/api"
 )
 
 /*
@@ -47,7 +48,7 @@ func (self *RoutesCache) Get(neighborId string) *api.RoutesResponse {
 		return nil
 	}
 
-	if response.CacheTtl() < 0 {
+	if response.CacheTTL() < 0 {
 		return nil
 	}
 
@@ -81,7 +82,7 @@ func (self *RoutesCache) Expire() int {
 
 	expiredKeys := []string{}
 	for key, response := range self.responses {
-		if response.CacheTtl() < 0 {
+		if response.CacheTTL() < 0 {
 			expiredKeys = append(expiredKeys, key)
 		}
 	}

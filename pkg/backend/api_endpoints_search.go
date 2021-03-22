@@ -110,7 +110,7 @@ func apiLookupPrefixGlobal(
 				CachedAt: AliceRoutesStore.CachedAt(),
 			},
 			ResultFromCache: true, // Well.
-			Ttl:             AliceRoutesStore.CacheTtl(),
+			Ttl:             AliceRoutesStore.CacheTTL(),
 		},
 		TimedResponse: api.TimedResponse{
 			RequestDuration: DurationMs(queryDuration),
@@ -153,7 +153,7 @@ func apiLookupNeighborsGlobal(
 				CachedAt: AliceNeighboursStore.CachedAt(),
 			},
 			ResultFromCache: true, // You would not have guessed.
-			Ttl:             AliceNeighboursStore.CacheTtl(),
+			Ttl:             AliceNeighboursStore.CacheTTL(),
 		},
 		Neighbours: neighbors,
 	}

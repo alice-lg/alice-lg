@@ -1,7 +1,7 @@
 package caches
 
 import (
-	"github.com/alice-lg/alice-lg/backend/api"
+	"github.com/alice-lg/alice-lg/pkg/api"
 )
 
 /*
@@ -37,7 +37,7 @@ func (self *NeighborsCache) Get() *api.NeighboursResponse {
 		return nil
 	}
 
-	if self.response.CacheTtl() < 0 {
+	if self.response.CacheTTL() < 0 {
 		return nil
 	}
 
