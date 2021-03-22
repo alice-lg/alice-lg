@@ -43,9 +43,6 @@ alpine:
 		-a -installsuffix cgo \
 		$(LDFLAGS) -o $(PROG)-linux-$(ARCH)
 
-bundle:
-	rice embed-go
-
 test:
 	GO111MODULE=on go test -v
 	cd api/ && GO111MODULE=on go test -v
@@ -55,12 +52,11 @@ test:
 
 dev: clean all
 
-prod: clean bundle $(TARGET)
+prod: clean $(TARGET)
 	@echo "Build $(VERSION) [production] @ $(TARGET)"
 
 
 clean:
-	rm -f rice-box.go
 	rm -f $(PROG)-osx-$(ARCH)
 	rm -f $(PROG)-linux-$(ARCH)
 

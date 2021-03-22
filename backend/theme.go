@@ -27,10 +27,13 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+// Theme is a client customization through additional
+// HTML, CSS and JS content.
 type Theme struct {
 	Config ThemeConfig
 }
 
+// NewTheme creates a theme from a config
 func NewTheme(config ThemeConfig) *Theme {
 	theme := &Theme{
 		Config: config,
@@ -39,13 +42,11 @@ func NewTheme(config ThemeConfig) *Theme {
 	return theme
 }
 
-/*
- Get includable files from theme directory
-*/
-func (self *Theme) listIncludes(suffix string) []string {
+// Get includable files from theme directory
+func (t *Theme) listIncludes(suffix string) []string {
 	includes := []string{}
 
-	files, err := ioutil.ReadDir(self.Config.Path)
+	files, err := ioutil.ReadDir(t.Config.Path)
 	if err != nil {
 		return []string{}
 	}
@@ -64,19 +65,16 @@ func (self *Theme) listIncludes(suffix string) []string {
 			includes = append(includes, filename)
 		}
 	}
-
 	return includes
 }
 
-/*
-Calculate a hashvalue for an include file,
-to help with cache invalidation, when the file changes.
-
-We are using the timestamp of the last access as Unix()
-encoded as hex
-*/
-func (self *Theme) HashInclude(include string) string {
-	path := filepath.Join(self.Config.Path, include)
+// HashInclude calculates a hashvalue for an include file,
+// to help with cache invalidation, when the file changes.
+//
+// We are using the timestamp of the last access as Unix()
+// encoded as hex
+func (t *Theme) HashInclude(include string) string {
+	path := filepath.Join(t.Config.Path, include)
 	stat, err := os.Stat(path)
 	if err != nil {
 		return ""
@@ -88,25 +86,21 @@ func (self *Theme) HashInclude(include string) string {
 	return strconv.FormatInt(timestamp, 16)
 }
 
-/*
- Retrieve a list of includeable stylesheets, with
- their md5sum as hash
-*/
-func (self *Theme) Stylesheets() []string {
-	return self.listIncludes(".css")
+// Stylesheets retrieve a list of includeable stylesheets, with
+// their md5sum as hash
+func (t *Theme) Stylesheets() []string {
+	return t.listIncludes(".css")
 }
 
-/*
- Make include statement: stylesheet
-*/
-func (self *Theme) StylesheetIncludes() string {
+// StylesheetIncludes make include statements for stylesheet
+func (t *Theme) StylesheetIncludes() string {
 
 	includes := []string{}
-	for _, stylesheet := range self.Stylesheets() {
-		hash := self.HashInclude(stylesheet)
+	for _, stylesheet := range t.Stylesheets() {
+		hash := t.HashInclude(stylesheet)
 		include := fmt.Sprintf(
 			"<link rel=\"stylesheet\" href=\"%s/%s?%s\" />",
-			self.Config.BasePath, stylesheet, hash,
+			t.Config.BasePath, stylesheet, hash,
 		)
 		includes = append(includes, include)
 	}
@@ -114,23 +108,19 @@ func (self *Theme) StylesheetIncludes() string {
 	return strings.Join(includes, "\n")
 }
 
-/*
- Retrieve a list of includeable javascipts
-*/
-func (self *Theme) Scripts() []string {
-	return self.listIncludes(".js")
+// Scripts retrieve a list of includeable javascipts
+func (t *Theme) Scripts() []string {
+	return t.listIncludes(".js")
 }
 
-/*
- Make include statement: script
-*/
-func (self *Theme) ScriptIncludes() string {
+// ScriptIncludes makes include statement for scripts
+func (t *Theme) ScriptIncludes() string {
 	includes := []string{}
-	for _, script := range self.Scripts() {
-		hash := self.HashInclude(script)
+	for _, script := range t.Scripts() {
+		hash := t.HashInclude(script)
 		include := fmt.Sprintf(
 			"<script type=\"text/javascript\" src=\"%s/%s?%s\"></script>",
-			self.Config.BasePath, script, hash,
+			t.Config.BasePath, script, hash,
 		)
 		includes = append(includes, include)
 	}
@@ -138,47 +128,40 @@ func (self *Theme) ScriptIncludes() string {
 	return strings.Join(includes, "\n")
 }
 
-/*
- Theme HTTP Handler
-*/
-func (self *Theme) Handler() http.Handler {
-
+// Handler is the theme HTTP handler
+func (t *Theme) Handler() http.Handler {
 	// Serve the content using the file server
-	path := self.Config.Path
+	path := t.Config.Path
 	themeFilesHandler := http.StripPrefix(
-		self.Config.BasePath, http.FileServer(http.Dir(path)))
-
+		t.Config.BasePath, http.FileServer(http.Dir(path)))
 	return themeFilesHandler
 }
 
-/*
- Register theme at path
-*/
-func (self *Theme) RegisterThemeAssets(router *httprouter.Router) error {
-	fsPath := self.Config.Path
+// RegisterThemeAssets registers the theme at path
+func (t *Theme) RegisterThemeAssets(router *httprouter.Router) error {
+	fsPath := t.Config.Path
 	if fsPath == "" {
 		return nil // nothing to do here
 	}
 
 	if _, err := os.Stat(fsPath); err != nil {
-		return fmt.Errorf("Theme path '%s' could not be found!", fsPath)
+		return fmt.Errorf("theme path '%s' could not be found", fsPath)
 	}
 
 	log.Println("Using theme at:", fsPath)
 
 	// We have a theme, install handler
-	path := fmt.Sprintf("%s/*path", self.Config.BasePath)
-	router.Handler("GET", path, self.Handler())
+	path := fmt.Sprintf("%s/*path", t.Config.BasePath)
+	router.Handler("GET", path, t.Handler())
 
 	return nil
 }
 
-/*
- Prepare document, fill placeholder with scripts and stylesheet
-*/
-func (self *Theme) PrepareClientHtml(html string) string {
-	stylesheets := self.StylesheetIncludes()
-	scripts := self.ScriptIncludes()
+// PrepareClientHTML prepares the document and fills placeholders
+// with scripts and stylesheet.
+func (t *Theme) PrepareClientHTML(html string) string {
+	stylesheets := t.StylesheetIncludes()
+	scripts := t.ScriptIncludes()
 
 	html = strings.Replace(html,
 		"<!-- ###THEME_STYLESHEETS### -->",

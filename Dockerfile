@@ -23,14 +23,13 @@ ADD client .
 RUN DISABLE_LOGGING=1 NODE_ENV=production /usr/local/bin/gulp
 
 # Build the backend
-FROM golang:1.12 AS backend
+FROM golang:1.16 AS backend
 
 # Install dependencies
 WORKDIR /src/alice-lg
 ADD go.mod .
 ADD go.sum .
 RUN go mod download
-RUN go install github.com/GeertJohan/go.rice/rice
 
 # Add client
 COPY --from=frontend /src/alice-lg/client/build client/build
@@ -38,10 +37,10 @@ COPY --from=frontend /src/alice-lg/client/build client/build
 # Build backend
 WORKDIR /src/alice-lg
 ADD VERSION .
+ADD go.mod go.sum .
 
 WORKDIR /src/alice-lg/backend
 ADD backend .
-RUN rice embed-go
 
 # RUN go build -o alice-lg-linux-amd64 -ldflags="-X main.version=4.0.3"
 RUN make alpine
