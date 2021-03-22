@@ -1,6 +1,6 @@
 module github.com/alice-lg/alice-lg
 
-go 1.14
+go 1.16
 
 require (
 	github.com/GeertJohan/go.rice v1.0.2

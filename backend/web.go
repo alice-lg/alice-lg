@@ -37,14 +37,12 @@ func webPrepareClientHTML(html string) string {
 func webRegisterAssets(ui UiConfig, router *httprouter.Router) error {
 	log.Println("Preparing and installing assets")
 
-	// Serve static assets
-	assetsHandler := http.StripPrefix("/static/", http.FileServer(client.Assets))
-
 	// Prepare client html: Rewrite paths
-	indexHTML, err := assets.ReadFile("index.html")
+	indexHTMLData, err := client.Assets.ReadFile("build/index.html")
 	if err != nil {
 		return err
 	}
+	indexHTML := string(indexHTMLData) // TODO: migrate to []byte
 
 	theme := NewTheme(ui.Theme)
 	err = theme.RegisterThemeAssets(router)
@@ -56,7 +54,7 @@ func webRegisterAssets(ui UiConfig, router *httprouter.Router) error {
 	indexHTML = webPrepareClientHTML(indexHTML)
 
 	// Register static assets
-	router.Handler("GET", "/static/*path", assetsHandler)
+	router.Handler("GET", "/static/*path", client.AssetsHTTPHandler("/static"))
 
 	// Rewrite paths
 	// Serve index html as root...
