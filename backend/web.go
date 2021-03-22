@@ -6,8 +6,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/GeertJohan/go.rice"
 	"github.com/julienschmidt/httprouter"
+
+	"github.com/alice-lg/alice-lg/client"
 )
 
 // Web Client
@@ -15,7 +16,7 @@ import (
 
 // Prepare client HTML:
 // Set paths and add version to assets.
-func webPrepareClientHtml(html string) string {
+func webPrepareClientHTML(html string) string {
 	status, _ := NewAppStatus()
 
 	// Replace paths and tags
@@ -37,13 +38,10 @@ func webRegisterAssets(ui UiConfig, router *httprouter.Router) error {
 	log.Println("Preparing and installing assets")
 
 	// Serve static assets
-	assets := rice.MustFindBox("../client/build")
-	assetsHandler := http.StripPrefix(
-		"/static/",
-		http.FileServer(assets.HTTPBox()))
+	assetsHandler := http.StripPrefix("/static/", http.FileServer(client.Assets))
 
 	// Prepare client html: Rewrite paths
-	indexHtml, err := assets.String("index.html")
+	indexHTML, err := assets.ReadFile("index.html")
 	if err != nil {
 		return err
 	}
@@ -55,7 +53,7 @@ func webRegisterAssets(ui UiConfig, router *httprouter.Router) error {
 	}
 
 	// Update paths
-	indexHtml = webPrepareClientHtml(indexHtml)
+	indexHTML = webPrepareClientHTML(indexHTML)
 
 	// Register static assets
 	router.Handler("GET", "/static/*path", assetsHandler)
@@ -67,8 +65,8 @@ func webRegisterAssets(ui UiConfig, router *httprouter.Router) error {
 			// Include theme, we need to update the
 			// hashes on reload, so we can check if the theme has
 			// changed without restarting the app
-			themedHtml := theme.PrepareClientHtml(indexHtml)
-			io.WriteString(res, themedHtml)
+			themedHTML := theme.PrepareClientHTML(indexHTML)
+			io.WriteString(res, themedHTML)
 		})
 
 	// ...and all alice related paths aswell
@@ -81,8 +79,8 @@ func webRegisterAssets(ui UiConfig, router *httprouter.Router) error {
 		router.GET(path,
 			func(res http.ResponseWriter, _ *http.Request, _ httprouter.Params) {
 				// ditto here
-				themedHtml := theme.PrepareClientHtml(indexHtml)
-				io.WriteString(res, themedHtml)
+				themedHTML := theme.PrepareClientHTML(indexHTML)
+				io.WriteString(res, themedHTML)
 			})
 	}
 

@@ -10,12 +10,6 @@ image:
 	docker build . -t alice-lg-golang:latest
 
 
-# Somehow rice.box does not work when the binary was built
-# using docker. However it does work when used for embedding.
-# So, making a production build is doable, an dev build however
-# is not.
-#
-
 # dev:
 #	$(DOCKER_EXEC) "cd backend && make dev"
 
