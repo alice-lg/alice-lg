@@ -1,8 +1,6 @@
 package openbgpd
 
 import (
-	"net/http"
-
 	"github.com/alice-lg/alice-lg/pkg/api"
 )
 
