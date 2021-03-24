@@ -5,13 +5,13 @@ import (
 	"time"
 )
 
-// General api response
+// Response is a general API response
 type Response interface{}
 
-// Details, usually the original backend response
+// Details are usually the original backend response
 type Details map[string]interface{}
 
-// Error Handling
+// ErrorResponse encodes an error message and code
 type ErrorResponse struct {
 	Message       string `json:"message"`
 	Code          int    `json:"code"`
@@ -19,12 +19,12 @@ type ErrorResponse struct {
 	RouteserverId string `json:"routeserver_id"`
 }
 
-// Cache aware api response
+// CacheableResponse is a cache aware API response
 type CacheableResponse interface {
 	CacheTTL() time.Duration
 }
 
-// Config
+// ConfigResponse is a response with client runtime configuration
 type ConfigResponse struct {
 	Asn int `json:"asn"`
 
@@ -51,6 +51,7 @@ type ConfigResponse struct {
 	PrefixLookupEnabled bool `json:"prefix_lookup_enabled"`
 }
 
+// Noexport options
 type Noexport struct {
 	LoadOnDemand bool `json:"load_on_demand"`
 }
