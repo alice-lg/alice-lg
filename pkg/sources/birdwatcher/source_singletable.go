@@ -5,6 +5,7 @@ import (
 	"sort"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
+	"github.com/alice-lg/alice-lg/pkg/decoders"
 )
 
 type SingleTableBirdwatcher struct {
@@ -119,7 +120,7 @@ func (self *SingleTableBirdwatcher) fetchRequiredRoutes(neighborId string) (*api
 	importedRoutes := api.Routes{}
 	if len(receivedRoutes) > 0 {
 		peer := receivedRoutes[0].Gateway
-		learntFrom := mustString(receivedRoutes[0].Details["learnt_from"], peer)
+		learntFrom := decoders.String(receivedRoutes[0].Details["learnt_from"], peer)
 
 		filteredRoutes = self.filterRoutesByPeerOrLearntFrom(filteredRoutes, peer, learntFrom)
 		importedRoutes = self.filterRoutesByDuplicates(receivedRoutes, filteredRoutes)

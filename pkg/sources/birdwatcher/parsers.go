@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
+	"github.com/alice-lg/alice-lg/pkg/decoders"
 )
 
 // Convert server time string to time
@@ -136,9 +137,9 @@ func parseBirdwatcherStatus(bird ClientResponse, config Config) (api.Status, err
 		LastReboot:   lastReboot,
 		LastReconfig: lastReconfig,
 		Backend:      "bird",
-		Version:      mustString(birdStatus["version"], "unknown"),
-		Message:      mustString(birdStatus["message"], "unknown"),
-		RouterId:     mustString(birdStatus["router_id"], "unknown"),
+		Version:      decoders.String(birdStatus["version"], "unknown"),
+		Message:      decoders.String(birdStatus["message"], "unknown"),
+		RouterId:     decoders.String(birdStatus["router_id"], "unknown"),
 	}
 
 	return status, nil
@@ -162,7 +163,7 @@ func parseNeighbours(bird ClientResponse, config Config) (api.Neighbours, error)
 		routes := protocol["routes"].(map[string]interface{})
 
 		uptime := parseRelativeServerTime(protocol["state_changed"], config)
-		lastError := mustString(protocol["last_error"], "")
+		lastError := decoders.String(protocol["last_error"], "")
 
 		routesReceived := float64(0)
 		if routes != nil {
@@ -177,17 +178,17 @@ func parseNeighbours(bird ClientResponse, config Config) (api.Neighbours, error)
 		neighbour := &api.Neighbour{
 			Id: protocolId,
 
-			Address: mustString(protocol["neighbor_address"], "error"),
-			Asn:     mustInt(protocol["neighbor_as"], 0),
+			Address: decoders.String(protocol["neighbor_address"], "error"),
+			Asn:     decoders.Int(protocol["neighbor_as"], 0),
 			State: strings.ToLower(
-				mustString(protocol["state"], "unknown")),
-			Description: mustString(protocol["description"], "no description"),
+				decoders.String(protocol["state"], "unknown")),
+			Description: decoders.String(protocol["description"], "no description"),
 
-			RoutesReceived:  mustInt(routesReceived, 0),
-			RoutesAccepted:  mustInt(routes["imported"], 0),
-			RoutesFiltered:  mustInt(routes["filtered"], 0),
-			RoutesExported:  mustInt(routes["exported"], 0), //TODO protocol_exported?
-			RoutesPreferred: mustInt(routes["preferred"], 0),
+			RoutesReceived:  decoders.Int(routesReceived, 0),
+			RoutesAccepted:  decoders.Int(routes["imported"], 0),
+			RoutesFiltered:  decoders.Int(routes["filtered"], 0),
+			RoutesExported:  decoders.Int(routes["exported"], 0), //TODO protocol_exported?
+			RoutesPreferred: decoders.Int(routes["preferred"], 0),
 
 			Uptime:    uptime,
 			LastError: lastError,
@@ -218,7 +219,7 @@ func parseNeighboursShort(bird ClientResponse, config Config) (api.NeighboursSta
 
 		neighbour := &api.NeighbourStatus{
 			Id:    protocolId,
-			State: mustString(protocol["state"], "unknown"),
+			State: decoders.String(protocol["state"], "unknown"),
 			Since: uptime,
 		}
 
@@ -238,18 +239,18 @@ func parseRouteBgpInfo(data interface{}) api.BgpInfo {
 		return api.BgpInfo{}
 	}
 
-	asPath := mustIntList(bgpData["as_path"])
+	asPath := decoders.IntList(bgpData["as_path"])
 	communities := parseBgpCommunities(bgpData["communities"])
 	largeCommunities := parseBgpCommunities(bgpData["large_communities"])
 	extCommunities := parseExtBgpCommunities(bgpData["ext_communities"])
 
-	localPref, _ := strconv.Atoi(mustString(bgpData["local_pref"], "0"))
-	med, _ := strconv.Atoi(mustString(bgpData["med"], "0"))
+	localPref, _ := strconv.Atoi(decoders.String(bgpData["local_pref"], "0"))
+	med, _ := strconv.Atoi(decoders.String(bgpData["med"], "0"))
 
 	bgp := api.BgpInfo{
-		Origin:           mustString(bgpData["origin"], "unknown"),
+		Origin:           decoders.String(bgpData["origin"], "unknown"),
 		AsPath:           asPath,
-		NextHop:          mustString(bgpData["next_hop"], "unknown"),
+		NextHop:          decoders.String(bgpData["next_hop"], "unknown"),
 		LocalPref:        localPref,
 		Med:              med,
 		Communities:      communities,
@@ -312,18 +313,18 @@ func parseRoutesData(birdRoutes []interface{}, config Config) api.Routes {
 		rdata := data.(map[string]interface{})
 
 		age := parseRelativeServerTime(rdata["age"], config)
-		rtype := mustStringList(rdata["type"])
+		rtype := decoders.StringList(rdata["type"])
 		bgpInfo := parseRouteBgpInfo(rdata["bgp"])
 
 		route := &api.Route{
-			Id:          mustString(rdata["network"], "unknown"),
-			NeighbourId: mustString(rdata["from_protocol"], "unknown neighbour"),
+			Id:          decoders.String(rdata["network"], "unknown"),
+			NeighbourId: decoders.String(rdata["from_protocol"], "unknown neighbour"),
 
-			Network:   mustString(rdata["network"], "unknown net"),
-			Interface: mustString(rdata["interface"], "unknown interface"),
-			Gateway:   mustString(rdata["gateway"], "unknown gateway"),
-			Metric:    mustInt(rdata["metric"], -1),
-			Primary:   mustBool(rdata["primary"], false),
+			Network:   decoders.String(rdata["network"], "unknown net"),
+			Interface: decoders.String(rdata["interface"], "unknown interface"),
+			Gateway:   decoders.String(rdata["gateway"], "unknown gateway"),
+			Metric:    decoders.Int(rdata["metric"], -1),
+			Primary:   decoders.Bool(rdata["primary"], false),
 			Age:       age,
 			Type:      rtype,
 			Bgp:       bgpInfo,
