@@ -37,9 +37,10 @@ client_prod:
 
 
 backend_prod: client_prod
-	$(MAKE) -C backend/ bundle
-	$(MAKE) -C backend/ linux
+	$(MAKE) -C cmd/alice-lg/ linux
 
+backend:
+	$(MAKE) -C cmd/alice-lg/ linux
 
 alice: client_prod backend_prod
 	mv backend/alice-lg-* bin/
