@@ -79,7 +79,7 @@ func Duration(value interface{}, fallback time.Duration) time.Duration {
 // According to https://github.com/openbgpd-portable/openbgpd-openbsd/blob/master/src/usr.sbin/bgpctl/bgpctl.c#L586-L591
 // we have to parse %02lluw%01ud%02uh, %01ud%02uh%02um and %02u:%02u:%02u.
 // This yields three formats:
-//   01w03d01h
+//   01w3d01h
 //   1d02h03m
 //   01:02:03
 func DurationTimeframe(value interface{}, fallback time.Duration) time.Duration {
