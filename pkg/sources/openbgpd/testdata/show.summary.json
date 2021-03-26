@@ -1,0 +1,28 @@
+{
+	"neighbors": [
+		{
+			"remote_as": "12345",
+			"group": "clients",
+			"remote_addr": "200.100.50.25",
+			"bgpid": "200.100.50.1",
+			"state": "Established",
+			"last_updown": "5d20h05m"
+		},
+		{
+			"remote_as": "12345",
+			"group": "clients",
+			"remote_addr": "fd23:42:1::23:1",
+			"bgpid": "100.200.50.25",
+			"state": "Active",
+			"last_updown": "01w2d15h"
+		},
+		{
+			"remote_as": "62993",
+			"group": "clients",
+			"remote_addr": "200.100.50.25",
+			"bgpid": "200.100.50.1",
+			"state": "None",
+			"last_updown": "10:11:12"
+		}
+	]
+}
