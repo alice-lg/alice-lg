@@ -9,13 +9,13 @@ import (
 
 // Decode the api status response from the openbgpd
 // state server.
-func decodeAPIStatus(res map[string]interface{}) *api.Status {
+func decodeAPIStatus(res map[string]interface{}) api.Status {
 	now := time.Now().UTC()
 	uptime := decoders.Duration(res["server_uptime"], 0)
 
 	// This is an approximation and maybe wrong
 	lastReboot := now.Add(-uptime)
-	s := &api.Status{
+	s := api.Status{
 		ServerTime:   decoders.TimeUTC(res["server_time_utc"], time.Time{}),
 		LastReboot:   lastReboot,
 		LastReconfig: time.Time{},

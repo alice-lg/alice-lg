@@ -3,8 +3,10 @@ package openbgpd
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
+	"github.com/alice-lg/alice-lg/pkg/decoders"
 )
 
 const (
@@ -32,7 +34,7 @@ func (s *Source) Status() (*api.StatusResponse, error) {
 	apiStatus := api.ApiStatus{
 		Version:         SourceVersion,
 		ResultFromCache: false,
-		Ttl:             0,
+		Ttl:             time.Now().UTC(),
 	}
 
 	// Make API request, at some
@@ -44,8 +46,12 @@ func (s *Source) Status() (*api.StatusResponse, error) {
 	if err != nil {
 		return nil, err
 	}
+	body, err := decoders.ReadJSONResponse(res)
+	if err != nil {
+		return nil, err
+	}
 
-	status := decodeAPIStatus(res)
+	status := decodeAPIStatus(body)
 
 	response := &api.StatusResponse{
 		Api:    apiStatus,
