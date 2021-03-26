@@ -4,6 +4,7 @@ package decoders
 // with a fallback.
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -69,6 +70,48 @@ func Duration(value interface{}, fallback time.Duration) time.Duration {
 		return fallback
 	}
 	return val
+}
+
+// DurationTimeframe decodes a duration: Bgpctl encodes
+// this using fmt_timeframe, whiuch outputs a format similar
+// to that being understood by time.ParseDuration - however
+// the time unit "w" (weeks) is not supported.
+// According to https://github.com/openbgpd-portable/openbgpd-openbsd/blob/master/src/usr.sbin/bgpctl/bgpctl.c#L586-L591
+// we have to parse %02lluw%01ud%02uh, %01ud%02uh%02um and %02u:%02u:%02u.
+// This yields three formats:
+//   01w03d01h
+//   1d02h03m
+//   01:02:03
+func DurationTimeframe(value interface{}, fallback time.Duration) time.Duration {
+	var sec, min, hour, day uint
+	var week uint64
+	sval := String(value, "")
+	if sval == "" {
+		return fallback
+	}
+
+	n, _ := fmt.Sscanf(sval, "%02dw%01dd%02dh", &week, &day, &hour)
+	if n == 3 {
+		return time.Duration(week)*7*24*time.Hour +
+			time.Duration(day)*24*time.Hour +
+			time.Duration(hour)*time.Hour
+	}
+
+	n, _ = fmt.Sscanf(sval, "%01dd%02dh%02dm", &day, &hour, &min)
+	if n == 3 {
+		return time.Duration(day)*24*time.Hour +
+			time.Duration(hour)*time.Hour +
+			time.Duration(min)*time.Minute
+	}
+
+	n, _ = fmt.Sscanf(sval, "%02d:%02d:%02d", &hour, &min, &sec)
+	if n == 3 {
+		return time.Duration(hour)*time.Hour +
+			time.Duration(min)*time.Minute +
+			time.Duration(sec)*time.Second
+	}
+
+	return fallback
 }
 
 // TimeUTC returns the time expecting an UTC timestamp
