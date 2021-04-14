@@ -2,8 +2,8 @@ package main
 
 import (
 	"log"
-	"time"
 	"runtime/debug"
+	"time"
 )
 
 func Housekeeping(config *Config) {
@@ -31,4 +31,3 @@ func Housekeeping(config *Config) {
 
 	}
 }
-
