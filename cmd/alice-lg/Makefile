@@ -45,9 +45,9 @@ alpine:
 
 test:
 	GO111MODULE=on go test -v
-	cd api/ && GO111MODULE=on go test -v
-	cd caches/ && GO111MODULE=on go test -v
-	cd sources/birdwatcher && GO111MODULE=on go test -v
+	cd ../../pkg/api/ && GO111MODULE=on go test -v
+	cd ../../pkg/caches/ && GO111MODULE=on go test -v
+	cd ../../pkg/sources/birdwatcher && GO111MODULE=on go test -v
 
 
 dev: clean all
