@@ -117,3 +117,7 @@ clean:
 	rm -f bin/alice-lg-linux-amd64
 	rm -f bin/alice-lg-osx-amd64
 	rm -rf $(DIST)
+
+
+test:
+	go test -v -race -cover ./...
