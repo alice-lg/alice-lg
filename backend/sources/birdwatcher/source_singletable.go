@@ -7,11 +7,9 @@ import (
 	"sort"
 )
 
-
 type SingleTableBirdwatcher struct {
 	GenericBirdwatcher
 }
-
 
 func (self *SingleTableBirdwatcher) fetchReceivedRoutes(neighborId string) (*api.ApiStatus, api.Routes, error) {
 	// Query birdwatcher
@@ -138,7 +136,6 @@ func (self *SingleTableBirdwatcher) fetchRequiredRoutes(neighborId string) (*api
 
 	return response, nil
 }
-
 
 // Get neighbors from protocols
 func (self *SingleTableBirdwatcher) Neighbours() (*api.NeighboursResponse, error) {
@@ -296,7 +293,7 @@ func (self *SingleTableBirdwatcher) AllRoutes() (*api.RoutesResponse, error) {
 	}
 
 	response := &api.RoutesResponse{
-		Api:    apiStatus,
+		Api: apiStatus,
 	}
 
 	// Parse the routes
