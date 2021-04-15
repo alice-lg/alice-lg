@@ -631,6 +631,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 		switch backendType {
 		case SOURCE_BIRDWATCHER:
 			sourceType := backendConfig.Key("type").MustString("")
+			mainTable := backendConfig.Key("main_table").MustString("master")
 			peerTablePrefix := backendConfig.Key("peer_table_prefix").MustString("T")
 			pipeProtocolPrefix := backendConfig.Key("pipe_protocol_prefix").MustString("M")
 
@@ -653,6 +654,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 				ServerTimeExt:   "Mon, 02 Jan 2006 15:04:05 -0700",
 
 				Type:               sourceType,
+				MainTable:          mainTable,
 				PeerTablePrefix:    peerTablePrefix,
 				PipeProtocolPrefix: pipeProtocolPrefix,
 			}
