@@ -1,7 +1,7 @@
 package caches
 
 import (
-	"github.com/alice-lg/alice-lg/backend/api"
+	"github.com/alice-lg/alice-lg/pkg/api"
 
 	"testing"
 	"time"
