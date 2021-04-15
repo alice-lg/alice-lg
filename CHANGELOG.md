@@ -1,6 +1,10 @@
 
 # Changelog
 
+## 4.2.1 (2021-04-15)
+
+* Added configurable main table
+
 ## 4.2.0 (2020-07-29)
 
 * Added GoBGP processing_timeout source config option
