@@ -14,3 +14,11 @@ func MapGet(m interface{}, key string, fallback interface{}) interface{} {
 	}
 	return val
 }
+
+// MapGetString retrievs a key from a map and
+// asserts its type is a string. Otherwise fallback
+// will be returned.
+func MapGetString(m interface{}, key, fallback string) string {
+	val := MapGet(m, key, fallback)
+	return val.(string)
+}

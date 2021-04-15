@@ -20,3 +20,12 @@ func TestDecodeAPIStatus(t *testing.T) {
 	t.Log(s.ServerTime)
 	t.Log(s.LastReboot)
 }
+
+func TestDecodeNeighbors(t *testing.T) {
+	res := readTestData("show.neighbor.json")
+	n, err := decodeNeighbors(res)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(n[0])
+}

@@ -54,6 +54,15 @@ func Int(value interface{}, fallback int) int {
 	return int(fval)
 }
 
+// IntFromString decodes an integer from a string
+func IntFromString(s string, fallback int) int {
+	val, err := strconv.Atoi(s)
+	if err != nil {
+		return fallback
+	}
+	return val
+}
+
 // Bool decodes a boolean value
 func Bool(value interface{}, fallback bool) bool {
 	val, ok := value.(bool)

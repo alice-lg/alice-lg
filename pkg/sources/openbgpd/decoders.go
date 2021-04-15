@@ -2,7 +2,6 @@ package openbgpd
 
 import (
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
@@ -35,9 +34,23 @@ func decodeNeighbor(n interface{}) (*api.Neighbour, error) {
 	if !ok {
 		return nil, fmt.Errorf("decode neighbor failed, interface is not a map")
 	}
+
+	stats := decoders.MapGet(nb, "stats", map[string]interface{}{})
+	prefixes := decoders.MapGet(stats, "prefixes", map[string]interface{}{})
+
 	neighbor := &api.Neighbour{
-		Id:      decoders.String(nb, "remote_addr", "invalid_id"),
-		Address: decoders.String(nb, "remote_addr", "invalid_address"),
+		Id:      decoders.MapGetString(nb, "bgpid", "invalid_id"),
+		Address: decoders.MapGetString(nb, "remote_addr", "invalid_address"),
+		Asn:     decoders.IntFromString(decoders.MapGetString(nb, "remote_as", ""), -1),
+		State:   decoders.MapGetString(nb, "state", "unknown"),
+		// TODO: Description: describeNeighbor(nb),
+		RoutesReceived: int(decoders.MapGet(prefixes, "sent", -1).(float64)),
+		// TODO: RoutesFiltered
+		RoutesExported: int(decoders.MapGet(prefixes, "received", -1).(float64)),
+		// TODO: RoutesPreferred
+		// TODO: RoutesAccepted
+		Uptime:        decoders.DurationTimeframe(decoders.MapGet(nb, "last_updown", ""), 0),
+		RouteServerId: decoders.MapGetString(nb, "bgpid", "invalid_id"),
 	}
 	return neighbor, nil
 }

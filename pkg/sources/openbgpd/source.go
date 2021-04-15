@@ -61,7 +61,7 @@ func (s *Source) Status() (*api.StatusResponse, error) {
 }
 
 // Neighbours retrievs a full list of all neighbors
-func Neighbours() (*api.NeighboursResponse, error) {
+func (s *Source) Neighbours() (*api.NeighboursResponse, error) {
 	// Retrieve neighbours
 	apiStatus := api.ApiStatus{
 		Version:         SourceVersion,
@@ -83,7 +83,10 @@ func Neighbours() (*api.NeighboursResponse, error) {
 		return nil, err
 	}
 
-	nb := decodeNeighbors(body)
+	nb, err := decodeNeighbors(body)
+	if err != nil {
+		return nil, err
+	}
 
 	response := &api.NeighboursResponse{
 		Api:        apiStatus,
