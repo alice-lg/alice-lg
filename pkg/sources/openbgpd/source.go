@@ -37,7 +37,7 @@ func (s *Source) Status() (*api.StatusResponse, error) {
 		Ttl:             time.Now().UTC(),
 	}
 
-	// Make API request, at some
+	// Make API request and read response
 	req, err := StatusRequest(context.Background(), s)
 	if err != nil {
 		return nil, err
@@ -57,6 +57,37 @@ func (s *Source) Status() (*api.StatusResponse, error) {
 		Api:    apiStatus,
 		Status: status,
 	}
+	return response, nil
+}
 
+// Neighbours retrievs a full list of all neighbors
+func Neighbours() (*api.NeighboursResponse, error) {
+	// Retrieve neighbours
+	apiStatus := api.ApiStatus{
+		Version:         SourceVersion,
+		ResultFromCache: false,
+		Ttl:             time.Now().UTC(),
+	}
+
+	// Make API request and read response
+	req, err := NeighborsRequest(context.Background(), s)
+	if err != nil {
+		return nil, err
+	}
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	body, err := decoders.ReadJSONResponse(res)
+	if err != nil {
+		return nil, err
+	}
+
+	nb := decodeNeighbors(body)
+
+	response := &api.NeighboursResponse{
+		Api:        apiStatus,
+		Neighbours: nb,
+	}
 	return response, nil
 }
