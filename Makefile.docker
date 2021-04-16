@@ -7,7 +7,7 @@ all: alice
 	cp cmd/alice-lg/alice-lg-* bin/
 
 client:
-	$(MAKE) -C client/ -f Makefile.docker
+	$(MAKE) -C client/ -f Makefile.docker client_prod
 
 alice: client
 	$(MAKE) -C cmd/alice-lg -f Makefile.docker
