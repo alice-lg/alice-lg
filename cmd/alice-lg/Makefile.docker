@@ -1,0 +1,20 @@
+
+#
+# Build alice using a dockerized go version
+#
+
+DOCKER := docker
+
+DOCKER_CONTAINER := alice-lg-build
+DOCKER_IMAGE := golang:1.16
+
+DOCKER_EXEC := $(DOCKER) run --rm -t -i \
+	-a stdin -a stdout -a stderr \
+	-v `pwd`/../../:/src/alice-lg \
+	--name $(DOCKER_CONTAINER) \
+	--workdir /src/alice-lg/cmd/alice-lg \
+	$(DOCKER_IMAGE)
+
+all:
+	$(DOCKER_EXEC) make static
+

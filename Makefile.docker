@@ -1,0 +1,16 @@
+
+# Build a local alice binary using docker.
+
+DOCKER := docker
+
+all: alice
+	cp cmd/alice-lg/alice-lg-* bin/
+
+client:
+	$(MAKE) -C client/ -f Makefile.docker
+
+alice: client
+	$(MAKE) -C cmd/alice-lg -f Makefile.docker
+
+.PHONY: client alice
+
