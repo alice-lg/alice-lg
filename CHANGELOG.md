@@ -1,7 +1,7 @@
 
 # Changelog
 
-## 4.2.1 (2021-04-15)
+## 4.3.0 (2021-04-15)
 
 * Added configurable main table
 
