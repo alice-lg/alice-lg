@@ -1,7 +1,8 @@
 
+DOCKER := docker
 DOCKER_CONTAINER := alice-lg-node-build
 DOCKER_IMAGE := alice-lg-node:latest
-DOCKER_EXEC := docker run --rm -t -i \
+DOCKER_EXEC := $(DOCKER) run --rm -t -i \
 	-a stdin -a stdout -a stderr \
 	-v `pwd`:/client/ \
 	--name $(DOCKER_CONTAINER) \
@@ -11,7 +12,7 @@ all: client
 	@echo "Built alice-lg client"
 
 image:
-	docker build . -t $(DOCKER_IMAGE) 
+	$(DOCKER) build . -t $(DOCKER_IMAGE) 
 
 deps: image
 	$(DOCKER_EXEC) "yarn install"
@@ -29,12 +30,12 @@ watch:
 
 stop:
 	@echo "Stopping docker container: $(DOCKER_CONTAINER)"
-	-docker stop $(DOCKER_CONTAINER)
+	-$(DOCKER) stop $(DOCKER_CONTAINER)
 	@sleep 1
 
 kill:
 	@echo "Killing docker container: $(DOCKER_CONTAINER)"
-	-docker kill $(DOCKER_CONTAINER)
+	-$(DOCKER) kill $(DOCKER_CONTAINER)
 	@sleep 1
 
 
