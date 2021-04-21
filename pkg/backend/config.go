@@ -23,12 +23,14 @@ const (
 // A ServerConfig holds the runtime configuration
 // for the backend.
 type ServerConfig struct {
-	Listen                         string `ini:"listen_http"`
-	EnablePrefixLookup             bool   `ini:"enable_prefix_lookup"`
-	NeighboursStoreRefreshInterval int    `ini:"neighbours_store_refresh_interval"`
-	RoutesStoreRefreshInterval     int    `ini:"routes_store_refresh_interval"`
-	Asn                            int    `ini:"asn"`
-	EnableNeighborsStatusRefresh   bool   `ini:"enable_neighbors_status_refresh"`
+	Listen string `ini:"listen_http"`
+	// HttpTimeout is a timeout in seconds
+	HttpTimeout                    int  `ini:"http_timeout"`
+	EnablePrefixLookup             bool `ini:"enable_prefix_lookup"`
+	NeighboursStoreRefreshInterval int  `ini:"neighbours_store_refresh_interval"`
+	RoutesStoreRefreshInterval     int  `ini:"routes_store_refresh_interval"`
+	Asn                            int  `ini:"asn"`
+	EnableNeighborsStatusRefresh   bool `ini:"enable_neighbors_status_refresh"`
 }
 
 // HousekeepingConfig describes the housekeeping interval
@@ -717,6 +719,11 @@ func loadConfig(file string) (*Config, error) {
 	// Map sections
 	server := ServerConfig{}
 	parsedConfig.Section("server").MapTo(&server)
+
+	// Set default http timeout when not configured
+	if server.HttpTimeout == 0 {
+		server.HttpTimeout = 10
+	}
 
 	housekeeping := HousekeepingConfig{}
 	parsedConfig.Section("housekeeping").MapTo(&housekeeping)
