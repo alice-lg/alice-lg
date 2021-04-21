@@ -3,16 +3,16 @@ package backend
 import (
 	"testing"
 
-	"github.com/alice-lg/alice-lg/backend/sources/birdwatcher"
-	"github.com/alice-lg/alice-lg/backend/sources/gobgp"
+	"github.com/alice-lg/alice-lg/pkg/sources/birdwatcher"
 )
+
+var testConfigFilename = "../../etc/alice-lg/alice.example.conf"
 
 // Test configuration loading and parsing
 // using the default config
-
 func TestLoadConfigs(t *testing.T) {
 
-	config, err := loadConfig("../etc/alice-lg/alice.example.conf")
+	config, err := loadConfig(testConfigFilename)
 	if err != nil {
 		t.Error("Could not load test config:", err)
 	}
@@ -44,7 +44,7 @@ func TestLoadConfigs(t *testing.T) {
 // example routeserver
 func TestSourceConfig(t *testing.T) {
 
-	config, err := loadConfig("../etc/alice-lg/alice.example.conf")
+	config, err := loadConfig(testConfigFilename)
 	if err != nil {
 		t.Error("Could not load test config:", err)
 	}
@@ -52,7 +52,6 @@ func TestSourceConfig(t *testing.T) {
 	// Get sources
 	rs1 := config.Sources[0] // Birdwatcher v4
 	rs2 := config.Sources[1] // Birdwatcher v6
-	rs3 := config.Sources[2] // GoBGP
 
 	nilBirdwatcherConfig := birdwatcher.Config{}
 	if rs1.Birdwatcher == nilBirdwatcherConfig {
@@ -67,18 +66,11 @@ func TestSourceConfig(t *testing.T) {
 			rs2.Name,
 		)
 	}
-	nilGoBGPConfig := gobgp.Config{}
-	if rs3.GoBGP == nilGoBGPConfig {
-		t.Errorf(
-			"Example routeserver %s should have been identified as a gobgp source but was not",
-			rs3.Name,
-		)
-	}
 }
 
 func TestSourceConfigDefaultsOverride(t *testing.T) {
 
-	config, err := loadConfig("../etc/alice-lg/alice.example.conf")
+	config, err := loadConfig(testConfigFilename)
 	if err != nil {
 		t.Error("Could not load test config:", err)
 	}
@@ -86,7 +78,6 @@ func TestSourceConfigDefaultsOverride(t *testing.T) {
 	// Get sources
 	rs1 := config.Sources[0] // Birdwatcher v4
 	rs2 := config.Sources[1] // Birdwatcher v6
-	rs3 := config.Sources[2] // GoBGP
 
 	// Source 1 should be on default time
 	// Source 2 should have an override
@@ -108,16 +99,10 @@ func TestSourceConfigDefaultsOverride(t *testing.T) {
 		t.Error("Expected 'Europe/Brussels', got", rs2.Birdwatcher.Timezone)
 	}
 
-	if rs3.GoBGP.ProcessingTimeout != 300 {
-		t.Error(
-			"Expected GoBGP example to set 300s 'processing_timeout', got",
-			rs3.GoBGP.ProcessingTimeout,
-		)
-	}
 }
 
 func TestRejectAndNoexportReasons(t *testing.T) {
-	config, err := loadConfig("../etc/alice-lg/alice.example.conf")
+	config, err := loadConfig(testConfigFilename)
 	if err != nil {
 		t.Error("Could not load test config:", err)
 	}
@@ -144,7 +129,7 @@ func TestRejectAndNoexportReasons(t *testing.T) {
 }
 
 func TestBlackholeParsing(t *testing.T) {
-	config, err := loadConfig("../etc/alice-lg/alice.example.conf")
+	config, err := loadConfig(testConfigFilename)
 	if err != nil {
 		t.Error("Could not load test config:", err)
 	}
@@ -163,7 +148,7 @@ func TestBlackholeParsing(t *testing.T) {
 }
 
 func TestOwnASN(t *testing.T) {
-	config, err := loadConfig("../etc/alice-lg/alice.example.conf")
+	config, err := loadConfig(testConfigFilename)
 	if err != nil {
 		t.Error("Could not load test config:", err)
 	}
@@ -174,7 +159,7 @@ func TestOwnASN(t *testing.T) {
 }
 
 func TestRpkiConfig(t *testing.T) {
-	config, err := loadConfig("../etc/alice-lg/alice.example.conf")
+	config, err := loadConfig(testConfigFilename)
 	if err != nil {
 		t.Error("Could not load test config:", err)
 	}
@@ -204,7 +189,7 @@ func TestRpkiConfig(t *testing.T) {
 }
 
 func TestRejectCandidatesConfig(t *testing.T) {
-	config, err := loadConfig("../etc/alice-lg/alice.example.conf")
+	config, err := loadConfig(testConfigFilename)
 	if err != nil {
 		t.Error("Could not load test config:", err)
 		return
