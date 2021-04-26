@@ -31,11 +31,11 @@
 		{
 			"prefix": "fc29:bac0:167::/48",
 			"aspath": "1111",
-			"exit_nexthop": "2001:504:2f::1:3335:1",
-			"true_nexthop": "2001:504:2f::1:3335:1",
+			"exit_nexthop": "2212:100:f::1:1",
+			"true_nexthop": "2212:100:f::1:1",
 			"neighbor": {
-				"remote_addr": "2001:504:2f::1:3335:1",
-				"bgp_id": "172.69.156.1"
+				"remote_addr": "2212:100:f::1:1",
+				"bgp_id": "172.11.111.1"
 			},
 			"valid": true,
 			"source": "external",

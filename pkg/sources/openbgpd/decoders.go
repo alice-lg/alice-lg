@@ -149,7 +149,7 @@ func decodeRoute(details map[string]interface{}) (*api.Route, error) {
 		decoders.MapGet(details, "last_update", nil), 0)
 
 	asPath := decodeASPath(decoders.MapGetString(details, "aspath", ""))
-	localPref := decoders.MapGet(details, "localpref", 0).(int)
+	localPref := int(decoders.MapGet(details, "localpref", 0).(float64))
 
 	// Decode BGP communities
 	communities := decodeCommunities(
