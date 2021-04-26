@@ -133,10 +133,43 @@ func (src *Source) NeighboursStatus() (*api.NeighboursStatusResponse, error) {
 	return response, nil
 }
 
-// Routes reitreives the routes for a specific neighbor
+// Routes retrieves the routes for a specific neighbor
 // identified by ID.
 func (src *Source) Routes(neighborID string) (*api.RoutesResponse, error) {
-	return nil, nil
+	// Retrieve routes for the specific neighbor
+	apiStatus := api.ApiStatus{
+		Version:         SourceVersion,
+		ResultFromCache: false,
+		Ttl:             time.Now().UTC(),
+	}
+
+	// Query RIB for routes received
+	req, err := NeighborRoutesReceivedRequest(
+		context.Background(), src, neighborID)
+	if err != nil {
+		return nil, err
+	}
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	// Read and decode response
+	body, err := decoders.ReadJSONResponse(res)
+	if err != nil {
+		return nil, err
+	}
+
+	recv, err := decodeRoutes(body)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &api.RoutesResponse{
+		Api:      apiStatus,
+		Imported: recv,
+	}
+	return response, nil
 }
 
 // RoutesReceived returns the routes exported by the neighbor.

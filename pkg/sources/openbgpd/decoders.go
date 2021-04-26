@@ -2,7 +2,7 @@ package openbgpd
 
 import (
 	"fmt"
-	"log"
+	"strings"
 	"time"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
@@ -43,11 +43,11 @@ func decodeNeighbor(n interface{}) (*api.Neighbour, error) {
 		Id:      decoders.MapGetString(nb, "bgpid", "invalid_id"),
 		Address: decoders.MapGetString(nb, "remote_addr", "invalid_address"),
 		Asn:     decoders.IntFromString(decoders.MapGetString(nb, "remote_as", ""), -1),
-		State:   decoders.MapGetString(nb, "state", "unknown"),
+		State:   decodeState(decoders.MapGetString(nb, "state", "unknown")),
 		// TODO: Description: describeNeighbor(nb),
-		RoutesReceived: int(decoders.MapGet(prefixes, "sent", -1).(float64)),
+		RoutesReceived: int(decoders.MapGet(prefixes, "received", -1).(float64)),
 		// TODO: RoutesFiltered
-		RoutesExported: int(decoders.MapGet(prefixes, "received", -1).(float64)),
+		RoutesExported: int(decoders.MapGet(prefixes, "sent", -1).(float64)),
 		// TODO: RoutesPreferred
 		// TODO: RoutesAccepted
 		Uptime:        decoders.DurationTimeframe(decoders.MapGet(nb, "last_updown", ""), 0),
@@ -87,10 +87,10 @@ func decodeNeighborsStatus(res map[string]interface{}) (api.NeighboursStatus, er
 	}
 	neighbors, ok := nbs.([]interface{})
 	if !ok {
-		return nil, fmt.Errorf("no a list of neighbors")
+		return nil, fmt.Errorf("no a list of interfaces")
 	}
 
-	all := make(api.NeighborsStatus, 0, len(neighbors))
+	all := make(api.NeighboursStatus, 0, len(neighbors))
 	for _, nb := range neighbors {
 		status := decodeNeighborStatus(nb)
 		all = append(all, status)
@@ -101,13 +101,128 @@ func decodeNeighborsStatus(res map[string]interface{}) (api.NeighboursStatus, er
 
 // decodeNeighborStatus decodes a single status from a
 // list of neighbor summaries.
-func decodeNeighborStatus(nb map[string]interface{}) *api.NeighbourStatus {
+func decodeNeighborStatus(nb interface{}) *api.NeighbourStatus {
 	id := decoders.MapGetString(nb, "bgpid", "undefined")
-	state := decoders.MapGetString(nb, "state", "Down")
-	uptime := decoders.DurationTimeframe(decoders.MapGet(nb, "last_updown", ""))
+	state := decodeState(decoders.MapGetString(nb, "state", "Down"))
+	uptime := decoders.DurationTimeframe(decoders.MapGet(nb, "last_updown", ""), 0)
 	return &api.NeighbourStatus{
 		Id:    id,
 		State: state,
 		Since: uptime,
 	}
+}
+
+// decodeRoutes decodes a response with a rib query.
+// The toplevel element is expected to be "rib".
+func decodeRoutes(res interface{}) (api.Routes, error) {
+	r := decoders.MapGet(res, "rib", nil)
+	if r == nil {
+		return nil, fmt.Errorf("missing 'rib' in response body")
+	}
+	rib, ok := r.([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("not a list of interfaces")
+	}
+	routes := make(api.Routes, 0, len(rib))
+	for _, details := range rib {
+		route, err := decodeRoute(details.(map[string]interface{}))
+		if err != nil {
+			return nil, err
+		}
+		routes = append(routes, route)
+	}
+
+	return routes, nil
+}
+
+// decodeRoute decodes a single route received from the source
+func decodeRoute(details map[string]interface{}) (*api.Route, error) {
+	prefix := decoders.MapGetString(details, "prefix", "")
+	origin := decoders.MapGetString(details, "origin", "")
+	neighbor := decoders.MapGet(details, "neighbor", nil)
+	neighborID := "unknown"
+	if neighbor != nil {
+		neighborID = decoders.MapGetString(neighbor, "bgp_id", neighborID)
+	}
+	trueNextHop := decoders.MapGetString(details, "true_nexthop", "")
+	lastUpdate := decoders.DurationTimeframe(
+		decoders.MapGet(details, "last_update", nil), 0)
+
+	asPath := decodeASPath(decoders.MapGetString(details, "aspath", ""))
+	localPref := decoders.MapGet(details, "localpref", 0).(int)
+
+	// Decode BGP communities
+	communities := decodeCommunities(
+		decoders.MapGet(details, "communities", nil))
+	largeCommunities := decodeCommunities(
+		decoders.MapGet(details, "large_communities", nil))
+	extendedCommunities := decodeExtendedCommunities(
+		decoders.MapGet(details, "extended_communities", nil))
+
+	// Make bgp info
+	bgpInfo := api.BgpInfo{
+		Origin:           origin,
+		AsPath:           asPath,
+		NextHop:          trueNextHop,
+		Communities:      communities,
+		ExtCommunities:   extendedCommunities,
+		LargeCommunities: largeCommunities,
+		LocalPref:        localPref,
+	}
+
+	r := &api.Route{
+		Id:          prefix,
+		NeighbourId: neighborID,
+		Network:     prefix,
+		Gateway:     trueNextHop,
+		Bgp:         bgpInfo,
+		Age:         lastUpdate,
+		Type:        []string{origin},
+		Primary:     false, // TODO
+		Details:     api.Details(details),
+	}
+	return r, nil
+}
+
+// decodeState will decode the state into a canonical form
+// used by the looking glass.
+func decodeState(s string) string {
+	s = strings.ToLower(s) // todo elaborate
+	return s
+}
+
+// decodeASPath decodes a space separated list of
+// string encoded ASNs into a list of integers.
+func decodeASPath(path string) []int {
+	tokens := strings.Split(path, " ")
+	return decoders.IntListFromStrings(tokens)
+}
+
+// decodeCommunities decodes communities into a list of
+// list of ints.
+func decodeCommunities(c interface{}) api.Communities {
+	details := decoders.StringList(c)
+	comms := make(api.Communities, 0, len(details))
+	for _, com := range details {
+		tokens := strings.Split(com, ":")
+		comms = append(comms, decoders.IntListFromStrings(tokens))
+	}
+	return comms
+}
+
+// decodeExtendedCommunities decodes extended communties
+// into a list of (str, int, int).
+func decodeExtendedCommunities(c interface{}) api.ExtCommunities {
+	details := decoders.StringList(c)
+	comms := make(api.ExtCommunities, 0, len(details))
+	for _, com := range details {
+		tokens := strings.SplitN(com, " ", 2)
+		if len(tokens) != 2 {
+			continue
+		}
+		nums := decoders.IntListFromStrings(
+			strings.SplitN(tokens[1], ":", 2))
+		comms = append(comms, []interface{}{tokens[0], nums[0], nums[1]})
+	}
+	return comms
 }

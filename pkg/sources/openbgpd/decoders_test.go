@@ -29,3 +29,15 @@ func TestDecodeNeighbors(t *testing.T) {
 	}
 	t.Log(n[0])
 }
+
+func TestDecodeNeighborsStatus(t *testing.T) {
+	res := readTestData("show.summary.json")
+	n, err := decodeNeighborsStatus(res)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(n) != 3 {
+		t.Error("unexpected length:", len(n))
+	}
+	t.Log(*n[0])
+}
