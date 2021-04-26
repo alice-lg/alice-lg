@@ -98,7 +98,39 @@ func (src *Source) Neighbours() (*api.NeighboursResponse, error) {
 // NeighboursStatus retrives the status summary
 // for all neightbors
 func (src *Source) NeighboursStatus() (*api.NeighboursStatusResponse, error) {
-	return nil, nil
+	// Retrieve neighbours
+	apiStatus := api.ApiStatus{
+		Version:         SourceVersion,
+		ResultFromCache: false,
+		Ttl:             time.Now().UTC(),
+	}
+
+	// Make API request and read response
+	req, err := NeighborsSummaryRequest(context.Background(), src)
+	if err != nil {
+		return nil, err
+	}
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	// Read and decode response
+	body, err := decoders.ReadJSONResponse(res)
+	if err != nil {
+		return nil, err
+	}
+
+	nb, err := decodeNeighborsStatus(body)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &api.NeighboursStatusResponse{
+		Api:        apiStatus,
+		Neighbours: nb,
+	}
+	return response, nil
 }
 
 // Routes reitreives the routes for a specific neighbor

@@ -2,6 +2,7 @@ package openbgpd
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
@@ -55,7 +56,7 @@ func decodeNeighbor(n interface{}) (*api.Neighbour, error) {
 	return neighbor, nil
 }
 
-// decodenNeighbors retrievs neighbors data from
+// decodeNeighbors retrievs neighbors data from
 // the bgpctl response.
 func decodeNeighbors(res map[string]interface{}) (api.Neighbours, error) {
 	nbs := decoders.MapGet(res, "neighbors", nil)
@@ -75,4 +76,38 @@ func decodeNeighbors(res map[string]interface{}) (api.Neighbours, error) {
 		all = append(all, n)
 	}
 	return all, nil
+}
+
+// decodeNeighborsStatus retrievs a neighbors summary
+// and decodes the status.
+func decodeNeighborsStatus(res map[string]interface{}) (api.NeighboursStatus, error) {
+	nbs := decoders.MapGet(res, "neighbors", nil)
+	if nbs == nil {
+		return nil, fmt.Errorf("missing neighbors in response body")
+	}
+	neighbors, ok := nbs.([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("no a list of neighbors")
+	}
+
+	all := make(api.NeighborsStatus, 0, len(neighbors))
+	for _, nb := range neighbors {
+		status := decodeNeighborStatus(nb)
+		all = append(all, status)
+	}
+
+	return all, nil
+}
+
+// decodeNeighborStatus decodes a single status from a
+// list of neighbor summaries.
+func decodeNeighborStatus(nb map[string]interface{}) *api.NeighbourStatus {
+	id := decoders.MapGetString(nb, "bgpid", "undefined")
+	state := decoders.MapGetString(nb, "state", "Down")
+	uptime := decoders.DurationTimeframe(decoders.MapGet(nb, "last_updown", ""))
+	return &api.NeighbourStatus{
+		Id:    id,
+		State: state,
+		Since: uptime,
+	}
 }

@@ -93,6 +93,8 @@ type NeighboursLookupResults map[string]Neighbours
 
 type NeighboursStatus []*NeighbourStatus
 
+// NeighbourStatus contains only the neighbor state and
+// uptime.
 type NeighbourStatus struct {
 	Id    string        `json:"id"`
 	State string        `json:"state"`

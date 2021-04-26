@@ -16,19 +16,19 @@ func apiURL(prefix, path string) string {
 }
 
 // StatusRequest makes status request from source
-func StatusRequest(ctx context.Context, s *Source) (*http.Request, error) {
-	url := apiURL(s.API, "v1/status")
+func StatusRequest(ctx context.Context, src *Source) (*http.Request, error) {
+	url := apiURL(src.API, "v1/status")
 	return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 }
 
 // NeighborsRequest makes an all neighbors request
-func NeighborsRequest(ctx context.Context, s *Source) (*http.Request, error) {
-	url := apiURL(s.API, "v1/show/neighbor")
+func NeighborsRequest(ctx context.Context, src *Source) (*http.Request, error) {
+	url := apiURL(src.API, "v1/show/neighbor")
 	return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 }
 
-// NeighborsStatusRequest builds an neighbors status request
-func NeighborsStatusRequest(ctx context.Context, s *Source) (*http.Request, error) {
-	url := apiURL(s.API, "v1/show/summary")
+// NeighborsSummaryRequest builds an neighbors status request
+func NeighborsSummaryRequest(ctx context.Context, src *Source) (*http.Request, error) {
+	url := apiURL(src.API, "v1/show/summary")
 	return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 }
