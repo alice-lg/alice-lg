@@ -18,6 +18,7 @@ const (
 	SOURCE_UNKNOWN     = 0
 	SOURCE_BIRDWATCHER = 1
 	SOURCE_GOBGP       = 2
+	SOURCE_OPENBGPD    = 3
 )
 
 // A ServerConfig holds the runtime configuration
@@ -178,8 +179,9 @@ func getBackendType(section *ini.Section) int {
 		return SOURCE_BIRDWATCHER
 	} else if strings.HasSuffix(name, "gobgp") {
 		return SOURCE_GOBGP
+	} else if strings.HasSuffix(name, "openbgpd") {
+		return SOURCE_OPENBGPD
 	}
-
 	return SOURCE_UNKNOWN
 }
 
@@ -191,9 +193,7 @@ func getRoutesColumnsDefaults() (map[string]string, []string, error) {
 		"gateway":     "Gateway",
 		"interface":   "Interface",
 	}
-
 	order := []string{"network", "bgp.as_path", "gateway", "interface"}
-
 	return columns, order, nil
 }
 
@@ -676,6 +676,13 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 			}
 
 			config.GoBGP = c
+
+		case SOURCE_OPENBGPD:
+			c := openbgpd.Config{
+				Id:   config.Id,
+				Name: config.Name,
+			}
+			backendConfig.MapTo(&c)
 		}
 
 		// Add to list of sources
