@@ -20,6 +20,8 @@ const (
 	SOURCE_GOBGP       = 2
 )
 
+var defaultHttpTimeout = 120
+
 // A ServerConfig holds the runtime configuration
 // for the backend.
 type ServerConfig struct {
@@ -722,7 +724,7 @@ func loadConfig(file string) (*Config, error) {
 
 	// Set default http timeout when not configured
 	if server.HttpTimeout == 0 {
-		server.HttpTimeout = 10
+		server.HttpTimeout = defaultHttpTimeout
 	}
 
 	housekeeping := HousekeepingConfig{}
