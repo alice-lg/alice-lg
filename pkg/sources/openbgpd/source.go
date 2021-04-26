@@ -24,13 +24,13 @@ type Source struct {
 }
 
 // ExpireCaches expires all cached data
-func (s *Source) ExpireCaches() int {
+func (src *Source) ExpireCaches() int {
 	return 0 // Nothing to expire yet
 }
 
 // Status returns an API status response. In our case
 // this is pretty much only that the service is available.
-func (s *Source) Status() (*api.StatusResponse, error) {
+func (src *Source) Status() (*api.StatusResponse, error) {
 	apiStatus := api.ApiStatus{
 		Version:         SourceVersion,
 		ResultFromCache: false,
@@ -38,7 +38,7 @@ func (s *Source) Status() (*api.StatusResponse, error) {
 	}
 
 	// Make API request and read response
-	req, err := StatusRequest(context.Background(), s)
+	req, err := StatusRequest(context.Background(), src)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func (s *Source) Status() (*api.StatusResponse, error) {
 }
 
 // Neighbours retrievs a full list of all neighbors
-func (s *Source) Neighbours() (*api.NeighboursResponse, error) {
+func (src *Source) Neighbours() (*api.NeighboursResponse, error) {
 	// Retrieve neighbours
 	apiStatus := api.ApiStatus{
 		Version:         SourceVersion,
@@ -70,7 +70,7 @@ func (s *Source) Neighbours() (*api.NeighboursResponse, error) {
 	}
 
 	// Make API request and read response
-	req, err := NeighborsRequest(context.Background(), s)
+	req, err := NeighborsRequest(context.Background(), src)
 	if err != nil {
 		return nil, err
 	}
@@ -93,4 +93,37 @@ func (s *Source) Neighbours() (*api.NeighboursResponse, error) {
 		Neighbours: nb,
 	}
 	return response, nil
+}
+
+// NeighboursStatus retrives the status summary
+// for all neightbors
+func (src *Source) NeighboursStatus() (*api.NeighboursStatusResponse, error) {
+	return nil, nil
+}
+
+// Routes reitreives the routes for a specific neighbor
+// identified by ID.
+func (src *Source) Routes(neighborID string) (*api.RoutesResponse, error) {
+	return nil, nil
+}
+
+// RoutesReceived returns the routes exported by the neighbor.
+func (src *Source) RoutesReceived(neighborID string) (*api.RoutesResponse, error) {
+	return nil, nil
+}
+
+// RoutesFiltered retrieves the routes filtered / not valid
+func (src *Source) RoutesFiltered(neighborID string) (*api.RoutesResponse, error) {
+	return nil, nil
+}
+
+// RoutesNotExported retrievs the routes not exported
+// from the rs for a neighbor.
+func (src *Source) RoutesNotExported(neighborID string) (*api.RoutesResponse, error) {
+	return nil, nil
+}
+
+// AllRoutes retrievs the entire RIB from the source
+func (src *Source) AllRoutes() (*api.RoutesResponse, error) {
+	return nil, nil
 }
