@@ -20,11 +20,11 @@ func String(value interface{}, fallback string) string {
 
 // StringList decodes a list of strings
 func StringList(data interface{}) []string {
-	list := []string{}
 	ldata, ok := data.([]interface{})
 	if !ok {
 		return []string{}
 	}
+	list := make([]string, 0, len(ldata))
 	for _, e := range ldata {
 		s, ok := e.(string)
 		if ok {
@@ -36,11 +36,27 @@ func StringList(data interface{}) []string {
 
 // IntList decodes a list of integers
 func IntList(data interface{}) []int {
-	list := []int{}
 	sdata := StringList(data)
+	list := make([]int, 0, len(sdata))
 	for _, e := range sdata {
-		val, _ := strconv.Atoi(e)
-		list = append(list, val)
+		val, err := strconv.Atoi(e)
+		if err == nil {
+			list = append(list, val)
+		}
+	}
+	return list
+}
+
+// IntListFromStrings decodes a list of strings
+// into a list of integers.
+func IntListFromStrings(strs []string) []int {
+	list := make([]int, 0, len(strs))
+	for _, s := range strs {
+		v, err := strconv.Atoi(s)
+		if err != nil {
+			continue // skip this
+		}
+		list = append(list, v)
 	}
 	return list
 }
