@@ -70,7 +70,7 @@ func (src *Source) Neighbours() (*api.NeighboursResponse, error) {
 	}
 
 	// Make API request and read response
-	req, err := NeighborsRequest(context.Background(), src)
+	req, err := ShowNeighborsRequest(context.Background(), src)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +106,7 @@ func (src *Source) NeighboursStatus() (*api.NeighboursStatusResponse, error) {
 	}
 
 	// Make API request and read response
-	req, err := NeighborsSummaryRequest(context.Background(), src)
+	req, err := ShowNeighborsSummaryRequest(context.Background(), src)
 	if err != nil {
 		return nil, err
 	}
@@ -144,8 +144,7 @@ func (src *Source) Routes(neighborID string) (*api.RoutesResponse, error) {
 	}
 
 	// Query RIB for routes received
-	req, err := NeighborRoutesReceivedRequest(
-		context.Background(), src, neighborID)
+	req, err := ShowNeighborRIBInRequest(context.Background(), src, neighborID)
 	if err != nil {
 		return nil, err
 	}
@@ -174,21 +173,101 @@ func (src *Source) Routes(neighborID string) (*api.RoutesResponse, error) {
 
 // RoutesReceived returns the routes exported by the neighbor.
 func (src *Source) RoutesReceived(neighborID string) (*api.RoutesResponse, error) {
-	return nil, nil
+	// Retrieve routes for the specific neighbor
+	apiStatus := api.ApiStatus{
+		Version:         SourceVersion,
+		ResultFromCache: false,
+		Ttl:             time.Now().UTC(),
+	}
+
+	// Query RIB for routes received
+	req, err := ShowNeighborRIBInRequest(context.Background(), src, neighborID)
+	if err != nil {
+		return nil, err
+	}
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	// Read and decode response
+	body, err := decoders.ReadJSONResponse(res)
+	if err != nil {
+		return nil, err
+	}
+
+	recv, err := decodeRoutes(body)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &api.RoutesResponse{
+		Api:         apiStatus,
+		Imported:    recv,
+		NotExported: api.Routes{},
+	}
+	return response, nil
 }
 
 // RoutesFiltered retrieves the routes filtered / not valid
 func (src *Source) RoutesFiltered(neighborID string) (*api.RoutesResponse, error) {
-	return nil, nil
+	apiStatus := api.ApiStatus{
+		Version:         SourceVersion,
+		ResultFromCache: false,
+		Ttl:             time.Now().UTC(),
+	}
+	response := &api.RoutesResponse{
+		Api: apiStatus,
+	}
+	return response, nil
 }
 
 // RoutesNotExported retrievs the routes not exported
 // from the rs for a neighbor.
 func (src *Source) RoutesNotExported(neighborID string) (*api.RoutesResponse, error) {
-	return nil, nil
+	apiStatus := api.ApiStatus{
+		Version:         SourceVersion,
+		ResultFromCache: false,
+		Ttl:             time.Now().UTC(),
+	}
+	response := &api.RoutesResponse{
+		Api: apiStatus,
+	}
+	return response, nil
 }
 
 // AllRoutes retrievs the entire RIB from the source
 func (src *Source) AllRoutes() (*api.RoutesResponse, error) {
-	return nil, nil
+	apiStatus := api.ApiStatus{
+		Version:         SourceVersion,
+		ResultFromCache: false,
+		Ttl:             time.Now().UTC(),
+	}
+
+	req, err := ShowRIBRequest(context.Background(), src)
+	if err != nil {
+		return nil, err
+	}
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	// Read and decode response
+	body, err := decoders.ReadJSONResponse(res)
+	if err != nil {
+		return nil, err
+	}
+
+	recv, err := decodeRoutes(body)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &api.RoutesResponse{
+		Api:         apiStatus,
+		Imported:    recv,
+		NotExported: api.Routes{},
+	}
+	return response, nil
 }

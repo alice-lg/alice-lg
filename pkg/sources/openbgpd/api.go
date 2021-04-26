@@ -22,25 +22,32 @@ func StatusRequest(ctx context.Context, src *Source) (*http.Request, error) {
 	return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 }
 
-// NeighborsRequest makes an all neighbors request
-func NeighborsRequest(ctx context.Context, src *Source) (*http.Request, error) {
+// ShowNeighborsRequest makes an all neighbors request
+func ShowNeighborsRequest(ctx context.Context, src *Source) (*http.Request, error) {
 	url := apiURL(src.API, "v1/bgpd/show/neighbor")
 	return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 }
 
-// NeighborsSummaryRequest builds an neighbors status request
-func NeighborsSummaryRequest(ctx context.Context, src *Source) (*http.Request, error) {
+// ShowNeighborsSummaryRequest builds an neighbors status request
+func ShowNeighborsSummaryRequest(ctx context.Context, src *Source) (*http.Request, error) {
 	url := apiURL(src.API, "v1/bgpd/show/summary")
 	return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 }
 
-// NeighborRoutesReceivedRequest retrives the RIB IN for neighbor identified
-// by bgp-id.
-func NeighborRoutesReceivedRequest(
+// ShowNeighborRIBInRequest retrives the routes accepted from the neighbor
+// identified by bgp-id.
+func ShowNeighborRIBInRequest(
 	ctx context.Context,
 	src *Source,
 	neighborID string,
 ) (*http.Request, error) {
 	url := apiURL(src.API, "v1/bgpd/show/rib/in/neighbor/%s/detail", neighborID)
+	return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+}
+
+// ShowRIBRequest makes a request for retrieving all routes imported
+// from all peers
+func ShowRIBRequest(ctx context.Context, src *Source) (*http.Request, error) {
+	url := apiURL(src.API, "vi/bgpd/show/rib/in/detail")
 	return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 }
