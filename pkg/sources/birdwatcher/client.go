@@ -50,7 +50,7 @@ func (self *Client) Get(client *http.Client, url string) (ClientResponse, error)
 func (self *Client) GetJson(endpoint string) (ClientResponse, error) {
 	client := &http.Client{}
 
-	return self.Get(client, self.Api + endpoint)
+	return self.Get(client, self.Api+endpoint)
 }
 
 // Make API request, parse response and return map or error
@@ -59,5 +59,5 @@ func (self *Client) GetJsonTimeout(timeout time.Duration, endpoint string) (Clie
 		Timeout: timeout,
 	}
 
-	return self.Get(client, self.Api + endpoint)
+	return self.Get(client, self.Api+endpoint)
 }

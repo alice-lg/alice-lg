@@ -276,13 +276,14 @@ func (self *SingleTableBirdwatcher) RoutesNotExported(neighborId string) (*api.R
 
 func (self *SingleTableBirdwatcher) AllRoutes() (*api.RoutesResponse, error) {
 	// First fetch all routes from the master table
-	birdImported, err := self.client.GetJson("/routes/table/master")
+	mainTable := self.GenericBirdwatcher.config.MainTable
+	birdImported, err := self.client.GetJson("/routes/table/" + mainTable)
 	if err != nil {
 		return nil, err
 	}
 
 	// Then fetch all filtered routes from the master table
-	birdFiltered, err := self.client.GetJson("/routes/table/master/filtered")
+	birdFiltered, err := self.client.GetJson("/routes/table/" + mainTable + "/filtered")
 	if err != nil {
 		return nil, err
 	}

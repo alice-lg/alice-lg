@@ -9,7 +9,6 @@ ARCH=amd64
 APP_VERSION=$(shell cat ../../VERSION)
 VERSION=$(APP_VERSION)_$(shell git rev-parse --short HEAD)
 
-LOCAL_RPMS=RPMS
 
 # OS Detection
 UNAME=$(shell uname)
@@ -20,7 +19,9 @@ else
 endif
 
 
-LDFLAGS=-ldflags="-X main.version=$(APP_VERSION)"
+LDFLAGS=-ldflags="-X github.com/alice-lg/alice-lg/pkg/backend.Version=$(APP_VERSION)"
+LDFLAGS_STATIC=-ldflags="-X github.com/alice-lg/alice-lg/pkg/backend.Version=$(APP_VERSION) -extldflags '-static'"
+
 FILES=$(shell find . -depth 1 ! -name "*_test.go" -name "*.go")
 
 all: deps $(TARGET)
@@ -43,11 +44,18 @@ alpine:
 		-a -installsuffix cgo \
 		$(LDFLAGS) -o $(PROG)-linux-$(ARCH)
 
+static:
+	GO111MODULE=on CGO_ENABLED=0 GOOS=linux GOARCH=$(ARCH) \
+		go build $(CFLAGS) \
+		-a $(LDFLAGS_STATIC) \
+		-o $(PROG)-linux-$(ARCH)
+
+
 test:
 	GO111MODULE=on go test -v
-	cd api/ && GO111MODULE=on go test -v
-	cd caches/ && GO111MODULE=on go test -v
-	cd sources/birdwatcher && GO111MODULE=on go test -v
+	cd ../../pkg/api/ && GO111MODULE=on go test -v
+	cd ../../pkg/caches/ && GO111MODULE=on go test -v
+	cd ../../pkg/sources/birdwatcher && GO111MODULE=on go test -v
 
 
 dev: clean all

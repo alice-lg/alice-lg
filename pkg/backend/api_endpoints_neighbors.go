@@ -29,7 +29,7 @@ func apiNeighborsList(
 		// Make response
 		neighborsResponse = &api.NeighboursResponse{
 			Api: api.ApiStatus{
-				Version: version,
+				Version: Version,
 				CacheStatus: api.CacheStatus{
 					OrigTtl:  0,
 					CachedAt: sourceStatus.LastRefresh,

@@ -31,22 +31,16 @@ ADD go.mod .
 ADD go.sum .
 RUN go mod download
 
+ADD . .
+
 # Add client
 COPY --from=frontend /src/alice-lg/client/build client/build
 
-# Build backend
-WORKDIR /src/alice-lg
-ADD VERSION .
-ADD go.mod go.sum .
-
-WORKDIR /src/alice-lg/backend
-ADD backend .
-
-# RUN go build -o alice-lg-linux-amd64 -ldflags="-X main.version=4.0.3"
+WORKDIR /src/alice-lg/cmd/alice-lg
 RUN make alpine
 
 FROM alpine:latest
-COPY --from=backend /src/alice-lg/backend/alice-lg-linux-amd64 /usr/bin/alice-lg
+COPY --from=backend /src/alice-lg/cmd/alice-lg/alice-lg-linux-amd64 /usr/bin/alice-lg
 RUN ls -lsha /usr/bin/alice-lg
 
 EXPOSE 7340:7340

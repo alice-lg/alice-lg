@@ -9,9 +9,9 @@ Take a look at an Alice-LG production examples at:
 And checkout the API at:
 - https://lg.de-cix.net/api/v1/config
 - https://lg.de-cix.net/api/v1/routeservers
-- https://lg.de-cix.net/api/v1/routeservers/0/status
-- https://lg.de-cix.net/api/v1/routeservers/0/neighbours
-- https://lg.de-cix.net/api/v1/routeservers/0/neighbours/ID109_AS31078/routes
+- https://lg.de-cix.net/api/v1/routeservers/rs1_fra_ipv4/status
+- https://lg.de-cix.net/api/v1/routeservers/rs1_fra_ipv4/neighbors
+- https://lg.de-cix.net/api/v1/routeservers/rs1_fra_ipv4/neighbors/R194_106/routes
 - https://lg.de-cix.net/api/v1/lookup/prefix?q=217.115.0.0
 
 ## Explanations

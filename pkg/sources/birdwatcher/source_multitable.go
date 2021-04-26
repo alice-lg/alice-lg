@@ -480,9 +480,10 @@ func (self *MultiTableBirdwatcher) AllRoutes() (*api.RoutesResponse, error) {
 	if err != nil {
 		return nil, err
 	}
+	mainTable := self.GenericBirdwatcher.config.MainTable
 
 	// Fetch received routes first
-	birdImported, err := self.client.GetJson("/routes/table/master")
+	birdImported, err := self.client.GetJson("/routes/table/" + mainTable)
 	if err != nil {
 		return nil, err
 	}

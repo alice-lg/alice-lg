@@ -1,6 +1,10 @@
 package backend
 
-var version = "unknown"
+// Version Alice (set during the build)
+var Version = "unknown"
+
+// Build is the current revision pointing at HEAD
+var Build = "unknown"
 
 // AppStatus contains application status information
 type AppStatus struct {
@@ -25,7 +29,7 @@ func NewAppStatus() (*AppStatus, error) {
 	}
 
 	status := &AppStatus{
-		Version:    version,
+		Version:    Version,
 		Routes:     routesStatus,
 		Neighbours: neighboursStatus,
 	}

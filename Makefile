@@ -35,15 +35,14 @@ client_dev:
 client_prod:
 	$(MAKE) -C client/ client_prod
 
-
 backend_prod: client_prod
 	$(MAKE) -C cmd/alice-lg/ linux
 
 backend:
 	$(MAKE) -C cmd/alice-lg/ linux
 
-alice: client_prod backend_prod
-	mv backend/alice-lg-* bin/
+alice: backend_prod
+	cp cmd/alice-lg/alice-lg-* bin/
 
 
 dist: clean alice
