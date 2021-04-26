@@ -18,9 +18,17 @@ const (
 // It is intendet to consume structured bgpctl output
 // queried over HTTP using a `openbgpd-state-server`.
 type Source struct {
-	// API is the http host and api prefix. For
-	// example http://rs1.mgmt.ixp.example.net:29111/api
-	API string
+	// cfg is the source configuration retrieved
+	// from the alice config file.
+	cfg *Config
+}
+
+// NewSource creates a new source instance with a
+// configuration.
+func NewSource(cfg *Config) *Source {
+	return &Source{
+		cfg: cfg,
+	}
 }
 
 // ExpireCaches expires all cached data
@@ -38,7 +46,7 @@ func (src *Source) Status() (*api.StatusResponse, error) {
 	}
 
 	// Make API request and read response
-	req, err := StatusRequest(context.Background(), src)
+	req, err := src.StatusRequest(context.Background())
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +78,7 @@ func (src *Source) Neighbours() (*api.NeighboursResponse, error) {
 	}
 
 	// Make API request and read response
-	req, err := ShowNeighborsRequest(context.Background(), src)
+	req, err := src.ShowNeighborsRequest(context.Background())
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +114,7 @@ func (src *Source) NeighboursStatus() (*api.NeighboursStatusResponse, error) {
 	}
 
 	// Make API request and read response
-	req, err := ShowNeighborsSummaryRequest(context.Background(), src)
+	req, err := src.ShowNeighborsSummaryRequest(context.Background())
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +152,7 @@ func (src *Source) Routes(neighborID string) (*api.RoutesResponse, error) {
 	}
 
 	// Query RIB for routes received
-	req, err := ShowNeighborRIBInRequest(context.Background(), src, neighborID)
+	req, err := src.ShowNeighborRIBInRequest(context.Background(), neighborID)
 	if err != nil {
 		return nil, err
 	}
@@ -181,7 +189,7 @@ func (src *Source) RoutesReceived(neighborID string) (*api.RoutesResponse, error
 	}
 
 	// Query RIB for routes received
-	req, err := ShowNeighborRIBInRequest(context.Background(), src, neighborID)
+	req, err := src.ShowNeighborRIBInRequest(context.Background(), neighborID)
 	if err != nil {
 		return nil, err
 	}
@@ -244,7 +252,7 @@ func (src *Source) AllRoutes() (*api.RoutesResponse, error) {
 		Ttl:             time.Now().UTC(),
 	}
 
-	req, err := ShowRIBRequest(context.Background(), src)
+	req, err := src.ShowRIBRequest(context.Background())
 	if err != nil {
 		return nil, err
 	}

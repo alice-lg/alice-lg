@@ -11,6 +11,7 @@ import (
 	"github.com/alice-lg/alice-lg/pkg/sources"
 	"github.com/alice-lg/alice-lg/pkg/sources/birdwatcher"
 	"github.com/alice-lg/alice-lg/pkg/sources/gobgp"
+	"github.com/alice-lg/alice-lg/pkg/sources/openbgpd"
 )
 
 // Config Source Types
@@ -121,6 +122,7 @@ type SourceConfig struct {
 	Type        int
 	Birdwatcher birdwatcher.Config
 	GoBGP       gobgp.Config
+	OpenBGPd    openbgpd.Config
 
 	// Source instance
 	instance sources.Source
@@ -679,10 +681,11 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 
 		case SOURCE_OPENBGPD:
 			c := openbgpd.Config{
-				Id:   config.Id,
+				ID:   config.Id,
 				Name: config.Name,
 			}
 			backendConfig.MapTo(&c)
+			config.OpenBGPd = c
 		}
 
 		// Add to list of sources
@@ -763,6 +766,8 @@ func (cfg *SourceConfig) getInstance() sources.Source {
 		instance = birdwatcher.NewBirdwatcher(cfg.Birdwatcher)
 	case SOURCE_GOBGP:
 		instance = gobgp.NewGoBGP(cfg.GoBGP)
+	case SOURCE_OPENBGPD:
+		instance = openbgpd.NewSource(&cfg.OpenBGPd)
 	}
 
 	cfg.instance = instance
