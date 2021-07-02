@@ -167,6 +167,9 @@ func decodeRoute(details map[string]interface{}) (*api.Route, error) {
 	extendedCommunities := decodeExtendedCommunities(
 		decoders.MapGet(details, "extended_communities", nil))
 
+	// Is preferred route
+	isPrimary := decoders.MapGetBool(details, "best", false)
+
 	// Make bgp info
 	bgpInfo := api.BgpInfo{
 		Origin:           origin,
@@ -186,7 +189,7 @@ func decodeRoute(details map[string]interface{}) (*api.Route, error) {
 		Bgp:         bgpInfo,
 		Age:         lastUpdate,
 		Type:        []string{origin},
-		Primary:     false, // TODO
+		Primary:     isPrimary,
 		Details:     api.Details(details),
 	}
 	return r, nil

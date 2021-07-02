@@ -35,6 +35,16 @@ func (src *Source) ShowNeighborRIBInRequest(
 	return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 }
 
+// ShowNeighborRIBRequest retrives the routes accepted from the neighbor
+// identified by bgp-id.
+func (src *Source) ShowNeighborRIBRequest(
+	ctx context.Context,
+	neighborID string,
+) (*http.Request, error) {
+	url := src.cfg.APIURL("/v1/bgpd/show/rib/neighbor/%s/detail", neighborID)
+	return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+}
+
 // ShowRIBRequest makes a request for retrieving all routes imported
 // from all peers
 func (src *Source) ShowRIBRequest(ctx context.Context) (*http.Request, error) {

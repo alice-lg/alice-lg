@@ -156,7 +156,7 @@ func (src *Source) Routes(neighborID string) (*api.RoutesResponse, error) {
 	}
 
 	// Query RIB for routes received
-	req, err := src.ShowNeighborRIBInRequest(context.Background(), neighborID)
+	req, err := src.ShowNeighborRIBRequest(context.Background(), neighborID)
 	if err != nil {
 		return nil, err
 	}
@@ -193,7 +193,7 @@ func (src *Source) RoutesReceived(neighborID string) (*api.RoutesResponse, error
 	}
 
 	// Query RIB for routes received
-	req, err := src.ShowNeighborRIBInRequest(context.Background(), neighborID)
+	req, err := src.ShowNeighborRIBRequest(context.Background(), neighborID)
 	if err != nil {
 		return nil, err
 	}
