@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -14,12 +15,22 @@ import (
 	"github.com/alice-lg/alice-lg/pkg/sources/openbgpd"
 )
 
-// Config Source Types
+var (
+	// ErrSourceTypeUnknown will be used if the type could
+	// not be identified from the section.
+	ErrSourceTypeUnknown = errors.New("source type unknown")
+)
+
 const (
-	SOURCE_UNKNOWN     = 0
-	SOURCE_BIRDWATCHER = 1
-	SOURCE_GOBGP       = 2
-	SOURCE_OPENBGPD    = 3
+	// SourceTypeBird is used for either bird 1x and 2x
+	// based route servers with a birdwatcher backend.
+	SourceTypeBird = "bird"
+
+	// SourceTypeGoBGP indicates a GoBGP based source.
+	SourceTypeGoBGP = "gobgp"
+
+	// SourceTypeOpenBGPD is used for an OpenBGPD source.
+	SourceTypeOpenBGPD = "openbgpd"
 )
 
 // A ServerConfig holds the runtime configuration
@@ -119,7 +130,7 @@ type SourceConfig struct {
 	Blackholes []string
 
 	// Source configurations
-	Type        int
+	Type        string
 	Birdwatcher birdwatcher.Config
 	GoBGP       gobgp.Config
 	OpenBGPd    openbgpd.Config
@@ -175,16 +186,17 @@ func isSourceBase(section *ini.Section) bool {
 }
 
 // Get backend configuration type
-func getBackendType(section *ini.Section) int {
+func getBackendType(section *ini.Section) (string, error) {
 	name := section.Name()
 	if strings.HasSuffix(name, "birdwatcher") {
-		return SOURCE_BIRDWATCHER
+		return SourceTypeBird, nil
 	} else if strings.HasSuffix(name, "gobgp") {
-		return SOURCE_GOBGP
+		return SourceTypeGoBGP, nil
 	} else if strings.HasSuffix(name, "openbgpd") {
-		return SOURCE_OPENBGPD
+		return SourceTypeOpenBGPD, nil
 	}
-	return SOURCE_UNKNOWN
+
+	return "", ErrSourceTypeUnknown
 }
 
 // Get UI config: Routes Columns Default
@@ -591,27 +603,26 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 		}
 
 		// Derive source-id from name
-		sourceId := section.Name()[len("source:"):]
+		sourceID := section.Name()[len("source:"):]
 
 		// Try to get child configs and determine
 		// Source type
 		sourceConfigSections := section.ChildSections()
 		if len(sourceConfigSections) == 0 {
 			// This source has no configured backend
-			return sources, fmt.Errorf("%s has no backend configuration", section.Name())
+			return nil, fmt.Errorf("%s has no backend configuration", section.Name())
 		}
 
 		if len(sourceConfigSections) > 1 {
 			// The source is ambiguous
-			return sources, fmt.Errorf("%s has ambigous backends", section.Name())
+			return nil, fmt.Errorf("%s has ambigous backends", section.Name())
 		}
 
 		// Configure backend
 		backendConfig := sourceConfigSections[0]
-		backendType := getBackendType(backendConfig)
-
-		if backendType == SOURCE_UNKNOWN {
-			return sources, fmt.Errorf("%s has an unsupported backend", section.Name())
+		backendType, err := getBackendType(backendConfig)
+		if err != nil {
+			return nil, fmt.Errorf("%s has an unsupported backend", section.Name())
 		}
 
 		// Make config
@@ -621,7 +632,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 			section.Key("blackholes").MustString(""))
 
 		config := &SourceConfig{
-			Id:         sourceId,
+			Id:         sourceID,
 			Order:      order,
 			Name:       sourceName,
 			Group:      sourceGroup,
@@ -631,7 +642,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 
 		// Set backend
 		switch backendType {
-		case SOURCE_BIRDWATCHER:
+		case SourceTypeBird:
 			sourceType := backendConfig.Key("type").MustString("")
 			mainTable := backendConfig.Key("main_table").MustString("master")
 			peerTablePrefix := backendConfig.Key("peer_table_prefix").MustString("T")
@@ -664,7 +675,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 			backendConfig.MapTo(&c)
 			config.Birdwatcher = c
 
-		case SOURCE_GOBGP:
+		case SourceTypeGoBGP:
 			c := gobgp.Config{
 				Id:   config.Id,
 				Name: config.Name,
@@ -679,7 +690,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 
 			config.GoBGP = c
 
-		case SOURCE_OPENBGPD:
+		case SourceTypeOpenBGPD:
 			c := openbgpd.Config{
 				ID:   config.Id,
 				Name: config.Name,
@@ -762,11 +773,11 @@ func (cfg *SourceConfig) getInstance() sources.Source {
 
 	var instance sources.Source
 	switch cfg.Type {
-	case SOURCE_BIRDWATCHER:
+	case SourceTypeBird:
 		instance = birdwatcher.NewBirdwatcher(cfg.Birdwatcher)
-	case SOURCE_GOBGP:
+	case SourceTypeGoBGP:
 		instance = gobgp.NewGoBGP(cfg.GoBGP)
-	case SOURCE_OPENBGPD:
+	case SourceTypeOpenBGPD:
 		instance = openbgpd.NewSource(&cfg.OpenBGPd)
 	}
 

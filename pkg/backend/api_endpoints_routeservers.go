@@ -18,6 +18,7 @@ func apiRouteserversList(_req *http.Request, _params httprouter.Params) (api.Res
 	for _, source := range sources {
 		routeservers = append(routeservers, api.Routeserver{
 			Id:         source.Id,
+			Type:       source.Type,
 			Name:       source.Name,
 			Group:      source.Group,
 			Blackholes: source.Blackholes,

@@ -96,9 +96,10 @@ type StatusResponse struct {
 	Status Status    `json:"status"`
 }
 
-// Routeservers
+// A Routeserver is a datasource with attributes.
 type Routeserver struct {
 	Id         string   `json:"id"`
+	Type       string   `json:"type"`
 	Name       string   `json:"name"`
 	Group      string   `json:"group"`
 	Blackholes []string `json:"blackholes"`
