@@ -177,8 +177,10 @@ func (src *Source) Routes(neighborID string) (*api.RoutesResponse, error) {
 	}
 
 	response := &api.RoutesResponse{
-		Api:      apiStatus,
-		Imported: recv,
+		Api:         apiStatus,
+		Imported:    recv,
+		NotExported: api.Routes{},
+		Filtered:    api.Routes{},
 	}
 	return response, nil
 }
@@ -217,6 +219,7 @@ func (src *Source) RoutesReceived(neighborID string) (*api.RoutesResponse, error
 		Api:         apiStatus,
 		Imported:    recv,
 		NotExported: api.Routes{},
+		Filtered:    api.Routes{},
 	}
 	return response, nil
 }
@@ -230,6 +233,10 @@ func (src *Source) RoutesFiltered(neighborID string) (*api.RoutesResponse, error
 	}
 	response := &api.RoutesResponse{
 		Api: apiStatus,
+
+		Imported:    api.Routes{},
+		NotExported: api.Routes{},
+		Filtered:    api.Routes{},
 	}
 	return response, nil
 }
@@ -244,6 +251,10 @@ func (src *Source) RoutesNotExported(neighborID string) (*api.RoutesResponse, er
 	}
 	response := &api.RoutesResponse{
 		Api: apiStatus,
+
+		Imported:    api.Routes{},
+		NotExported: api.Routes{},
+		Filtered:    api.Routes{},
 	}
 	return response, nil
 }
@@ -280,6 +291,7 @@ func (src *Source) AllRoutes() (*api.RoutesResponse, error) {
 		Api:         apiStatus,
 		Imported:    recv,
 		NotExported: api.Routes{},
+		Filtered:    api.Routes{},
 	}
 	return response, nil
 }

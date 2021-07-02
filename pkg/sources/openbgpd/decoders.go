@@ -150,7 +150,7 @@ func decodeRoute(details map[string]interface{}) (*api.Route, error) {
 	neighbor := decoders.MapGet(details, "neighbor", nil)
 	neighborID := "unknown"
 	if neighbor != nil {
-		neighborID = decoders.MapGetString(neighbor, "bgp_id", neighborID)
+		neighborID = decoders.MapGetString(neighbor, "remote_addr", neighborID)
 	}
 	trueNextHop := decoders.MapGetString(details, "true_nexthop", "")
 	lastUpdate := decoders.DurationTimeframe(

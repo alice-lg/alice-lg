@@ -48,6 +48,6 @@ func (src *Source) ShowNeighborRIBRequest(
 // ShowRIBRequest makes a request for retrieving all routes imported
 // from all peers
 func (src *Source) ShowRIBRequest(ctx context.Context) (*http.Request, error) {
-	url := src.cfg.APIURL("/v1/bgpd/show/rib/in/detail")
+	url := src.cfg.APIURL("/v1/bgpd/show/rib/detail")
 	return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 }
