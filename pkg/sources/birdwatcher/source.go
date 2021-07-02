@@ -30,7 +30,7 @@ type GenericBirdwatcher struct {
 }
 
 func NewBirdwatcher(config Config) Birdwatcher {
-	client := NewClient(config.Api)
+	client := NewClient(config.API)
 
 	// Cache settings:
 	// TODO: Maybe read from config file
@@ -248,7 +248,7 @@ func (self *GenericBirdwatcher) NeighboursStatus() (*api.NeighboursStatusRespons
 func (self *GenericBirdwatcher) LookupPrefix(prefix string) (*api.RoutesLookupResponse, error) {
 	// Get RS info
 	rs := api.Routeserver{
-		Id:   self.config.Id,
+		Id:   self.config.ID,
 		Name: self.config.Name,
 	}
 

@@ -12,7 +12,7 @@ func apiLogSourceError(module string, sourceID string, params ...interface{}) {
 	args := []string{}
 
 	// Get source configuration
-	source := AliceConfig.SourceById(sourceID)
+	source := AliceConfig.SourceByID(sourceID)
 	sourceName := "unknown"
 	if source != nil {
 		sourceName = source.Name

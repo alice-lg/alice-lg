@@ -153,7 +153,7 @@ func parseRelativeServerTime(uptime interface{}, config Config) time.Duration {
 
 // Parse neighbours response
 func parseNeighbours(bird ClientResponse, config Config) (api.Neighbours, error) {
-	rsId := config.Id
+	rsId := config.ID
 	neighbours := api.Neighbours{}
 	protocols := bird["protocols"].(map[string]interface{})
 

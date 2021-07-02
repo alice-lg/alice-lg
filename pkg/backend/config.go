@@ -83,8 +83,8 @@ type RpkiConfig struct {
 	Invalid    []string `ini:"invalid"`
 }
 
-// UiConfig holds runtime settings for the web client
-type UiConfig struct {
+// UIConfig holds runtime settings for the web client
+type UIConfig struct {
 	RoutesColumns      map[string]string
 	RoutesColumnsOrder []string
 
@@ -121,7 +121,7 @@ type PaginationConfig struct {
 
 // A SourceConfig is a generic source configuration
 type SourceConfig struct {
-	Id    string
+	ID    string
 	Order int
 	Name  string
 	Group string
@@ -143,24 +143,24 @@ type SourceConfig struct {
 type Config struct {
 	Server       ServerConfig
 	Housekeeping HousekeepingConfig
-	Ui           UiConfig
+	UI           UIConfig
 	Sources      []*SourceConfig
 	File         string
 }
 
-// SourceById returns a source from the config by id
-func (cfg *Config) SourceById(sourceId string) *SourceConfig {
+// SourceByID returns a source from the config by id
+func (cfg *Config) SourceByID(id string) *SourceConfig {
 	for _, sourceConfig := range cfg.Sources {
-		if sourceConfig.Id == sourceId {
+		if sourceConfig.ID == id {
 			return sourceConfig
 		}
 	}
 	return nil
 }
 
-// SourceInstanceById returns an instance by id
-func (cfg *Config) SourceInstanceById(sourceId string) sources.Source {
-	sourceConfig := cfg.SourceById(sourceId)
+// SourceInstanceByID returns an instance by id
+func (cfg *Config) SourceInstanceByID(id string) sources.Source {
+	sourceConfig := cfg.SourceByID(id)
 	if sourceConfig == nil {
 		return nil // Nothing to do here.
 	}
@@ -516,8 +516,8 @@ func getPaginationConfig(config *ini.File) PaginationConfig {
 }
 
 // Get the UI configuration from the config file
-func getUiConfig(config *ini.File) (UiConfig, error) {
-	uiConfig := UiConfig{}
+func getUIConfig(config *ini.File) (UIConfig, error) {
+	uiConfig := UIConfig{}
 
 	// Get route columns
 	routesColumns, routesColumnsOrder, err := getRoutesColumns(config)
@@ -567,7 +567,7 @@ func getUiConfig(config *ini.File) (UiConfig, error) {
 	paginationConfig := getPaginationConfig(config)
 
 	// Make config
-	uiConfig = UiConfig{
+	uiConfig = UIConfig{
 		RoutesColumns:      routesColumns,
 		RoutesColumnsOrder: routesColumnsOrder,
 
@@ -632,7 +632,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 			section.Key("blackholes").MustString(""))
 
 		config := &SourceConfig{
-			Id:         sourceID,
+			ID:         sourceID,
 			Order:      order,
 			Name:       sourceName,
 			Group:      sourceGroup,
@@ -658,7 +658,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 				"and pipe_protocol_prefix", pipeProtocolPrefix)
 
 			c := birdwatcher.Config{
-				Id:   config.Id,
+				ID:   config.ID,
 				Name: config.Name,
 
 				Timezone:        "UTC",
@@ -677,7 +677,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 
 		case SourceTypeGoBGP:
 			c := gobgp.Config{
-				Id:   config.Id,
+				Id:   config.ID,
 				Name: config.Name,
 			}
 
@@ -692,7 +692,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 
 		case SourceTypeOpenBGPD:
 			c := openbgpd.Config{
-				ID:   config.Id,
+				ID:   config.ID,
 				Name: config.Name,
 			}
 			backendConfig.MapTo(&c)
@@ -749,7 +749,7 @@ func loadConfig(file string) (*Config, error) {
 	}
 
 	// Get UI configurations
-	ui, err := getUiConfig(parsedConfig)
+	ui, err := getUIConfig(parsedConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -757,7 +757,7 @@ func loadConfig(file string) (*Config, error) {
 	config := &Config{
 		Server:       server,
 		Housekeeping: housekeeping,
-		Ui:           ui,
+		UI:           ui,
 		Sources:      sources,
 		File:         file,
 	}
