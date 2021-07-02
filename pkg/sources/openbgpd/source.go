@@ -95,6 +95,10 @@ func (src *Source) Neighbours() (*api.NeighboursResponse, error) {
 	if err != nil {
 		return nil, err
 	}
+	// Set route server id (sourceID) for all neighbors
+	for _, n := range nb {
+		n.RouteServerId = src.cfg.ID
+	}
 
 	response := &api.NeighboursResponse{
 		Api:        apiStatus,

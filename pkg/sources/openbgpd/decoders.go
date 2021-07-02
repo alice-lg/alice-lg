@@ -21,8 +21,8 @@ func decodeAPIStatus(res map[string]interface{}) api.Status {
 		ServerTime:   decoders.TimeUTC(res["server_time_utc"], time.Time{}),
 		LastReboot:   lastReboot,
 		LastReconfig: time.Time{},
-		Message:      "bgpd up and running",
-		Version:      "1.0",
+		Message:      "openbgpd up and running",
+		Version:      "",
 		Backend:      "openbgpd",
 	}
 	return s
@@ -40,20 +40,26 @@ func decodeNeighbor(n interface{}) (*api.Neighbour, error) {
 	prefixes := decoders.MapGet(stats, "prefixes", map[string]interface{}{})
 
 	neighbor := &api.Neighbour{
-		Id:      decoders.MapGetString(nb, "bgpid", "invalid_id"),
-		Address: decoders.MapGetString(nb, "remote_addr", "invalid_address"),
-		Asn:     decoders.IntFromString(decoders.MapGetString(nb, "remote_as", ""), -1),
-		State:   decodeState(decoders.MapGetString(nb, "state", "unknown")),
-		// TODO: Description: describeNeighbor(nb),
+		Id:             decoders.MapGetString(nb, "remote_addr", "invalid_id"),
+		Address:        decoders.MapGetString(nb, "remote_addr", "invalid_address"),
+		Asn:            decoders.IntFromString(decoders.MapGetString(nb, "remote_as", ""), -1),
+		State:          decodeState(decoders.MapGetString(nb, "state", "unknown")),
+		Description:    describeNeighbor(nb),
 		RoutesReceived: int(decoders.MapGet(prefixes, "received", -1).(float64)),
 		// TODO: RoutesFiltered
 		RoutesExported: int(decoders.MapGet(prefixes, "sent", -1).(float64)),
 		// TODO: RoutesPreferred
 		// TODO: RoutesAccepted
-		Uptime:        decoders.DurationTimeframe(decoders.MapGet(nb, "last_updown", ""), 0),
-		RouteServerId: decoders.MapGetString(nb, "bgpid", "invalid_id"),
+		Uptime: decoders.DurationTimeframe(decoders.MapGet(nb, "last_updown", ""), 0),
 	}
 	return neighbor, nil
+}
+
+// describeNeighbor creates a neighbor description
+func describeNeighbor(nb interface{}) string {
+	addr := decoders.MapGetString(nb, "remote_addr", "invalid_address")
+	asn := decoders.MapGetString(nb, "remote_as", "")
+	return fmt.Sprintf("PEER AS%s %s", asn, addr)
 }
 
 // decodeNeighbors retrievs neighbors data from
@@ -117,7 +123,9 @@ func decodeNeighborStatus(nb interface{}) *api.NeighbourStatus {
 func decodeRoutes(res interface{}) (api.Routes, error) {
 	r := decoders.MapGet(res, "rib", nil)
 	if r == nil {
-		return nil, fmt.Errorf("missing 'rib' in response body")
+		// The response was a valid json but empty. So no
+		// routes are present.
+		return api.Routes{}, nil
 	}
 	rib, ok := r.([]interface{})
 	if !ok {
