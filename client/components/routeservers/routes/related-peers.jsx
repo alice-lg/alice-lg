@@ -48,7 +48,7 @@ function PeerLink(props) {
   const rid = neighbor.routeserver_id;
   let peerUrl;
 
-  if (neighbor.state == "up") {
+  if (neighbor.state == "up" || neighbor.state.includes("established")) {
     peerUrl = `/routeservers/${rid}/protocols/${pid}/routes`;
   } else {
     peerUrl = `/routeservers/${rid}#sessions-down`;

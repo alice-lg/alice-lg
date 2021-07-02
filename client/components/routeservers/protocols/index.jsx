@@ -108,11 +108,17 @@ function _sortNeighbors(neighbors, sort, order) {
   return neighbors.sort(_sortOrder(cmp, order));
 }
 
+function isUpState(s) {
+    if (!s) { return false; }
+    s = s.toLowerCase();
+    return (s.includes("up") || s.includes("established"));
+}
+
 
 class RoutesLink extends React.Component {
   render() {
     let url = `/routeservers/${this.props.routeserverId}/protocols/${this.props.protocol}/routes`;
-    if (this.props.state.toLowerCase() != 'up') {
+    if (!isUpState(this.props.state)) {
       return (<span>{this.props.children}</span>);
     }
     return (
@@ -189,7 +195,7 @@ const ColDescription = function(props) {
                   protocol={neighbour.id}
                   state={neighbour.state}>
         {neighbour.description}
-        {neighbour.state.toLowerCase() != "up" && 
+        {!isUpState(neighbour.state) && 
          neighbour.last_error &&
           <span className="protocol-state-error">
               {neighbour.last_error}
@@ -386,21 +392,17 @@ class Protocols extends React.Component {
     let neighboursDown = [];
     let neighboursIdle = [];
 
-    for (let id in protocol) {
-      let n = protocol[id];
-      switch(n.state.toLowerCase()) {
-        case 'up':
-          neighboursUp.push(n);
-          break;
-        case 'down':
-          neighboursDown.push(n);
-          break;
-        case 'start':
-          neighboursIdle.push(n);
-          break;
-        default:
-          neighboursUp.push(n);
-          console.error("Couldn't classify neighbour by state:", n);
+    for (let n of protocol) {
+      let s = n.state.toLowerCase();
+      if (s.includes("up") || s.includes("established") ) {
+        neighboursUp.push(n);
+      } else if (s.includes("down")) {
+        neighboursDown.push(n);
+      } else if (s.includes("start") || s.includes("active")) {
+        neighboursIdle.push(n);
+      } else {
+        console.error("Couldn't classify neighbour by state:", n);
+        neighboursUp.push(n);
       }
     }
 
