@@ -31,7 +31,6 @@ const QuickLinks = function(props) {
 
   // Is there anything to show?
   if (!isLoading &&
-      !showNotExported &&
       props.routes.notExported.totalResults == 0 &&
       props.routes.received.totalResults == 0 &&
       props.routes.filtered.totalResults == 0) {
