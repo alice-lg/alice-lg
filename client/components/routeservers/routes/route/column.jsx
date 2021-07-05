@@ -91,6 +91,7 @@ export default function(props) {
     "flags": ColFlags,
     "bgp.as_path": ColAsPath,
 
+    "Flags": ColFlags,
     "ASPath": ColAsPath,
   };
 
