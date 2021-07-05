@@ -17,7 +17,11 @@ const (
 
 // StateServerSource implements the OpenBGPD source for Alice.
 // It is intendet to consume structured bgpctl output
-// queried over HTTP using a `openbgpd-state-server`.
+// queried over HTTP using the:
+//
+//    openbgpd-state-server
+//    https://github.com/alice-lg/openbgpd-state-server
+//
 type StateServerSource struct {
 	// cfg is the source configuration retrieved
 	// from the alice config file.
@@ -28,7 +32,7 @@ type StateServerSource struct {
 
 	// Store the routes responses from the server
 	// here identified by neighborID
-	routesCache *caches.RoutesCache
+	routesReceivedCache *caches.RoutesCache
 }
 
 // NewStateServerSource creates a new source instance with a
@@ -38,19 +42,19 @@ func NewStateServerSource(cfg *Config) *StateServerSource {
 
 	// Initialize caches
 	nc := caches.NewNeighborsCache(cacheDisabled)
-	rc := caches.NewRoutesCache(cacheDisabled, 128) // configure this?
+	rrc := caches.NewRoutesCache(cacheDisabled, 128) // configure this?
 
 	return &StateServerSource{
-		cfg:            cfg,
-		neighborsCache: nc,
-		routesCache:    rc,
+		cfg:                 cfg,
+		neighborsCache:      nc,
+		routesReceivedCache: rrc,
 	}
 }
 
 // ExpireCaches ... will flush the cache. Seriously this needs
 // a renaming.
 func (src *StateServerSource) ExpireCaches() int {
-	totalExpired := src.routesCache.Expire()
+	totalExpired := src.routesReceivedCache.Expire()
 	return totalExpired
 }
 
@@ -77,16 +81,6 @@ func (src *StateServerSource) ShowNeighborsSummaryRequest(
 	return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 }
 
-// ShowNeighborRIBInRequest retrives the routes accepted from the neighbor
-// identified by bgp-id.
-func (src *StateServerSource) ShowNeighborRIBInRequest(
-	ctx context.Context,
-	neighborID string,
-) (*http.Request, error) {
-	url := src.cfg.APIURL("/v1/bgpd/show/rib/in/neighbor/%s/detail", neighborID)
-	return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-}
-
 // ShowNeighborRIBRequest retrives the routes accepted from the neighbor
 // identified by bgp-id.
 func (src *StateServerSource) ShowNeighborRIBRequest(
@@ -107,8 +101,8 @@ func (src *StateServerSource) ShowRIBRequest(ctx context.Context) (*http.Request
 // Datasource
 // ==========
 
-// apiStatus will create a new api status with cache infos
-func (src *StateServerSource) apiStatus() api.ApiStatus {
+// makeCacheStatus will create a new api status with cache infos
+func (src *StateServerSource) makeCacheStatus() api.ApiStatus {
 	return api.ApiStatus{
 		CacheStatus: api.CacheStatus{
 			CachedAt: time.Now().UTC(),
@@ -122,7 +116,7 @@ func (src *StateServerSource) apiStatus() api.ApiStatus {
 // Status returns an API status response. In our case
 // this is pretty much only that the service is available.
 func (src *StateServerSource) Status() (*api.StatusResponse, error) {
-	// Make API request and read response
+	// Make API request and read response. We do not cache the result.
 	req, err := src.StatusRequest(context.Background())
 	if err != nil {
 		return nil, err
@@ -135,11 +129,9 @@ func (src *StateServerSource) Status() (*api.StatusResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	status := decodeAPIStatus(body)
-
 	response := &api.StatusResponse{
-		Api:    src.apiStatus(),
+		Api:    src.makeCacheStatus(),
 		Status: status,
 	}
 	return response, nil
@@ -147,6 +139,13 @@ func (src *StateServerSource) Status() (*api.StatusResponse, error) {
 
 // Neighbours retrievs a full list of all neighbors
 func (src *StateServerSource) Neighbours() (*api.NeighboursResponse, error) {
+	// Query cache and see if we have a hit
+	response := src.neighborsCache.Get()
+	if response != nil {
+		response.Api.ResultFromCache = true
+		return response, nil
+	}
+
 	// Make API request and read response
 	req, err := src.ShowNeighborsRequest(context.Background())
 	if err != nil {
@@ -169,11 +168,12 @@ func (src *StateServerSource) Neighbours() (*api.NeighboursResponse, error) {
 	for _, n := range nb {
 		n.RouteServerId = src.cfg.ID
 	}
-
-	response := &api.NeighboursResponse{
-		Api:        src.apiStatus(),
+	response = &api.NeighboursResponse{
+		Api:        src.makeCacheStatus(),
 		Neighbours: nb,
 	}
+	src.neighborsCache.Set(response)
+
 	return response, nil
 }
 
@@ -202,7 +202,7 @@ func (src *StateServerSource) NeighboursStatus() (*api.NeighboursStatusResponse,
 	}
 
 	response := &api.NeighboursStatusResponse{
-		Api:        src.apiStatus(),
+		Api:        src.makeCacheStatus(),
 		Neighbours: nb,
 	}
 	return response, nil
@@ -211,6 +211,12 @@ func (src *StateServerSource) NeighboursStatus() (*api.NeighboursStatusResponse,
 // Routes retrieves the routes for a specific neighbor
 // identified by ID.
 func (src *StateServerSource) Routes(neighborID string) (*api.RoutesResponse, error) {
+	response := src.routesReceivedCache.Get(neighborID)
+	if response != nil {
+		response.Api.ResultFromCache = true
+		return response, nil
+	}
+
 	// Query RIB for routes received
 	req, err := src.ShowNeighborRIBRequest(context.Background(), neighborID)
 	if err != nil {
@@ -232,17 +238,25 @@ func (src *StateServerSource) Routes(neighborID string) (*api.RoutesResponse, er
 		return nil, err
 	}
 
-	response := &api.RoutesResponse{
-		Api:         src.apiStatus(),
+	response = &api.RoutesResponse{
+		Api:         src.makeCacheStatus(),
 		Imported:    recv,
 		NotExported: api.Routes{},
 		Filtered:    api.Routes{},
 	}
+	src.routesReceivedCache.Set(neighborID, response)
+
 	return response, nil
 }
 
 // RoutesReceived returns the routes exported by the neighbor.
 func (src *StateServerSource) RoutesReceived(neighborID string) (*api.RoutesResponse, error) {
+	response := src.routesReceivedCache.Get(neighborID)
+	if response != nil {
+		response.Api.ResultFromCache = true
+		return response, nil
+	}
+
 	// Query RIB for routes received
 	req, err := src.ShowNeighborRIBRequest(context.Background(), neighborID)
 	if err != nil {
@@ -264,19 +278,21 @@ func (src *StateServerSource) RoutesReceived(neighborID string) (*api.RoutesResp
 		return nil, err
 	}
 
-	response := &api.RoutesResponse{
-		Api:         src.apiStatus(),
+	response = &api.RoutesResponse{
+		Api:         src.makeCacheStatus(),
 		Imported:    recv,
 		NotExported: api.Routes{},
 		Filtered:    api.Routes{},
 	}
+	src.routesReceivedCache.Set(neighborID, response)
+
 	return response, nil
 }
 
 // RoutesFiltered retrieves the routes filtered / not valid
 func (src *StateServerSource) RoutesFiltered(neighborID string) (*api.RoutesResponse, error) {
 	response := &api.RoutesResponse{
-		Api: src.apiStatus(),
+		Api: src.makeCacheStatus(),
 
 		Imported:    api.Routes{},
 		NotExported: api.Routes{},
@@ -289,7 +305,7 @@ func (src *StateServerSource) RoutesFiltered(neighborID string) (*api.RoutesResp
 // from the rs for a neighbor.
 func (src *StateServerSource) RoutesNotExported(neighborID string) (*api.RoutesResponse, error) {
 	response := &api.RoutesResponse{
-		Api: src.apiStatus(),
+		Api: src.makeCacheStatus(),
 
 		Imported:    api.Routes{},
 		NotExported: api.Routes{},
@@ -298,7 +314,8 @@ func (src *StateServerSource) RoutesNotExported(neighborID string) (*api.RoutesR
 	return response, nil
 }
 
-// AllRoutes retrievs the entire RIB from the source
+// AllRoutes retrievs the entire RIB from the source. This is never
+// cached as it is processed by the store.
 func (src *StateServerSource) AllRoutes() (*api.RoutesResponse, error) {
 	req, err := src.ShowRIBRequest(context.Background())
 	if err != nil {
@@ -321,7 +338,7 @@ func (src *StateServerSource) AllRoutes() (*api.RoutesResponse, error) {
 	}
 
 	response := &api.RoutesResponse{
-		Api:         src.apiStatus(),
+		Api:         src.makeCacheStatus(),
 		Imported:    recv,
 		NotExported: api.Routes{},
 		Filtered:    api.Routes{},
