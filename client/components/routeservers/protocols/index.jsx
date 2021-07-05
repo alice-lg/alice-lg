@@ -236,6 +236,12 @@ const ColPlain = function(props) {
   );
 }
 
+const ColNotAvailable = function(props) {
+  return (
+    <td>-</td>
+  );
+}
+
 // Column:
 const NeighbourColumn = function(props) {
   const neighbour = props.neighbour;
@@ -250,6 +256,12 @@ const NeighbourColumn = function(props) {
     "Description": ColDescription,
   };
 
+  // For openbgpd the value is ommitted
+  if (props.rsType == "openbgpd") {
+      widgets["routes_filtered"] = ColNotAvailable;
+      widgets["routes_not_exported"] = ColNotAvailable;
+  }
+
   // Get render function
   let Widget = widgets[column] || ColLinked;
   return (
@@ -262,8 +274,11 @@ const NeighbourColumn = function(props) {
 class NeighboursTableView extends React.Component {
 
   render() {
+    const rs = this.props.routeserver;
+    if(!rs) { return null; } // We wait until we have a routeserver
+
     const columns = this.props.neighboursColumns;
-    const columnsOrder = this.props.neighboursColumnsOrder;
+    let columnsOrder = this.props.neighboursColumnsOrder;
 
     const sortedNeighbors = _sortNeighbors(this.props.neighbours,
                                            this.props.sortColumn,
@@ -273,6 +288,7 @@ class NeighboursTableView extends React.Component {
       return (
         <NeighborColumnHeader key={col}
                               rsId={this.props.routeserverId}
+                              rsType={rs.type}
                               columns={columns} column={col}
                               sort={this.props.sortColumn}
                               order={this.props.sortOrder}
@@ -284,6 +300,7 @@ class NeighboursTableView extends React.Component {
       let neighbourColumns = columnsOrder.map((col) => {
         return <NeighbourColumn key={col}
                                 rsId={this.props.routeserverId}
+                                rsType={rs.type}
                                 column={col}
                                 neighbour={n} />
       });
@@ -334,14 +351,21 @@ class NeighboursTableView extends React.Component {
 }
 
 const NeighboursTable = connect(
-  (state) => ({
-    neighboursColumns:      state.config.neighbours_columns,
-    neighboursColumnsOrder: state.config.neighbours_columns_order,
+  (state, ownProps) => {
+    const rsId = ownProps.routeserverId;
+    const rs   = state.routeservers.byId[rsId];
+    
+    return {
+      routeserver: rs,
 
-    sortColumn: state.neighbors.sortColumn,
-    sortOrder:  state.neighbors.sortOrder,
-    filterQuery: state.neighbors.filterQuery,
-  })
+      neighboursColumns:      state.config.neighbours_columns,
+      neighboursColumnsOrder: state.config.neighbours_columns_order,
+
+      sortColumn: state.neighbors.sortColumn,
+      sortOrder:  state.neighbors.sortOrder,
+      filterQuery: state.neighbors.filterQuery,
+    };
+  }
 )(NeighboursTableView);
 
 
@@ -406,7 +430,6 @@ class Protocols extends React.Component {
       }
     }
 
-
     // Render tables
     let tables = [];
     if (neighboursUp.length) {
@@ -439,7 +462,7 @@ export default connect(
       protocols: state.routeservers.protocols,
 
       filterQuery: state.neighbors.filterQuery,
-      routing: state.routing.locationBeforeTransitions,
+      routing:     state.routing.locationBeforeTransitions,
     }
   }
 )(Protocols);
