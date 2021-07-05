@@ -153,7 +153,7 @@ type SourceConfig struct {
 	Backend     string
 	Birdwatcher birdwatcher.Config
 	GoBGP       gobgp.Config
-	OpenBGPd    openbgpd.Config
+	OpenBGPD    openbgpd.Config
 
 	// Source instance
 	instance sources.Source
@@ -742,7 +742,19 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 				CacheTTL: cacheTTL,
 			}
 			backendConfig.MapTo(&c)
-			config.OpenBGPd = c
+			config.OpenBGPD = c
+
+		case SourceBackendOpenBGPDBgplgd:
+			// Get cache TTL from the config
+			cacheTTL := time.Second * time.Duration(backendConfig.Key("cache_ttl").MustInt(0))
+
+			c := openbgpd.Config{
+				ID:       config.ID,
+				Name:     config.Name,
+				CacheTTL: cacheTTL,
+			}
+			backendConfig.MapTo(&c)
+			config.OpenBGPD = c
 		}
 
 		// Add to list of sources
@@ -817,8 +829,6 @@ func (cfg *SourceConfig) getInstance() sources.Source {
 		return cfg.instance
 	}
 
-	fmt.Println("GET INSTANCE: souirce type", cfg.Type)
-
 	var instance sources.Source
 	switch cfg.Backend {
 	case SourceBackendBirdwatcher:
@@ -826,7 +836,9 @@ func (cfg *SourceConfig) getInstance() sources.Source {
 	case SourceBackendGoBGP:
 		instance = gobgp.NewGoBGP(cfg.GoBGP)
 	case SourceBackendOpenBGPDStateServer:
-		instance = openbgpd.NewStateServerSource(&cfg.OpenBGPd)
+		instance = openbgpd.NewStateServerSource(&cfg.OpenBGPD)
+	case SourceBackendOpenBGPDBgplgd:
+		instance = openbgpd.NewBgplgdSource(&cfg.OpenBGPD)
 	}
 
 	cfg.instance = instance
