@@ -34,7 +34,7 @@ func webPrepareClientHTML(html string) string {
 
 // Register assets handler and index handler
 // at /static and /
-func webRegisterAssets(ui UiConfig, router *httprouter.Router) error {
+func webRegisterAssets(ui UIConfig, router *httprouter.Router) error {
 	log.Println("Preparing and installing assets")
 
 	// Prepare client html: Rewrite paths

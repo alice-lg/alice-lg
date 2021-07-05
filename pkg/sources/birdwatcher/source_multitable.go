@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
+	"github.com/alice-lg/alice-lg/pkg/decoders"
 )
 
 type MultiTableBirdwatcher struct {
@@ -238,7 +239,7 @@ func (self *MultiTableBirdwatcher) fetchRequiredRoutes(neighborId string) (*api.
 	importedRoutes := api.Routes{}
 	if len(receivedRoutes) > 0 {
 		peer := receivedRoutes[0].Gateway
-		learntFrom := mustString(receivedRoutes[0].Details["learnt_from"], peer)
+		learntFrom := decoders.String(receivedRoutes[0].Details["learnt_from"], peer)
 
 		filteredRoutes = self.filterRoutesByPeerOrLearntFrom(filteredRoutes, peer, learntFrom)
 		importedRoutes = self.filterRoutesByDuplicates(receivedRoutes, filteredRoutes)
@@ -507,7 +508,7 @@ func (self *MultiTableBirdwatcher) AllRoutes() (*api.RoutesResponse, error) {
 	protocolsBgp := self.filterProtocolsBgp(birdProtocols)
 	for protocolId, protocolsData := range protocolsBgp["protocols"].(map[string]interface{}) {
 		peer := protocolsData.(map[string]interface{})["neighbor_address"].(string)
-		learntFrom := mustString(protocolsData.(map[string]interface{})["learnt_from"], peer)
+		learntFrom := decoders.String(protocolsData.(map[string]interface{})["learnt_from"], peer)
 
 		// Fetch filtered routes
 		_, filtered, err := self.fetchFilteredRoutes(protocolId)

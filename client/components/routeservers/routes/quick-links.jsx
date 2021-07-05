@@ -31,7 +31,6 @@ const QuickLinks = function(props) {
 
   // Is there anything to show?
   if (!isLoading &&
-      !showNotExported &&
       props.routes.notExported.totalResults == 0 &&
       props.routes.received.totalResults == 0 &&
       props.routes.filtered.totalResults == 0) {
@@ -50,7 +49,8 @@ const QuickLinks = function(props) {
            props.routes.received.totalResults > 0) &&
           <li className="received">
             <a href="#routes-received">Accepted</a></li>}
-        {showNotExported &&
+        {(!props.routes.notExported.loading &&
+           props.routes.notExported.totalResults > 0) &&    
           <li className="not-exported">
             <a href="#routes-not-exported">Not Exported</a></li>}
       </ul>

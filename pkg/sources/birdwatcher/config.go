@@ -1,10 +1,12 @@
 package birdwatcher
 
+// Config contains all configuration attributes
+// for a birdwatcher based source.
 type Config struct {
-	Id   string
+	ID   string
 	Name string
 
-	Api             string `ini:"api"`
+	API             string `ini:"api"`
 	Timezone        string `ini:"timezone"`
 	ServerTime      string `ini:"servertime"`
 	ServerTimeShort string `ini:"servertime_short"`

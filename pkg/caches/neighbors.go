@@ -14,11 +14,13 @@ birdwatcher, we keep a local cache. (This comes in handy
 when we are paginating the results for better client performance.)
 */
 
+// NeighborsCache implements a cache to store neighbors
 type NeighborsCache struct {
 	response *api.NeighboursResponse
 	disabled bool
 }
 
+// NewNeighborsCache initializes a cache for neighbor responses.
 func NewNeighborsCache(disabled bool) *NeighborsCache {
 	cache := &NeighborsCache{
 		response: nil,
@@ -28,26 +30,29 @@ func NewNeighborsCache(disabled bool) *NeighborsCache {
 	return cache
 }
 
-func (self *NeighborsCache) Get() *api.NeighboursResponse {
-	if self.disabled {
+// Get retrievs the neighbors response from the cache, if present,
+// and makes sure the information is still up to date.
+func (cache *NeighborsCache) Get() *api.NeighboursResponse {
+	if cache.disabled {
 		return nil
 	}
 
-	if self.response == nil {
+	if cache.response == nil {
 		return nil
 	}
 
-	if self.response.CacheTTL() < 0 {
+	if cache.response.CacheTTL() < 0 {
 		return nil
 	}
 
-	return self.response
+	return cache.response
 }
 
-func (self *NeighborsCache) Set(response *api.NeighboursResponse) {
-	if self.disabled {
+// Set updates the neighbors cache with a new response retrieved
+// from a backend source.
+func (cache *NeighborsCache) Set(response *api.NeighboursResponse) {
+	if cache.disabled {
 		return
 	}
-
-	self.response = response
+	cache.response = response
 }
