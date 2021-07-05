@@ -3,12 +3,15 @@ package openbgpd
 import (
 	"fmt"
 	"strings"
+	"time"
 )
 
 // Config is a OpenBGPD source config
 type Config struct {
 	ID   string
 	Name string
+
+	CacheTTL time.Duration
 
 	API string `ini:"api"`
 }
