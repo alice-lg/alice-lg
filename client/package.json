@@ -34,7 +34,7 @@
     "gulp-size": "^2.1.0",
     "gulp-uglify": "^2.0.0",
     "history": "^2.1.2",
-    "jquery": "^3.1.1",
+    "jquery": "^3.5.0",
     "jshint": "^2.9.5",
     "moment": "^2.15.1",
     "node-sass": "^3.13.1",
