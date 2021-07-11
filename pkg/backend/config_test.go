@@ -221,3 +221,15 @@ func TestRejectCandidatesConfig(t *testing.T) {
 		t.Error("expected 23:42:46 to be a 'reject-candidate'")
 	}
 }
+
+// TestDefaultHttpTimeout checks that the default HTTP timeout be set when not configured from a config file
+func TestDefaultHttpTimeout(t *testing.T) {
+	config, err := loadConfig("../etc/alice-lg/alice.example.conf")
+	if err != nil {
+		t.Error("Could not load test config:", err)
+	}
+
+	if config.Server.HttpTimeout != defaultHttpTimeout {
+		t.Error("Expected HTTP timeout be set to %d but got %d", defaultHttpTimeout, config.Server.HttpTimeout)
+	}
+}
