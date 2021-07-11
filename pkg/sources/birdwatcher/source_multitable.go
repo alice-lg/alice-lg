@@ -82,10 +82,11 @@ func (self *MultiTableBirdwatcher) fetchReceivedRoutes(neighborId string) (*api.
 		return nil, nil, fmt.Errorf("Invalid Neighbor")
 	}
 
+	mainTable := self.GenericBirdwatcher.config.MainTable
 	peer := protocols[neighborId].(map[string]interface{})["neighbor_address"].(string)
 
 	// Query birdwatcher
-	bird, err := self.client.GetJson("/routes/peer/" + peer)
+	bird, err := self.client.GetJson("/routes/table/" + mainTable + "/peer/" + peer)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -100,7 +101,7 @@ func (self *MultiTableBirdwatcher) fetchReceivedRoutes(neighborId string) (*api.
 	received, err := parseRoutes(bird, self.config)
 	if err != nil {
 		log.Println("WARNING Could not retrieve received routes:", err)
-		log.Println("Is the 'routes_peer' module active in birdwatcher?")
+		log.Println("Is the 'routes_table_peer' module active in birdwatcher?")
 		return &apiStatus, nil, err
 	}
 
