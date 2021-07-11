@@ -17,7 +17,7 @@ func PeerHash(peer *api.Peer) string {
 
 func PeerHashWithASAndAddress(asn uint32, address string) string {
 	h := sha1.New()
-	io.WriteString(h, string(asn))
+	io.WriteString(h, fmt.Sprint(asn))
 	io.WriteString(h, address)
 	sum := h.Sum(nil)
 	return fmt.Sprintf("%x", sum[0:5])
