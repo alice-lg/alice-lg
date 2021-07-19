@@ -4,7 +4,7 @@ _Lewis Carroll, Alice's Adventures in Wonderland & Through the Looking-Glass_
 
 Take a look at an Alice-LG production examples at:
 - https://lg.de-cix.net/
-- https://lg.ecix.net/
+- https://lg.megaport.com/
 
 And checkout the API at:
 - https://lg.de-cix.net/api/v1/config
