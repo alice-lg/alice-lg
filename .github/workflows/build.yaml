@@ -23,9 +23,12 @@ jobs:
           go-version: '^1.16'
 
       - run: cd client
+
       - run: npm install -g gulp@4.0.0 gulp-cli
+
       - run: yarn install
         working-directory: ./client
+
       - run: gulp
         working-directory: ./client
         env:
@@ -33,6 +36,31 @@ jobs:
           NODE_ENV: production
 
       - run: go mod download
+
       - run: make alpine
+        working-directory: ./cmd/alice-lg
 
       - run: pwd && ls -lah && find .
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: |
+            ghcr.io/${{ github.repository }}
+
+      - name: Build and push Docker images
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: .
+          file: Dockerfile.production
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

@@ -1,0 +1,10 @@
+#
+# Alice - The friendly BGP looking glass
+#
+
+FROM alpine:latest
+COPY cmd/alice-lg/alice-lg-linux-amd64 /usr/bin/alice-lg
+RUN ls -lsha /usr/bin/alice-lg
+
+EXPOSE 7340:7340
+CMD ["/usr/bin/alice-lg"]
