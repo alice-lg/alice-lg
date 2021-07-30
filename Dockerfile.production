@@ -3,6 +3,9 @@
 #
 
 FROM alpine:latest
+
+RUN apk add -U tzdata
+
 COPY cmd/alice-lg/alice-lg-linux-amd64 /usr/bin/alice-lg
 RUN ls -lsha /usr/bin/alice-lg
 
