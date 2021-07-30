@@ -25,12 +25,12 @@ jobs:
       - run: cd client
       - run: npm install -g gulp@4.0.0 gulp-cli
       - run: yarn install
+        working-directory: ./client
       - run: gulp
+        working-directory: ./client
         env:
           DISABLE_LOGGING: 1
           NODE_ENV: production
-
-      - run: cd ..
 
       - run: go mod download
       - run: make alpine
