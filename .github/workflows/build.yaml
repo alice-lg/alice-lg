@@ -17,12 +17,10 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 11
-          cache: 'yarn'
 
       - uses: actions/setup-go@v2
         with:
           go-version: '^1.16'
-
 
       - run: cd client
       - run: npm install -g gulp@4.0.0 gulp-cli
