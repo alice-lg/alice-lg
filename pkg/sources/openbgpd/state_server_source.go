@@ -41,12 +41,13 @@ type StateServerSource struct {
 // configuration.
 func NewStateServerSource(cfg *Config) *StateServerSource {
 	cacheDisabled := cfg.CacheTTL == 0
+	cacheSize := cfg.RoutesCacheSize
 
 	// Initialize caches
 	nc := caches.NewNeighborsCache(cacheDisabled)
-	rc := caches.NewRoutesCache(cacheDisabled, 128)
-	rrc := caches.NewRoutesCache(cacheDisabled, 128)
-	rfc := caches.NewRoutesCache(cacheDisabled, 128)
+	rc := caches.NewRoutesCache(cacheDisabled, cacheSize)
+	rrc := caches.NewRoutesCache(cacheDisabled, cacheSize)
+	rfc := caches.NewRoutesCache(cacheDisabled, cacheSize)
 
 	return &StateServerSource{
 		cfg:                 cfg,
