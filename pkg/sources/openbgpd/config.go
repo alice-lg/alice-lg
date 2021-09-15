@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/alice-lg/alice-lg/pkg/api"
 )
 
 // Config is a OpenBGPD source config
@@ -14,6 +16,8 @@ type Config struct {
 	CacheTTL time.Duration
 
 	API string `ini:"api"`
+
+	RejectCommunities api.Communities
 }
 
 // APIURL creates an url from the config

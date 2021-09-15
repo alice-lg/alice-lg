@@ -672,7 +672,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 		sourceBlackholes := TrimmedStringList(
 			section.Key("blackholes").MustString(""))
 
-		config := &SourceConfig{
+		srcCfg := &SourceConfig{
 			ID:         sourceID,
 			Order:      order,
 			Name:       sourceName,
@@ -700,8 +700,8 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 				"and pipe_protocol_prefix", pipeProtocolPrefix)
 
 			c := birdwatcher.Config{
-				ID:   config.ID,
-				Name: config.Name,
+				ID:   srcCfg.ID,
+				Name: srcCfg.Name,
 
 				Timezone:        "UTC",
 				ServerTime:      "2006-01-02T15:04:05.999999999Z07:00",
@@ -715,12 +715,12 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 			}
 
 			backendConfig.MapTo(&c)
-			config.Birdwatcher = c
+			srcCfg.Birdwatcher = c
 
 		case SourceBackendGoBGP:
 			c := gobgp.Config{
-				Id:   config.ID,
-				Name: config.Name,
+				Id:   srcCfg.ID,
+				Name: srcCfg.Name,
 			}
 
 			backendConfig.MapTo(&c)
@@ -730,35 +730,47 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 				c.ProcessingTimeout = 300
 			}
 
-			config.GoBGP = c
+			srcCfg.GoBGP = c
 
 		case SourceBackendOpenBGPDStateServer:
-			// Get cache TTL from the config
+			// Get cache TTL and reject communities from the config
 			cacheTTL := time.Second * time.Duration(backendConfig.Key("cache_ttl").MustInt(0))
+			rc, err := getRoutesRejections(config)
+			if err != nil {
+				return nil, err
+			}
+			rejectComms := rc.Reasons.APICommunities()
 
 			c := openbgpd.Config{
-				ID:       config.ID,
-				Name:     config.Name,
-				CacheTTL: cacheTTL,
+				ID:                srcCfg.ID,
+				Name:              srcCfg.Name,
+				CacheTTL:          cacheTTL,
+				RejectCommunities: rejectComms,
 			}
 			backendConfig.MapTo(&c)
-			config.OpenBGPD = c
+			srcCfg.OpenBGPD = c
 
 		case SourceBackendOpenBGPDBgplgd:
 			// Get cache TTL from the config
 			cacheTTL := time.Second * time.Duration(backendConfig.Key("cache_ttl").MustInt(0))
+			rc, err := getRoutesRejections(config)
+			if err != nil {
+				return nil, err
+			}
+			rejectComms := rc.Reasons.APICommunities()
 
 			c := openbgpd.Config{
-				ID:       config.ID,
-				Name:     config.Name,
-				CacheTTL: cacheTTL,
+				ID:                srcCfg.ID,
+				Name:              srcCfg.Name,
+				CacheTTL:          cacheTTL,
+				RejectCommunities: rejectComms,
 			}
 			backendConfig.MapTo(&c)
-			config.OpenBGPD = c
+			srcCfg.OpenBGPD = c
 		}
 
 		// Add to list of sources
-		sources = append(sources, config)
+		sources = append(sources, srcCfg)
 		order++
 	}
 

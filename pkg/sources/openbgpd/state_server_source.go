@@ -32,7 +32,9 @@ type StateServerSource struct {
 
 	// Store the routes responses from the server
 	// here identified by neighborID
+	routesCache         *caches.RoutesCache
 	routesReceivedCache *caches.RoutesCache
+	routesFilteredCache *caches.RoutesCache
 }
 
 // NewStateServerSource creates a new source instance with a
@@ -42,19 +44,23 @@ func NewStateServerSource(cfg *Config) *StateServerSource {
 
 	// Initialize caches
 	nc := caches.NewNeighborsCache(cacheDisabled)
-	rrc := caches.NewRoutesCache(cacheDisabled, 128) // configure this?
+	rc := caches.NewRoutesCache(cacheDisabled, 128)
+	rrc := caches.NewRoutesCache(cacheDisabled, 128)
+	rfc := caches.NewRoutesCache(cacheDisabled, 128)
 
 	return &StateServerSource{
 		cfg:                 cfg,
 		neighborsCache:      nc,
+		routesCache:         rc,
 		routesReceivedCache: rrc,
+		routesFilteredCache: rfc,
 	}
 }
 
 // ExpireCaches ... will flush the cache. Seriously this needs
 // a renaming.
 func (src *StateServerSource) ExpireCaches() int {
-	totalExpired := src.routesReceivedCache.Expire()
+	totalExpired := src.routesCache.Expire()
 	return totalExpired
 }
 
@@ -167,6 +173,14 @@ func (src *StateServerSource) Neighbours() (*api.NeighboursResponse, error) {
 	// Set route server id (sourceID) for all neighbors
 	for _, n := range nb {
 		n.RouteServerId = src.cfg.ID
+
+		rejectedRes, err := src.RoutesFiltered(n.Id)
+		if err != nil {
+			return nil, err
+		}
+		rejectCount := len(rejectedRes.Filtered)
+		n.RoutesFiltered = rejectCount
+
 	}
 	response = &api.NeighboursResponse{
 		Api:        src.makeCacheStatus(),
@@ -211,7 +225,7 @@ func (src *StateServerSource) NeighboursStatus() (*api.NeighboursStatusResponse,
 // Routes retrieves the routes for a specific neighbor
 // identified by ID.
 func (src *StateServerSource) Routes(neighborID string) (*api.RoutesResponse, error) {
-	response := src.routesReceivedCache.Get(neighborID)
+	response := src.routesCache.Get(neighborID)
 	if response != nil {
 		response.Api.ResultFromCache = true
 		return response, nil
@@ -233,18 +247,23 @@ func (src *StateServerSource) Routes(neighborID string) (*api.RoutesResponse, er
 		return nil, err
 	}
 
-	recv, err := decodeRoutes(body)
+	routes, err := decodeRoutes(body)
 	if err != nil {
 		return nil, err
 	}
 
+	// Filtered routes are marked with a large BGP community
+	// as defined in the reject reasons.
+	received := filterReceivedRoutes(src.cfg.RejectCommunities, routes)
+	rejected := filterRejectedRoutes(src.cfg.RejectCommunities, routes)
+
 	response = &api.RoutesResponse{
 		Api:         src.makeCacheStatus(),
-		Imported:    recv,
+		Imported:    received,
 		NotExported: api.Routes{},
-		Filtered:    api.Routes{},
+		Filtered:    rejected,
 	}
-	src.routesReceivedCache.Set(neighborID, response)
+	src.routesCache.Set(neighborID, response)
 
 	return response, nil
 }
@@ -273,14 +292,16 @@ func (src *StateServerSource) RoutesReceived(neighborID string) (*api.RoutesResp
 		return nil, err
 	}
 
-	recv, err := decodeRoutes(body)
+	routes, err := decodeRoutes(body)
 	if err != nil {
 		return nil, err
 	}
 
+	received := filterReceivedRoutes(src.cfg.RejectCommunities, routes)
+
 	response = &api.RoutesResponse{
 		Api:         src.makeCacheStatus(),
-		Imported:    recv,
+		Imported:    received,
 		NotExported: api.Routes{},
 		Filtered:    api.Routes{},
 	}
@@ -291,13 +312,43 @@ func (src *StateServerSource) RoutesReceived(neighborID string) (*api.RoutesResp
 
 // RoutesFiltered retrieves the routes filtered / not valid
 func (src *StateServerSource) RoutesFiltered(neighborID string) (*api.RoutesResponse, error) {
-	response := &api.RoutesResponse{
-		Api: src.makeCacheStatus(),
+	response := src.routesFilteredCache.Get(neighborID)
+	if response != nil {
+		response.Api.ResultFromCache = true
+		return response, nil
+	}
 
+	// Query RIB for routes received
+	req, err := src.ShowNeighborRIBRequest(context.Background(), neighborID)
+	if err != nil {
+		return nil, err
+	}
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	// Read and decode response
+	body, err := decoders.ReadJSONResponse(res)
+	if err != nil {
+		return nil, err
+	}
+
+	routes, err := decodeRoutes(body)
+	if err != nil {
+		return nil, err
+	}
+
+	rejected := filterRejectedRoutes(src.cfg.RejectCommunities, routes)
+
+	response = &api.RoutesResponse{
+		Api:         src.makeCacheStatus(),
 		Imported:    api.Routes{},
 		NotExported: api.Routes{},
-		Filtered:    api.Routes{},
+		Filtered:    rejected,
 	}
+	src.routesFilteredCache.Set(neighborID, response)
+
 	return response, nil
 }
 
@@ -332,16 +383,21 @@ func (src *StateServerSource) AllRoutes() (*api.RoutesResponse, error) {
 		return nil, err
 	}
 
-	recv, err := decodeRoutes(body)
+	routes, err := decodeRoutes(body)
 	if err != nil {
 		return nil, err
 	}
 
+	// Filtered routes are marked with a large BGP community
+	// as defined in the reject reasons.
+	received := filterReceivedRoutes(src.cfg.RejectCommunities, routes)
+	rejected := filterRejectedRoutes(src.cfg.RejectCommunities, routes)
+
 	response := &api.RoutesResponse{
 		Api:         src.makeCacheStatus(),
-		Imported:    recv,
+		Imported:    received,
 		NotExported: api.Routes{},
-		Filtered:    api.Routes{},
+		Filtered:    rejected,
 	}
 	return response, nil
 }

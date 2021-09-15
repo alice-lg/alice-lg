@@ -27,7 +27,9 @@ type BgplgdSource struct {
 
 	// Store the routes responses from the server
 	// here identified by neighborID
+	routesCache         *caches.RoutesCache
 	routesReceivedCache *caches.RoutesCache
+	routesFilteredCache *caches.RoutesCache
 }
 
 // NewBgplgdSource creates a new source instance with a configuration.
@@ -36,12 +38,16 @@ func NewBgplgdSource(cfg *Config) *BgplgdSource {
 
 	// Initialize caches
 	nc := caches.NewNeighborsCache(cacheDisabled)
-	rrc := caches.NewRoutesCache(cacheDisabled, 128) // configure this?
+	rc := caches.NewRoutesCache(cacheDisabled, 128)
+	rrc := caches.NewRoutesCache(cacheDisabled, 128)
+	rfc := caches.NewRoutesCache(cacheDisabled, 128)
 
 	return &BgplgdSource{
 		cfg:                 cfg,
 		neighborsCache:      nc,
+		routesCache:         rc,
 		routesReceivedCache: rrc,
+		routesFilteredCache: rfc,
 	}
 }
 
@@ -141,9 +147,17 @@ func (src *BgplgdSource) Neighbours() (*api.NeighboursResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	// Set route server id (sourceID) for all neighbors
+	// Set route server id (sourceID) for all neighbors and
+	// calculate the filtered routes.
 	for _, n := range nb {
 		n.RouteServerId = src.cfg.ID
+		rejectedRes, err := src.RoutesFiltered(n.Id)
+		if err != nil {
+			return nil, err
+		}
+		rejectCount := len(rejectedRes.Filtered)
+		n.RoutesFiltered = rejectCount
+
 	}
 	response = &api.NeighboursResponse{
 		Api:        src.makeCacheStatus(),
@@ -188,7 +202,7 @@ func (src *BgplgdSource) NeighboursStatus() (*api.NeighboursStatusResponse, erro
 // Routes retrieves the routes for a specific neighbor
 // identified by ID.
 func (src *BgplgdSource) Routes(neighborID string) (*api.RoutesResponse, error) {
-	response := src.routesReceivedCache.Get(neighborID)
+	response := src.routesCache.Get(neighborID)
 	if response != nil {
 		response.Api.ResultFromCache = true
 		return response, nil
@@ -210,18 +224,23 @@ func (src *BgplgdSource) Routes(neighborID string) (*api.RoutesResponse, error) 
 		return nil, err
 	}
 
-	recv, err := decodeRoutes(body)
+	routes, err := decodeRoutes(body)
 	if err != nil {
 		return nil, err
 	}
 
+	// Filtered routes are marked with a large BGP community
+	// as defined in the reject reasons.
+	received := filterReceivedRoutes(src.cfg.RejectCommunities, routes)
+	rejected := filterRejectedRoutes(src.cfg.RejectCommunities, routes)
+
 	response = &api.RoutesResponse{
 		Api:         src.makeCacheStatus(),
-		Imported:    recv,
+		Imported:    received,
 		NotExported: api.Routes{},
-		Filtered:    api.Routes{},
+		Filtered:    rejected,
 	}
-	src.routesReceivedCache.Set(neighborID, response)
+	src.routesCache.Set(neighborID, response)
 
 	return response, nil
 }
@@ -250,14 +269,18 @@ func (src *BgplgdSource) RoutesReceived(neighborID string) (*api.RoutesResponse,
 		return nil, err
 	}
 
-	recv, err := decodeRoutes(body)
+	routes, err := decodeRoutes(body)
 	if err != nil {
 		return nil, err
 	}
 
+	// Filtered routes are marked with a large BGP community
+	// as defined in the reject reasons.
+	received := filterReceivedRoutes(src.cfg.RejectCommunities, routes)
+
 	response = &api.RoutesResponse{
 		Api:         src.makeCacheStatus(),
-		Imported:    recv,
+		Imported:    received,
 		NotExported: api.Routes{},
 		Filtered:    api.Routes{},
 	}
@@ -268,13 +291,45 @@ func (src *BgplgdSource) RoutesReceived(neighborID string) (*api.RoutesResponse,
 
 // RoutesFiltered retrieves the routes filtered / not valid
 func (src *BgplgdSource) RoutesFiltered(neighborID string) (*api.RoutesResponse, error) {
-	response := &api.RoutesResponse{
-		Api: src.makeCacheStatus(),
+	response := src.routesFilteredCache.Get(neighborID)
+	if response != nil {
+		response.Api.ResultFromCache = true
+		return response, nil
+	}
 
+	// Query RIB for routes received
+	req, err := src.ShowNeighborRIBRequest(context.Background(), neighborID)
+	if err != nil {
+		return nil, err
+	}
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	// Read and decode response
+	body, err := decoders.ReadJSONResponse(res)
+	if err != nil {
+		return nil, err
+	}
+
+	routes, err := decodeRoutes(body)
+	if err != nil {
+		return nil, err
+	}
+
+	// Filtered routes are marked with a large BGP community
+	// as defined in the reject reasons.
+	rejected := filterRejectedRoutes(src.cfg.RejectCommunities, routes)
+
+	response = &api.RoutesResponse{
+		Api:         src.makeCacheStatus(),
 		Imported:    api.Routes{},
 		NotExported: api.Routes{},
-		Filtered:    api.Routes{},
+		Filtered:    rejected,
 	}
+	src.routesFilteredCache.Set(neighborID, response)
+
 	return response, nil
 }
 
@@ -309,16 +364,21 @@ func (src *BgplgdSource) AllRoutes() (*api.RoutesResponse, error) {
 		return nil, err
 	}
 
-	recv, err := decodeRoutes(body)
+	routes, err := decodeRoutes(body)
 	if err != nil {
 		return nil, err
 	}
 
+	// Filtered routes are marked with a large BGP community
+	// as defined in the reject reasons.
+	received := filterReceivedRoutes(src.cfg.RejectCommunities, routes)
+	rejected := filterRejectedRoutes(src.cfg.RejectCommunities, routes)
+
 	response := &api.RoutesResponse{
 		Api:         src.makeCacheStatus(),
-		Imported:    recv,
+		Imported:    received,
 		NotExported: api.Routes{},
-		Filtered:    api.Routes{},
+		Filtered:    rejected,
 	}
 	return response, nil
 }

@@ -258,7 +258,6 @@ const NeighbourColumn = function(props) {
 
   // For openbgpd the value is ommitted
   if (props.rsType == "openbgpd") {
-      widgets["routes_filtered"] = ColNotAvailable;
       widgets["routes_not_exported"] = ColNotAvailable;
   }
 
