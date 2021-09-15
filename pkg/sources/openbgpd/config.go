@@ -13,7 +13,8 @@ type Config struct {
 	ID   string
 	Name string
 
-	CacheTTL time.Duration
+	CacheTTL        time.Duration
+	RoutesCacheSize int
 
 	API string `ini:"api"`
 

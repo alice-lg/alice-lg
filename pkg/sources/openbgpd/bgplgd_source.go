@@ -38,9 +38,9 @@ func NewBgplgdSource(cfg *Config) *BgplgdSource {
 
 	// Initialize caches
 	nc := caches.NewNeighborsCache(cacheDisabled)
-	rc := caches.NewRoutesCache(cacheDisabled, 128)
-	rrc := caches.NewRoutesCache(cacheDisabled, 128)
-	rfc := caches.NewRoutesCache(cacheDisabled, 128)
+	rc := caches.NewRoutesCache(cacheDisabled, cfg.RoutesCacheSize)
+	rrc := caches.NewRoutesCache(cacheDisabled, cfg.RoutesCacheSize)
+	rfc := caches.NewRoutesCache(cacheDisabled, cfg.RoutesCacheSize)
 
 	return &BgplgdSource{
 		cfg:                 cfg,
