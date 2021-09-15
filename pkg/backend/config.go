@@ -734,7 +734,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 
 		case SourceBackendOpenBGPDStateServer:
 			// Get cache TTL and reject communities from the config
-			cacheTTL := time.Second * time.Duration(backendConfig.Key("cache_ttl").MustInt(0))
+			cacheTTL := time.Second * time.Duration(backendConfig.Key("cache_ttl").MustInt(300))
 			routesCacheSize := backendConfig.Key("routes_cache_size").MustInt(1024)
 			rc, err := getRoutesRejections(config)
 			if err != nil {
@@ -754,7 +754,8 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 
 		case SourceBackendOpenBGPDBgplgd:
 			// Get cache TTL from the config
-			cacheTTL := time.Second * time.Duration(backendConfig.Key("cache_ttl").MustInt(0))
+			cacheTTL := time.Second * time.Duration(backendConfig.Key("cache_ttl").MustInt(300))
+			routesCacheSize := backendConfig.Key("routes_cache_size").MustInt(1024)
 			rc, err := getRoutesRejections(config)
 			if err != nil {
 				return nil, err
@@ -765,6 +766,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 				ID:                srcCfg.ID,
 				Name:              srcCfg.Name,
 				CacheTTL:          cacheTTL,
+				RoutesCacheSize:   routesCacheSize,
 				RejectCommunities: rejectComms,
 			}
 			backendConfig.MapTo(&c)
