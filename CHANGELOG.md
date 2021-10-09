@@ -3,7 +3,7 @@
 
 ## 5.0.0 (2021-10-09)
 
-* OpenBGP support! Thanks to the Route Server Support Foundation
+* OpenBGPD support! Thanks to the Route Server Support Foundation
   for sponsoring this feature!
 
 * Backend cleanup and restructured go codebase.
