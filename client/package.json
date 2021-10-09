@@ -9,7 +9,7 @@
   "author": "Matthias Hannig",
   "license": "MIT",
   "devDependencies": {
-    "axios": "^0.15.2",
+    "axios": "^0.21.2",
     "babel": "^6.5.2",
     "babel-core": "^6.17.0",
     "babel-eslint": "^7.0.0",
