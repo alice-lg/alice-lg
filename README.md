@@ -257,3 +257,6 @@ The development of Alice is now sponsored by
 </p>
 
 Many thanks go out to [ECIX](https://www.ecix.net), where this project originated and was backed over the last two years.
+
+Support for **OpenBGP** was sponsored by the [Route Server Support Foundation](https://www.rssf.nl/).
+
