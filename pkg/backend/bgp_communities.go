@@ -2,7 +2,10 @@ package backend
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
+
+	"github.com/alice-lg/alice-lg/pkg/api"
 )
 
 /*
@@ -129,4 +132,45 @@ func (c BgpCommunities) Set(community string, label string) {
 
 	slookup := lookup.(BgpCommunities)
 	slookup[path[len(path)-1]] = label
+}
+
+// APICommunities enumerates all bgp communities into
+// a set of api.Communities.
+// CAVEAT: Wildcards are substituted by 0 and ** ARE NOT ** expanded.
+func (c BgpCommunities) APICommunities() api.Communities {
+	communities := api.Communities{}
+	// We could do this recursive, or assume that
+	// the max depth is 3.
+	for uVal, c1 := range c {
+		u, err := strconv.Atoi(uVal)
+		if err != nil {
+			u = 0
+		}
+		for vVal, c2 := range c1.(BgpCommunities) {
+			v, err := strconv.Atoi(vVal)
+			if err != nil {
+				v = 0
+			}
+
+			com2, ok := c2.(BgpCommunities)
+			if !ok {
+				// we only have labels here
+				communities = append(
+					communities, api.Community{u, v})
+				continue
+			}
+
+			for wVal := range com2 {
+				w, err := strconv.Atoi(wVal)
+				if err != nil {
+					w = 0
+				}
+
+				communities = append(
+					communities, api.Community{u, v, w})
+				continue
+			}
+		}
+	}
+	return communities
 }

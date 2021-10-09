@@ -158,6 +158,9 @@ export const RpkiIndicator = connect(
 class _RejectCandidateIndicator extends React.Component {
 
   render() {
+    if (!this.props.candidateCommunities) {
+      return null;
+    }
     if (!isRejectCandidate(this.props.candidateCommunities, this.props.route)) {
       return null;
     }

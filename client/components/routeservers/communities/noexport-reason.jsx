@@ -21,7 +21,7 @@ class NoExportReason extends React.Component {
       const cls = `noexport-reason noexport-reason-${community[1]}-${community[2]}`;
       return (
         <p key={key} className={cls}>
-          <a href={`http://irrexplorer.nlnog.net/search/${route.network}`}
+          <a href={`https://irrexplorer.nlnog.net/prefix/${route.network}`}
              target="_blank" >{reason}</a>
         </p>
       );

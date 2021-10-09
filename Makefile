@@ -35,14 +35,11 @@ client_dev:
 client_prod:
 	$(MAKE) -C client/ client_prod
 
-backend_dev: client_dev
-	$(MAKE) -C cmd/alice-lg/
-
-dev: 
-	$(MAKE) -C cmd/alice-lg/ osx-dev
-
 backend_prod: client_prod
-	$(MAKE) -C cmd/alice-lg/
+	$(MAKE) -C cmd/alice-lg/ linux
+
+backend:
+	$(MAKE) -C cmd/alice-lg/ linux
 
 alice: backend_prod
 	cp cmd/alice-lg/alice-lg-* bin/

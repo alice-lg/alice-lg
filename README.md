@@ -37,12 +37,17 @@ Major thanks to Barry O'Donovan who built the original [INEX Bird's Eye](https:/
 ### GoBGP
 Alice-LG supports direct integration with GoBGP instances using gRPC.  See the configuration section for more detail.
 
+### OpenBGPD
+
+Alice-LG supports OpenBGP via [`bgplgd`](https://github.com/cjeker/bgplgd) 
+and [`openbgpd-state-server`](https://github.com/alice-lg/openbgpd-state-server).
+
 ## Building Alice-LG from scratch
 __These examples include setting up your Go environment, if you already have set that up then you can obviously skip that__
 
 In case you have trouble with `npm` and `gulp` you can try using `yarn`.
 
-### CentOS 7:
+### CentOS:
 First add the following lines at the end of your `~/.bash_profile`:
 ```bash
 GOPATH=$HOME/go
@@ -117,6 +122,32 @@ group = AMS
 host = rs2.example.com:50051
 # ProcessingTimeout is a timeout in seconds configured per gRPC call to a given GoBGP daemon
 processing_timeout = 300
+```
+
+[OpenBGPD](https://www.openbgpd.org/) via `openbgpd-state-server`:
+```ini
+[source.rs-example]
+name = rs-example.openbgpd-state-server
+
+[source.rs-example.openbgpd-state-server]
+api = http://rs23.example.net:29111/api
+
+# Optional response cache time in seconds
+# Default: disabled (0)
+cache_ttl = 100
+```
+
+[OpenBGPD](https://www.openbgpd.org/) via `bgplgd`:
+```ini
+[source.rs-example]
+name = rs-example.openbgpd-bgplgd
+
+[source.rs-example.openbgpd-bgplgd]
+api = http://rs23.example.net/bgplgd
+
+# Optional response cache time in seconds
+# Default: disabled (0)
+cache_ttl = 100
 ```
 
 ## Running
@@ -230,3 +261,6 @@ The development of Alice is now sponsored by
 </p>
 
 Many thanks go out to [ECIX](https://www.ecix.net), where this project originated and was backed over the last two years.
+
+Support for **OpenBGP** was sponsored by the [Route Server Support Foundation](https://www.rssf.nl/).
+

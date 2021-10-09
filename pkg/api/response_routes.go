@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"time"
 )
 
@@ -19,6 +20,11 @@ type Route struct {
 	Primary   bool          `json:"primary"`
 
 	Details Details `json:"details"`
+}
+
+func (r *Route) String() string {
+	s, _ := json.Marshal(r)
+	return string(s)
 }
 
 // Implement Filterable interface for routes

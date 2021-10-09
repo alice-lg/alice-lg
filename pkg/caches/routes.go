@@ -8,7 +8,8 @@ import (
 )
 
 /*
-Routes Cache:
+RoutesCache stores routes responses from the backend.
+
 Keep a kv map with neighborId <-> api.RoutesResponse
 TTL is derived from the api.RoutesResponse.
 
@@ -24,6 +25,7 @@ type RoutesCache struct {
 	sync.Mutex
 }
 
+// NewRoutesCache initializes a new cache for route responses.
 func NewRoutesCache(disabled bool, size int) *RoutesCache {
 	cache := &RoutesCache{
 		responses:  make(map[string]*api.RoutesResponse),
@@ -35,15 +37,16 @@ func NewRoutesCache(disabled bool, size int) *RoutesCache {
 	return cache
 }
 
-func (self *RoutesCache) Get(neighborId string) *api.RoutesResponse {
-	if self.disabled {
+// Get retrievs all routes for a given neighbor
+func (cache *RoutesCache) Get(neighborID string) *api.RoutesResponse {
+	if cache.disabled {
 		return nil
 	}
 
-	self.Lock()
-	defer self.Unlock()
+	cache.Lock()
+	defer cache.Unlock()
 
-	response, ok := self.responses[neighborId]
+	response, ok := cache.responses[neighborID]
 	if !ok {
 		return nil
 	}
@@ -52,43 +55,45 @@ func (self *RoutesCache) Get(neighborId string) *api.RoutesResponse {
 		return nil
 	}
 
-	self.accessedAt[neighborId] = time.Now()
+	cache.accessedAt[neighborID] = time.Now()
 
 	return response
 }
 
-func (self *RoutesCache) Set(neighborId string, response *api.RoutesResponse) {
-	if self.disabled {
+// Set the routes response for a given neighbor
+func (cache *RoutesCache) Set(neighborID string, response *api.RoutesResponse) {
+	if cache.disabled {
 		return
 	}
 
-	self.Lock()
-	defer self.Unlock()
+	cache.Lock()
+	defer cache.Unlock()
 
-	if len(self.responses) > self.size {
+	if len(cache.responses) > cache.size {
 		// delete LRU
-		lru := self.accessedAt.LRU()
-		delete(self.accessedAt, lru)
-		delete(self.responses, lru)
+		leastRecentNeighbor := cache.accessedAt.LRU()
+		delete(cache.accessedAt, leastRecentNeighbor)
+		delete(cache.responses, leastRecentNeighbor)
 	}
 
-	self.accessedAt[neighborId] = time.Now()
-	self.responses[neighborId] = response
+	cache.accessedAt[neighborID] = time.Now()
+	cache.responses[neighborID] = response
 }
 
-func (self *RoutesCache) Expire() int {
-	self.Lock()
-	defer self.Unlock()
+// Expire will flush expired keys. (TODO: naming could be better.)
+func (cache *RoutesCache) Expire() int {
+	cache.Lock()
+	defer cache.Unlock()
 
 	expiredKeys := []string{}
-	for key, response := range self.responses {
+	for key, response := range cache.responses {
 		if response.CacheTTL() < 0 {
 			expiredKeys = append(expiredKeys, key)
 		}
 	}
 
 	for _, key := range expiredKeys {
-		delete(self.responses, key)
+		delete(cache.responses, key)
 	}
 
 	return len(expiredKeys)

@@ -3,8 +3,8 @@ package backend
 import (
 	"testing"
 
-	"github.com/alice-lg/alice-lg/backend/sources/birdwatcher"
-	"github.com/alice-lg/alice-lg/backend/sources/gobgp"
+	"github.com/alice-lg/alice-lg/pkg/sources/birdwatcher"
+	"github.com/alice-lg/alice-lg/pkg/sources/gobgp"
 )
 
 // Test configuration loading and parsing
@@ -12,25 +12,25 @@ import (
 
 func TestLoadConfigs(t *testing.T) {
 
-	config, err := loadConfig("../etc/alice-lg/alice.example.conf")
+	config, err := loadConfig("_testdata/alice.conf")
 	if err != nil {
-		t.Error("Could not load test config:", err)
+		t.Fatal("Could not load test config:", err)
 	}
 
 	if config.Server.Listen == "" {
 		t.Error("Listen string not present.")
 	}
 
-	if len(config.Ui.RoutesColumns) == 0 {
+	if len(config.UI.RoutesColumns) == 0 {
 		t.Error("Route columns settings missing")
 	}
 
-	if len(config.Ui.RoutesRejections.Reasons) == 0 {
+	if len(config.UI.RoutesRejections.Reasons) == 0 {
 		t.Error("Rejection reasons missing")
 	}
 
 	// Check communities
-	label, err := config.Ui.BgpCommunities.Lookup("1:23")
+	label, err := config.UI.BgpCommunities.Lookup("1:23")
 	if err != nil {
 		t.Error(err)
 	}
@@ -43,10 +43,9 @@ func TestLoadConfigs(t *testing.T) {
 // TestSourceConfig checks that the proper backend type was identified for each
 // example routeserver
 func TestSourceConfig(t *testing.T) {
-
-	config, err := loadConfig("../etc/alice-lg/alice.example.conf")
+	config, err := loadConfig("_testdata/alice.conf")
 	if err != nil {
-		t.Error("Could not load test config:", err)
+		t.Fatal("Could not load test config:", err)
 	}
 
 	// Get sources
@@ -77,10 +76,9 @@ func TestSourceConfig(t *testing.T) {
 }
 
 func TestSourceConfigDefaultsOverride(t *testing.T) {
-
-	config, err := loadConfig("../etc/alice-lg/alice.example.conf")
+	config, err := loadConfig("_testdata/alice.conf")
 	if err != nil {
-		t.Error("Could not load test config:", err)
+		t.Fatal("Could not load test config:", err)
 	}
 
 	// Get sources
@@ -117,13 +115,13 @@ func TestSourceConfigDefaultsOverride(t *testing.T) {
 }
 
 func TestRejectAndNoexportReasons(t *testing.T) {
-	config, err := loadConfig("../etc/alice-lg/alice.example.conf")
+	config, err := loadConfig("_testdata/alice.conf")
 	if err != nil {
-		t.Error("Could not load test config:", err)
+		t.Fatal("Could not load test config:", err)
 	}
 
 	// Rejection reasons
-	description, err := config.Ui.RoutesRejections.Reasons.Lookup("23:42:1")
+	description, err := config.UI.RoutesRejections.Reasons.Lookup("23:42:1")
 	if err != nil {
 		t.Error(err)
 	}
@@ -133,7 +131,7 @@ func TestRejectAndNoexportReasons(t *testing.T) {
 	}
 
 	// Noexport reasons
-	description, err = config.Ui.RoutesNoexports.Reasons.Lookup("23:46:1")
+	description, err = config.UI.RoutesNoexports.Reasons.Lookup("23:46:1")
 	if err != nil {
 		t.Error(err)
 	}
@@ -144,9 +142,9 @@ func TestRejectAndNoexportReasons(t *testing.T) {
 }
 
 func TestBlackholeParsing(t *testing.T) {
-	config, err := loadConfig("../etc/alice-lg/alice.example.conf")
+	config, err := loadConfig("_testdata/alice.conf")
 	if err != nil {
-		t.Error("Could not load test config:", err)
+		t.Fatal("Could not load test config:", err)
 	}
 
 	// Get first source
@@ -163,9 +161,9 @@ func TestBlackholeParsing(t *testing.T) {
 }
 
 func TestOwnASN(t *testing.T) {
-	config, err := loadConfig("../etc/alice-lg/alice.example.conf")
+	config, err := loadConfig("_testdata/alice.conf")
 	if err != nil {
-		t.Error("Could not load test config:", err)
+		t.Fatal("Could not load test config:", err)
 	}
 
 	if config.Server.Asn != 9033 {
@@ -174,45 +172,43 @@ func TestOwnASN(t *testing.T) {
 }
 
 func TestRpkiConfig(t *testing.T) {
-	config, err := loadConfig("../etc/alice-lg/alice.example.conf")
+	config, err := loadConfig("_testdata/alice.conf")
 	if err != nil {
-		t.Error("Could not load test config:", err)
+		t.Fatal("Could not load test config:", err)
 	}
 
-	if len(config.Ui.Rpki.Valid) != 3 {
-		t.Error("Unexpected RPKI:VALID,", config.Ui.Rpki.Valid)
+	if len(config.UI.Rpki.Valid) != 3 {
+		t.Error("Unexpected RPKI:VALID,", config.UI.Rpki.Valid)
 	}
-	if len(config.Ui.Rpki.Invalid) != 4 {
-		t.Error("Unexpected RPKI:INVALID,", config.Ui.Rpki.Invalid)
-		return // We would fail hard later
+	if len(config.UI.Rpki.Invalid) != 4 {
+		t.Fatal("Unexpected RPKI:INVALID,", config.UI.Rpki.Invalid)
 	}
 
 	// Check fallback
-	if config.Ui.Rpki.NotChecked[0] != "9033" {
+	if config.UI.Rpki.NotChecked[0] != "9033" {
 		t.Error(
 			"Expected NotChecked to fall back to defaults, got:",
-			config.Ui.Rpki.NotChecked,
+			config.UI.Rpki.NotChecked,
 		)
 	}
 
 	// Check range postprocessing
-	if config.Ui.Rpki.Invalid[3] != "*" {
+	if config.UI.Rpki.Invalid[3] != "*" {
 		t.Error("Missing wildcard from config")
 	}
 
-	t.Log(config.Ui.Rpki)
+	t.Log(config.UI.Rpki)
 }
 
 func TestRejectCandidatesConfig(t *testing.T) {
-	config, err := loadConfig("../etc/alice-lg/alice.example.conf")
+	config, err := loadConfig("_testdata/alice.conf")
 	if err != nil {
-		t.Error("Could not load test config:", err)
-		return
+		t.Fatal("Could not load test config:", err)
 	}
 
-	t.Log(config.Ui.RoutesRejectCandidates.Communities)
+	t.Log(config.UI.RoutesRejectCandidates.Communities)
 
-	description, err := config.Ui.RoutesRejectCandidates.Communities.Lookup("23:42:46")
+	description, err := config.UI.RoutesRejectCandidates.Communities.Lookup("23:42:46")
 	if err != nil {
 		t.Error(err)
 	}

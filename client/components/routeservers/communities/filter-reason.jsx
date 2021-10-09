@@ -21,7 +21,7 @@ class FilterReason extends React.Component {
       const cls = `reject-reason reject-reason-${community[1]}-${community[2]}`;
       return (
         <p key={key} className={cls}>
-          <a href={`http://irrexplorer.nlnog.net/search/${route.network}`}
+          <a href={`https://irrexplorer.nlnog.net/prefix/${route.network}`}
              target="_blank" >{reason}</a>
         </p>
       );
