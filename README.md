@@ -2,9 +2,13 @@
 __"No, no! The adventures first, explanations take such a dreadful time."__  
 _Lewis Carroll, Alice's Adventures in Wonderland & Through the Looking-Glass_
 
-Take a look at an Alice-LG production examples at:
+Take a look at Alice-LG production examples at:
 - https://lg.de-cix.net/
-- https://lg.ecix.net/
+- https://lg.ams-ix.net
+- https://lg.bcix.de/
+- https://lg.megaport.com/
+- https://lg.netnod.se/
+- https://alice-rs.linx.net/
 
 And checkout the API at:
 - https://lg.de-cix.net/api/v1/config
@@ -75,7 +79,7 @@ Your Alice-LG source will now be located at `~/go/src/github.com/alice-lg/alice-
 ## Configuration
 
 An example configuration can be found at
-[etc/alice-lg/alice.example.conf](https://github.com/alice-lg/alice-lg/blob/readme_update/etc/alice-lg/alice.example.conf).
+[etc/alice-lg/alice.example.conf](https://github.com/alice-lg/alice-lg/blob/master/etc/alice-lg/alice.example.conf).
 
 You can copy it to any of the following locations:
 
