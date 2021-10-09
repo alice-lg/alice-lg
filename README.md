@@ -47,7 +47,7 @@ __These examples include setting up your Go environment, if you already have set
 
 In case you have trouble with `npm` and `gulp` you can try using `yarn`.
 
-### CentOS 7:
+### CentOS:
 First add the following lines at the end of your `~/.bash_profile`:
 ```bash
 GOPATH=$HOME/go
