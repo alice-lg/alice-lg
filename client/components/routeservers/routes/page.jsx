@@ -68,6 +68,9 @@ const makeQueryLinkProps = function(routing, query, loadNotExported) {
  * loading) and show info screen.
  */
 const RoutesViewEmpty = (props) => {
+  const hasContent = props.routes.received.totalResults > 0 ||
+                     props.routes.filtered.totalResults > 0 ||
+                     props.routes.notExported.totalResults > 0;
   const isLoading = props.routes.received.loading ||
                     props.routes.filtered.loading ||
                     props.routes.notExported.loading;
@@ -75,24 +78,24 @@ const RoutesViewEmpty = (props) => {
   if (isLoading) {
     return null; // We are not a loading indicator.
   }
-
-  if (!props.loadNotExported) {
-    return null; // There may be routes matching the query in there!
+ 
+  // Maybe this has something to do with a filter
+  if (!hasContent && props.hasQuery) {
+      return (
+        <div className="card info-result-empty">
+          <h4>No routes  matching your query.</h4>
+          <p>Please check if your query is too restrictive.</p>
+        </div>
+      );
   }
 
-  const hasContent = props.routes.received.totalResults > 0 ||
-                     props.routes.filtered.totalResults > 0 ||
-                     props.routes.notExported.totalResults > 0;
   if (hasContent) {
     return null; // Nothing to do then.
   }
 
-
-  // Show info screen
   return (
     <div className="card info-result-empty">
-      <h4>No routes found matching your query.</h4>
-      <p>Please check if your query is too restrictive.</p>
+        <p className="card-body">There are <b>no routes</b> to display for this neighbor.</p>
     </div>
   );
 }
@@ -156,8 +159,7 @@ class RoutesPage extends React.Component {
     const filterPlaceholder = "Filter by " +
       filterableColumnsText(
         this.props.routesColumns,
-        this.props.routesColumnsOrder
-      );
+        this.props.routesColumnsOrder);
 
     return(
       <div className={pageClass}>
@@ -189,9 +191,8 @@ class RoutesPage extends React.Component {
             <QuickLinks routes={this.props.routes} />
 
             <RoutesViewEmpty routes={this.props.routes}
+                             hasQuery={!!this.props.filterValue}
                              loadNotExported={this.props.loadNotExported} />
-
-
             <RoutesView
                 type={ROUTES_FILTERED}
                 routeserverId={this.props.params.routeserverId}
@@ -239,6 +240,7 @@ class RoutesPage extends React.Component {
 
 export default connect(
   (state, props) => {
+    const query = props.params.query; 
     const protocolId = props.params.protocolId;
     const rsId = props.params.routeserverId;
     const neighbors = state.routeservers.protocols[rsId];
@@ -266,6 +268,11 @@ export default connect(
       totalResults: state.routes.notExportedTotalResults,
       apiStatus:    state.routes.notExportedApiStatus
     };
+
+    const totalResults = state.routes.receivedTotalResults +
+      state.routes.filteredTotalResults +
+      state.routes.notExportedTotalResults;
+
     const anyLoading = state.routes.receivedLoading ||
                      state.routes.filteredLoading ||
                      state.routes.notExportedLoading;
@@ -286,9 +293,9 @@ export default connect(
       neighbor: neighbor,
       filterValue: state.routes.filterValue,
       routes: {
-         [ROUTES_RECEIVED]:     received,
-          [ROUTES_FILTERED]:     filtered,
-          [ROUTES_NOT_EXPORTED]: notExported
+        [ROUTES_RECEIVED]:     received,
+        [ROUTES_FILTERED]:     filtered,
+        [ROUTES_NOT_EXPORTED]: notExported
       },
       routesColumns: state.config.routes_columns,
       routesColumnsOrder: state.config.routes_columns_order,
@@ -297,8 +304,10 @@ export default connect(
       loadNotExported: state.routes.loadNotExported ||
                        !state.config.noexport_load_on_demand,
 
+      totalResults: totalResults,
       anyLoading: anyLoading,
 
+      filterQuery: state.routes.filterQuery,
       filtersApplied: filtersApplied,
       filtersAvailable: filtersAvailable,
 

@@ -11,20 +11,20 @@ import (
 
 // Handle routes
 func apiRoutesList(_req *http.Request, params httprouter.Params) (api.Response, error) {
-	rsId, err := validateSourceID(params.ByName("id"))
+	rsID, err := validateSourceID(params.ByName("id"))
 	if err != nil {
 		return nil, err
 	}
-	neighborId := params.ByName("neighborId")
+	neighborID := params.ByName("neighborId")
 
-	source := AliceConfig.SourceInstanceById(rsId)
+	source := AliceConfig.SourceInstanceByID(rsID)
 	if source == nil {
 		return nil, SOURCE_NOT_FOUND_ERROR
 	}
 
-	result, err := source.Routes(neighborId)
+	result, err := source.Routes(neighborID)
 	if err != nil {
-		apiLogSourceError("routes", rsId, neighborId, err)
+		apiLogSourceError("routes", rsID, neighborID, err)
 	}
 
 	return result, err
@@ -38,20 +38,20 @@ func apiRoutesListReceived(
 	// Measure response time
 	t0 := time.Now()
 
-	rsId, err := validateSourceID(params.ByName("id"))
+	rsID, err := validateSourceID(params.ByName("id"))
 	if err != nil {
 		return nil, err
 	}
 
-	neighborId := params.ByName("neighborId")
-	source := AliceConfig.SourceInstanceById(rsId)
+	neighborID := params.ByName("neighborId")
+	source := AliceConfig.SourceInstanceByID(rsID)
 	if source == nil {
 		return nil, SOURCE_NOT_FOUND_ERROR
 	}
 
-	result, err := source.RoutesReceived(neighborId)
+	result, err := source.RoutesReceived(neighborID)
 	if err != nil {
-		apiLogSourceError("routes_received", rsId, neighborId, err)
+		apiLogSourceError("routes_received", rsID, neighborID, err)
 		return nil, err
 	}
 
@@ -80,7 +80,7 @@ func apiRoutesListReceived(
 
 	// Paginate results
 	page := apiQueryMustInt(req, "page", 0)
-	pageSize := AliceConfig.Ui.Pagination.RoutesAcceptedPageSize
+	pageSize := AliceConfig.UI.Pagination.RoutesAcceptedPageSize
 	routes, pagination := apiPaginateRoutes(routes, page, pageSize)
 
 	// Calculate query duration
@@ -111,20 +111,20 @@ func apiRoutesListFiltered(
 ) (api.Response, error) {
 	t0 := time.Now()
 
-	rsId, err := validateSourceID(params.ByName("id"))
+	rsID, err := validateSourceID(params.ByName("id"))
 	if err != nil {
 		return nil, err
 	}
 
-	neighborId := params.ByName("neighborId")
-	source := AliceConfig.SourceInstanceById(rsId)
+	neighborID := params.ByName("neighborId")
+	source := AliceConfig.SourceInstanceByID(rsID)
 	if source == nil {
 		return nil, SOURCE_NOT_FOUND_ERROR
 	}
 
-	result, err := source.RoutesFiltered(neighborId)
+	result, err := source.RoutesFiltered(neighborID)
 	if err != nil {
-		apiLogSourceError("routes_filtered", rsId, neighborId, err)
+		apiLogSourceError("routes_filtered", rsID, neighborID, err)
 		return nil, err
 	}
 
@@ -153,7 +153,7 @@ func apiRoutesListFiltered(
 
 	// Paginate results
 	page := apiQueryMustInt(req, "page", 0)
-	pageSize := AliceConfig.Ui.Pagination.RoutesFilteredPageSize
+	pageSize := AliceConfig.UI.Pagination.RoutesFilteredPageSize
 	routes, pagination := apiPaginateRoutes(routes, page, pageSize)
 
 	// Calculate query duration
@@ -184,20 +184,20 @@ func apiRoutesListNotExported(
 ) (api.Response, error) {
 	t0 := time.Now()
 
-	rsId, err := validateSourceID(params.ByName("id"))
+	rsID, err := validateSourceID(params.ByName("id"))
 	if err != nil {
 		return nil, err
 	}
 
-	neighborId := params.ByName("neighborId")
-	source := AliceConfig.SourceInstanceById(rsId)
+	neighborID := params.ByName("neighborId")
+	source := AliceConfig.SourceInstanceByID(rsID)
 	if source == nil {
 		return nil, SOURCE_NOT_FOUND_ERROR
 	}
 
-	result, err := source.RoutesNotExported(neighborId)
+	result, err := source.RoutesNotExported(neighborID)
 	if err != nil {
-		apiLogSourceError("routes_not_exported", rsId, neighborId, err)
+		apiLogSourceError("routes_not_exported", rsID, neighborID, err)
 		return nil, err
 	}
 
@@ -226,7 +226,7 @@ func apiRoutesListNotExported(
 
 	// Paginate results
 	page := apiQueryMustInt(req, "page", 0)
-	pageSize := AliceConfig.Ui.Pagination.RoutesNotExportedPageSize
+	pageSize := AliceConfig.UI.Pagination.RoutesNotExportedPageSize
 	routes, pagination := apiPaginateRoutes(routes, page, pageSize)
 
 	// Calculate query duration

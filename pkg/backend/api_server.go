@@ -15,7 +15,7 @@ func StartHTTPServer() {
 	router := httprouter.New()
 
 	// Serve static content
-	if err := webRegisterAssets(AliceConfig.Ui, router); err != nil {
+	if err := webRegisterAssets(AliceConfig.UI, router); err != nil {
 		log.Fatal(err)
 	}
 

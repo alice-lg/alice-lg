@@ -33,7 +33,7 @@ func NewRoutesStore(config *Config) *RoutesStore {
 	configMap := make(map[string]*SourceConfig)
 
 	for _, source := range config.Sources {
-		id := source.Id
+		id := source.ID
 
 		configMap[id] = source
 		routesMap[id] = &api.RoutesResponse{}
@@ -109,7 +109,7 @@ func (rs *RoutesStore) update() {
 		if err != nil {
 			log.Println(
 				"Refreshing the routes store failed for:", sourceConfig.Name,
-				"(", sourceConfig.Id, ")",
+				"(", sourceConfig.ID, ")",
 				"with:", err,
 				"- NEXT STATE: ERROR",
 			)
@@ -207,7 +207,7 @@ func routeToLookupRoute(
 ) *api.LookupRoute {
 
 	// Get neighbour
-	neighbour := AliceNeighboursStore.GetNeighbourAt(source.Id, route.NeighbourId)
+	neighbour := AliceNeighboursStore.GetNeighbourAt(source.ID, route.NeighbourId)
 
 	// Make route
 	lookup := &api.LookupRoute{
@@ -217,7 +217,7 @@ func routeToLookupRoute(
 		Neighbour:   neighbour,
 
 		Routeserver: api.Routeserver{
-			Id:   source.Id,
+			Id:   source.ID,
 			Name: source.Name,
 		},
 

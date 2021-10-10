@@ -108,11 +108,17 @@ function _sortNeighbors(neighbors, sort, order) {
   return neighbors.sort(_sortOrder(cmp, order));
 }
 
+function isUpState(s) {
+    if (!s) { return false; }
+    s = s.toLowerCase();
+    return (s.includes("up") || s.includes("established"));
+}
+
 
 class RoutesLink extends React.Component {
   render() {
     let url = `/routeservers/${this.props.routeserverId}/protocols/${this.props.protocol}/routes`;
-    if (this.props.state.toLowerCase() != 'up') {
+    if (!isUpState(this.props.state)) {
       return (<span>{this.props.children}</span>);
     }
     return (
@@ -189,7 +195,7 @@ const ColDescription = function(props) {
                   protocol={neighbour.id}
                   state={neighbour.state}>
         {neighbour.description}
-        {neighbour.state.toLowerCase() != "up" && 
+        {!isUpState(neighbour.state) && 
          neighbour.last_error &&
           <span className="protocol-state-error">
               {neighbour.last_error}
@@ -230,6 +236,12 @@ const ColPlain = function(props) {
   );
 }
 
+const ColNotAvailable = function(props) {
+  return (
+    <td>-</td>
+  );
+}
+
 // Column:
 const NeighbourColumn = function(props) {
   const neighbour = props.neighbour;
@@ -244,6 +256,11 @@ const NeighbourColumn = function(props) {
     "Description": ColDescription,
   };
 
+  // For openbgpd the value is ommitted
+  if (props.rsType == "openbgpd") {
+      widgets["routes_not_exported"] = ColNotAvailable;
+  }
+
   // Get render function
   let Widget = widgets[column] || ColLinked;
   return (
@@ -256,8 +273,11 @@ const NeighbourColumn = function(props) {
 class NeighboursTableView extends React.Component {
 
   render() {
+    const rs = this.props.routeserver;
+    if(!rs) { return null; } // We wait until we have a routeserver
+
     const columns = this.props.neighboursColumns;
-    const columnsOrder = this.props.neighboursColumnsOrder;
+    let columnsOrder = this.props.neighboursColumnsOrder;
 
     const sortedNeighbors = _sortNeighbors(this.props.neighbours,
                                            this.props.sortColumn,
@@ -267,6 +287,7 @@ class NeighboursTableView extends React.Component {
       return (
         <NeighborColumnHeader key={col}
                               rsId={this.props.routeserverId}
+                              rsType={rs.type}
                               columns={columns} column={col}
                               sort={this.props.sortColumn}
                               order={this.props.sortOrder}
@@ -278,6 +299,7 @@ class NeighboursTableView extends React.Component {
       let neighbourColumns = columnsOrder.map((col) => {
         return <NeighbourColumn key={col}
                                 rsId={this.props.routeserverId}
+                                rsType={rs.type}
                                 column={col}
                                 neighbour={n} />
       });
@@ -328,14 +350,21 @@ class NeighboursTableView extends React.Component {
 }
 
 const NeighboursTable = connect(
-  (state) => ({
-    neighboursColumns:      state.config.neighbours_columns,
-    neighboursColumnsOrder: state.config.neighbours_columns_order,
+  (state, ownProps) => {
+    const rsId = ownProps.routeserverId;
+    const rs   = state.routeservers.byId[rsId];
+    
+    return {
+      routeserver: rs,
 
-    sortColumn: state.neighbors.sortColumn,
-    sortOrder:  state.neighbors.sortOrder,
-    filterQuery: state.neighbors.filterQuery,
-  })
+      neighboursColumns:      state.config.neighbours_columns,
+      neighboursColumnsOrder: state.config.neighbours_columns_order,
+
+      sortColumn: state.neighbors.sortColumn,
+      sortOrder:  state.neighbors.sortOrder,
+      filterQuery: state.neighbors.filterQuery,
+    };
+  }
 )(NeighboursTableView);
 
 
@@ -386,24 +415,19 @@ class Protocols extends React.Component {
     let neighboursDown = [];
     let neighboursIdle = [];
 
-    for (let id in protocol) {
-      let n = protocol[id];
-      switch(n.state.toLowerCase()) {
-        case 'up':
-          neighboursUp.push(n);
-          break;
-        case 'down':
-          neighboursDown.push(n);
-          break;
-        case 'start':
-          neighboursIdle.push(n);
-          break;
-        default:
-          neighboursUp.push(n);
-          console.error("Couldn't classify neighbour by state:", n);
+    for (let n of protocol) {
+      let s = n.state.toLowerCase();
+      if (s.includes("up") || s.includes("established") ) {
+        neighboursUp.push(n);
+      } else if (s.includes("down")) {
+        neighboursDown.push(n);
+      } else if (s.includes("start") || s.includes("active")) {
+        neighboursIdle.push(n);
+      } else {
+        console.error("Couldn't classify neighbour by state:", n);
+        neighboursUp.push(n);
       }
     }
-
 
     // Render tables
     let tables = [];
@@ -437,7 +461,7 @@ export default connect(
       protocols: state.routeservers.protocols,
 
       filterQuery: state.neighbors.filterQuery,
-      routing: state.routing.locationBeforeTransitions,
+      routing:     state.routing.locationBeforeTransitions,
     }
   }
 )(Protocols);

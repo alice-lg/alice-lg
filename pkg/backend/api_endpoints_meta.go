@@ -17,19 +17,19 @@ func apiStatusShow(_req *http.Request, _params httprouter.Params) (api.Response,
 
 // Handle status
 func apiStatus(_req *http.Request, params httprouter.Params) (api.Response, error) {
-	rsId, err := validateSourceID(params.ByName("id"))
+	rsID, err := validateSourceID(params.ByName("id"))
 	if err != nil {
 		return nil, err
 	}
 
-	source := AliceConfig.SourceInstanceById(rsId)
+	source := AliceConfig.SourceInstanceByID(rsID)
 	if source == nil {
 		return nil, SOURCE_NOT_FOUND_ERROR
 	}
 
 	result, err := source.Status()
 	if err != nil {
-		apiLogSourceError("status", rsId, err)
+		apiLogSourceError("status", rsID, err)
 	}
 
 	return result, err
@@ -39,22 +39,22 @@ func apiStatus(_req *http.Request, params httprouter.Params) (api.Response, erro
 func apiConfigShow(_req *http.Request, _params httprouter.Params) (api.Response, error) {
 	result := api.ConfigResponse{
 		Asn:            AliceConfig.Server.Asn,
-		BgpCommunities: AliceConfig.Ui.BgpCommunities,
-		RejectReasons:  AliceConfig.Ui.RoutesRejections.Reasons,
+		BgpCommunities: AliceConfig.UI.BgpCommunities,
+		RejectReasons:  AliceConfig.UI.RoutesRejections.Reasons,
 		Noexport: api.Noexport{
-			LoadOnDemand: AliceConfig.Ui.RoutesNoexports.LoadOnDemand,
+			LoadOnDemand: AliceConfig.UI.RoutesNoexports.LoadOnDemand,
 		},
-		NoexportReasons: AliceConfig.Ui.RoutesNoexports.Reasons,
+		NoexportReasons: AliceConfig.UI.RoutesNoexports.Reasons,
 		RejectCandidates: api.RejectCandidates{
-			Communities: AliceConfig.Ui.RoutesRejectCandidates.Communities,
+			Communities: AliceConfig.UI.RoutesRejectCandidates.Communities,
 		},
-		Rpki:                   api.Rpki(AliceConfig.Ui.Rpki),
-		RoutesColumns:          AliceConfig.Ui.RoutesColumns,
-		RoutesColumnsOrder:     AliceConfig.Ui.RoutesColumnsOrder,
-		NeighboursColumns:      AliceConfig.Ui.NeighboursColumns,
-		NeighboursColumnsOrder: AliceConfig.Ui.NeighboursColumnsOrder,
-		LookupColumns:          AliceConfig.Ui.LookupColumns,
-		LookupColumnsOrder:     AliceConfig.Ui.LookupColumnsOrder,
+		Rpki:                   api.Rpki(AliceConfig.UI.Rpki),
+		RoutesColumns:          AliceConfig.UI.RoutesColumns,
+		RoutesColumnsOrder:     AliceConfig.UI.RoutesColumnsOrder,
+		NeighboursColumns:      AliceConfig.UI.NeighboursColumns,
+		NeighboursColumnsOrder: AliceConfig.UI.NeighboursColumnsOrder,
+		LookupColumns:          AliceConfig.UI.LookupColumns,
+		LookupColumnsOrder:     AliceConfig.UI.LookupColumnsOrder,
 		PrefixLookupEnabled:    AliceConfig.Server.EnablePrefixLookup,
 	}
 	return result, nil

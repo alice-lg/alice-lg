@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"strings"
 	"time"
 )
@@ -27,6 +28,13 @@ type Neighbour struct {
 
 	// Original response
 	Details map[string]interface{} `json:"details"`
+}
+
+// String encodes a neighbor as json. This is
+// more readable than the golang default represenation.
+func (n *Neighbour) String() string {
+	repr, _ := json.Marshal(n)
+	return string(repr)
 }
 
 // Implement sorting interface for routes
@@ -85,6 +93,8 @@ type NeighboursLookupResults map[string]Neighbours
 
 type NeighboursStatus []*NeighbourStatus
 
+// NeighbourStatus contains only the neighbor state and
+// uptime.
 type NeighbourStatus struct {
 	Id    string        `json:"id"`
 	State string        `json:"state"`

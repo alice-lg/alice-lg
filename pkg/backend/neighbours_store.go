@@ -25,6 +25,7 @@ type NeighboursStore struct {
 	sync.RWMutex
 }
 
+// NewNeighboursStore creates a new store for neighbors
 func NewNeighboursStore(config *Config) *NeighboursStore {
 
 	// Build source mapping
@@ -33,13 +34,13 @@ func NewNeighboursStore(config *Config) *NeighboursStore {
 	statusMap := make(map[string]StoreStatus)
 
 	for _, source := range config.Sources {
-		sourceId := source.Id
-		configMap[sourceId] = source
-		statusMap[sourceId] = StoreStatus{
+		id := source.ID
+		configMap[id] = source
+		statusMap[id] = StoreStatus{
 			State: STATE_INIT,
 		}
 
-		neighboursMap[sourceId] = make(NeighboursIndex)
+		neighboursMap[id] = make(NeighboursIndex)
 	}
 
 	// Set refresh interval, default to 5 minutes when
@@ -62,6 +63,7 @@ func NewNeighboursStore(config *Config) *NeighboursStore {
 	return store
 }
 
+// Start the store's housekeeping.
 func (self *NeighboursStore) Start() {
 	log.Println("Starting local neighbours store")
 	log.Println("Neighbours Store refresh interval set to:", self.refreshInterval)
@@ -121,7 +123,7 @@ func (self *NeighboursStore) update() {
 		if err != nil {
 			log.Println(
 				"Refreshing the neighbors store failed for:",
-				sourceConfig.Name, "(", sourceConfig.Id, ")",
+				sourceConfig.Name, "(", sourceConfig.ID, ")",
 				"with:", err,
 				"- NEXT STATE: ERROR",
 			)
