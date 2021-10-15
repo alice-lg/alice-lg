@@ -103,7 +103,7 @@ type Status struct {
 
 // StatusResponse ??
 type StatusResponse struct {
-	Meta   Meta   `json:"api"`
+	Response
 	Status Status `json:"status"`
 }
 
