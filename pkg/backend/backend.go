@@ -4,7 +4,7 @@ package backend
 var (
 	AliceConfig          *Config
 	AliceRoutesStore     *RoutesStore
-	AliceNeighboursStore *NeighboursStore
+	AliceNeighborsStore *NeighborsStore
 )
 
 // InitConfig loads the configuration into the global
@@ -17,6 +17,6 @@ func InitConfig(filename string) error {
 
 // InitStores initializes the routes and neighbors cache
 func InitStores() {
-	AliceNeighboursStore = NewNeighboursStore(AliceConfig)
+	AliceNeighborsStore = NewNeighborsStore(AliceConfig)
 	AliceRoutesStore = NewRoutesStore(AliceConfig)
 }

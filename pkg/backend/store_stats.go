@@ -46,33 +46,33 @@ func (stats RoutesStoreStats) Log() {
 	}
 }
 
-// Neighbours Store
+// Neighbors Store
 
-type RouteServerNeighboursStats struct {
+type RouteServerNeighborsStats struct {
 	Name       string    `json:"name"`
 	State      string    `json:"state"`
-	Neighbours int       `json:"neighbours"`
+	Neighbors int       `json:"neighbors"`
 	UpdatedAt  time.Time `json:"updated_at"`
 }
 
-type NeighboursStoreStats struct {
-	TotalNeighbours int `json:"total_neighbours"`
+type NeighborsStoreStats struct {
+	TotalNeighbors int `json:"total_neighbors"`
 
-	RouteServers []RouteServerNeighboursStats `json:"route_servers"`
+	RouteServers []RouteServerNeighborsStats `json:"route_servers"`
 }
 
 // Print stats
-func (stats NeighboursStoreStats) Log() {
-	log.Println("Neighbours store:")
+func (stats NeighborsStoreStats) Log() {
+	log.Println("Neighbors store:")
 
-	log.Println("    Neighbours:",
-		stats.TotalNeighbours)
+	log.Println("    Neighbors:",
+		stats.TotalNeighbors)
 
 	for _, rs := range stats.RouteServers {
 		log.Println("      -", rs.Name)
 		log.Println("        State:", rs.State)
 		log.Println("        UpdatedAt:", rs.UpdatedAt)
-		log.Println("        Neighbours:",
-			rs.Neighbours)
+		log.Println("        Neighbors:",
+			rs.Neighbors)
 	}
 }

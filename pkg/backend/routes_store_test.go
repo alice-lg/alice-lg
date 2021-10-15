@@ -125,7 +125,7 @@ func TestRoutesStoreStats(t *testing.T) {
 }
 
 func TestLookupPrefixAt(t *testing.T) {
-	startTestNeighboursStore()
+	startTestNeighborsStore()
 	store := makeTestRoutesStore()
 
 	query := "193.200."
@@ -146,7 +146,7 @@ func TestLookupPrefixAt(t *testing.T) {
 }
 
 func TestLookupPrefix(t *testing.T) {
-	startTestNeighboursStore()
+	startTestNeighborsStore()
 	store := makeTestRoutesStore()
 	query := "193.200."
 
@@ -168,12 +168,12 @@ func TestLookupPrefix(t *testing.T) {
 	}
 }
 
-func TestLookupNeighboursPrefixesAt(t *testing.T) {
-	startTestNeighboursStore()
+func TestLookupNeighborsPrefixesAt(t *testing.T) {
+	startTestNeighborsStore()
 	store := makeTestRoutesStore()
 
 	// Query
-	results := store.LookupNeighboursPrefixesAt("rs1", []string{
+	results := store.LookupNeighborsPrefixesAt("rs1", []string{
 		"ID163_AS31078",
 	})
 
@@ -190,21 +190,21 @@ func TestLookupNeighboursPrefixesAt(t *testing.T) {
 	testCheckPrefixesPresence(presence, resultset, t)
 }
 
-func TestLookupPrefixForNeighbours(t *testing.T) {
-	// Construct a neighbours lookup result
-	neighbours := api.NeighboursLookupResults{
-		"rs1": api.Neighbours{
-			&api.Neighbour{
+func TestLookupPrefixForNeighbors(t *testing.T) {
+	// Construct a neighbors lookup result
+	neighbors := api.NeighborsLookupResults{
+		"rs1": api.Neighbors{
+			&api.Neighbor{
 				Id: "ID163_AS31078",
 			},
 		},
 	}
 
-	startTestNeighboursStore()
+	startTestNeighborsStore()
 	store := makeTestRoutesStore()
 
 	// Query
-	results := store.LookupPrefixForNeighbours(neighbours)
+	results := store.LookupPrefixForNeighbors(neighbors)
 
 	// We should have retrived 8 prefixes,
 	if len(results) != 8 {

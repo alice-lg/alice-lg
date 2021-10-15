@@ -20,19 +20,19 @@ func makeQueryRoutes() api.Routes {
 	routes := api.Routes{
 		&api.Route{
 			Id:          "route_01",
-			NeighbourId: "n01",
+			NeighborId: "n01",
 			Network:     "123.42.43.0/24",
 			Gateway:     "23.42.42.1",
 		},
 		&api.Route{
 			Id:          "route_02",
-			NeighbourId: "n01",
+			NeighborId: "n01",
 			Network:     "142.23.0.0/16",
 			Gateway:     "42.42.42.1",
 		},
 		&api.Route{
 			Id:          "route_03",
-			NeighbourId: "n01",
+			NeighborId: "n01",
 			Network:     "123.43.0.0/16",
 			Gateway:     "23.42.43.1",
 		},

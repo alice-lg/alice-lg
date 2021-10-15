@@ -206,15 +206,15 @@ func routeToLookupRoute(
 	route *api.Route,
 ) *api.LookupRoute {
 
-	// Get neighbour
-	neighbour := AliceNeighboursStore.GetNeighbourAt(source.ID, route.NeighbourId)
+	// Get neighbor
+	neighbor := AliceNeighborsStore.GetNeighborAt(source.ID, route.NeighborId)
 
 	// Make route
 	lookup := &api.LookupRoute{
 		Id: route.Id,
 
-		NeighbourId: route.NeighbourId,
-		Neighbour:   neighbour,
+		NeighborId: route.NeighborId,
+		Neighbor:   neighbor,
 
 		Routeserver: api.Routeserver{
 			Id:   source.ID,
@@ -254,17 +254,17 @@ func filterRoutesByPrefix(
 	return results
 }
 
-func filterRoutesByNeighbourIds(
+func filterRoutesByNeighborIds(
 	source *SourceConfig,
 	routes api.Routes,
-	neighbourIds []string,
+	neighborIds []string,
 	state string,
 ) api.LookupRoutes {
 
 	results := api.LookupRoutes{}
 	for _, route := range routes {
 		// Filtering:
-		if MemberOf(neighbourIds, route.NeighbourId) == true {
+		if MemberOf(neighborIds, route.NeighborId) == true {
 			lookup := routeToLookupRoute(source, state, route)
 			results = append(results, lookup)
 		}
@@ -272,11 +272,11 @@ func filterRoutesByNeighbourIds(
 	return results
 }
 
-// LookupNeighboursPrefixesAt performs a single route server
+// LookupNeighborsPrefixesAt performs a single route server
 // routes lookup by neighbor id
-func (rs *RoutesStore) LookupNeighboursPrefixesAt(
+func (rs *RoutesStore) LookupNeighborsPrefixesAt(
 	sourceID string,
-	neighbourIds []string,
+	neighborIds []string,
 ) chan api.LookupRoutes {
 	response := make(chan api.LookupRoutes)
 
@@ -286,15 +286,15 @@ func (rs *RoutesStore) LookupNeighboursPrefixesAt(
 		routes := rs.routesMap[sourceID]
 		rs.RUnlock()
 
-		filtered := filterRoutesByNeighbourIds(
+		filtered := filterRoutesByNeighborIds(
 			source,
 			routes.Filtered,
-			neighbourIds,
+			neighborIds,
 			"filtered")
-		imported := filterRoutesByNeighbourIds(
+		imported := filterRoutesByNeighborIds(
 			source,
 			routes.Imported,
-			neighbourIds,
+			neighborIds,
 			"imported")
 
 		var result api.LookupRoutes
@@ -366,23 +366,23 @@ func (rs *RoutesStore) LookupPrefix(prefix string) api.LookupRoutes {
 	return result
 }
 
-// LookupPrefixForNeighbours returns all routes for
+// LookupPrefixForNeighbors returns all routes for
 // a set of neighbors.
-func (rs *RoutesStore) LookupPrefixForNeighbours(
-	neighbours api.NeighboursLookupResults,
+func (rs *RoutesStore) LookupPrefixForNeighbors(
+	neighbors api.NeighborsLookupResults,
 ) api.LookupRoutes {
 
 	result := api.LookupRoutes{}
 	responses := []chan api.LookupRoutes{}
 
 	// Dispatch
-	for sourceID, locals := range neighbours {
-		lookupNeighbourIds := []string{}
+	for sourceID, locals := range neighbors {
+		lookupNeighborIds := []string{}
 		for _, n := range locals {
-			lookupNeighbourIds = append(lookupNeighbourIds, n.Id)
+			lookupNeighborIds = append(lookupNeighborIds, n.Id)
 		}
 
-		res := rs.LookupNeighboursPrefixesAt(sourceID, lookupNeighbourIds)
+		res := rs.LookupNeighborsPrefixesAt(sourceID, lookupNeighborIds)
 		responses = append(responses, res)
 	}
 

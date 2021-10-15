@@ -19,15 +19,15 @@ func apiNeighborsList(
 		return nil, err
 	}
 
-	var neighborsResponse *api.NeighboursResponse
+	var neighborsResponse *api.NeighborsResponse
 
 	// Try to fetch neighbors from store, only fall back
 	// to RS query if store is not ready yet
-	sourceStatus := AliceNeighboursStore.SourceStatus(rsID)
+	sourceStatus := AliceNeighborsStore.SourceStatus(rsID)
 	if sourceStatus.State == STATE_READY {
-		neighbors := AliceNeighboursStore.GetNeighborsAt(rsID)
+		neighbors := AliceNeighborsStore.GetNeighborsAt(rsID)
 		// Make response
-		neighborsResponse = &api.NeighboursResponse{
+		neighborsResponse = &api.NeighborsResponse{
 			Api: api.ApiStatus{
 				Version: Version,
 				CacheStatus: api.CacheStatus{
@@ -36,9 +36,9 @@ func apiNeighborsList(
 				},
 				ResultFromCache: true, // you bet!
 				Ttl: sourceStatus.LastRefresh.Add(
-					AliceNeighboursStore.refreshInterval),
+					AliceNeighborsStore.refreshInterval),
 			},
-			Neighbours: neighbors,
+			Neighbors: neighbors,
 		}
 	} else {
 		source := AliceConfig.SourceInstanceByID(rsID)
@@ -46,7 +46,7 @@ func apiNeighborsList(
 			return nil, SOURCE_NOT_FOUND_ERROR
 		}
 
-		neighborsResponse, err = source.Neighbours()
+		neighborsResponse, err = source.Neighbors()
 		if err != nil {
 			apiLogSourceError("neighbors", rsID, err)
 			return nil, err
@@ -54,7 +54,7 @@ func apiNeighborsList(
 	}
 
 	// Sort result
-	sort.Sort(&neighborsResponse.Neighbours)
+	sort.Sort(&neighborsResponse.Neighbors)
 
 	return neighborsResponse, nil
 }

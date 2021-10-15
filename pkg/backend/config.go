@@ -57,7 +57,7 @@ const (
 type ServerConfig struct {
 	Listen                         string `ini:"listen_http"`
 	EnablePrefixLookup             bool   `ini:"enable_prefix_lookup"`
-	NeighboursStoreRefreshInterval int    `ini:"neighbours_store_refresh_interval"`
+	NeighborsStoreRefreshInterval int    `ini:"neighbors_store_refresh_interval"`
 	RoutesStoreRefreshInterval     int    `ini:"routes_store_refresh_interval"`
 	Asn                            int    `ini:"asn"`
 	EnableNeighborsStatusRefresh   bool   `ini:"enable_neighbors_status_refresh"`
@@ -107,8 +107,8 @@ type UIConfig struct {
 	RoutesColumns      map[string]string
 	RoutesColumnsOrder []string
 
-	NeighboursColumns      map[string]string
-	NeighboursColumnsOrder []string
+	NeighborsColumns      map[string]string
+	NeighborsColumnsOrder []string
 
 	LookupColumns      map[string]string
 	LookupColumnsOrder []string
@@ -276,10 +276,10 @@ func getRoutesColumns(config *ini.File) (map[string]string, []string, error) {
 	return columns, order, nil
 }
 
-// Get UI config: Get Neighbours Columns Defaults
-func getNeighboursColumnsDefaults() (map[string]string, []string, error) {
+// Get UI config: Get Neighbors Columns Defaults
+func getNeighborsColumnsDefaults() (map[string]string, []string, error) {
 	columns := map[string]string{
-		"address":         "Neighbour",
+		"address":         "Neighbor",
 		"asn":             "ASN",
 		"state":           "State",
 		"Uptime":          "Uptime",
@@ -296,9 +296,9 @@ func getNeighboursColumnsDefaults() (map[string]string, []string, error) {
 	return columns, order, nil
 }
 
-// Get UI config: Get Neighbours Columns
+// Get UI config: Get Neighbors Columns
 // basically the same as with the routes columns.
-func getNeighboursColumns(config *ini.File) (
+func getNeighborsColumns(config *ini.File) (
 	map[string]string,
 	[]string,
 	error,
@@ -306,11 +306,11 @@ func getNeighboursColumns(config *ini.File) (
 	columns := make(map[string]string)
 	order := []string{}
 
-	section := config.Section("neighbours_columns")
+	section := config.Section("neighbors_columns")
 	keys := section.Keys()
 
 	if len(keys) == 0 {
-		return getNeighboursColumnsDefaults()
+		return getNeighborsColumnsDefaults()
 	}
 
 	for _, key := range keys {
@@ -329,8 +329,8 @@ func getLookupColumnsDefaults() (map[string]string, []string, error) {
 	columns := map[string]string{
 		"network":               "Network",
 		"gateway":               "Gateway",
-		"neighbour.asn":         "ASN",
-		"neighbour.description": "Neighbor",
+		"neighbor.asn":         "ASN",
+		"neighbor.description": "Neighbor",
 		"bgp.as_path":           "AS Path",
 		"routeserver.name":      "RS",
 	}
@@ -339,8 +339,8 @@ func getLookupColumnsDefaults() (map[string]string, []string, error) {
 		"network",
 		"gateway",
 		"bgp.as_path",
-		"neighbour.asn",
-		"neighbour.description",
+		"neighbor.asn",
+		"neighbor.description",
 		"routeserver.name",
 	}
 
@@ -564,10 +564,10 @@ func getUIConfig(config *ini.File) (UIConfig, error) {
 		return uiConfig, err
 	}
 
-	// Get neighbours table columns
-	neighboursColumns,
-		neighboursColumnsOrder,
-		err := getNeighboursColumns(config)
+	// Get neighbors table columns
+	neighborsColumns,
+		neighborsColumnsOrder,
+		err := getNeighborsColumns(config)
 	if err != nil {
 		return uiConfig, err
 	}
@@ -610,8 +610,8 @@ func getUIConfig(config *ini.File) (UIConfig, error) {
 		RoutesColumns:      routesColumns,
 		RoutesColumnsOrder: routesColumnsOrder,
 
-		NeighboursColumns:      neighboursColumns,
-		NeighboursColumnsOrder: neighboursColumnsOrder,
+		NeighborsColumns:      neighborsColumns,
+		NeighborsColumnsOrder: neighborsColumnsOrder,
 
 		LookupColumns:      lookupColumns,
 		LookupColumnsOrder: lookupColumnsOrder,

@@ -10,7 +10,7 @@ var Build = "unknown"
 type AppStatus struct {
 	Version    string               `json:"version"`
 	Routes     RoutesStoreStats     `json:"routes"`
-	Neighbours NeighboursStoreStats `json:"neighbours"`
+	Neighbors NeighborsStoreStats `json:"neighbors"`
 }
 
 // NewAppStatus calculates the application status,
@@ -23,15 +23,15 @@ func NewAppStatus() (*AppStatus, error) {
 		routesStatus = AliceRoutesStore.Stats()
 	}
 
-	neighboursStatus := NeighboursStoreStats{}
+	neighborsStatus := NeighborsStoreStats{}
 	if AliceRoutesStore != nil {
-		neighboursStatus = AliceNeighboursStore.Stats()
+		neighborsStatus = AliceNeighborsStore.Stats()
 	}
 
 	status := &AppStatus{
 		Version:    Version,
 		Routes:     routesStatus,
-		Neighbours: neighboursStatus,
+		Neighbors: neighborsStatus,
 	}
 	return status, nil
 }

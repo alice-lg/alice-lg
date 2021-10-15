@@ -30,7 +30,7 @@ func apiLookupPrefixGlobal(
 
 	// Check what we want to query
 	//  Prefix -> fetch prefix
-	//       _ -> fetch neighbours and routes
+	//       _ -> fetch neighbors and routes
 	lookupPrefix := MaybePrefix(q)
 
 	// Measure response time
@@ -48,8 +48,8 @@ func apiLookupPrefixGlobal(
 		routes = AliceRoutesStore.LookupPrefix(q)
 
 	} else {
-		neighbours := AliceNeighboursStore.LookupNeighbours(q)
-		routes = AliceRoutesStore.LookupPrefixForNeighbours(neighbours)
+		neighbors := AliceNeighborsStore.LookupNeighbors(q)
+		routes = AliceRoutesStore.LookupPrefixForNeighbors(neighbors)
 	}
 
 	// Split routes
@@ -142,20 +142,20 @@ func apiLookupNeighborsGlobal(
 ) (api.Response, error) {
 	// Query neighbors store
 	filter := api.NeighborFilterFromQuery(req.URL.Query())
-	neighbors := AliceNeighboursStore.FilterNeighbors(filter)
+	neighbors := AliceNeighborsStore.FilterNeighbors(filter)
 
 	sort.Sort(neighbors)
 
 	// Make response
-	response := &api.NeighboursResponse{
+	response := &api.NeighborsResponse{
 		Api: api.ApiStatus{
 			CacheStatus: api.CacheStatus{
-				CachedAt: AliceNeighboursStore.CachedAt(),
+				CachedAt: AliceNeighborsStore.CachedAt(),
 			},
 			ResultFromCache: true, // You would not have guessed.
-			Ttl:             AliceNeighboursStore.CacheTTL(),
+			Ttl:             AliceNeighborsStore.CacheTTL(),
 		},
-		Neighbours: neighbors,
+		Neighbors: neighbors,
 	}
 	return response, nil
 }
