@@ -89,7 +89,7 @@ func (n *Neighbor) MatchName(name string) bool {
 // A NeighborsResponse is a list of neighbors with
 // caching information.
 type NeighborsResponse struct {
-	Meta      Meta      `json:"api"`
+	Response
 	Neighbors Neighbors `json:"neighbors"`
 }
 
