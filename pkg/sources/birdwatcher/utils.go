@@ -1,30 +1,9 @@
 package birdwatcher
 
 import (
-	"fmt"
 	"strings"
 	"sync"
-
-	"github.com/alice-lg/alice-lg/pkg/api"
 )
-
-/*
-Helper functions for dealing with birdwatcher API data
-*/
-
-// Get neighbour by protocol id
-func getNeighborByID(neighbours api.Neighbors, id string) (*api.Neighbor, error) {
-	for _, n := range neighbours {
-		if n.ID == id {
-			return n, nil
-		}
-	}
-	unknown := &api.Neighbor{
-		ID:          "unknown",
-		Description: "Unknown neighbor",
-	}
-	return unknown, fmt.Errorf("neighbor not found")
-}
 
 /*
 LockMap uses the sync.Map to manage locks, accessed by a key.
