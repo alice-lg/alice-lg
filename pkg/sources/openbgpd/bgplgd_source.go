@@ -94,8 +94,8 @@ func (src *BgplgdSource) ShowRIBRequest(ctx context.Context) (*http.Request, err
 // Datasource
 // ==========
 
-// makeCacheStatus will create a new api status with cache infos
-func (src *BgplgdSource) makeCacheStatus() api.Meta {
+// makeResponseMeta will create a new api status with cache infos
+func (src *BgplgdSource) makeResponseMeta() api.Meta {
 	return api.Meta{
 		CacheStatus: api.CacheStatus{
 			CachedAt: time.Now().UTC(),
@@ -112,7 +112,7 @@ func (src *BgplgdSource) Status() (*api.StatusResponse, error) {
 	// Make API request and read response. We do not cache the result.
 	response := &api.StatusResponse{
 		Response: api.Response{
-			Meta: src.makeCacheStatus(),
+			Meta: src.makeResponseMeta(),
 		},
 		Status: api.Status{
 			Version: "openbgpd",
@@ -127,7 +127,7 @@ func (src *BgplgdSource) Neighbors() (*api.NeighborsResponse, error) {
 	// Query cache and see if we have a hit
 	response := src.neighborsCache.Get()
 	if response != nil {
-		response.Api.ResultFromCache = true
+		response.Meta.ResultFromCache = true
 		return response, nil
 	}
 
@@ -152,8 +152,8 @@ func (src *BgplgdSource) Neighbors() (*api.NeighborsResponse, error) {
 	// Set route server id (sourceID) for all neighbors and
 	// calculate the filtered routes.
 	for _, n := range nb {
-		n.RouteServerId = src.cfg.ID
-		rejectedRes, err := src.RoutesFiltered(n.Id)
+		n.RouteServerID = src.cfg.ID
+		rejectedRes, err := src.RoutesFiltered(n.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -162,7 +162,9 @@ func (src *BgplgdSource) Neighbors() (*api.NeighborsResponse, error) {
 
 	}
 	response = &api.NeighborsResponse{
-		Api:        src.makeCacheStatus(),
+		Response: api.Response{
+			Meta: src.makeResponseMeta(),
+		},
 		Neighbors: nb,
 	}
 	src.neighborsCache.Set(response)
@@ -195,7 +197,9 @@ func (src *BgplgdSource) NeighborsStatus() (*api.NeighborsStatusResponse, error)
 	}
 
 	response := &api.NeighborsStatusResponse{
-		Api:        src.makeCacheStatus(),
+		Response: api.Response{
+			Meta: src.makeResponseMeta(),
+		},
 		Neighbors: nb,
 	}
 	return response, nil
@@ -206,7 +210,7 @@ func (src *BgplgdSource) NeighborsStatus() (*api.NeighborsStatusResponse, error)
 func (src *BgplgdSource) Routes(neighborID string) (*api.RoutesResponse, error) {
 	response := src.routesCache.Get(neighborID)
 	if response != nil {
-		response.Api.ResultFromCache = true
+		response.Meta.ResultFromCache = true
 		return response, nil
 	}
 
@@ -237,7 +241,9 @@ func (src *BgplgdSource) Routes(neighborID string) (*api.RoutesResponse, error) 
 	rejected := filterRejectedRoutes(src.cfg.RejectCommunities, routes)
 
 	response = &api.RoutesResponse{
-		Api:         src.makeCacheStatus(),
+		Response: api.Response{
+			Meta: src.makeResponseMeta(),
+		},
 		Imported:    received,
 		NotExported: api.Routes{},
 		Filtered:    rejected,
@@ -251,7 +257,7 @@ func (src *BgplgdSource) Routes(neighborID string) (*api.RoutesResponse, error) 
 func (src *BgplgdSource) RoutesReceived(neighborID string) (*api.RoutesResponse, error) {
 	response := src.routesReceivedCache.Get(neighborID)
 	if response != nil {
-		response.Api.ResultFromCache = true
+		response.Meta.ResultFromCache = true
 		return response, nil
 	}
 
@@ -281,7 +287,9 @@ func (src *BgplgdSource) RoutesReceived(neighborID string) (*api.RoutesResponse,
 	received := filterReceivedRoutes(src.cfg.RejectCommunities, routes)
 
 	response = &api.RoutesResponse{
-		Api:         src.makeCacheStatus(),
+		Response: api.Response{
+			Meta: src.makeResponseMeta(),
+		},
 		Imported:    received,
 		NotExported: api.Routes{},
 		Filtered:    api.Routes{},
@@ -295,7 +303,7 @@ func (src *BgplgdSource) RoutesReceived(neighborID string) (*api.RoutesResponse,
 func (src *BgplgdSource) RoutesFiltered(neighborID string) (*api.RoutesResponse, error) {
 	response := src.routesFilteredCache.Get(neighborID)
 	if response != nil {
-		response.Api.ResultFromCache = true
+		response.Meta.ResultFromCache = true
 		return response, nil
 	}
 
@@ -325,7 +333,9 @@ func (src *BgplgdSource) RoutesFiltered(neighborID string) (*api.RoutesResponse,
 	rejected := filterRejectedRoutes(src.cfg.RejectCommunities, routes)
 
 	response = &api.RoutesResponse{
-		Api:         src.makeCacheStatus(),
+		Response: api.Response{
+			Meta: src.makeResponseMeta(),
+		},
 		Imported:    api.Routes{},
 		NotExported: api.Routes{},
 		Filtered:    rejected,
@@ -339,8 +349,9 @@ func (src *BgplgdSource) RoutesFiltered(neighborID string) (*api.RoutesResponse,
 // from the rs for a neighbor.
 func (src *BgplgdSource) RoutesNotExported(neighborID string) (*api.RoutesResponse, error) {
 	response := &api.RoutesResponse{
-		Api: src.makeCacheStatus(),
-
+		Response: api.Response{
+			Meta: src.makeResponseMeta(),
+		},
 		Imported:    api.Routes{},
 		NotExported: api.Routes{},
 		Filtered:    api.Routes{},
@@ -377,7 +388,9 @@ func (src *BgplgdSource) AllRoutes() (*api.RoutesResponse, error) {
 	rejected := filterRejectedRoutes(src.cfg.RejectCommunities, routes)
 
 	response := &api.RoutesResponse{
-		Api:         src.makeCacheStatus(),
+		Response: api.Response{
+			Meta: src.makeResponseMeta(),
+		},
 		Imported:    received,
 		NotExported: api.Routes{},
 		Filtered:    rejected,

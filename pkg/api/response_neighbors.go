@@ -130,6 +130,6 @@ func (neighbors NeighborsStatus) Swap(i, j int) {
 // NeighborsStatusResponse contains the status of all neighbors
 // on a RS.
 type NeighborsStatusResponse struct {
-	Meta      Meta            `json:"api"`
+	Response
 	Neighbors NeighborsStatus `json:"neighbors"`
 }

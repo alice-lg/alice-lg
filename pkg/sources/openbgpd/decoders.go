@@ -40,9 +40,9 @@ func decodeNeighbor(n interface{}) (*api.Neighbor, error) {
 	prefixes := decoders.MapGet(stats, "prefixes", map[string]interface{}{})
 
 	neighbor := &api.Neighbor{
-		Id:             decoders.MapGetString(nb, "remote_addr", "invalid_id"),
+		ID:             decoders.MapGetString(nb, "remote_addr", "invalid_id"),
 		Address:        decoders.MapGetString(nb, "remote_addr", "invalid_address"),
-		Asn:            decoders.IntFromString(decoders.MapGetString(nb, "remote_as", ""), -1),
+		ASN:            decoders.IntFromString(decoders.MapGetString(nb, "remote_as", ""), -1),
 		State:          decodeState(decoders.MapGetString(nb, "state", "unknown")),
 		Description:    describeNeighbor(nb),
 		RoutesReceived: int(decoders.MapGet(prefixes, "received", -1).(float64)),
@@ -112,7 +112,7 @@ func decodeNeighborStatus(nb interface{}) *api.NeighborStatus {
 	state := decodeState(decoders.MapGetString(nb, "state", "Down"))
 	uptime := decoders.DurationTimeframe(decoders.MapGet(nb, "last_updown", ""), 0)
 	return &api.NeighborStatus{
-		Id:    id,
+		ID:    id,
 		State: state,
 		Since: uptime,
 	}
@@ -171,7 +171,7 @@ func decodeRoute(details map[string]interface{}) (*api.Route, error) {
 	isPrimary := decoders.MapGetBool(details, "best", false)
 
 	// Make bgp info
-	bgpInfo := api.BgpInfo{
+	bgpInfo := &api.BGPInfo{
 		Origin:           origin,
 		AsPath:           asPath,
 		NextHop:          trueNextHop,
@@ -182,15 +182,15 @@ func decodeRoute(details map[string]interface{}) (*api.Route, error) {
 	}
 
 	r := &api.Route{
-		Id:          prefix,
-		NeighborId: neighborID,
-		Network:     prefix,
-		Gateway:     trueNextHop,
-		Bgp:         bgpInfo,
-		Age:         lastUpdate,
-		Type:        []string{origin},
-		Primary:     isPrimary,
-		Details:     api.Details(details),
+		ID:         prefix,
+		NeighborID: neighborID,
+		Network:    prefix,
+		Gateway:    trueNextHop,
+		BGP:        bgpInfo,
+		Age:        lastUpdate,
+		Type:       []string{origin},
+		Primary:    isPrimary,
+		Details:    api.Details(details),
 	}
 	return r, nil
 }
