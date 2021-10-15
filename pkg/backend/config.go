@@ -55,12 +55,12 @@ const (
 // A ServerConfig holds the runtime configuration
 // for the backend.
 type ServerConfig struct {
-	Listen                         string `ini:"listen_http"`
-	EnablePrefixLookup             bool   `ini:"enable_prefix_lookup"`
+	Listen                        string `ini:"listen_http"`
+	EnablePrefixLookup            bool   `ini:"enable_prefix_lookup"`
 	NeighborsStoreRefreshInterval int    `ini:"neighbors_store_refresh_interval"`
-	RoutesStoreRefreshInterval     int    `ini:"routes_store_refresh_interval"`
-	Asn                            int    `ini:"asn"`
-	EnableNeighborsStatusRefresh   bool   `ini:"enable_neighbors_status_refresh"`
+	RoutesStoreRefreshInterval    int    `ini:"routes_store_refresh_interval"`
+	Asn                           int    `ini:"asn"`
+	EnableNeighborsStatusRefresh  bool   `ini:"enable_neighbors_status_refresh"`
 }
 
 // HousekeepingConfig describes the housekeeping interval
@@ -327,12 +327,12 @@ func getNeighborsColumns(config *ini.File) (
 // we provide an additional configuration for this
 func getLookupColumnsDefaults() (map[string]string, []string, error) {
 	columns := map[string]string{
-		"network":               "Network",
-		"gateway":               "Gateway",
+		"network":              "Network",
+		"gateway":              "Gateway",
 		"neighbor.asn":         "ASN",
 		"neighbor.description": "Neighbor",
-		"bgp.as_path":           "AS Path",
-		"routeserver.name":      "RS",
+		"bgp.as_path":          "AS Path",
+		"routeserver.name":     "RS",
 	}
 
 	order := []string{
