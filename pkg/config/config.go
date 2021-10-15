@@ -424,7 +424,9 @@ func getRoutesNoexports(config *ini.File) (NoexportsConfig, error) {
 
 	// Map base configuration
 	noexportsConfig := NoexportsConfig{}
-	baseConfig.MapTo(&noexportsConfig)
+	if err := baseConfig.MapTo(&noexportsConfig); err != nil {
+		return noexportsConfig, err
+	}
 
 	reasons := parseAndMergeCommunities(
 		make(api.BGPCommunityMap),
@@ -462,7 +464,9 @@ func getRpkiConfig(config *ini.File) (RpkiConfig, error) {
 	// Defaults taken from:
 	//   https://www.euro-ix.net/en/forixps/large-bgp-communities/
 	section := config.Section("rpki")
-	section.MapTo(&rpki)
+	if err := section.MapTo(&rpki); err != nil {
+		return rpki, err
+	}
 
 	fallbackAsn, err := getOwnASN(config)
 	if err != nil {
@@ -529,7 +533,7 @@ func getThemeConfig(config *ini.File) ThemeConfig {
 	baseConfig := config.Section("theme")
 
 	themeConfig := ThemeConfig{}
-	baseConfig.MapTo(&themeConfig)
+	_ = baseConfig.MapTo(&themeConfig)
 
 	if themeConfig.BasePath == "" {
 		themeConfig.BasePath = "/theme"
@@ -543,7 +547,7 @@ func getPaginationConfig(config *ini.File) PaginationConfig {
 	baseConfig := config.Section("pagination")
 
 	paginationConfig := PaginationConfig{}
-	baseConfig.MapTo(&paginationConfig)
+	_ = baseConfig.MapTo(&paginationConfig)
 
 	return paginationConfig
 }
@@ -708,7 +712,9 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 				PipeProtocolPrefix: pipeProtocolPrefix,
 			}
 
-			backendConfig.MapTo(&c)
+			if err := backendConfig.MapTo(&c); err != nil {
+				return nil, err
+			}
 			srcCfg.Birdwatcher = c
 
 		case SourceBackendGoBGP:
@@ -717,7 +723,9 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 				Name: srcCfg.Name,
 			}
 
-			backendConfig.MapTo(&c)
+			if err := backendConfig.MapTo(&c); err != nil {
+				return nil, err
+			}
 			// Update defaults:
 			//  - processing_timeout
 			if c.ProcessingTimeout == 0 {
@@ -743,7 +751,9 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 				RoutesCacheSize:   routesCacheSize,
 				RejectCommunities: rejectComms,
 			}
-			backendConfig.MapTo(&c)
+			if err := backendConfig.MapTo(&c); err != nil {
+				return nil, err
+			}
 			srcCfg.OpenBGPD = c
 
 		case SourceBackendOpenBGPDBgplgd:
@@ -763,7 +773,9 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 				RoutesCacheSize:   routesCacheSize,
 				RejectCommunities: rejectComms,
 			}
-			backendConfig.MapTo(&c)
+			if err := backendConfig.MapTo(&c); err != nil {
+				return nil, err
+			}
 			srcCfg.OpenBGPD = c
 		}
 
@@ -805,10 +817,14 @@ func loadConfig(file string) (*Config, error) {
 
 	// Map sections
 	server := ServerConfig{}
-	parsedConfig.Section("server").MapTo(&server)
+	if err := parsedConfig.Section("server").MapTo(&server); err != nil {
+		return nil, err
+	}
 
 	housekeeping := HousekeepingConfig{}
-	parsedConfig.Section("housekeeping").MapTo(&housekeeping)
+	if err := parsedConfig.Section("housekeeping").MapTo(&housekeeping); err != nil {
+		return nil, err
+	}
 
 	// Get all sources
 	sources, err := getSources(parsedConfig)
