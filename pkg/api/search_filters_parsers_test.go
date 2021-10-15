@@ -12,7 +12,7 @@ func TestParseQueryValueIntList(t *testing.T) {
 	}
 
 	expected := []int{23, 42, 10, 11}
-	for i, _ := range expected {
+	for i := range expected {
 		if res[i].Value.(int) != expected[i] {
 			t.Error("Expected:", expected[i], "got:", res[i])
 		}

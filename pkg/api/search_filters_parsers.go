@@ -5,9 +5,7 @@ import (
 	"strings"
 )
 
-/*
-Parser search filter query components
-*/
+// FilterQueryParser parses a filter value into a search filter
 type FilterQueryParser func(value string) (*SearchFilter, error)
 
 func parseQueryValueList(parser FilterQueryParser, value string) ([]*SearchFilter, error) {
