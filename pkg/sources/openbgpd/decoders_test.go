@@ -10,7 +10,7 @@ import (
 func readTestData(filename string) map[string]interface{} {
 	data, _ := ioutil.ReadFile(filepath.Join("testdata", filename))
 	payload := make(map[string]interface{})
-	json.Unmarshal(data, &payload)
+	_ = json.Unmarshal(data, &payload)
 	return payload
 }
 
