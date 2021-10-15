@@ -125,7 +125,7 @@ func parseBirdwatcherStatus(bird ClientResponse, config Config) (api.Status, err
 		config.Timezone,
 	)
 
-	if config.ShowLastReboot == false {
+	if !config.ShowLastReboot {
 		lastReboot = time.Time{}
 	}
 
@@ -355,6 +355,12 @@ func parseRoutes(bird ClientResponse, config Config) (api.Routes, error) {
 	return routes, nil
 }
 
+/*
+
+Linter says parseRoutesDump is dead code.
+So for now this is removed...
+
+
 func parseRoutesDump(bird ClientResponse, config Config) (*api.RoutesResponse, error) {
 	result := &api.RoutesResponse{}
 
@@ -386,3 +392,4 @@ func parseRoutesDump(bird ClientResponse, config Config) (*api.RoutesResponse, e
 
 	return result, nil
 }
+*/

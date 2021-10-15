@@ -17,7 +17,7 @@ func (src *SingleTableBirdwatcher) fetchReceivedRoutes(
 	neighborID string,
 ) (*api.Meta, api.Routes, error) {
 	// Query birdwatcher
-	bird, err := src.client.GetJson("/routes/protocol/" + neighborID)
+	bird, err := src.client.GetJSON("/routes/protocol/" + neighborID)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -43,7 +43,7 @@ func (src *SingleTableBirdwatcher) fetchFilteredRoutes(
 	neighborID string,
 ) (*api.Meta, api.Routes, error) {
 	// Query birdwatcher
-	bird, err := src.client.GetJson("/routes/filtered/" + neighborID)
+	bird, err := src.client.GetJSON("/routes/filtered/" + neighborID)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -69,7 +69,7 @@ func (src *SingleTableBirdwatcher) fetchNotExportedRoutes(
 	neighborID string,
 ) (*api.Meta, api.Routes, error) {
 	// Query birdwatcher
-	bird, err := src.client.GetJson("/routes/noexport/" + neighborID)
+	bird, _ := src.client.GetJSON("/routes/noexport/" + neighborID)
 
 	// Use api status from first request
 	apiStatus, err := parseAPIStatus(bird, src.config)
@@ -156,7 +156,7 @@ func (src *SingleTableBirdwatcher) Neighbors() (*api.NeighborsResponse, error) {
 	}
 
 	// Query birdwatcher
-	bird, err := src.client.GetJson("/protocols/bgp")
+	bird, err := src.client.GetJSON("/protocols/bgp")
 	if err != nil {
 		return nil, err
 	}
@@ -299,13 +299,13 @@ func (src *SingleTableBirdwatcher) RoutesNotExported(
 func (src *SingleTableBirdwatcher) AllRoutes() (*api.RoutesResponse, error) {
 	// First fetch all routes from the master table
 	mainTable := src.GenericBirdwatcher.config.MainTable
-	birdImported, err := src.client.GetJson("/routes/table/" + mainTable)
+	birdImported, err := src.client.GetJSON("/routes/table/" + mainTable)
 	if err != nil {
 		return nil, err
 	}
 
 	// Then fetch all filtered routes from the master table
-	birdFiltered, err := src.client.GetJson("/routes/table/" + mainTable + "/filtered")
+	birdFiltered, err := src.client.GetJSON("/routes/table/" + mainTable + "/filtered")
 	if err != nil {
 		return nil, err
 	}

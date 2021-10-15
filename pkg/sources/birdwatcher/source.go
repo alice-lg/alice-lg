@@ -151,9 +151,10 @@ func (b *GenericBirdwatcher) filterRoutesByDuplicates(
 
 	// Remove routes from "routes" that are contained within filterRoutes
 	for _, filterRoute := range filterRoutes {
-		if _, ok := routesMap[filterRoute.ID]; ok {
-			delete(routesMap, filterRoute.ID)
-		}
+		delete(routesMap, filterRoute.ID)
+		// in theorey this guard is unneccessary
+		//if _, ok := routesMap[filterRoute.ID]; ok {
+		// }
 	}
 
 	for _, route := range routesMap {
@@ -166,6 +167,9 @@ func (b *GenericBirdwatcher) filterRoutesByDuplicates(
 
 	return routes
 }
+
+/*
+linter says: dead code.
 
 func (b *GenericBirdwatcher) filterRoutesByNeighborID(
 	routes api.Routes,
@@ -186,6 +190,7 @@ func (b *GenericBirdwatcher) filterRoutesByNeighborID(
 
 	return routes
 }
+*/
 
 func (b *GenericBirdwatcher) fetchProtocolsShort() (
 	*api.Meta,
@@ -197,7 +202,7 @@ func (b *GenericBirdwatcher) fetchProtocolsShort() (
 	if b.config.NeighborsRefreshTimeout > 0 {
 		timeout = time.Duration(b.config.NeighborsRefreshTimeout) * time.Second
 	}
-	bird, err := b.client.GetJsonTimeout(timeout, "/protocols/short?uncached=true")
+	bird, err := b.client.GetJSONTimeout(timeout, "/protocols/short?uncached=true")
 	if err != nil {
 		return nil, nil, err
 	}
@@ -224,7 +229,7 @@ func (b *GenericBirdwatcher) ExpireCaches() int {
 
 // Status retrievs the current backend status
 func (b *GenericBirdwatcher) Status() (*api.StatusResponse, error) {
-	bird, err := b.client.GetJson("/status")
+	bird, err := b.client.GetJSON("/status")
 	if err != nil {
 		return nil, err
 	}
@@ -288,7 +293,7 @@ func (b *GenericBirdwatcher) LookupPrefix(
 	}
 
 	// Query prefix on RS
-	bird, err := b.client.GetJson("/routes/prefix?prefix=" + prefix)
+	bird, err := b.client.GetJSON("/routes/prefix?prefix=" + prefix)
 	if err != nil {
 		return nil, err
 	}
@@ -300,7 +305,7 @@ func (b *GenericBirdwatcher) LookupPrefix(
 	}
 
 	// Parse routes
-	routes, err := parseRoutes(bird, b.config)
+	routes, _ := parseRoutes(bird, b.config)
 
 	// Add corresponding neighbor and source rs to result
 	results := api.LookupRoutes{}
