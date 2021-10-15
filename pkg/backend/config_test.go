@@ -12,7 +12,7 @@ import (
 
 func TestLoadConfigs(t *testing.T) {
 
-	config, err := loadConfig("_testdata/alice.conf")
+	config, err := loadConfig("testdata/alice.conf")
 	if err != nil {
 		t.Fatal("Could not load test config:", err)
 	}
@@ -43,7 +43,7 @@ func TestLoadConfigs(t *testing.T) {
 // TestSourceConfig checks that the proper backend type was identified for each
 // example routeserver
 func TestSourceConfig(t *testing.T) {
-	config, err := loadConfig("_testdata/alice.conf")
+	config, err := loadConfig("testdata/alice.conf")
 	if err != nil {
 		t.Fatal("Could not load test config:", err)
 	}
@@ -76,7 +76,7 @@ func TestSourceConfig(t *testing.T) {
 }
 
 func TestSourceConfigDefaultsOverride(t *testing.T) {
-	config, err := loadConfig("_testdata/alice.conf")
+	config, err := loadConfig("testdata/alice.conf")
 	if err != nil {
 		t.Fatal("Could not load test config:", err)
 	}
@@ -115,7 +115,7 @@ func TestSourceConfigDefaultsOverride(t *testing.T) {
 }
 
 func TestRejectAndNoexportReasons(t *testing.T) {
-	config, err := loadConfig("_testdata/alice.conf")
+	config, err := loadConfig("testdata/alice.conf")
 	if err != nil {
 		t.Fatal("Could not load test config:", err)
 	}
@@ -142,7 +142,7 @@ func TestRejectAndNoexportReasons(t *testing.T) {
 }
 
 func TestBlackholeParsing(t *testing.T) {
-	config, err := loadConfig("_testdata/alice.conf")
+	config, err := loadConfig("testdata/alice.conf")
 	if err != nil {
 		t.Fatal("Could not load test config:", err)
 	}
@@ -161,7 +161,7 @@ func TestBlackholeParsing(t *testing.T) {
 }
 
 func TestOwnASN(t *testing.T) {
-	config, err := loadConfig("_testdata/alice.conf")
+	config, err := loadConfig("testdata/alice.conf")
 	if err != nil {
 		t.Fatal("Could not load test config:", err)
 	}
@@ -172,7 +172,7 @@ func TestOwnASN(t *testing.T) {
 }
 
 func TestRpkiConfig(t *testing.T) {
-	config, err := loadConfig("_testdata/alice.conf")
+	config, err := loadConfig("testdata/alice.conf")
 	if err != nil {
 		t.Fatal("Could not load test config:", err)
 	}
@@ -201,7 +201,7 @@ func TestRpkiConfig(t *testing.T) {
 }
 
 func TestRejectCandidatesConfig(t *testing.T) {
-	config, err := loadConfig("_testdata/alice.conf")
+	config, err := loadConfig("testdata/alice.conf")
 	if err != nil {
 		t.Fatal("Could not load test config:", err)
 	}
