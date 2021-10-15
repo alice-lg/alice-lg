@@ -95,14 +95,14 @@ func (src *BgplgdSource) ShowRIBRequest(ctx context.Context) (*http.Request, err
 // ==========
 
 // makeCacheStatus will create a new api status with cache infos
-func (src *BgplgdSource) makeCacheStatus() api.ApiStatus {
-	return api.ApiStatus{
+func (src *BgplgdSource) makeCacheStatus() api.Meta {
+	return api.Meta{
 		CacheStatus: api.CacheStatus{
 			CachedAt: time.Now().UTC(),
 		},
 		Version:         BgplgdSourceVersion,
 		ResultFromCache: false,
-		Ttl:             time.Now().UTC().Add(src.cfg.CacheTTL),
+		TTL:             time.Now().UTC().Add(src.cfg.CacheTTL),
 	}
 }
 
@@ -111,7 +111,9 @@ func (src *BgplgdSource) makeCacheStatus() api.ApiStatus {
 func (src *BgplgdSource) Status() (*api.StatusResponse, error) {
 	// Make API request and read response. We do not cache the result.
 	response := &api.StatusResponse{
-		Api: src.makeCacheStatus(),
+		Response: api.Response{
+			Meta: src.makeCacheStatus(),
+		},
 		Status: api.Status{
 			Version: "openbgpd",
 			Message: "openbgpd up and running",
@@ -120,8 +122,8 @@ func (src *BgplgdSource) Status() (*api.StatusResponse, error) {
 	return response, nil
 }
 
-// Neighbours retrievs a full list of all neighbors
-func (src *BgplgdSource) Neighbours() (*api.NeighboursResponse, error) {
+// Neighbors retrievs a full list of all neighbors
+func (src *BgplgdSource) Neighbors() (*api.NeighborsResponse, error) {
 	// Query cache and see if we have a hit
 	response := src.neighborsCache.Get()
 	if response != nil {
@@ -159,18 +161,18 @@ func (src *BgplgdSource) Neighbours() (*api.NeighboursResponse, error) {
 		n.RoutesFiltered = rejectCount
 
 	}
-	response = &api.NeighboursResponse{
+	response = &api.NeighborsResponse{
 		Api:        src.makeCacheStatus(),
-		Neighbours: nb,
+		Neighbors: nb,
 	}
 	src.neighborsCache.Set(response)
 
 	return response, nil
 }
 
-// NeighboursStatus retrives the status summary
+// NeighborsStatus retrives the status summary
 // for all neightbors
-func (src *BgplgdSource) NeighboursStatus() (*api.NeighboursStatusResponse, error) {
+func (src *BgplgdSource) NeighborsStatus() (*api.NeighborsStatusResponse, error) {
 	// Make API request and read response
 	req, err := src.ShowNeighborsSummaryRequest(context.Background())
 	if err != nil {
@@ -192,9 +194,9 @@ func (src *BgplgdSource) NeighboursStatus() (*api.NeighboursStatusResponse, erro
 		return nil, err
 	}
 
-	response := &api.NeighboursStatusResponse{
+	response := &api.NeighborsStatusResponse{
 		Api:        src.makeCacheStatus(),
-		Neighbours: nb,
+		Neighbors: nb,
 	}
 	return response, nil
 }

@@ -9,8 +9,8 @@ import (
 type Source interface {
 	ExpireCaches() int
 	Status() (*api.StatusResponse, error)
-	Neighbours() (*api.NeighboursResponse, error)
-	NeighboursStatus() (*api.NeighboursStatusResponse, error)
+	Neighbors() (*api.NeighborsResponse, error)
+	NeighborsStatus() (*api.NeighborsStatusResponse, error)
 	Routes(neighborID string) (*api.RoutesResponse, error)
 	RoutesReceived(neighborID string) (*api.RoutesResponse, error)
 	RoutesFiltered(neighborID string) (*api.RoutesResponse, error)

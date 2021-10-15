@@ -143,8 +143,8 @@ func (src *StateServerSource) Status() (*api.StatusResponse, error) {
 	return response, nil
 }
 
-// Neighbours retrievs a full list of all neighbors
-func (src *StateServerSource) Neighbours() (*api.NeighboursResponse, error) {
+// Neighbors retrievs a full list of all neighbors
+func (src *StateServerSource) Neighbors() (*api.NeighborsResponse, error) {
 	// Query cache and see if we have a hit
 	response := src.neighborsCache.Get()
 	if response != nil {
@@ -182,18 +182,18 @@ func (src *StateServerSource) Neighbours() (*api.NeighboursResponse, error) {
 		n.RoutesFiltered = rejectCount
 
 	}
-	response = &api.NeighboursResponse{
+	response = &api.NeighborsResponse{
 		Api:        src.makeCacheStatus(),
-		Neighbours: nb,
+		Neighbors: nb,
 	}
 	src.neighborsCache.Set(response)
 
 	return response, nil
 }
 
-// NeighboursStatus retrives the status summary
+// NeighborsStatus retrives the status summary
 // for all neightbors
-func (src *StateServerSource) NeighboursStatus() (*api.NeighboursStatusResponse, error) {
+func (src *StateServerSource) NeighborsStatus() (*api.NeighborsStatusResponse, error) {
 	// Make API request and read response
 	req, err := src.ShowNeighborsSummaryRequest(context.Background())
 	if err != nil {
@@ -215,9 +215,9 @@ func (src *StateServerSource) NeighboursStatus() (*api.NeighboursStatusResponse,
 		return nil, err
 	}
 
-	response := &api.NeighboursStatusResponse{
+	response := &api.NeighborsStatusResponse{
 		Api:        src.makeCacheStatus(),
-		Neighbours: nb,
+		Neighbors: nb,
 	}
 	return response, nil
 }
