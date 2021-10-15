@@ -1,3 +1,8 @@
+// Package config provides runtime configuration
+// for the Alice Looking Glass.
+//
+// This configuration is read from a config file.
+//
 package config
 
 import (
@@ -189,18 +194,6 @@ func (cfg *Config) SourceInstanceByID(id string) sources.Source {
 
 	// Get instance from config
 	return sourceConfig.getInstance()
-}
-
-// Get sources keys form ini
-func getSourcesKeys(config *ini.File) []string {
-	sources := []string{}
-	sections := config.SectionStrings()
-	for _, section := range sections {
-		if strings.HasPrefix(section, "source") {
-			sources = append(sources, section)
-		}
-	}
-	return sources
 }
 
 func isSourceBase(section *ini.Section) bool {
@@ -505,13 +498,12 @@ func getRpkiConfig(config *ini.File) (RpkiConfig, error) {
 	} else {
 		// Preprocess
 		rpki.Invalid = strings.SplitN(rpki.Invalid[0], ":", 3)
-		tokens := []string{}
 		if len(rpki.Invalid) != 3 {
 			// This is wrong, we should have three parts (RS):1000:[range]
 			return rpki, fmt.Errorf(
 				"unexpected rpki.Invalid configuration: %v", rpki.Invalid)
 		}
-		tokens = strings.Split(rpki.Invalid[2], "-")
+		tokens := strings.Split(rpki.Invalid[2], "-")
 		rpki.Invalid = append([]string{rpki.Invalid[0], rpki.Invalid[1]}, tokens...)
 	}
 
@@ -526,7 +518,7 @@ func getOwnASN(config *ini.File) (int, error) {
 	asn := server.Key("asn").MustInt(-1)
 
 	if asn == -1 {
-		return 0, fmt.Errorf("Could not get own ASN from config")
+		return 0, fmt.Errorf("could not get own ASN from config")
 	}
 
 	return asn, nil
