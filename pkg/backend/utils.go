@@ -61,21 +61,6 @@ func SerializeReasons(reasons map[int]string) map[string]string {
 	return res
 }
 
-// TrimmedStringList makes a trimmed list of CSV strings
-// ommitting empty values.
-func TrimmedStringList(s string) []string {
-	tokens := strings.Split(s, ",")
-	list := []string{}
-	for _, t := range tokens {
-		if t == "" {
-			continue
-		}
-
-		list = append(list, strings.TrimSpace(t))
-	}
-	return list
-}
-
 // DurationMs converts time.Duration to milliseconds
 func DurationMs(d time.Duration) float64 {
 	return float64(d) / 1000.0 / 1000.0 // nano -> micro -> milli

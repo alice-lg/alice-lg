@@ -1,4 +1,4 @@
-package backend
+package config
 
 import (
 	"testing"
@@ -30,7 +30,7 @@ func TestLoadConfigs(t *testing.T) {
 	}
 
 	// Check communities
-	label, err := config.UI.BgpCommunities.Lookup("1:23")
+	label, err := config.UI.BGPCommunities.Lookup("1:23")
 	if err != nil {
 		t.Error(err)
 	}

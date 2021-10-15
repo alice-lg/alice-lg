@@ -1,4 +1,4 @@
-package backend
+package config
 
 import (
 	"errors"
@@ -10,6 +10,8 @@ import (
 
 	"github.com/go-ini/ini"
 
+	"github.com/alice-lg/alice-lg/pkg/api"
+	"github.com/alice-lg/alice-lg/pkg/decoders"
 	"github.com/alice-lg/alice-lg/pkg/sources"
 	"github.com/alice-lg/alice-lg/pkg/sources/birdwatcher"
 	"github.com/alice-lg/alice-lg/pkg/sources/gobgp"
@@ -73,14 +75,14 @@ type HousekeepingConfig struct {
 // RejectionsConfig holds rejection reasons
 // associated with BGP communities
 type RejectionsConfig struct {
-	Reasons BgpCommunities
+	Reasons api.BGPCommunityMap
 }
 
 // NoexportsConfig holds no-export reasons
 // associated with BGP communities and behaviour
 // tweaks.
 type NoexportsConfig struct {
-	Reasons      BgpCommunities
+	Reasons      api.BGPCommunityMap
 	LoadOnDemand bool `ini:"load_on_demand"`
 }
 
@@ -88,7 +90,7 @@ type NoexportsConfig struct {
 // candidates (e.g. routes that will be dropped if
 // a hard filtering would be applied.)
 type RejectCandidatesConfig struct {
-	Communities BgpCommunities
+	Communities api.BGPCommunityMap
 }
 
 // RpkiConfig defines BGP communities describing the RPKI
@@ -117,7 +119,7 @@ type UIConfig struct {
 	RoutesNoexports        NoexportsConfig
 	RoutesRejectCandidates RejectCandidatesConfig
 
-	BgpCommunities BgpCommunities
+	BGPCommunities api.BGPCommunityMap
 	Rpki           RpkiConfig
 
 	Theme ThemeConfig
@@ -372,8 +374,8 @@ func getLookupColumns(config *ini.File) (
 
 // Helper parse communities from a section body
 func parseAndMergeCommunities(
-	communities BgpCommunities, body string,
-) BgpCommunities {
+	communities api.BGPCommunityMap, body string,
+) api.BGPCommunityMap {
 
 	// Parse and merge communities
 	lines := strings.Split(body, "\n")
@@ -392,10 +394,10 @@ func parseAndMergeCommunities(
 	return communities
 }
 
-// Get UI config: Bgp Communities
-func getBgpCommunities(config *ini.File) BgpCommunities {
+// Get UI config: BGP Communities
+func getBGPCommunityMap(config *ini.File) api.BGPCommunityMap {
 	// Load defaults
-	communities := MakeWellKnownBgpCommunities()
+	communities := api.MakeWellKnownBGPCommunities()
 	communitiesConfig := config.Section("bgp_communities")
 	if communitiesConfig == nil {
 		return communities // nothing else to do here, go with the default
@@ -412,7 +414,7 @@ func getRoutesRejections(config *ini.File) (RejectionsConfig, error) {
 	}
 
 	reasons := parseAndMergeCommunities(
-		make(BgpCommunities),
+		make(api.BGPCommunityMap),
 		reasonsConfig.Body())
 
 	rejectionsConfig := RejectionsConfig{
@@ -432,7 +434,7 @@ func getRoutesNoexports(config *ini.File) (NoexportsConfig, error) {
 	baseConfig.MapTo(&noexportsConfig)
 
 	reasons := parseAndMergeCommunities(
-		make(BgpCommunities),
+		make(api.BGPCommunityMap),
 		reasonsConfig.Body())
 
 	noexportsConfig.Reasons = reasons
@@ -449,7 +451,7 @@ func getRejectCandidatesConfig(config *ini.File) (RejectCandidatesConfig, error)
 		return RejectCandidatesConfig{}, nil
 	}
 
-	communities := BgpCommunities{}
+	communities := api.BGPCommunityMap{}
 	for i, c := range strings.Split(candidateCommunities, ",") {
 		communities.Set(c, fmt.Sprintf("reject-candidate-%d", i+1))
 	}
@@ -620,7 +622,7 @@ func getUIConfig(config *ini.File) (UIConfig, error) {
 		RoutesNoexports:        noexports,
 		RoutesRejectCandidates: rejectCandidates,
 
-		BgpCommunities: getBgpCommunities(config),
+		BGPCommunities: getBGPCommunityMap(config),
 		Rpki:           rpki,
 
 		Theme: themeConfig,
@@ -669,7 +671,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 		// Make config
 		sourceName := section.Key("name").MustString("Unknown Source")
 		sourceGroup := section.Key("group").MustString("")
-		sourceBlackholes := TrimmedStringList(
+		sourceBlackholes := decoders.TrimmedCSVStringList(
 			section.Key("blackholes").MustString(""))
 
 		srcCfg := &SourceConfig{
@@ -719,7 +721,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 
 		case SourceBackendGoBGP:
 			c := gobgp.Config{
-				Id:   srcCfg.ID,
+				ID:   srcCfg.ID,
 				Name: srcCfg.Name,
 			}
 
@@ -740,7 +742,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 			if err != nil {
 				return nil, err
 			}
-			rejectComms := rc.Reasons.APICommunities()
+			rejectComms := rc.Reasons.Communities()
 
 			c := openbgpd.Config{
 				ID:                srcCfg.ID,
@@ -760,7 +762,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 			if err != nil {
 				return nil, err
 			}
-			rejectComms := rc.Reasons.APICommunities()
+			rejectComms := rc.Reasons.Communities()
 
 			c := openbgpd.Config{
 				ID:                srcCfg.ID,

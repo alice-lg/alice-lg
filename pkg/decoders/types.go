@@ -6,6 +6,7 @@ package decoders
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -30,6 +31,20 @@ func StringList(data interface{}) []string {
 		if ok {
 			list = append(list, s)
 		}
+	}
+	return list
+}
+
+// TrimmedCSVStringList makes a trimmed list of CSV strings
+// ommitting empty values.
+func TrimmedCSVStringList(s string) []string {
+	tokens := strings.Split(s, ",")
+	list := []string{}
+	for _, t := range tokens {
+		if t == "" {
+			continue
+		}
+		list = append(list, strings.TrimSpace(t))
 	}
 	return list
 }
