@@ -13,46 +13,50 @@ Helper functions for dealing with birdwatcher API data
 */
 
 // Get neighbour by protocol id
-func getNeighbourById(neighbours api.Neighbours, id string) (*api.Neighbour, error) {
+func getNeighborByID(neighbours api.Neighbors, id string) (*api.Neighbor, error) {
 	for _, n := range neighbours {
-		if n.Id == id {
+		if n.ID == id {
 			return n, nil
 		}
 	}
-	unknown := &api.Neighbour{
-		Id:          "unknown",
-		Description: "Unknown neighbour",
+	unknown := &api.Neighbor{
+		ID:          "unknown",
+		Description: "Unknown neighbor",
 	}
-	return unknown, fmt.Errorf("Neighbour not found")
+	return unknown, fmt.Errorf("neighbor not found")
 }
 
 /*
-LockMap: Uses the sync.Map to manage locks, accessed by a key.
+LockMap uses the sync.Map to manage locks, accessed by a key.
 TODO: Maybe this would be a nice generic helper
 */
 type LockMap struct {
 	locks *sync.Map
 }
 
+// NewLockMap creates a new LockMap
 func NewLockMap() *LockMap {
 	return &LockMap{
 		locks: &sync.Map{},
 	}
 }
 
-func (self *LockMap) Lock(key string) {
-	mutex, _ := self.locks.LoadOrStore(key, &sync.Mutex{})
+// Lock locks the lock.
+func (m *LockMap) Lock(key string) {
+	mutex, _ := m.locks.LoadOrStore(key, &sync.Mutex{})
 	mutex.(*sync.Mutex).Lock()
 }
 
-func (self *LockMap) Unlock(key string) {
-	mutex, ok := self.locks.Load(key)
+// Unlock unlocks the locked LockMap-lock.
+func (m *LockMap) Unlock(key string) {
+	mutex, ok := m.locks.Load(key)
 	if !ok {
-		return // Nothing to unlock
+		return // no lock
 	}
 	mutex.(*sync.Mutex).Unlock()
 }
 
+// Wouldn't we all like to know?
 func isProtocolUp(protocol string) bool {
 	protocol = strings.ToLower(protocol)
 	return protocol == "up"
