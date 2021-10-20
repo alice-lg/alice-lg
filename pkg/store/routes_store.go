@@ -1,4 +1,4 @@
-package routes 
+package store
 
 import (
 	"log"
