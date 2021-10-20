@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
+	"github.com/alice-lg/alice-lg/pkg/config"
 )
 
 var REGEX_MATCH_ASLOOKUP = regexp.MustCompile(`(?i)^AS(\d+)`)
@@ -16,7 +17,7 @@ type NeighborsIndex map[string]*api.Neighbor
 
 type NeighborsStore struct {
 	neighborsMap         map[string]NeighborsIndex
-	configMap             map[string]*SourceConfig
+	cfgMap             map[string]*config.SourceConfig
 	statusMap             map[string]StoreStatus
 	refreshInterval       time.Duration
 	refreshNeighborStatus bool
@@ -26,16 +27,16 @@ type NeighborsStore struct {
 }
 
 // NewNeighborsStore creates a new store for neighbors
-func NewNeighborsStore(config *Config) *NeighborsStore {
+func NewNeighborsStore(cfg *config.Config) *NeighborsStore {
 
 	// Build source mapping
 	neighborsMap := make(map[string]NeighborsIndex)
-	configMap := make(map[string]*SourceConfig)
+	cfgMap := make(map[string]*config.SourceConfig)
 	statusMap := make(map[string]StoreStatus)
 
-	for _, source := range config.Sources {
+	for _, source := range cfg.Sources {
 		id := source.ID
-		configMap[id] = source
+		cfgMap[id] = source
 		statusMap[id] = StoreStatus{
 			State: STATE_INIT,
 		}
@@ -46,17 +47,17 @@ func NewNeighborsStore(config *Config) *NeighborsStore {
 	// Set refresh interval, default to 5 minutes when
 	// interval is set to 0
 	refreshInterval := time.Duration(
-		config.Server.NeighborsStoreRefreshInterval) * time.Minute
+		cfg.Server.NeighborsStoreRefreshInterval) * time.Minute
 	if refreshInterval == 0 {
 		refreshInterval = time.Duration(5) * time.Minute
 	}
 
-	refreshNeighborStatus := config.Server.EnableNeighborsStatusRefresh
+	refreshNeighborStatus := cfg.Server.EnableNeighborsStatusRefresh
 
 	store := &NeighborsStore{
 		neighborsMap:         neighborsMap,
 		statusMap:             statusMap,
-		configMap:             configMap,
+		cfgMap:             cfgMap,
 		refreshInterval:       refreshInterval,
 		refreshNeighborStatus: refreshNeighborStatus,
 	}
@@ -84,17 +85,17 @@ func (self *NeighborsStore) init() {
 	}
 }
 
-func (self *NeighborsStore) SourceStatus(sourceId string) StoreStatus {
+func (self *NeighborsStore) SourceStatus(sourceID string) StoreStatus {
 	self.RLock()
-	status := self.statusMap[sourceId]
+	status := self.statusMap[sourceID]
 	self.RUnlock()
 
 	return status
 }
 
-// Get state by source Id
-func (self *NeighborsStore) SourceState(sourceId string) int {
-	status := self.SourceStatus(sourceId)
+// Get state by source ID
+func (self *NeighborsStore) SourceState(sourceID string) int {
+	status := self.SourceStatus(sourceID)
 	return status.State
 }
 
@@ -103,21 +104,21 @@ func (self *NeighborsStore) update() {
 	successCount := 0
 	errorCount := 0
 	t0 := time.Now()
-	for sourceId, _ := range self.neighborsMap {
+	for sourceID, _ := range self.neighborsMap {
 		// Get current state
-		if self.statusMap[sourceId].State == STATE_UPDATING {
+		if self.statusMap[sourceID].State == STATE_UPDATING {
 			continue // nothing to do here. really.
 		}
 
 		// Start updating
 		self.Lock()
-		self.statusMap[sourceId] = StoreStatus{
+		self.statusMap[sourceID] = StoreStatus{
 			State: STATE_UPDATING,
 		}
 		self.Unlock()
 
-		sourceConfig := self.configMap[sourceId]
-		source := sourceConfig.getInstance()
+		sourceConfig := self.cfgMap[sourceID]
+		source := sourceConfig.GetInstance()
 
 		neighborsRes, err := source.Neighbors()
 		if err != nil {
@@ -129,7 +130,7 @@ func (self *NeighborsStore) update() {
 			)
 			// That's sad.
 			self.Lock()
-			self.statusMap[sourceId] = StoreStatus{
+			self.statusMap[sourceID] = StoreStatus{
 				State:       STATE_ERROR,
 				LastError:   err,
 				LastRefresh: time.Now(),
@@ -146,13 +147,13 @@ func (self *NeighborsStore) update() {
 		// Make neighbors index
 		index := make(NeighborsIndex)
 		for _, neighbor := range neighbors {
-			index[neighbor.Id] = neighbor
+			index[neighbor.ID] = neighbor
 		}
 
 		self.Lock()
-		self.neighborsMap[sourceId] = index
+		self.neighborsMap[sourceID] = index
 		// Update state
-		self.statusMap[sourceId] = StoreStatus{
+		self.statusMap[sourceID] = StoreStatus{
 			LastRefresh: time.Now(),
 			State:       STATE_READY,
 		}
@@ -168,33 +169,33 @@ func (self *NeighborsStore) update() {
 	)
 }
 
-func (self *NeighborsStore) GetNeighborsAt(sourceId string) api.Neighbors {
+func (self *NeighborsStore) GetNeighborsAt(sourceID string) api.Neighbors {
 	self.RLock()
-	neighborsIdx := self.neighborsMap[sourceId]
+	neighborsIDx := self.neighborsMap[sourceID]
 	self.RUnlock()
 
 	var neighborsStatus map[string]api.NeighborStatus
 	if self.refreshNeighborStatus {
-		sourceConfig := self.configMap[sourceId]
-		source := sourceConfig.getInstance()
+		sourceConfig := self.cfgMap[sourceID]
+		source := sourceConfig.GetInstance()
 
 		neighborsStatusData, err := source.NeighborsStatus()
 		if err == nil {
 			neighborsStatus = make(map[string]api.NeighborStatus, len(neighborsStatusData.Neighbors))
 
 			for _, neighbor := range neighborsStatusData.Neighbors {
-				neighborsStatus[neighbor.Id] = *neighbor
+				neighborsStatus[neighbor.ID] = *neighbor
 			}
 		}
 	}
 
-	neighbors := make(api.Neighbors, 0, len(neighborsIdx))
+	neighbors := make(api.Neighbors, 0, len(neighborsIDx))
 
-	for _, neighbor := range neighborsIdx {
+	for _, neighbor := range neighborsIDx {
 		if self.refreshNeighborStatus {
-			if _, ok := neighborsStatus[neighbor.Id]; ok {
+			if _, ok := neighborsStatus[neighbor.ID]; ok {
 				self.Lock()
-				neighbor.State = neighborsStatus[neighbor.Id].State
+				neighbor.State = neighborsStatus[neighbor.ID].State
 				self.Unlock()
 			}
 		}
@@ -206,25 +207,25 @@ func (self *NeighborsStore) GetNeighborsAt(sourceId string) api.Neighbors {
 }
 
 func (self *NeighborsStore) GetNeighborAt(
-	sourceId string,
+	sourceID string,
 	id string,
 ) *api.Neighbor {
 	// Lookup neighbor on RS
 	self.RLock()
-	neighborsIdx := self.neighborsMap[sourceId]
+	neighborsIDx := self.neighborsMap[sourceID]
 	self.RUnlock()
 
-	return neighborsIdx[id]
+	return neighborsIDx[id]
 }
 
 func (self *NeighborsStore) LookupNeighborsAt(
-	sourceId string,
+	sourceID string,
 	query string,
 ) api.Neighbors {
 	results := api.Neighbors{}
 
 	self.RLock()
-	neighbors := self.neighborsMap[sourceId]
+	neighbors := self.neighborsMap[sourceID]
 	self.RUnlock()
 
 	asn := -1
@@ -236,7 +237,7 @@ func (self *NeighborsStore) LookupNeighborsAt(
 	}
 
 	for _, neighbor := range neighbors {
-		if asn >= 0 && neighbor.Asn == asn { // only executed if valid AS query is detected
+		if asn >= 0 && neighbor.ASN == asn { // only executed if valid AS query is detected
 			results = append(results, neighbor)
 		} else if ContainsCi(neighbor.Description, query) {
 			results = append(results, neighbor)
@@ -254,8 +255,8 @@ func (self *NeighborsStore) LookupNeighbors(
 	// Create empty result set
 	results := make(api.NeighborsLookupResults)
 
-	for sourceId, _ := range self.neighborsMap {
-		results[sourceId] = self.LookupNeighborsAt(sourceId, query)
+	for sourceID, _ := range self.neighborsMap {
+		results[sourceID] = self.LookupNeighborsAt(sourceID, query)
 	}
 
 	return results
@@ -265,13 +266,13 @@ func (self *NeighborsStore) LookupNeighbors(
  Filter neighbors from a single route server.
 */
 func (self *NeighborsStore) FilterNeighborsAt(
-	sourceId string,
+	sourceID string,
 	filter *api.NeighborFilter,
 ) api.Neighbors {
 	results := []*api.Neighbor{}
 
 	self.RLock()
-	neighbors := self.neighborsMap[sourceId]
+	neighbors := self.neighborsMap[sourceID]
 	self.RUnlock()
 
 	// Apply filters
@@ -293,8 +294,8 @@ func (self *NeighborsStore) FilterNeighbors(
 	results := []*api.Neighbor{}
 
 	// Get neighbors from all routeservers
-	for sourceId, _ := range self.neighborsMap {
-		rsResults := self.FilterNeighborsAt(sourceId, filter)
+	for sourceID, _ := range self.neighborsMap {
+		rsResults := self.FilterNeighborsAt(sourceID, filter)
 		results = append(results, rsResults...)
 	}
 
@@ -307,11 +308,11 @@ func (self *NeighborsStore) Stats() NeighborsStoreStats {
 	rsStats := []RouteServerNeighborsStats{}
 
 	self.RLock()
-	for sourceId, neighbors := range self.neighborsMap {
-		status := self.statusMap[sourceId]
+	for sourceID, neighbors := range self.neighborsMap {
+		status := self.statusMap[sourceID]
 		totalNeighbors += len(neighbors)
 		serverStats := RouteServerNeighborsStats{
-			Name:       self.configMap[sourceId].Name,
+			Name:       self.cfgMap[sourceID].Name,
 			State:      stateToString(status.State),
 			Neighbors: len(neighbors),
 			UpdatedAt:  status.LastRefresh,

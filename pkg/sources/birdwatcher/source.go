@@ -314,21 +314,7 @@ func (b *GenericBirdwatcher) LookupPrefix(
 		// A less bruteforce approach would be highly appreciated
 		route := &api.LookupRoute{
 			RouteServer: rs,
-
-			Route: api.Route{
-				ID:         src.ID,
-				NeighborID: src.NeighborID,
-
-				Network:   src.Network,
-				Interface: src.Interface,
-				Gateway:   src.Gateway,
-				Metric:    src.Metric,
-				BGP:       src.BGP,
-				Age:       src.Age,
-				Type:      src.Type,
-
-				Details: src.Details,
-			},
+			Route: src,
 		}
 		results = append(results, route)
 	}

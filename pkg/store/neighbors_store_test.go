@@ -7,15 +7,6 @@ import (
 	"github.com/alice-lg/alice-lg/pkg/api"
 )
 
-/*
- Start the global neighbors store,
- because the route store in the tests have
- this as a dependency.
-*/
-func startTestNeighborsStore() {
-	store := makeTestNeighborsStore()
-	AliceNeighborsStore = store
-}
 
 /*
  Make a store and populate it with data
@@ -25,37 +16,37 @@ func makeTestNeighborsStore() *NeighborsStore {
 	// Populate neighbors
 	rs1 := NeighborsIndex{
 		"ID2233_AS2342": &api.Neighbor{
-			Id:            "ID2233_AS2342",
-			Asn:           2342,
+			ID:            "ID2233_AS2342",
+			ASN:           2342,
 			Description:   "PEER AS2342 192.9.23.42 Customer Peer 1",
-			RouteServerId: "rs1",
+			RouteServerID: "rs1",
 		},
 		"ID2233_AS2343": &api.Neighbor{
-			Id:            "ID2233_AS2343",
-			Asn:           2343,
+			ID:            "ID2233_AS2343",
+			ASN:           2343,
 			Description:   "PEER AS2343 192.9.23.43 Different Peer 1",
-			RouteServerId: "rs1",
+			RouteServerID: "rs1",
 		},
 		"ID2233_AS2344": &api.Neighbor{
-			Id:            "ID2233_AS2344",
-			Asn:           2344,
+			ID:            "ID2233_AS2344",
+			ASN:           2344,
 			Description:   "PEER AS2344 192.9.23.44 3rd Peer from the sun",
-			RouteServerId: "rs1",
+			RouteServerID: "rs1",
 		},
 	}
 
 	rs2 := NeighborsIndex{
 		"ID2233_AS2342": &api.Neighbor{
-			Id:            "ID2233_AS2342",
-			Asn:           2342,
+			ID:            "ID2233_AS2342",
+			ASN:           2342,
 			Description:   "PEER AS2342 192.9.23.42 Customer Peer 1",
-			RouteServerId: "rs2",
+			RouteServerID: "rs2",
 		},
 		"ID2233_AS4223": &api.Neighbor{
-			Id:            "ID2233_AS4223",
-			Asn:           4223,
+			ID:            "ID2233_AS4223",
+			ASN:           4223,
 			Description:   "PEER AS4223 192.9.42.23 Cloudfoo Inc.",
-			RouteServerId: "rs2",
+			RouteServerID: "rs2",
 		},
 	}
 
@@ -94,7 +85,7 @@ func TestGetNeighborAt(t *testing.T) {
 	store := makeTestNeighborsStore()
 
 	neighbor := store.GetNeighborAt("rs1", "ID2233_AS2343")
-	if neighbor.Id != "ID2233_AS2343" {
+	if neighbor.ID != "ID2233_AS2343" {
 		t.Error("Expected another peer in GetNeighborAt")
 	}
 }
@@ -109,7 +100,7 @@ func TestGetNeighbors(t *testing.T) {
 
 	sort.Sort(neighbors)
 
-	if neighbors[0].Id != "ID2233_AS2342" {
+	if neighbors[0].ID != "ID2233_AS2342" {
 		t.Error("Expected neighbor: ID2233_AS2342, got:",
 			neighbors[0])
 	}
@@ -134,7 +125,7 @@ func TestNeighborLookupAt(t *testing.T) {
 	// Make index
 	index := NeighborsIndex{}
 	for _, n := range neighbors {
-		index[n.Id] = n
+		index[n.ID] = n
 	}
 
 	for _, id := range expected {
@@ -164,7 +155,7 @@ func TestNeighborLookup(t *testing.T) {
 	}
 
 	n := neighbors[0]
-	if n.Id != "ID2233_AS4223" {
+	if n.ID != "ID2233_AS4223" {
 		t.Error("Wrong peer in lookup response")
 	}
 }

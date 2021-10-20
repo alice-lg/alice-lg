@@ -1,4 +1,4 @@
-package backend
+package store
 
 // Some helper functions
 import (

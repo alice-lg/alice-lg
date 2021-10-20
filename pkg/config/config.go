@@ -193,7 +193,7 @@ func (cfg *Config) SourceInstanceByID(id string) sources.Source {
 	}
 
 	// Get instance from config
-	return sourceConfig.getInstance()
+	return sourceConfig.GetInstance()
 }
 
 func isSourceBase(section *ini.Section) bool {
@@ -844,7 +844,7 @@ func LoadConfig(file string) (*Config, error) {
 }
 
 // Get source instance from config
-func (cfg *SourceConfig) getInstance() sources.Source {
+func (cfg *SourceConfig) GetInstance() sources.Source {
 	if cfg.instance != nil {
 		return cfg.instance
 	}

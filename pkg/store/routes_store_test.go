@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
+	"github.com/alice-lg/alice-lg/pkg/config"
 	"github.com/alice-lg/alice-lg/pkg/sources/birdwatcher"
 )
 
@@ -68,6 +69,9 @@ func testCheckPrefixesPresence(prefixes, resultset []string, t *testing.T) {
 //
 
 func makeTestRoutesStore() *RoutesStore {
+
+  neighborsStore := makeTestNeighborsStore()
+
 	rs1RoutesResponse := loadTestRoutesResponse()
 
 	// Build mapping based on source instances:
@@ -77,11 +81,11 @@ func makeTestRoutesStore() *RoutesStore {
 		"rs1": rs1RoutesResponse,
 	}
 
-	configMap := map[string]*SourceConfig{
-		"rs1": &SourceConfig{
+	configMap := map[string]*config.SourceConfig{
+		"rs1": &config.SourceConfig{
 			ID:   "rs1",
 			Name: "rs1.test",
-			Type: SourceTypeBird,
+			Type: config.SourceTypeBird,
 
 			Birdwatcher: birdwatcher.Config{
 				API:             "http://localhost:2342",
@@ -96,7 +100,8 @@ func makeTestRoutesStore() *RoutesStore {
 	store := &RoutesStore{
 		routesMap: routesMap,
 		statusMap: statusMap,
-		configMap: configMap,
+		cfgMap: configMap,
+    neighborsStore: neighborsStore,
 	}
 
 	return store
@@ -125,7 +130,6 @@ func TestRoutesStoreStats(t *testing.T) {
 }
 
 func TestLookupPrefixAt(t *testing.T) {
-	startTestNeighborsStore()
 	store := makeTestRoutesStore()
 
 	query := "193.200."
@@ -146,7 +150,6 @@ func TestLookupPrefixAt(t *testing.T) {
 }
 
 func TestLookupPrefix(t *testing.T) {
-	startTestNeighborsStore()
 	store := makeTestRoutesStore()
 	query := "193.200."
 
@@ -169,7 +172,6 @@ func TestLookupPrefix(t *testing.T) {
 }
 
 func TestLookupNeighborsPrefixesAt(t *testing.T) {
-	startTestNeighborsStore()
 	store := makeTestRoutesStore()
 
 	// Query
@@ -195,16 +197,16 @@ func TestLookupPrefixForNeighbors(t *testing.T) {
 	neighbors := api.NeighborsLookupResults{
 		"rs1": api.Neighbors{
 			&api.Neighbor{
-				Id: "ID163_AS31078",
+				ID: "ID163_AS31078",
 			},
 		},
 	}
 
-	startTestNeighborsStore()
 	store := makeTestRoutesStore()
 
 	// Query
 	results := store.LookupPrefixForNeighbors(neighbors)
+  t.Log(results)
 
 	// We should have retrived 8 prefixes,
 	if len(results) != 8 {

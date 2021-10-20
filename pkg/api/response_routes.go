@@ -8,7 +8,7 @@ import (
 // Route is a prefix with BGP information.
 type Route struct {
 	ID         string `json:"id"`
-	NeighborID string `json:"neighbor_id"`
+	NeighborID string `json:"neighbour_id"`
 
 	Network   string        `json:"network"`
 	Interface string        `json:"interface"`
@@ -109,7 +109,7 @@ type Searchable struct {
 // LookupRoute is a route with additional
 // neighbor and state information
 type LookupRoute struct {
-	Route
+	*Route
 
 	State string `json:"state"` // Filtered, Imported, ...
 

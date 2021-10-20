@@ -1,4 +1,4 @@
-package backend
+package store 
 
 import (
 	"testing"
@@ -36,14 +36,3 @@ func TestMaybePrefix(t *testing.T) {
 	}
 }
 
-func TestTrimmedStringList(t *testing.T) {
-	l := TrimmedStringList("foo, bar   , dreiundzwanzig,")
-
-	if len(l) != 3 {
-		t.Error("Expected length to be 3, got:", len(l))
-	}
-
-	if l[0] != "foo" || l[1] != "bar" || l[2] != "dreiundzwanzig" {
-		t.Error("Expected list of [foo, bar, dreiundzwanzig], got:", l)
-	}
-}

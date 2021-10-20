@@ -7,35 +7,41 @@ import (
 	"time"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
+	"github.com/alice-lg/alice-lg/pkg/config"
 )
 
 // The RoutesStore holds a mapping of routes,
-// status and configs and will be queried instead
+// status and cfgs and will be queried instead
 // of a backend by the API
 type RoutesStore struct {
 	routesMap map[string]*api.RoutesResponse
 	statusMap map[string]StoreStatus
-	configMap map[string]*SourceConfig
+	cfgMap map[string]*config.SourceConfig
 
 	refreshInterval time.Duration
 	lastRefresh     time.Time
+
+  neighborsStore *NeighborsStore
 
 	sync.RWMutex
 }
 
 // NewRoutesStore makes a new store instance
-// with a config.
-func NewRoutesStore(config *Config) *RoutesStore {
+// with a cfg.
+func NewRoutesStore(
+  neighborsStore *NeighborsStore,
+  cfg *config.Config,
+) *RoutesStore {
 
 	// Build mapping based on source instances
 	routesMap := make(map[string]*api.RoutesResponse)
 	statusMap := make(map[string]StoreStatus)
-	configMap := make(map[string]*SourceConfig)
+	cfgMap := make(map[string]*config.SourceConfig)
 
-	for _, source := range config.Sources {
+	for _, source := range cfg.Sources {
 		id := source.ID
 
-		configMap[id] = source
+		cfgMap[id] = source
 		routesMap[id] = &api.RoutesResponse{}
 		statusMap[id] = StoreStatus{
 			State: STATE_INIT,
@@ -45,7 +51,7 @@ func NewRoutesStore(config *Config) *RoutesStore {
 	// Set refresh interval as duration, fall back to
 	// five minutes if no interval is set.
 	refreshInterval := time.Duration(
-		config.Server.RoutesStoreRefreshInterval) * time.Minute
+		cfg.Server.RoutesStoreRefreshInterval) * time.Minute
 	if refreshInterval == 0 {
 		refreshInterval = time.Duration(5) * time.Minute
 	}
@@ -53,8 +59,9 @@ func NewRoutesStore(config *Config) *RoutesStore {
 	store := &RoutesStore{
 		routesMap:       routesMap,
 		statusMap:       statusMap,
-		configMap:       configMap,
+		cfgMap:       cfgMap,
 		refreshInterval: refreshInterval,
+    neighborsStore: neighborsStore,
 	}
 	return store
 }
@@ -90,8 +97,8 @@ func (rs *RoutesStore) update() {
 	t0 := time.Now()
 
 	for sourceID := range rs.routesMap {
-		sourceConfig := rs.configMap[sourceID]
-		source := sourceConfig.getInstance()
+		sourceConfig := rs.cfgMap[sourceID]
+		source := sourceConfig.GetInstance()
 
 		// Get current update state
 		if rs.statusMap[sourceID].State == STATE_UPDATING {
@@ -163,7 +170,7 @@ func (rs *RoutesStore) Stats() RoutesStoreStats {
 		totalFiltered += len(routes.Filtered)
 
 		serverStats := RouteServerRoutesStats{
-			Name: rs.configMap[sourceID].Name,
+			Name: rs.cfgMap[sourceID].Name,
 
 			Routes: RoutesStats{
 				Filtered: len(routes.Filtered),
@@ -201,44 +208,29 @@ func (rs *RoutesStore) CacheTTL() time.Time {
 
 // Lookup routes transform
 func routeToLookupRoute(
-	source *SourceConfig,
+  nStore *NeighborsStore,
+	source *config.SourceConfig,
 	state string,
 	route *api.Route,
 ) *api.LookupRoute {
-
-	// Get neighbor
-	neighbor := AliceNeighborsStore.GetNeighborAt(source.ID, route.NeighborId)
-
-	// Make route
+	// Get neighbor and make route
+	neighbor := nStore.GetNeighborAt(source.ID, route.NeighborID)
 	lookup := &api.LookupRoute{
-		Id: route.Id,
-
-		NeighborId: route.NeighborId,
+    Route: route,
+		State: state,
 		Neighbor:   neighbor,
-
-		Routeserver: api.Routeserver{
-			Id:   source.ID,
+		RouteServer: &api.RouteServer{
+			ID:   source.ID,
 			Name: source.Name,
 		},
-
-		State: state,
-
-		Network:   route.Network,
-		Interface: route.Interface,
-		Gateway:   route.Gateway,
-		Metric:    route.Metric,
-		Bgp:       route.Bgp,
-		Age:       route.Age,
-		Type:      route.Type,
-		Primary:   route.Primary,
 	}
-
 	return lookup
 }
 
 // Routes filter
 func filterRoutesByPrefix(
-	source *SourceConfig,
+  nStore *NeighborsStore,
+	source *config.SourceConfig,
 	routes api.Routes,
 	prefix string,
 	state string,
@@ -247,25 +239,27 @@ func filterRoutesByPrefix(
 	for _, route := range routes {
 		// Naiive filtering:
 		if strings.HasPrefix(strings.ToLower(route.Network), prefix) {
-			lookup := routeToLookupRoute(source, state, route)
+			lookup := routeToLookupRoute(nStore, source, state, route)
 			results = append(results, lookup)
 		}
 	}
 	return results
 }
 
-func filterRoutesByNeighborIds(
-	source *SourceConfig,
+func filterRoutesByNeighborIDs(
+  nStore *NeighborsStore,
+	source *config.SourceConfig,
 	routes api.Routes,
-	neighborIds []string,
+	neighborIDs []string,
 	state string,
 ) api.LookupRoutes {
 
 	results := api.LookupRoutes{}
 	for _, route := range routes {
 		// Filtering:
-		if MemberOf(neighborIds, route.NeighborId) == true {
-			lookup := routeToLookupRoute(source, state, route)
+    log.Println("r:", route.NeighborID)
+		if MemberOf(neighborIDs, route.NeighborID) == true {
+			lookup := routeToLookupRoute(nStore, source, state, route)
 			results = append(results, lookup)
 		}
 	}
@@ -276,25 +270,27 @@ func filterRoutesByNeighborIds(
 // routes lookup by neighbor id
 func (rs *RoutesStore) LookupNeighborsPrefixesAt(
 	sourceID string,
-	neighborIds []string,
+	neighborIDs []string,
 ) chan api.LookupRoutes {
 	response := make(chan api.LookupRoutes)
 
 	go func() {
 		rs.RLock()
-		source := rs.configMap[sourceID]
+		source := rs.cfgMap[sourceID]
 		routes := rs.routesMap[sourceID]
 		rs.RUnlock()
 
-		filtered := filterRoutesByNeighborIds(
+		filtered := filterRoutesByNeighborIDs(
+      rs.neighborsStore,
 			source,
 			routes.Filtered,
-			neighborIds,
+			neighborIDs,
 			"filtered")
-		imported := filterRoutesByNeighborIds(
+		imported := filterRoutesByNeighborIDs(
+      rs.neighborsStore,
 			source,
 			routes.Imported,
-			neighborIds,
+			neighborIDs,
 			"imported")
 
 		var result api.LookupRoutes
@@ -316,17 +312,19 @@ func (rs *RoutesStore) LookupPrefixAt(
 
 	go func() {
 		rs.RLock()
-		config := rs.configMap[sourceID]
+		cfg := rs.cfgMap[sourceID]
 		routes := rs.routesMap[sourceID]
 		rs.RUnlock()
 
 		filtered := filterRoutesByPrefix(
-			config,
+      rs.neighborsStore,
+			cfg,
 			routes.Filtered,
 			prefix,
 			"filtered")
 		imported := filterRoutesByPrefix(
-			config,
+      rs.neighborsStore,
+			cfg,
 			routes.Imported,
 			prefix,
 			"imported")
@@ -377,12 +375,11 @@ func (rs *RoutesStore) LookupPrefixForNeighbors(
 
 	// Dispatch
 	for sourceID, locals := range neighbors {
-		lookupNeighborIds := []string{}
+		lookupNeighborIDs := []string{}
 		for _, n := range locals {
-			lookupNeighborIds = append(lookupNeighborIds, n.Id)
+			lookupNeighborIDs = append(lookupNeighborIDs, n.ID)
 		}
-
-		res := rs.LookupNeighborsPrefixesAt(sourceID, lookupNeighborIds)
+		res := rs.LookupNeighborsPrefixesAt(sourceID, lookupNeighborIDs)
 		responses = append(responses, res)
 	}
 
