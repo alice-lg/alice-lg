@@ -787,14 +787,8 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 	return sources, nil
 }
 
-// Try to load configfiles as specified in the files
-// list. For example:
-//
-//    ./etc/alice-lg/alice.conf
-//    /etc/alice-lg/alice.conf
-//    ./etc/alice-lg/alice.local.conf
-//
-func loadConfig(file string) (*Config, error) {
+// Try to load the config file 
+func LoadConfig(file string) (*Config, error) {
 
 	// Try to get config file, fallback to alternatives
 	file, err := getConfigFile(file)

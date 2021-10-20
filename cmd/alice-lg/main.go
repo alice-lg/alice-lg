@@ -4,7 +4,7 @@ import (
 	"flag"
 	"log"
 
-	"github.com/alice-lg/alice-lg/pkg/backend"
+	"github.com/alice-lg/alice-lg/pkg/store"
 )
 
 func main() {
@@ -19,31 +19,29 @@ func main() {
 	flag.Parse()
 
 	// Load configuration
-	if err := backend.InitConfig(*configFilenameFlag); err != nil {
+	cfg, err = config.LoadConfig(filename)
+  if err != nil {
 		log.Fatal(err)
 	}
 
 	// Say hi
 	printBanner()
-
-	log.Println("Using configuration:", backend.AliceConfig.File)
+	log.Println("Using configuration:", cfg.File)
 
 	// Setup local routes store
-	backend.InitStores()
+	neighborsStore := store.NewNeighborsStore(cfg)
+	routesStore := store.NewRoutesStore(cfg)
 
 	// Start stores
 	if backend.AliceConfig.Server.EnablePrefixLookup == true {
-		go backend.AliceRoutesStore.Start()
-	}
-
-	// Setup local neighbours store
-	if backend.AliceConfig.Server.EnablePrefixLookup == true {
-		go backend.AliceNeighboursStore.Start()
+		go neighborsStore.Start()
+    go routesStore.Start()
 	}
 
 	// Start the Housekeeping
-	go backend.Housekeeping(backend.AliceConfig)
+	go store.Housekeeping(cfg)
 
+  // Start HTTP API
 	go backend.StartHTTPServer()
 
 	<-quit

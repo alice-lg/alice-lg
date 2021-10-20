@@ -1,4 +1,6 @@
-package backend
+// Package store provides a store for persisting and
+// querying neighbors and routes.
+package store
 
 import (
 	"time"
