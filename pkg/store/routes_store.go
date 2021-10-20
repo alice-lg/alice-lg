@@ -257,7 +257,6 @@ func filterRoutesByNeighborIDs(
 	results := api.LookupRoutes{}
 	for _, route := range routes {
 		// Filtering:
-    log.Println("r:", route.NeighborID)
 		if MemberOf(neighborIDs, route.NeighborID) == true {
 			lookup := routeToLookupRoute(nStore, source, state, route)
 			results = append(results, lookup)
