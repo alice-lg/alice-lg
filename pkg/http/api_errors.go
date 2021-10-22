@@ -1,4 +1,4 @@
-package backend
+package http
 
 // Improve error handling
 // Create api.ErrorResponses based on errors returned from server.

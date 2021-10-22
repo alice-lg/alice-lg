@@ -1,4 +1,4 @@
-package backend
+package http
 
 import (
 	"compress/gzip"

@@ -155,7 +155,7 @@ func (rs *RoutesStore) update() {
 }
 
 // Stats calculates some store insights
-func (rs *RoutesStore) Stats() RoutesStoreStats {
+func (rs *RoutesStore) Stats() *api.RoutesStoreStats {
 	totalImported := 0
 	totalFiltered := 0
 
@@ -185,7 +185,7 @@ func (rs *RoutesStore) Stats() RoutesStoreStats {
 	rs.RUnlock()
 
 	// Make stats
-	storeStats := RoutesStoreStats{
+	storeStats := &RoutesStoreStats{
 		TotalRoutes: RoutesStats{
 			Imported: totalImported,
 			Filtered: totalFiltered,

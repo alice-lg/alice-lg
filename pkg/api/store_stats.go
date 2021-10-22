@@ -30,7 +30,7 @@ type RoutesStoreStats struct {
 }
 
 // Log writes stats to the log
-func (stats RoutesStoreStats) Log() {
+func (stats *RoutesStoreStats) Log() {
 	log.Println("Routes store:")
 	log.Println("    Routes Imported:",
 		stats.TotalRoutes.Imported,
@@ -65,7 +65,7 @@ type NeighborsStoreStats struct {
 }
 
 // Log prints the stats
-func (stats NeighborsStoreStats) Log() {
+func (stats *NeighborsStoreStats) Log() {
 	log.Println("Neighbors store:")
 
 	log.Println("    Neighbors:",

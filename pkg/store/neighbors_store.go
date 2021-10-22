@@ -299,7 +299,7 @@ func (s *NeighborsStore) FilterNeighbors(
 }
 
 // Stats exports some statistics for monitoring.
-func (s *NeighborsStore) Stats() NeighborsStoreStats {
+func (s *NeighborsStore) Stats() *NeighborsStoreStats {
 	totalNeighbors := 0
 	rsStats := []RouteServerNeighborsStats{}
 
@@ -317,7 +317,7 @@ func (s *NeighborsStore) Stats() NeighborsStoreStats {
 	}
 	s.RUnlock()
 
-	storeStats := NeighborsStoreStats{
+	storeStats := &NeighborsStoreStats{
 		TotalNeighbors: totalNeighbors,
 		RouteServers:   rsStats,
 	}
