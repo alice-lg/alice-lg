@@ -26,7 +26,7 @@ func makeTestRoute() *Route {
 
 func makeTestLookupRoute() *LookupRoute {
 	route := &LookupRoute{
-		Route: Route{
+		Route: &Route{
 			BGP: &BGPInfo{
 				Communities: []Community{
 					Community{23, 42},

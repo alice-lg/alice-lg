@@ -8,14 +8,14 @@ import (
 
 // Store State Constants
 const (
-	STATE_INIT = iota
-	STATE_READY
-	STATE_UPDATING
-	STATE_ERROR
+	StateInit = iota
+	StateReady
+	StateUpdating
+	StateError
 )
 
-// StoreStatus defines a status the store can be in
-type StoreStatus struct {
+// Status defines a status the store can be in
+type Status struct {
 	LastRefresh time.Time
 	LastError   error
 	State       int
@@ -24,13 +24,13 @@ type StoreStatus struct {
 // Helper: stateToString
 func stateToString(state int) string {
 	switch state {
-	case STATE_INIT:
+	case StateInit:
 		return "INIT"
-	case STATE_READY:
+	case StateReady:
 		return "READY"
-	case STATE_UPDATING:
+	case StateUpdating:
 		return "UPDATING"
-	case STATE_ERROR:
+	case StateError:
 		return "ERROR"
 	}
 	return "INVALID"
