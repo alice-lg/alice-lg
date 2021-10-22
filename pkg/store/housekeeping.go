@@ -26,7 +26,7 @@ func StartHousekeeping(ctx context.Context, cfg *config.Config) {
 		// Expire the caches
 		log.Println("Expiring caches")
 		for _, source := range cfg.Sources {
-			count := source.getInstance().ExpireCaches()
+			count := source.GetInstance().ExpireCaches()
 			log.Println("Expired", count, "entries for source", source.Name)
 		}
 

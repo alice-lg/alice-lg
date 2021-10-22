@@ -53,12 +53,12 @@ func makeTestNeighborsStore() *NeighborsStore {
 			"rs1": rs1,
 			"rs2": rs2,
 		},
-		statusMap: map[string]StoreStatus{
-			"rs1": StoreStatus{
-				State: STATE_READY,
+		statusMap: map[string]Status{
+			"rs1": Status{
+				State: StateReady,
 			},
-			"rs2": StoreStatus{
-				State: STATE_INIT,
+			"rs2": Status{
+				State: StateInit,
 			},
 		},
 	}
@@ -69,11 +69,11 @@ func makeTestNeighborsStore() *NeighborsStore {
 func TestGetSourceState(t *testing.T) {
 	store := makeTestNeighborsStore()
 
-	if store.SourceState("rs1") != STATE_READY {
+	if store.SourceState("rs1") != StateReady {
 		t.Error("Expected Source(1) to be STATE_READY")
 	}
 
-	if store.SourceState("rs2") == STATE_READY {
+	if store.SourceState("rs2") == StateReady {
 		t.Error("Expected Source(2) to be NOT STATE_READY")
 	}
 }

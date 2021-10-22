@@ -16,7 +16,7 @@ import (
 // of a backend by the API
 type RoutesStore struct {
 	routesMap map[string]*api.RoutesResponse
-	statusMap map[string]StoreStatus
+	statusMap map[string]Status
 	cfgMap    map[string]*config.SourceConfig
 
 	refreshInterval time.Duration
@@ -35,7 +35,7 @@ func NewRoutesStore(
 ) *RoutesStore {
 	// Build mapping based on source instances
 	routesMap := make(map[string]*api.RoutesResponse)
-	statusMap := make(map[string]StoreStatus)
+	statusMap := make(map[string]Status)
 	cfgMap := make(map[string]*config.SourceConfig)
 
 	for _, source := range cfg.Sources {
@@ -43,8 +43,8 @@ func NewRoutesStore(
 
 		cfgMap[id] = source
 		routesMap[id] = &api.RoutesResponse{}
-		statusMap[id] = StoreStatus{
-			State: STATE_INIT,
+		statusMap[id] = Status{
+			State: StateInit,
 		}
 	}
 
@@ -100,14 +100,14 @@ func (rs *RoutesStore) update() {
 		source := sourceConfig.GetInstance()
 
 		// Get current update state
-		if rs.statusMap[sourceID].State == STATE_UPDATING {
+		if rs.statusMap[sourceID].State == StateUpdating {
 			continue // nothing to do here
 		}
 
 		// Set update state
 		rs.Lock()
-		rs.statusMap[sourceID] = StoreStatus{
-			State: STATE_UPDATING,
+		rs.statusMap[sourceID] = Status{
+			State: StateUpdating,
 		}
 		rs.Unlock()
 
@@ -121,8 +121,8 @@ func (rs *RoutesStore) update() {
 			)
 
 			rs.Lock()
-			rs.statusMap[sourceID] = StoreStatus{
-				State:       STATE_ERROR,
+			rs.statusMap[sourceID] = Status{
+				State:       StateError,
 				LastError:   err,
 				LastRefresh: time.Now(),
 			}
@@ -136,9 +136,9 @@ func (rs *RoutesStore) update() {
 		// Update data
 		rs.routesMap[sourceID] = routes
 		// Update state
-		rs.statusMap[sourceID] = StoreStatus{
+		rs.statusMap[sourceID] = Status{
 			LastRefresh: time.Now(),
-			State:       STATE_READY,
+			State:       StateReady,
 		}
 		rs.lastRefresh = time.Now().UTC()
 		rs.Unlock()
@@ -159,7 +159,7 @@ func (rs *RoutesStore) Stats() *api.RoutesStoreStats {
 	totalImported := 0
 	totalFiltered := 0
 
-	rsStats := []RouteServerRoutesStats{}
+	rsStats := []api.RouteServerRoutesStats{}
 
 	rs.RLock()
 	for sourceID, routes := range rs.routesMap {
@@ -168,10 +168,10 @@ func (rs *RoutesStore) Stats() *api.RoutesStoreStats {
 		totalImported += len(routes.Imported)
 		totalFiltered += len(routes.Filtered)
 
-		serverStats := RouteServerRoutesStats{
+		serverStats := api.RouteServerRoutesStats{
 			Name: rs.cfgMap[sourceID].Name,
 
-			Routes: RoutesStats{
+			Routes: api.RoutesStats{
 				Filtered: len(routes.Filtered),
 				Imported: len(routes.Imported),
 			},
@@ -185,8 +185,8 @@ func (rs *RoutesStore) Stats() *api.RoutesStoreStats {
 	rs.RUnlock()
 
 	// Make stats
-	storeStats := &RoutesStoreStats{
-		TotalRoutes: RoutesStats{
+	storeStats := &api.RoutesStoreStats{
+		TotalRoutes: api.RoutesStats{
 			Imported: totalImported,
 			Filtered: totalFiltered,
 		},

@@ -70,13 +70,13 @@ func testCheckPrefixesPresence(prefixes, resultset []string, t *testing.T) {
 
 func makeTestRoutesStore() *RoutesStore {
 
-  neighborsStore := makeTestNeighborsStore()
+	neighborsStore := makeTestNeighborsStore()
 
 	rs1RoutesResponse := loadTestRoutesResponse()
 
 	// Build mapping based on source instances:
 	//   rs : <response>
-	statusMap := make(map[string]StoreStatus)
+	statusMap := make(map[string]Status)
 	routesMap := map[string]*api.RoutesResponse{
 		"rs1": rs1RoutesResponse,
 	}
@@ -98,10 +98,10 @@ func makeTestRoutesStore() *RoutesStore {
 	}
 
 	store := &RoutesStore{
-		routesMap: routesMap,
-		statusMap: statusMap,
-		cfgMap: configMap,
-    neighborsStore: neighborsStore,
+		routesMap:      routesMap,
+		statusMap:      statusMap,
+		cfgMap:         configMap,
+		neighborsStore: neighborsStore,
 	}
 
 	return store
@@ -206,7 +206,7 @@ func TestLookupPrefixForNeighbors(t *testing.T) {
 
 	// Query
 	results := store.LookupPrefixForNeighbors(neighbors)
-  t.Log(results)
+	t.Log(results)
 
 	// We should have retrived 8 prefixes,
 	if len(results) != 8 {
