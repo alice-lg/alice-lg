@@ -19,8 +19,8 @@ else
 endif
 
 
-LDFLAGS=-ldflags="-X github.com/alice-lg/alice-lg/pkg/backend.Version=$(APP_VERSION)"
-LDFLAGS_STATIC=-ldflags="-X github.com/alice-lg/alice-lg/pkg/backend.Version=$(APP_VERSION) -extldflags '-static'"
+LDFLAGS=-ldflags="-X github.com/alice-lg/alice-lg/pkg/config.Version=$(APP_VERSION)"
+LDFLAGS_STATIC=-ldflags="-X github.com/alice-lg/alice-lg/pkg/config.Version=$(APP_VERSION) -extldflags '-static'"
 
 FILES=$(shell find . -depth 1 ! -name "*_test.go" -name "*.go")
 

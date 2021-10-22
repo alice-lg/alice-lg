@@ -1,14 +1,18 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 
+	"github.com/alice-lg/alice-lg/pkg/backend"
+	"github.com/alice-lg/alice-lg/pkg/config"
 	"github.com/alice-lg/alice-lg/pkg/store"
 )
 
 func main() {
 	quit := make(chan bool)
+	ctx := context.Background()
 
 	// Handle commandline parameters
 	configFilenameFlag := flag.String(
@@ -20,7 +24,7 @@ func main() {
 
 	// Load configuration
 	cfg, err = config.LoadConfig(filename)
-  if err != nil {
+	if err != nil {
 		log.Fatal(err)
 	}
 
@@ -33,16 +37,16 @@ func main() {
 	routesStore := store.NewRoutesStore(cfg)
 
 	// Start stores
-	if backend.AliceConfig.Server.EnablePrefixLookup == true {
-		go neighborsStore.Start()
-    go routesStore.Start()
+	if config.EnablePrefixLookup == true {
+		go neighborsStore.Start(ctx)
+		go routesStore.Start(ctx)
 	}
 
 	// Start the Housekeeping
-	go store.Housekeeping(cfg)
+	go store.StartHousekeeping(cfg)
 
-  // Start HTTP API
-	go backend.StartHTTPServer()
+	// Start HTTP API
+	go backend.StartHTTPServer(ctx)
 
 	<-quit
 }

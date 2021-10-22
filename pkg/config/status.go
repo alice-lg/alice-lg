@@ -1,4 +1,4 @@
-package backend
+package config
 
 // Version Alice (set during the build)
 var Version = "unknown"
@@ -8,8 +8,8 @@ var Build = "unknown"
 
 // AppStatus contains application status information
 type AppStatus struct {
-	Version    string               `json:"version"`
-	Routes     RoutesStoreStats     `json:"routes"`
+	Version   string              `json:"version"`
+	Routes    RoutesStoreStats    `json:"routes"`
 	Neighbors NeighborsStoreStats `json:"neighbors"`
 }
 
@@ -29,8 +29,8 @@ func NewAppStatus() (*AppStatus, error) {
 	}
 
 	status := &AppStatus{
-		Version:    Version,
-		Routes:     routesStatus,
+		Version:   Version,
+		Routes:    routesStatus,
 		Neighbors: neighborsStatus,
 	}
 	return status, nil

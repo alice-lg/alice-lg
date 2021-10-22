@@ -7,10 +7,7 @@ import (
 	"github.com/alice-lg/alice-lg/pkg/api"
 )
 
-
-/*
- Make a store and populate it with data
-*/
+// Make a store and populate it with data
 func makeTestNeighborsStore() *NeighborsStore {
 
 	// Populate neighbors
