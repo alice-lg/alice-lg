@@ -10,6 +10,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
+	"github.com/alice-lg/alice-lg/pkg/config"
 )
 
 // Alice LG Rest API
@@ -84,11 +85,11 @@ func endpoint(wrapped apiEndpoint) httprouter.Handle {
 }
 
 // Register api endpoints
-func apiRegisterEndpoints(router *httprouter.Router) error {
+func apiRegisterEndpoints(cfg *config.Config, router *httprouter.Router) error {
 
 	// Meta
 	router.GET("/api/v1/status", endpoint(apiStatusShow))
-	router.GET("/api/v1/config", endpoint(apiConfigShow))
+	router.GET("/api/v1/config", endpoint(apiConfigShow(cfg)))
 
 	// Routeservers
 	router.GET("/api/v1/routeservers",
@@ -107,7 +108,7 @@ func apiRegisterEndpoints(router *httprouter.Router) error {
 		endpoint(apiRoutesListNotExported))
 
 	// Querying
-	if AliceConfig.Server.EnablePrefixLookup == true {
+	if cfg.Server.EnablePrefixLookup == true {
 		router.GET("/api/v1/lookup/prefix",
 			endpoint(apiLookupPrefixGlobal))
 		router.GET("/api/v1/lookup/neighbors",

@@ -9,6 +9,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 
 	"github.com/alice-lg/alice-lg/client"
+	"github.com/alice-lg/alice-lg/pkg/config"
 )
 
 // Web Client
@@ -34,7 +35,7 @@ func webPrepareClientHTML(html string) string {
 
 // Register assets handler and index handler
 // at /static and /
-func webRegisterAssets(ui UIConfig, router *httprouter.Router) error {
+func webRegisterAssets(cfg *config.Config, router *httprouter.Router) error {
 	log.Println("Preparing and installing assets")
 
 	// Prepare client html: Rewrite paths
@@ -44,7 +45,7 @@ func webRegisterAssets(ui UIConfig, router *httprouter.Router) error {
 	}
 	indexHTML := string(indexHTMLData) // TODO: migrate to []byte
 
-	theme := NewTheme(ui.Theme)
+	theme := NewTheme(cfg.UI.Theme)
 	err = theme.RegisterThemeAssets(router)
 	if err != nil {
 		log.Println("Warning:", err)

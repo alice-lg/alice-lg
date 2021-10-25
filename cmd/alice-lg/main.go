@@ -5,13 +5,13 @@ import (
 	"flag"
 	"log"
 
-	"github.com/alice-lg/alice-lg/pkg/backend"
 	"github.com/alice-lg/alice-lg/pkg/config"
+	"github.com/alice-lg/alice-lg/pkg/http"
 	"github.com/alice-lg/alice-lg/pkg/store"
 )
 
 func main() {
-	quit := make(chan bool)
+	done := make(chan bool)
 	ctx := context.Background()
 
 	// Handle commandline parameters
@@ -43,10 +43,11 @@ func main() {
 	}
 
 	// Start the Housekeeping
-	go store.StartHousekeeping(cfg)
+	go store.StartHousekeeping(ctx, cfg)
 
 	// Start HTTP API
-	go backend.StartHTTPServer(ctx)
+	server := http.NewServer(cfg, routesStore, neighborsStore)
+	go server.Start()
 
-	<-quit
+	<-done
 }

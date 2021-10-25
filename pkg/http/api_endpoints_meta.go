@@ -6,12 +6,13 @@ import (
 	"github.com/julienschmidt/httprouter"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
+	"github.com/alice-lg/alice-lg/pkg/config"
 )
 
 // Handle Status Endpoint, this is intended for
 // monitoring and service health checks
 func apiStatusShow(_req *http.Request, _params httprouter.Params) (api.Response, error) {
-	status, err := NewAppStatus()
+	status, err := CollectAppStatus()
 	return status, err
 }
 
@@ -36,26 +37,28 @@ func apiStatus(_req *http.Request, params httprouter.Params) (api.Response, erro
 }
 
 // Handle Config Endpoint
-func apiConfigShow(_req *http.Request, _params httprouter.Params) (api.Response, error) {
-	result := api.ConfigResponse{
-		Asn:            AliceConfig.Server.Asn,
-		BgpCommunities: AliceConfig.UI.BgpCommunities,
-		RejectReasons:  AliceConfig.UI.RoutesRejections.Reasons,
-		Noexport: api.Noexport{
-			LoadOnDemand: AliceConfig.UI.RoutesNoexports.LoadOnDemand,
-		},
-		NoexportReasons: AliceConfig.UI.RoutesNoexports.Reasons,
-		RejectCandidates: api.RejectCandidates{
-			Communities: AliceConfig.UI.RoutesRejectCandidates.Communities,
-		},
-		Rpki:                   api.Rpki(AliceConfig.UI.Rpki),
-		RoutesColumns:          AliceConfig.UI.RoutesColumns,
-		RoutesColumnsOrder:     AliceConfig.UI.RoutesColumnsOrder,
-		NeighborsColumns:      AliceConfig.UI.NeighborsColumns,
-		NeighborsColumnsOrder: AliceConfig.UI.NeighborsColumnsOrder,
-		LookupColumns:          AliceConfig.UI.LookupColumns,
-		LookupColumnsOrder:     AliceConfig.UI.LookupColumnsOrder,
-		PrefixLookupEnabled:    AliceConfig.Server.EnablePrefixLookup,
+func apiConfigShow(cfg *config.Config) apiEndpoint {
+	return func(_req *http.Request, _params httprouter.Params) (api.Response, error) {
+		result := api.ConfigResponse{
+			Asn:            cfg.Server.Asn,
+			BgpCommunities: cfg.UI.BgpCommunities,
+			RejectReasons:  cdf.UI.RoutesRejections.Reasons,
+			Noexport: api.Noexport{
+				LoadOnDemand: cfg.UI.RoutesNoexports.LoadOnDemand,
+			},
+			NoexportReasons: cfg.UI.RoutesNoexports.Reasons,
+			RejectCandidates: api.RejectCandidates{
+				Communities: cfg.UI.RoutesRejectCandidates.Communities,
+			},
+			Rpki:                  api.Rpki(AliceConfig.UI.Rpki),
+			RoutesColumns:         cfg.UI.RoutesColumns,
+			RoutesColumnsOrder:    cfg.UI.RoutesColumnsOrder,
+			NeighborsColumns:      cfg.UI.NeighborsColumns,
+			NeighborsColumnsOrder: cfg.UI.NeighborsColumnsOrder,
+			LookupColumns:         cfg.UI.LookupColumns,
+			LookupColumnsOrder:    cfg.UI.LookupColumnsOrder,
+			PrefixLookupEnabled:   cfg.Server.EnablePrefixLookup,
+		}
+		return result, nil
 	}
-	return result, nil
 }
