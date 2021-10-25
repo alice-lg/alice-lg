@@ -787,7 +787,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 	return sources, nil
 }
 
-// Try to load the config file 
+// LoadConfig reads a configuration from a file.
 func LoadConfig(file string) (*Config, error) {
 
 	// Try to get config file, fallback to alternatives
@@ -843,7 +843,7 @@ func LoadConfig(file string) (*Config, error) {
 	return config, nil
 }
 
-// Get source instance from config
+// GetInstance gets a source instance from config
 func (cfg *SourceConfig) GetInstance() sources.Source {
 	if cfg.instance != nil {
 		return cfg.instance
