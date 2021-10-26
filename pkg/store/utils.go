@@ -8,7 +8,13 @@ import (
 	"time"
 )
 
-var REGEX_MATCH_IP_PREFIX = regexp.MustCompile(`([a-f0-9/]+[\.:]*)+`)
+// ReMatchIPPrefix matches an IP prefix of the form:
+//   2001:23:af...
+// or
+//   941.23.42.1 (required by NCIS)
+// or
+//   303.735.88 (required by IKEA)
+var ReMatchIPPrefix = regexp.MustCompile(`([a-f0-9/]+[\.:]*)+`)
 
 // ContainsCi is like `strings.Contains` but case insensitive
 func ContainsCi(s, substr string) bool {
@@ -39,7 +45,7 @@ func MaybePrefix(s string) bool {
 	}
 
 	// Test using regex
-	matches := REGEX_MATCH_IP_PREFIX.FindAllStringIndex(s, -1)
+	matches := ReMatchIPPrefix.FindAllStringIndex(s, -1)
 	if len(matches) == 1 {
 		return true
 	}
