@@ -85,34 +85,37 @@ func endpoint(wrapped apiEndpoint) httprouter.Handle {
 }
 
 // Register api endpoints
-func apiRegisterEndpoints(cfg *config.Config, router *httprouter.Router) error {
+func (s *Server) apiRegisterEndpoints(
+	cfg *config.Config,
+	router *httprouter.Router,
+) error {
 
 	// Meta
-	router.GET("/api/v1/status", endpoint(apiStatusShow))
-	router.GET("/api/v1/config", endpoint(apiConfigShow(cfg)))
+	router.GET("/api/v1/status", endpoint(s.apiStatusShow))
+	router.GET("/api/v1/config", endpoint(s.apiConfigShow))
 
 	// Routeservers
 	router.GET("/api/v1/routeservers",
-		endpoint(apiRouteserversList))
+		endpoint(s.apiRouteserversList))
 	router.GET("/api/v1/routeservers/:id/status",
-		endpoint(apiStatus))
+		endpoint(s.apiStatus))
 	router.GET("/api/v1/routeservers/:id/neighbors",
-		endpoint(apiNeighborsList))
+		endpoint(s.apiNeighborsList))
 	router.GET("/api/v1/routeservers/:id/neighbors/:neighborId/routes",
-		endpoint(apiRoutesList))
+		endpoint(s.apiRoutesList))
 	router.GET("/api/v1/routeservers/:id/neighbors/:neighborId/routes/received",
-		endpoint(apiRoutesListReceived))
+		endpoint(s.apiRoutesListReceived))
 	router.GET("/api/v1/routeservers/:id/neighbors/:neighborId/routes/filtered",
-		endpoint(apiRoutesListFiltered))
+		endpoint(s.apiRoutesListFiltered))
 	router.GET("/api/v1/routeservers/:id/neighbors/:neighborId/routes/not-exported",
-		endpoint(apiRoutesListNotExported))
+		endpoint(s.apiRoutesListNotExported))
 
 	// Querying
 	if cfg.Server.EnablePrefixLookup == true {
 		router.GET("/api/v1/lookup/prefix",
-			endpoint(apiLookupPrefixGlobal))
+			endpoint(s.apiLookupPrefixGlobal))
 		router.GET("/api/v1/lookup/neighbors",
-			endpoint(apiLookupNeighborsGlobal))
+			endpoint(s.apiLookupNeighborsGlobal))
 	}
 
 	return nil

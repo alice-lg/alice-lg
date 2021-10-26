@@ -89,7 +89,7 @@ func (n *Neighbor) MatchName(name string) bool {
 // A NeighborsResponse is a list of neighbors with
 // caching information.
 type NeighborsResponse struct {
-	Response
+	BackendResponse
 	Neighbors Neighbors `json:"neighbors"`
 }
 
@@ -130,6 +130,6 @@ func (neighbors NeighborsStatus) Swap(i, j int) {
 // NeighborsStatusResponse contains the status of all neighbors
 // on a RS.
 type NeighborsStatusResponse struct {
-	Response
+	BackendResponse
 	Neighbors NeighborsStatus `json:"neighbors"`
 }

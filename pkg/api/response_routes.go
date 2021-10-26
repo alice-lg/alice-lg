@@ -69,7 +69,7 @@ func (routes Routes) Swap(i, j int) {
 
 // RoutesResponse contains all routes from a source
 type RoutesResponse struct {
-	Response
+	BackendResponse
 	Imported    Routes `json:"imported"`
 	Filtered    Routes `json:"filtered"`
 	NotExported Routes `json:"not_exported"`
@@ -78,7 +78,7 @@ type RoutesResponse struct {
 // CacheTTL returns the cache ttl of the reponse
 func (res *RoutesResponse) CacheTTL() time.Duration {
 	now := time.Now().UTC()
-	return res.Response.Meta.TTL.Sub(now)
+	return res.BackendResponse.Meta.TTL.Sub(now)
 }
 
 // Timed responses include the duration of the request

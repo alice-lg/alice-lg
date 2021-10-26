@@ -8,9 +8,7 @@ import (
 // A Response is a general API response. All API responses
 // contain meta information with API version and caching
 // information.
-type Response struct {
-	Meta Meta `json:"api"`
-}
+type Response interface{}
 
 // Details are usually the original backend response
 type Details map[string]interface{}
@@ -75,6 +73,11 @@ type Rpki struct {
 	Invalid    []string `json:"invalid"`
 }
 
+// A BackendResponse contains meta information.
+type BackendResponse struct {
+	Meta Meta `json:"api"`
+}
+
 // Meta contains response meta information
 // like cacheing time and cache ttl or the API version
 type Meta struct {
@@ -103,7 +106,7 @@ type Status struct {
 
 // StatusResponse ??
 type StatusResponse struct {
-	Response
+	BackendResponse
 	Status Status `json:"status"`
 }
 

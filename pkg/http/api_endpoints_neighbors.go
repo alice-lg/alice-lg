@@ -10,7 +10,7 @@ import (
 )
 
 // Handle get neighbors on routeserver
-func apiNeighborsList(
+func (s *Server) apiNeighborsList(
 	_req *http.Request,
 	params httprouter.Params,
 ) (api.Response, error) {
@@ -23,9 +23,9 @@ func apiNeighborsList(
 
 	// Try to fetch neighbors from store, only fall back
 	// to RS query if store is not ready yet
-	sourceStatus := AliceNeighborsStore.SourceStatus(rsID)
+	sourceStatus := s.neighborsStore.SourceStatus(rsID)
 	if sourceStatus.State == STATE_READY {
-		neighbors := AliceNeighborsStore.GetNeighborsAt(rsID)
+		neighbors := s.neighborsStore.GetNeighborsAt(rsID)
 		// Make response
 		neighborsResponse = &api.NeighborsResponse{
 			Api: api.ApiStatus{
@@ -36,16 +36,15 @@ func apiNeighborsList(
 				},
 				ResultFromCache: true, // you bet!
 				Ttl: sourceStatus.LastRefresh.Add(
-					AliceNeighborsStore.refreshInterval),
+					s.neighborsStore.refreshInterval),
 			},
 			Neighbors: neighbors,
 		}
 	} else {
-		source := AliceConfig.SourceInstanceByID(rsID)
+		source := s.neighborsStore.SourceInstanceByID(rsID)
 		if source == nil {
 			return nil, SOURCE_NOT_FOUND_ERROR
 		}
-
 		neighborsResponse, err = source.Neighbors()
 		if err != nil {
 			apiLogSourceError("neighbors", rsID, err)
@@ -55,6 +54,5 @@ func apiNeighborsList(
 
 	// Sort result
 	sort.Sort(&neighborsResponse.Neighbors)
-
 	return neighborsResponse, nil
 }

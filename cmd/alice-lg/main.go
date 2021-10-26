@@ -29,7 +29,7 @@ func main() {
 	}
 
 	// Say hi
-	printBanner()
+	printBanner(cfg)
 	log.Println("Using configuration:", cfg.File)
 
 	// Setup local routes store

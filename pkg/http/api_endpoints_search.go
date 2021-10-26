@@ -11,7 +11,7 @@ import (
 )
 
 // Handle global lookup
-func apiLookupPrefixGlobal(
+func (s *Server) apiLookupPrefixGlobal(
 	req *http.Request,
 	params httprouter.Params,
 ) (api.Response, error) {
@@ -45,11 +45,11 @@ func apiLookupPrefixGlobal(
 	// Perform query
 	var routes api.LookupRoutes
 	if lookupPrefix {
-		routes = AliceRoutesStore.LookupPrefix(q)
+		routes = s.routesStore.LookupPrefix(q)
 
 	} else {
-		neighbors := AliceNeighborsStore.LookupNeighbors(q)
-		routes = AliceRoutesStore.LookupPrefixForNeighbors(neighbors)
+		neighbors := s.neighborsStore.LookupNeighbors(q)
+		routes = s.routesStore.LookupPrefixForNeighbors(neighbors)
 	}
 
 	// Split routes
@@ -89,13 +89,13 @@ func apiLookupPrefixGlobal(
 
 	// Paginate results
 	pageImported := apiQueryMustInt(req, "page_imported", 0)
-	pageSizeImported := AliceConfig.UI.Pagination.RoutesAcceptedPageSize
+	pageSizeImported := s.cfg.UI.Pagination.RoutesAcceptedPageSize
 	routesImported, paginationImported := apiPaginateLookupRoutes(
 		imported, pageImported, pageSizeImported,
 	)
 
 	pageFiltered := apiQueryMustInt(req, "page_filtered", 0)
-	pageSizeFiltered := AliceConfig.UI.Pagination.RoutesFilteredPageSize
+	pageSizeFiltered := s.cfg.UI.Pagination.RoutesFilteredPageSize
 	routesFiltered, paginationFiltered := apiPaginateLookupRoutes(
 		filtered, pageFiltered, pageSizeFiltered,
 	)
@@ -136,13 +136,13 @@ func apiLookupPrefixGlobal(
 	return response, nil
 }
 
-func apiLookupNeighborsGlobal(
+func (s *Server) apiLookupNeighborsGlobal(
 	req *http.Request,
 	params httprouter.Params,
 ) (api.Response, error) {
 	// Query neighbors store
 	filter := api.NeighborFilterFromQuery(req.URL.Query())
-	neighbors := AliceNeighborsStore.FilterNeighbors(filter)
+	neighbors := s.neighborsStore.FilterNeighbors(filter)
 
 	sort.Sort(neighbors)
 
@@ -150,10 +150,10 @@ func apiLookupNeighborsGlobal(
 	response := &api.NeighborsResponse{
 		Api: api.ApiStatus{
 			CacheStatus: api.CacheStatus{
-				CachedAt: AliceNeighborsStore.CachedAt(),
+				CachedAt: s.neighborsStore.CachedAt(),
 			},
 			ResultFromCache: true, // You would not have guessed.
-			Ttl:             AliceNeighborsStore.CacheTTL(),
+			Ttl:             s.neighborsStore.CacheTTL(),
 		},
 		Neighbors: neighbors,
 	}

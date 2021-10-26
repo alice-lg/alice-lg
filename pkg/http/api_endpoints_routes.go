@@ -10,14 +10,17 @@ import (
 )
 
 // Handle routes
-func apiRoutesList(_req *http.Request, params httprouter.Params) (api.Response, error) {
+func (s *Server) apiRoutesList(
+	_req *http.Request,
+	params httprouter.Params,
+) (api.Response, error) {
 	rsID, err := validateSourceID(params.ByName("id"))
 	if err != nil {
 		return nil, err
 	}
 	neighborID := params.ByName("neighborId")
 
-	source := AliceConfig.SourceInstanceByID(rsID)
+	source := s.cfg.SourceInstanceByID(rsID)
 	if source == nil {
 		return nil, SOURCE_NOT_FOUND_ERROR
 	}
@@ -31,7 +34,7 @@ func apiRoutesList(_req *http.Request, params httprouter.Params) (api.Response, 
 }
 
 // Paginated Routes Respponse: Received routes
-func apiRoutesListReceived(
+func (s *Server) apiRoutesListReceived(
 	req *http.Request,
 	params httprouter.Params,
 ) (api.Response, error) {
@@ -44,9 +47,9 @@ func apiRoutesListReceived(
 	}
 
 	neighborID := params.ByName("neighborId")
-	source := AliceConfig.SourceInstanceByID(rsID)
+	source := s.cfg.SourceInstanceByID(rsID)
 	if source == nil {
-		return nil, SOURCE_NOT_FOUND_ERROR
+		return nil, ErrSourceNotFound
 	}
 
 	result, err := source.RoutesReceived(neighborID)
@@ -105,7 +108,7 @@ func apiRoutesListReceived(
 	return response, nil
 }
 
-func apiRoutesListFiltered(
+func (s *Server) apiRoutesListFiltered(
 	req *http.Request,
 	params httprouter.Params,
 ) (api.Response, error) {
@@ -117,9 +120,9 @@ func apiRoutesListFiltered(
 	}
 
 	neighborID := params.ByName("neighborId")
-	source := AliceConfig.SourceInstanceByID(rsID)
+	source := s.cfg.SourceInstanceByID(rsID)
 	if source == nil {
-		return nil, SOURCE_NOT_FOUND_ERROR
+		return nil, ErrSourceNotFound
 	}
 
 	result, err := source.RoutesFiltered(neighborID)
@@ -178,7 +181,7 @@ func apiRoutesListFiltered(
 	return response, nil
 }
 
-func apiRoutesListNotExported(
+func (s *Server) apiRoutesListNotExported(
 	req *http.Request,
 	params httprouter.Params,
 ) (api.Response, error) {
@@ -190,9 +193,9 @@ func apiRoutesListNotExported(
 	}
 
 	neighborID := params.ByName("neighborId")
-	source := AliceConfig.SourceInstanceByID(rsID)
+	source := s.cfg.SourceInstanceByID(rsID)
 	if source == nil {
-		return nil, SOURCE_NOT_FOUND_ERROR
+		return nil, ErrSourceNotFound
 	}
 
 	result, err := source.RoutesNotExported(neighborID)
@@ -226,7 +229,7 @@ func apiRoutesListNotExported(
 
 	// Paginate results
 	page := apiQueryMustInt(req, "page", 0)
-	pageSize := AliceConfig.UI.Pagination.RoutesNotExportedPageSize
+	pageSize := s.cfg.UI.Pagination.RoutesNotExportedPageSize
 	routes, pagination := apiPaginateRoutes(routes, page, pageSize)
 
 	// Calculate query duration

@@ -5,7 +5,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/alice-lg/alice-lg/pkg/backend"
+	"github.com/alice-lg/alice-lg/pkg/config"
+	"github.com/alice-lg/alice-lg/pkg/http"
+	"github.com/alice-lg/alice-lg/pkg/store"
 )
 
 var banner = []string{
@@ -28,9 +30,12 @@ var banner = []string{
 	" **                                                      ",
 }
 
-func printBanner() {
-	status, _ := backend.NewAppStatus()
-	cfg := backend.AliceConfig
+func printBanner(
+	cfg *config.Config,
+	neigborsStore *store.NeighborsStore,
+	routesStore *store.RoutesStore,
+) {
+	status, _ := http.CollectAppStatus(routesStore, neighborsStore)
 	mapper := strings.NewReplacer(
 		"?VERSION", status.Version,
 		"?LISTEN", cfg.Server.Listen,

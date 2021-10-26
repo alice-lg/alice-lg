@@ -38,11 +38,11 @@ func (s *Server) Start() {
 	router := httprouter.New()
 
 	// Serve static content
-	if err := webRegisterAssets(cfg, router); err != nil {
+	if err := s.webRegisterAssets(router); err != nil {
 		log.Fatal(err)
 	}
 
-	if err := apiRegisterEndpoints(cfg, router); err != nil {
+	if err := s.apiRegisterEndpoints(router); err != nil {
 		log.Fatal(err)
 	}
 

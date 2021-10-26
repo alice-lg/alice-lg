@@ -10,11 +10,14 @@ import (
 )
 
 // Handle Routeservers List
-func apiRouteserversList(_req *http.Request, _params httprouter.Params) (api.Response, error) {
+func (s *Server) apiRouteserversList(
+	_req *http.Request,
+	_params httprouter.Params,
+) (api.Response, error) {
 	// Get list of sources from config,
 	routeservers := api.Routeservers{}
 
-	sources := AliceConfig.Sources
+	sources := s.cfg.Sources
 	for _, source := range sources {
 		routeservers = append(routeservers, api.Routeserver{
 			Id:         source.ID,

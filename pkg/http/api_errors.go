@@ -13,60 +13,65 @@ import (
 	"github.com/alice-lg/alice-lg/pkg/api"
 )
 
-// ResourceNotFoundError is a 404 error
-type ResourceNotFoundError struct{}
+// ErrResourceNotFoundError is a 404 error
+type ErrResourceNotFoundError struct{}
 
 // Error implements the error interface and returns
 // the error message
-func (err *ResourceNotFoundError) Error() string {
+func (err *ErrResourceNotFoundError) Error() string {
 	return "resource not found"
 }
 
 // Variables
 var (
-	SOURCE_NOT_FOUND_ERROR = &ResourceNotFoundError{}
+	ErrSourceNotFound = &ErrResourceNotFoundError{}
 )
 
-// Error Constants
+// Error tags
 const (
-	GENERIC_ERROR_TAG      = "GENERIC_ERROR"
-	CONNECTION_REFUSED_TAG = "CONNECTION_REFUSED"
-	CONNECTION_TIMEOUT_TAG = "CONNECTION_TIMEOUT"
-	RESOURCE_NOT_FOUND_TAG = "NOT_FOUND"
+	TagGenericError      = "GENERIC_ERROR"
+	TagConnectionRefused = "CONNECTION_REFUSED"
+	TagConnectionTimeout = "CONNECTION_TIMEOUT"
+	TagResourceNotFound  = "NOT_FOUND"
 )
 
+// Error codes
 const (
-	GENERIC_ERROR_CODE      = 42
-	CONNECTION_REFUSED_CODE = 100
-	CONNECTION_TIMEOUT_CODE = 101
-	RESOURCE_NOT_FOUND_CODE = 404
+	CodeGeneric           = 42
+	CodeConnectionRefused = 100
+	CodeConnectionTimeout = 101
+	CodeResourceNotFound  = 404
 )
 
+// Error status codes
 const (
-	ERROR_STATUS              = http.StatusInternalServerError
-	RESOURCE_NOT_FOUND_STATUS = http.StatusNotFound
+	StatusError            = http.StatusInternalServerError
+	StatusResourceNotFound = http.StatusNotFound
 )
 
 // Handle an error and create a error API response
-func apiErrorResponse(routeserverId string, err error) (api.ErrorResponse, int) {
-	code := GENERIC_ERROR_CODE
+func apiErrorResponse(
+	routeserverID string,
+	err error,
+) (api.ErrorResponse, int) {
+	code := CodeGeneric
 	message := err.Error()
-	tag := GENERIC_ERROR_TAG
-	status := ERROR_STATUS
+	tag := TagGenericError
+	status := StatusError
 
 	switch e := err.(type) {
 	case *ResourceNotFoundError:
-		tag = RESOURCE_NOT_FOUND_TAG
-		code = RESOURCE_NOT_FOUND_CODE
-		status = RESOURCE_NOT_FOUND_STATUS
+		tag = TagResourceNotFound
+		code = CodeResourceNotFound
+		status = StatusResourceNotFound
 	case *url.Error:
 		if strings.Contains(message, "connection refused") {
-			tag = CONNECTION_REFUSED_TAG
-			code = CONNECTION_REFUSED_CODE
+			tag = TagConnectionRefused
+			code = CodeConnectionRefused
 			message = "Connection refused while dialing the API"
 		} else if e.Timeout() {
-			tag = CONNECTION_TIMEOUT_TAG
-			code = CONNECTION_TIMEOUT_CODE
+			tag = TagConnectionTimeout
+			code = CodeConnectionTimeout
 			message = "Connection timed out when connecting to the backend API"
 		}
 	}
@@ -75,6 +80,6 @@ func apiErrorResponse(routeserverId string, err error) (api.ErrorResponse, int) 
 		Code:          code,
 		Tag:           tag,
 		Message:       message,
-		RouteserverId: routeserverId,
+		RouteserverID: routeserverID,
 	}, status
 }
