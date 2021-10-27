@@ -23,23 +23,23 @@ func main() {
 	flag.Parse()
 
 	// Load configuration
-	cfg, err = config.LoadConfig(filename)
+	cfg, err := config.LoadConfig(*configFilenameFlag)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Say hi
-	printBanner(cfg)
-	log.Println("Using configuration:", cfg.File)
-
 	// Setup local routes store
 	neighborsStore := store.NewNeighborsStore(cfg)
-	routesStore := store.NewRoutesStore(cfg)
+	routesStore := store.NewRoutesStore(neighborsStore, cfg)
+
+	// Say hi
+	printBanner(cfg, neighborsStore, routesStore)
+	log.Println("Using configuration:", cfg.File)
 
 	// Start stores
-	if config.EnablePrefixLookup == true {
-		go neighborsStore.Start(ctx)
-		go routesStore.Start(ctx)
+	if cfg.Server.EnablePrefixLookup == true {
+		go neighborsStore.Start()
+		go routesStore.Start()
 	}
 
 	// Start the Housekeeping

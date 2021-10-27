@@ -32,7 +32,7 @@ var banner = []string{
 
 func printBanner(
 	cfg *config.Config,
-	neigborsStore *store.NeighborsStore,
+	neighborsStore *store.NeighborsStore,
 	routesStore *store.RoutesStore,
 ) {
 	status, _ := http.CollectAppStatus(routesStore, neighborsStore)

@@ -1,7 +1,6 @@
 package store
 
 import (
-	"context"
 	"log"
 	"strings"
 	"sync"
@@ -66,7 +65,7 @@ func NewRoutesStore(
 }
 
 // Start starts the routes store
-func (rs *RoutesStore) Start(ctx context.Context) {
+func (rs *RoutesStore) Start() {
 	log.Println("Starting local routes store")
 	log.Println("Routes Store refresh interval set to:", rs.refreshInterval)
 	if err := rs.init(); err != nil {
