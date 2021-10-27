@@ -8,9 +8,6 @@ import (
 	"strings"
 
 	"github.com/julienschmidt/httprouter"
-
-	"github.com/alice-lg/alice-lg/pkg/api"
-	"github.com/alice-lg/alice-lg/pkg/config"
 )
 
 // Alice LG Rest API
@@ -33,7 +30,9 @@ import (
 //     LookupPrefix   /api/v1/lookup/prefix?q=<prefix>
 //     LookupNeighbor /api/v1/lookup/neighbor?asn=1235
 
-type apiEndpoint func(*http.Request, httprouter.Params) (api.Response, error)
+type response interface{}
+
+type apiEndpoint func(*http.Request, httprouter.Params) (response, error)
 
 // Wrap handler for access controll, throtteling and compression
 func endpoint(wrapped apiEndpoint) httprouter.Handle {
@@ -86,7 +85,6 @@ func endpoint(wrapped apiEndpoint) httprouter.Handle {
 
 // Register api endpoints
 func (s *Server) apiRegisterEndpoints(
-	cfg *config.Config,
 	router *httprouter.Router,
 ) error {
 
@@ -111,7 +109,7 @@ func (s *Server) apiRegisterEndpoints(
 		endpoint(s.apiRoutesListNotExported))
 
 	// Querying
-	if cfg.Server.EnablePrefixLookup == true {
+	if s.cfg.Server.EnablePrefixLookup == true {
 		router.GET("/api/v1/lookup/prefix",
 			endpoint(s.apiLookupPrefixGlobal))
 		router.GET("/api/v1/lookup/neighbors",

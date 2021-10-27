@@ -69,7 +69,7 @@ func (routes Routes) Swap(i, j int) {
 
 // RoutesResponse contains all routes from a source
 type RoutesResponse struct {
-	Meta        *Meta  `json:api`
+	Response
 	Imported    Routes `json:"imported"`
 	Filtered    Routes `json:"filtered"`
 	NotExported Routes `json:"not_exported"`
@@ -78,11 +78,11 @@ type RoutesResponse struct {
 // CacheTTL returns the cache ttl of the reponse
 func (res *RoutesResponse) CacheTTL() time.Duration {
 	now := time.Now().UTC()
-	return res.Meta.TTL.Sub(now)
+	return res.Response.Meta.TTL.Sub(now)
 }
 
-// Timed responses include the duration of the request
-type Timed struct {
+// TimedResponse include the duration of the request
+type TimedResponse struct {
 	RequestDuration float64 `json:"request_duration_ms"`
 }
 
@@ -95,13 +95,13 @@ type Pagination struct {
 	TotalResults int `json:"total_results"`
 }
 
-// A Paginated response with pagination info
-type Paginated struct {
+// A PaginatedResponse with pagination info
+type PaginatedResponse struct {
 	Pagination Pagination `json:"pagination"`
 }
 
-// Searchable responses include filters applied and available
-type Searchable struct {
+// FilteredResponse includes filters applied and available
+type FilteredResponse struct {
 	FiltersAvailable *SearchFilters `json:"filters_available"`
 	FiltersApplied   *SearchFilters `json:"filters_applied"`
 }
@@ -157,33 +157,49 @@ func (r LookupRoutes) Swap(i, j int) {
 	r[i], r[j] = r[j], r[i]
 }
 
+// RoutesLookup contains routes and pagination info
+type RoutesLookup struct {
+	Routes     LookupRoutes `json:"routes"`
+	Pagination Pagination   `json:"pagination"`
+}
+
 // RoutesLookupResponse is a PaginatedResponse with
 // a set of lookup routes, as the result of a query of
 // a specific route server.
 type RoutesLookupResponse struct {
-	Paginated
-	Timed
-	Searchable
+	Response
+	PaginatedResponse
+	TimedResponse
+	FilteredResponse
 	Routes LookupRoutes `json:"routes"`
-	Meta   *Meta        `json:"api"`
 }
 
 // GlobalRoutesLookupResponse is the result of a routes
 // query across all route servers.
 type GlobalRoutesLookupResponse struct {
 	Response
-	Paginated
-	Timed
-	Searchable
+	PaginatedResponse
+	TimedResponse
+	FilteredResponse
 	Routes LookupRoutes `json:"routes"`
+}
+
+// A PaginatedRoutesResponse includes routes and pagination
+// information form a single route server
+type PaginatedRoutesResponse struct {
+	Response
+	PaginatedResponse
+	TimedResponse
+	FilteredResponse
+	RoutesResponse
 }
 
 // A PaginatedRoutesLookupResponse TODO
 type PaginatedRoutesLookupResponse struct {
 	Response
-	Timed
-	Searchable
+	TimedResponse
+	FilteredResponse
 
-	Imported *RoutesLookupResponse `json:"imported"`
-	Filtered *RoutesLookupResponse `json:"filtered"`
+	Imported *RoutesLookup `json:"imported"`
+	Filtered *RoutesLookup `json:"filtered"`
 }

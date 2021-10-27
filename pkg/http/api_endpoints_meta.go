@@ -13,7 +13,7 @@ import (
 func (s *Server) apiStatusShow(
 	_req *http.Request,
 	_params httprouter.Params,
-) (api.Response, error) {
+) (response, error) {
 	status, err := CollectAppStatus(s.routesStore, s.neighborsStore)
 	return status, err
 }
@@ -22,7 +22,7 @@ func (s *Server) apiStatusShow(
 func (s *Server) apiStatus(
 	_req *http.Request,
 	params httprouter.Params,
-) (api.Response, error) {
+) (response, error) {
 	rsID, err := validateSourceID(params.ByName("id"))
 	if err != nil {
 		return nil, err
@@ -35,7 +35,7 @@ func (s *Server) apiStatus(
 
 	result, err := source.Status()
 	if err != nil {
-		apiLogSourceError("status", rsID, err)
+		s.logSourceError("status", rsID, err)
 	}
 
 	return result, err
@@ -45,7 +45,7 @@ func (s *Server) apiStatus(
 func (s *Server) apiConfigShow(
 	_req *http.Request,
 	_params httprouter.Params,
-) (api.Response, error) {
+) (response, error) {
 	result := api.ConfigResponse{
 		Asn:            s.cfg.Server.Asn,
 		BGPCommunities: s.cfg.UI.BGPCommunities,

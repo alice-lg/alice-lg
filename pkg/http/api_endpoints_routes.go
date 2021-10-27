@@ -13,7 +13,7 @@ import (
 func (s *Server) apiRoutesList(
 	_req *http.Request,
 	params httprouter.Params,
-) (api.Response, error) {
+) (response, error) {
 	rsID, err := validateSourceID(params.ByName("id"))
 	if err != nil {
 		return nil, err
@@ -27,7 +27,7 @@ func (s *Server) apiRoutesList(
 
 	result, err := source.Routes(neighborID)
 	if err != nil {
-		apiLogSourceError("routes", rsID, neighborID, err)
+		s.logSourceError("routes", rsID, neighborID, err)
 	}
 
 	return result, err
@@ -37,7 +37,7 @@ func (s *Server) apiRoutesList(
 func (s *Server) apiRoutesListReceived(
 	req *http.Request,
 	params httprouter.Params,
-) (api.Response, error) {
+) (response, error) {
 	// Measure response time
 	t0 := time.Now()
 
@@ -54,7 +54,7 @@ func (s *Server) apiRoutesListReceived(
 
 	result, err := source.RoutesReceived(neighborID)
 	if err != nil {
-		apiLogSourceError("routes_received", rsID, neighborID, err)
+		s.logSourceError("routes_received", rsID, neighborID, err)
 		return nil, err
 	}
 
@@ -91,18 +91,22 @@ func (s *Server) apiRoutesListReceived(
 
 	// Make paginated response
 	response := api.PaginatedRoutesResponse{
-		RoutesResponse: &api.RoutesResponse{
-			Api:      result.Api,
+		RoutesResponse: api.RoutesResponse{
+			Response: api.Response{
+				Meta: result.Response.Meta,
+			},
 			Imported: routes,
 		},
 		TimedResponse: api.TimedResponse{
 			RequestDuration: DurationMs(queryDuration),
 		},
-		FilterableResponse: api.FilterableResponse{
+		FilteredResponse: api.FilteredResponse{
 			FiltersAvailable: filtersAvailable,
 			FiltersApplied:   filtersApplied,
 		},
-		Pagination: pagination,
+		PaginatedResponse: api.PaginatedResponse{
+			Pagination: pagination,
+		},
 	}
 
 	return response, nil
@@ -111,7 +115,7 @@ func (s *Server) apiRoutesListReceived(
 func (s *Server) apiRoutesListFiltered(
 	req *http.Request,
 	params httprouter.Params,
-) (api.Response, error) {
+) (response, error) {
 	t0 := time.Now()
 
 	rsID, err := validateSourceID(params.ByName("id"))
@@ -127,7 +131,7 @@ func (s *Server) apiRoutesListFiltered(
 
 	result, err := source.RoutesFiltered(neighborID)
 	if err != nil {
-		apiLogSourceError("routes_filtered", rsID, neighborID, err)
+		s.logSourceError("routes_filtered", rsID, neighborID, err)
 		return nil, err
 	}
 
@@ -164,18 +168,22 @@ func (s *Server) apiRoutesListFiltered(
 
 	// Make response
 	response := api.PaginatedRoutesResponse{
-		RoutesResponse: &api.RoutesResponse{
-			Api:      result.Api,
+		RoutesResponse: api.RoutesResponse{
+			Response: api.Response{
+				Meta: result.Response.Meta,
+			},
 			Filtered: routes,
 		},
 		TimedResponse: api.TimedResponse{
 			RequestDuration: DurationMs(queryDuration),
 		},
-		FilterableResponse: api.FilterableResponse{
+		FilteredResponse: api.FilteredResponse{
 			FiltersAvailable: filtersAvailable,
 			FiltersApplied:   filtersApplied,
 		},
-		Pagination: pagination,
+		PaginatedResponse: api.PaginatedResponse{
+			Pagination: pagination,
+		},
 	}
 
 	return response, nil
@@ -184,7 +192,7 @@ func (s *Server) apiRoutesListFiltered(
 func (s *Server) apiRoutesListNotExported(
 	req *http.Request,
 	params httprouter.Params,
-) (api.Response, error) {
+) (response, error) {
 	t0 := time.Now()
 
 	rsID, err := validateSourceID(params.ByName("id"))
@@ -200,7 +208,7 @@ func (s *Server) apiRoutesListNotExported(
 
 	result, err := source.RoutesNotExported(neighborID)
 	if err != nil {
-		apiLogSourceError("routes_not_exported", rsID, neighborID, err)
+		s.logSourceError("routes_not_exported", rsID, neighborID, err)
 		return nil, err
 	}
 
@@ -237,18 +245,22 @@ func (s *Server) apiRoutesListNotExported(
 
 	// Make response
 	response := api.PaginatedRoutesResponse{
-		RoutesResponse: &api.RoutesResponse{
-			Api:         result.Api,
+		RoutesResponse: api.RoutesResponse{
+			Response: api.Response{
+				Meta: result.Response.Meta,
+			},
 			NotExported: routes,
 		},
 		TimedResponse: api.TimedResponse{
 			RequestDuration: DurationMs(queryDuration),
 		},
-		FilterableResponse: api.FilterableResponse{
+		FilteredResponse: api.FilteredResponse{
 			FiltersAvailable: filtersAvailable,
 			FiltersApplied:   filtersApplied,
 		},
-		Pagination: pagination,
+		PaginatedResponse: api.PaginatedResponse{
+			Pagination: pagination,
+		},
 	}
 
 	return response, nil

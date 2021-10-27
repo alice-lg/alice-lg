@@ -47,5 +47,5 @@ func (s *Server) Start() {
 	}
 
 	// Start http server
-	log.Fatal(http.ListenAndServe(cfg.Server.Listen, router))
+	log.Fatal(http.ListenAndServe(s.cfg.Server.Listen, router))
 }

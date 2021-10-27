@@ -247,7 +247,9 @@ func (b *GenericBirdwatcher) Status() (*api.StatusResponse, error) {
 	}
 
 	response := &api.StatusResponse{
-		Meta:   apiStatus,
+		Response: api.Response{
+			Meta: apiStatus,
+		},
 		Status: birdStatus,
 	}
 
@@ -272,7 +274,9 @@ func (b *GenericBirdwatcher) NeighborsStatus() (
 	}
 
 	response := &api.NeighborsStatusResponse{
-		Meta:      apiStatus,
+		Response: api.Response{
+			Meta: apiStatus,
+		},
 		Neighbors: neighbors,
 	}
 	return response, nil // dereference for now
@@ -317,7 +321,9 @@ func (b *GenericBirdwatcher) LookupPrefix(
 
 	// Make result
 	response := &api.RoutesLookupResponse{
-		Meta:   apiStatus,
+		Response: api.Response{
+			Meta: apiStatus,
+		},
 		Routes: results,
 	}
 	return response, nil

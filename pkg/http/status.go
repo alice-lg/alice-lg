@@ -9,8 +9,8 @@ import (
 // AppStatus contains application status information
 type AppStatus struct {
 	Version   string                  `json:"version"`
-	Routes    api.RoutesStoreStats    `json:"routes"`
-	Neighbors api.NeighborsStoreStats `json:"neighbors"`
+	Routes    *api.RoutesStoreStats    `json:"routes"`
+	Neighbors *api.NeighborsStoreStats `json:"neighbors"`
 }
 
 // CollectAppStatus initializes the application

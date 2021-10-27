@@ -15,7 +15,7 @@ import (
 func (s *Server) apiNeighborsList(
 	_req *http.Request,
 	params httprouter.Params,
-) (api.Response, error) {
+) (response, error) {
 	rsID, err := validateSourceID(params.ByName("id"))
 	if err != nil {
 		return nil, err
@@ -30,26 +30,28 @@ func (s *Server) apiNeighborsList(
 		neighbors := s.neighborsStore.GetNeighborsAt(rsID)
 		// Make response
 		neighborsResponse = &api.NeighborsResponse{
-			Meta: &api.Meta{
-				Version: config.Version,
-				CacheStatus: api.CacheStatus{
-					OrigTTL:  0,
-					CachedAt: sourceStatus.LastRefresh,
+			Response: api.Response{
+				Meta: &api.Meta{
+					Version: config.Version,
+					CacheStatus: api.CacheStatus{
+						OrigTTL:  0,
+						CachedAt: sourceStatus.LastRefresh,
+					},
+					ResultFromCache: true, // you bet!
+					TTL: sourceStatus.LastRefresh.Add(
+						s.neighborsStore.RefreshInterval),
 				},
-				ResultFromCache: true, // you bet!
-				TTL: sourceStatus.LastRefresh.Add(
-					s.neighborsStore.RefreshInterval),
 			},
 			Neighbors: neighbors,
 		}
 	} else {
-		source := s.neighborsStore.SourceInstanceByID(rsID)
+		source := s.cfg.SourceInstanceByID(rsID)
 		if source == nil {
 			return nil, ErrSourceNotFound
 		}
 		neighborsResponse, err = source.Neighbors()
 		if err != nil {
-			apiLogSourceError("neighbors", rsID, err)
+			s.logSourceError("neighbors", rsID, err)
 			return nil, err
 		}
 	}

@@ -9,7 +9,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 
 	"github.com/alice-lg/alice-lg/client"
-	"github.com/alice-lg/alice-lg/pkg/config"
 )
 
 // Web Client
@@ -17,8 +16,8 @@ import (
 
 // Prepare client HTML:
 // Set paths and add version to assets.
-func webPrepareClientHTML(html string) string {
-	status, _ := NewAppStatus()
+func (s*Server)webPrepareClientHTML(html string) string {
+	status, _ := CollectAppStatus(s.routesStore, s.neighborsStore)
 
 	// Replace paths and tags
 	rewriter := strings.NewReplacer(
@@ -35,7 +34,7 @@ func webPrepareClientHTML(html string) string {
 
 // Register assets handler and index handler
 // at /static and /
-func webRegisterAssets(cfg *config.Config, router *httprouter.Router) error {
+func (s *Server) webRegisterAssets(router *httprouter.Router) error {
 	log.Println("Preparing and installing assets")
 
 	// Prepare client html: Rewrite paths
@@ -45,14 +44,14 @@ func webRegisterAssets(cfg *config.Config, router *httprouter.Router) error {
 	}
 	indexHTML := string(indexHTMLData) // TODO: migrate to []byte
 
-	theme := NewTheme(cfg.UI.Theme)
+	theme := NewTheme(s.cfg.UI.Theme)
 	err = theme.RegisterThemeAssets(router)
 	if err != nil {
 		log.Println("Warning:", err)
 	}
 
 	// Update paths
-	indexHTML = webPrepareClientHTML(indexHTML)
+	indexHTML = s.webPrepareClientHTML(indexHTML)
 
 	// Register static assets
 	router.Handler("GET", "/static/*path", client.AssetsHTTPHandler("/static"))

@@ -8,16 +8,16 @@ import (
 
 func TestApiRoutesPagination(t *testing.T) {
 	routes := api.Routes{
-		&api.Route{Id: "r01"},
-		&api.Route{Id: "r02"},
-		&api.Route{Id: "r03"},
-		&api.Route{Id: "r04"},
-		&api.Route{Id: "r05"},
-		&api.Route{Id: "r06"},
-		&api.Route{Id: "r07"},
-		&api.Route{Id: "r08"},
-		&api.Route{Id: "r09"},
-		&api.Route{Id: "r10"},
+		&api.Route{ID: "r01"},
+		&api.Route{ID: "r02"},
+		&api.Route{ID: "r03"},
+		&api.Route{ID: "r04"},
+		&api.Route{ID: "r05"},
+		&api.Route{ID: "r06"},
+		&api.Route{ID: "r07"},
+		&api.Route{ID: "r08"},
+		&api.Route{ID: "r09"},
+		&api.Route{ID: "r10"},
 	}
 
 	paginated, pagination := apiPaginateRoutes(routes, 0, 8)
@@ -36,13 +36,13 @@ func TestApiRoutesPagination(t *testing.T) {
 
 	// Check paginated slicing
 	r := paginated[0]
-	if r.Id != "r01" {
-		t.Error("First route on page 0 should be r01, got:", r.Id)
+	if r.ID != "r01" {
+		t.Error("First route on page 0 should be r01, got:", r.ID)
 	}
 
 	r = paginated[len(paginated)-1]
-	if r.Id != "r08" {
-		t.Error("Last route should be r08, but got:", r.Id)
+	if r.ID != "r08" {
+		t.Error("Last route should be r08, but got:", r.ID)
 	}
 
 	// Second page
@@ -52,13 +52,13 @@ func TestApiRoutesPagination(t *testing.T) {
 	}
 
 	r = paginated[0]
-	if r.Id != "r09" {
-		t.Error("First route on page 1 should be r09, got:", r.Id)
+	if r.ID != "r09" {
+		t.Error("First route on page 1 should be r09, got:", r.ID)
 	}
 
 	r = paginated[len(paginated)-1]
-	if r.Id != "r10" {
-		t.Error("Last route should be r10, but got:", r.Id)
+	if r.ID != "r10" {
+		t.Error("Last route should be r10, but got:", r.ID)
 	}
 
 	// Access out of bound page

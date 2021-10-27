@@ -15,7 +15,7 @@ import (
 func (s *Server) apiLookupPrefixGlobal(
 	req *http.Request,
 	params httprouter.Params,
-) (api.Response, error) {
+) (response, error) {
 	// TODO: This function is way too long
 
 	// Get prefix to query
@@ -106,29 +106,27 @@ func (s *Server) apiLookupPrefixGlobal(
 
 	// Make response
 	response := api.PaginatedRoutesLookupResponse{
-		Api: api.ApiStatus{
-			CacheStatus: api.CacheStatus{
-				CachedAt: AliceRoutesStore.CachedAt(),
+		Response: api.Response{
+			Meta: &api.Meta{
+				CacheStatus: api.CacheStatus{
+					CachedAt: s.routesStore.CachedAt(),
+				},
+				ResultFromCache: true, // Well.
+				TTL:             s.routesStore.CacheTTL(),
 			},
-			ResultFromCache: true, // Well.
-			Ttl:             AliceRoutesStore.CacheTTL(),
 		},
 		TimedResponse: api.TimedResponse{
 			RequestDuration: DurationMs(queryDuration),
 		},
-		Imported: &api.LookupRoutesResponse{
-			Routes: routesImported,
-			PaginatedResponse: &api.PaginatedResponse{
-				Pagination: paginationImported,
-			},
+		Imported: &api.RoutesLookup{
+			Routes:     routesImported,
+			Pagination: paginationImported,
 		},
-		Filtered: &api.LookupRoutesResponse{
-			Routes: routesFiltered,
-			PaginatedResponse: &api.PaginatedResponse{
-				Pagination: paginationFiltered,
-			},
+		Filtered: &api.RoutesLookup{
+			Routes:     routesFiltered,
+			Pagination: paginationFiltered,
 		},
-		FilterableResponse: api.FilterableResponse{
+		FilteredResponse: api.FilteredResponse{
 			FiltersAvailable: filtersAvailable,
 			FiltersApplied:   filtersApplied,
 		},
@@ -140,7 +138,7 @@ func (s *Server) apiLookupPrefixGlobal(
 func (s *Server) apiLookupNeighborsGlobal(
 	req *http.Request,
 	params httprouter.Params,
-) (api.Response, error) {
+) (response, error) {
 	// Query neighbors store
 	filter := api.NeighborFilterFromQuery(req.URL.Query())
 	neighbors := s.neighborsStore.FilterNeighbors(filter)
@@ -149,12 +147,14 @@ func (s *Server) apiLookupNeighborsGlobal(
 
 	// Make response
 	response := &api.NeighborsResponse{
-		Api: api.ApiStatus{
-			CacheStatus: api.CacheStatus{
-				CachedAt: s.neighborsStore.CachedAt(),
+		Response: api.Response{
+			Meta: &api.Meta{
+				CacheStatus: api.CacheStatus{
+					CachedAt: s.neighborsStore.CachedAt(),
+				},
+				ResultFromCache: true, // You would not have guessed.
+				TTL:             s.neighborsStore.CacheTTL(),
 			},
-			ResultFromCache: true, // You would not have guessed.
-			Ttl:             s.neighborsStore.CacheTTL(),
 		},
 		Neighbors: neighbors,
 	}

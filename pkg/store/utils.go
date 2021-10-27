@@ -4,7 +4,6 @@ package store
 import (
 	"strconv"
 	"strings"
-	"time"
 )
 
 // ContainsCi is like `strings.Contains` but case insensitive
@@ -38,9 +37,4 @@ func SerializeReasons(reasons map[int]string) map[string]string {
 		res[strconv.Itoa(id)] = reason
 	}
 	return res
-}
-
-// DurationMs converts time.Duration to milliseconds
-func DurationMs(d time.Duration) float64 {
-	return float64(d) / 1000.0 / 1000.0 // nano -> micro -> milli
 }

@@ -89,15 +89,15 @@ func (n *Neighbor) MatchName(name string) bool {
 // A NeighborsResponse is a list of neighbors with
 // caching information.
 type NeighborsResponse struct {
+	Response
 	Neighbors Neighbors `json:"neighbors"`
-	Meta      *Meta     `json:"api"`
 }
 
 // CacheTTL returns the duration of validity
 // of the neighbor response.
 func (res *NeighborsResponse) CacheTTL() time.Duration {
 	now := time.Now().UTC()
-	return res.Meta.TTL.Sub(now)
+	return res.Response.Meta.TTL.Sub(now)
 }
 
 // NeighborsLookupResults is a mapping of lookup neighbors.
@@ -130,6 +130,6 @@ func (neighbors NeighborsStatus) Swap(i, j int) {
 // NeighborsStatusResponse contains the status of all neighbors
 // on a RS.
 type NeighborsStatusResponse struct {
+	Response
 	Neighbors NeighborsStatus `json:"neighbors"`
-	Meta      *Meta           `json:"api"`
 }

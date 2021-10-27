@@ -7,12 +7,16 @@ import (
 )
 
 // Log an api error
-func apiLogSourceError(module string, sourceID string, params ...interface{}) {
+func (s *Server) logSourceError(
+	module string,
+	sourceID string,
+	params ...interface{},
+) {
 	var err error
 	args := []string{}
 
 	// Get source configuration
-	source := AliceConfig.SourceByID(sourceID)
+	source := s.cfg.SourceByID(sourceID)
 	sourceName := "unknown"
 	if source != nil {
 		sourceName = source.Name

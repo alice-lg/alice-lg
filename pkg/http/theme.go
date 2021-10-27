@@ -25,21 +25,21 @@ import (
 	"path/filepath"
 
 	"github.com/julienschmidt/httprouter"
+
+	"github.com/alice-lg/alice-lg/pkg/config"
 )
 
 // Theme is a client customization through additional
 // HTML, CSS and JS content.
 type Theme struct {
-	Config ThemeConfig
+	Config config.ThemeConfig
 }
 
 // NewTheme creates a theme from a config
-func NewTheme(config ThemeConfig) *Theme {
-	theme := &Theme{
+func NewTheme(config config.ThemeConfig) *Theme {
+	return &Theme{
 		Config: config,
 	}
-
-	return theme
 }
 
 // Get includable files from theme directory

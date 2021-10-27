@@ -134,7 +134,9 @@ func (src *SingleTableBirdwatcher) fetchRequiredRoutes(
 	}
 
 	response = &api.RoutesResponse{
-		Meta:     apiStatus,
+		Response: api.Response{
+			Meta: apiStatus,
+		},
 		Imported: importedRoutes,
 		Filtered: filteredRoutes,
 	}
@@ -172,7 +174,9 @@ func (src *SingleTableBirdwatcher) Neighbors() (*api.NeighborsResponse, error) {
 	}
 
 	response = &api.NeighborsResponse{
-		Meta:      apiStatus,
+		Response: api.Response{
+			Meta: apiStatus,
+		},
 		Neighbors: neighbors,
 	}
 
@@ -279,7 +283,9 @@ func (src *SingleTableBirdwatcher) RoutesNotExported(
 	}
 
 	response = &api.RoutesResponse{
-		Meta:        apiStatus,
+		Response: api.Response{
+			Meta: apiStatus,
+		},
 		NotExported: routes,
 	}
 
@@ -311,7 +317,9 @@ func (src *SingleTableBirdwatcher) AllRoutes() (*api.RoutesResponse, error) {
 	}
 
 	response := &api.RoutesResponse{
-		Meta: apiStatus,
+		Response: api.Response{
+			Meta: apiStatus,
+		},
 	}
 
 	// Parse the routes

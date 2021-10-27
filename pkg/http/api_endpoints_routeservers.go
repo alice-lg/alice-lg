@@ -13,14 +13,14 @@ import (
 func (s *Server) apiRouteServersList(
 	_req *http.Request,
 	_params httprouter.Params,
-) (api.Response, error) {
+) (response, error) {
 	// Get list of sources from config,
 	routeservers := api.RouteServers{}
 
 	sources := s.cfg.Sources
 	for _, source := range sources {
 		routeservers = append(routeservers, api.RouteServer{
-			Id:         source.ID,
+			ID:         source.ID,
 			Type:       source.Type,
 			Name:       source.Name,
 			Group:      source.Group,

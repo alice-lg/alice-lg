@@ -19,20 +19,20 @@ func makeQueryRequest(q string) *http.Request {
 func makeQueryRoutes() api.Routes {
 	routes := api.Routes{
 		&api.Route{
-			Id:          "route_01",
-			NeighborId: "n01",
+			ID:          "route_01",
+			NeighborID: "n01",
 			Network:     "123.42.43.0/24",
 			Gateway:     "23.42.42.1",
 		},
 		&api.Route{
-			Id:          "route_02",
-			NeighborId: "n01",
+			ID:          "route_02",
+			NeighborID: "n01",
 			Network:     "142.23.0.0/16",
 			Gateway:     "42.42.42.1",
 		},
 		&api.Route{
-			Id:          "route_03",
-			NeighborId: "n01",
+			ID:          "route_03",
+			NeighborID: "n01",
 			Network:     "123.43.0.0/16",
 			Gateway:     "23.42.43.1",
 		},
@@ -54,11 +54,11 @@ func TestApiQueryFilterNextHopGateway(t *testing.T) {
 	}
 
 	// Check presence of route_01 and _03, matching prefix 123.
-	if filtered[0].Id != "route_01" {
-		t.Error("Expected route_01, got:", filtered[0].Id)
+	if filtered[0].ID != "route_01" {
+		t.Error("Expected route_01, got:", filtered[0].ID)
 	}
-	if filtered[1].Id != "route_03" {
-		t.Error("Expected route_03, got:", filtered[1].Id)
+	if filtered[1].ID != "route_03" {
+		t.Error("Expected route_03, got:", filtered[1].ID)
 	}
 
 	// Test another query matching the gateway only
@@ -71,7 +71,7 @@ func TestApiQueryFilterNextHopGateway(t *testing.T) {
 		t.Error("Expected only one result")
 	}
 
-	if filtered[0].Id != "route_02" {
+	if filtered[0].ID != "route_02" {
 		t.Error("Expected route_02 to match criteria, got:", filtered[0])
 	}
 }

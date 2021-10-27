@@ -8,7 +8,9 @@ import (
 // A Response is a general API response. All API responses
 // contain meta information with API version and caching
 // information.
-type Response interface{}
+type Response struct {
+	Meta *Meta `json:"api"`
+}
 
 // Details are usually the original backend response
 type Details map[string]interface{}
@@ -101,8 +103,8 @@ type Status struct {
 
 // StatusResponse ??
 type StatusResponse struct {
+	Response
 	Status Status `json:"status"`
-	Meta   *Meta  `json:"api"`
 }
 
 // A RouteServer is a datasource with attributes.

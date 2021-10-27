@@ -257,7 +257,9 @@ func (src *MultiTableBirdwatcher) fetchRequiredRoutes(
 	}
 
 	response = &api.RoutesResponse{
-		Meta:     apiStatus,
+		Response: api.Response{
+			Meta: apiStatus,
+		},
 		Imported: importedRoutes,
 		Filtered: filteredRoutes,
 	}
@@ -381,7 +383,9 @@ func (src *MultiTableBirdwatcher) Neighbors() (*api.NeighborsResponse, error) {
 	}
 
 	response = &api.NeighborsResponse{
-		Meta:      apiStatus,
+		Response: api.Response{
+			Meta: apiStatus,
+		},
 		Neighbors: neighbors,
 	}
 
@@ -410,7 +414,7 @@ func (src *MultiTableBirdwatcher) Routes(
 		return nil, err
 	}
 
-	response.Meta = required.Meta
+	response.Response.Meta = required.Meta
 	response.Imported = required.Imported
 	response.Filtered = required.Filtered
 	response.NotExported = notExported
@@ -427,7 +431,7 @@ func (src *MultiTableBirdwatcher) RoutesReceived(
 	// Check if we have a cache hit
 	cachedRoutes := src.routesRequiredCache.Get(neighborID)
 	if cachedRoutes != nil {
-		response.Meta = cachedRoutes.Meta
+		response.Response.Meta = cachedRoutes.Response.Meta
 		response.Imported = cachedRoutes.Imported
 		return response, nil
 	}
@@ -487,7 +491,9 @@ func (src *MultiTableBirdwatcher) RoutesNotExported(
 	}
 
 	response = &api.RoutesResponse{
-		Meta:        apiStatus,
+		Response: api.Response{
+			Meta: apiStatus,
+		},
 		NotExported: routes,
 	}
 
@@ -519,7 +525,9 @@ func (src *MultiTableBirdwatcher) AllRoutes() (*api.RoutesResponse, error) {
 	}
 
 	response := &api.RoutesResponse{
-		Meta: apiStatus,
+		Response: api.Response{
+			Meta: apiStatus,
+		},
 	}
 
 	// Parse the routes

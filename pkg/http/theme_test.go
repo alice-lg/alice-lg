@@ -7,6 +7,8 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/alice-lg/alice-lg/pkg/config"
 )
 
 func touchFile(path, filename string) error {
@@ -27,7 +29,7 @@ func TestThemeFiles(t *testing.T) {
 	touchFile(themePath, "script.js")
 
 	// Load theme
-	theme := NewTheme(ThemeConfig{
+	theme := NewTheme(config.ThemeConfig{
 		BasePath: "/theme",
 		Path:     themePath,
 	})
@@ -64,7 +66,7 @@ func TestThemeIncludeHash(t *testing.T) {
 	// Create some "stylesheets" and a "script"
 	touchFile(themePath, "style.css")
 
-	theme := NewTheme(ThemeConfig{
+	theme := NewTheme(config.ThemeConfig{
 		BasePath: "/theme",
 		Path:     themePath,
 	})
@@ -91,28 +93,28 @@ func TestThemeIncludes(t *testing.T) {
 	touchFile(themePath, "script.js")
 
 	// Load theme
-	theme := NewTheme(ThemeConfig{
+	theme := NewTheme(config.ThemeConfig{
 		BasePath: "/theme",
 		Path:     themePath,
 	})
 
-	stylesHtml := theme.StylesheetIncludes()
-	scriptsHtml := theme.ScriptIncludes()
+	stylesHTML := theme.StylesheetIncludes()
+	scriptsHTML := theme.ScriptIncludes()
 
-	if !strings.HasPrefix(scriptsHtml, "<script") {
+	if !strings.HasPrefix(scriptsHTML, "<script") {
 		t.Error("Script include should start with <script")
 	}
-	if strings.Index(scriptsHtml, "script.js") == -1 {
+	if strings.Index(scriptsHTML, "script.js") == -1 {
 		t.Error("Scripts include should contain script.js")
 	}
 
-	if !strings.HasPrefix(stylesHtml, "<link") {
+	if !strings.HasPrefix(stylesHTML, "<link") {
 		t.Error("Stylesheet include should start with <link")
 	}
-	if strings.Index(stylesHtml, "extra.css") == -1 {
+	if strings.Index(stylesHTML, "extra.css") == -1 {
 		t.Error("Stylesheet include should contain extra.css")
 	}
-	if strings.Index(stylesHtml, "script.js") != -1 {
+	if strings.Index(stylesHTML, "script.js") != -1 {
 		t.Error("Stylesheet include should not contain script.js")
 	}
 

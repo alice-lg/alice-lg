@@ -60,7 +60,7 @@ func apiErrorResponse(
 	status := StatusError
 
 	switch e := err.(type) {
-	case *ResourceNotFoundError:
+	case *ErrResourceNotFoundError:
 		tag = TagResourceNotFound
 		code = CodeResourceNotFound
 		status = StatusResourceNotFound
