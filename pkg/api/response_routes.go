@@ -69,7 +69,7 @@ func (routes Routes) Swap(i, j int) {
 
 // RoutesResponse contains all routes from a source
 type RoutesResponse struct {
-	BackendResponse
+	Meta        *Meta  `json:api`
 	Imported    Routes `json:"imported"`
 	Filtered    Routes `json:"filtered"`
 	NotExported Routes `json:"not_exported"`
@@ -78,7 +78,7 @@ type RoutesResponse struct {
 // CacheTTL returns the cache ttl of the reponse
 func (res *RoutesResponse) CacheTTL() time.Duration {
 	now := time.Now().UTC()
-	return res.BackendResponse.Meta.TTL.Sub(now)
+	return res.Meta.TTL.Sub(now)
 }
 
 // Timed responses include the duration of the request
@@ -161,11 +161,11 @@ func (r LookupRoutes) Swap(i, j int) {
 // a set of lookup routes, as the result of a query of
 // a specific route server.
 type RoutesLookupResponse struct {
-	Response
 	Paginated
 	Timed
 	Searchable
 	Routes LookupRoutes `json:"routes"`
+	Meta   *Meta        `json:"api"`
 }
 
 // GlobalRoutesLookupResponse is the result of a routes

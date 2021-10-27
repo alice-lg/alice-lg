@@ -73,11 +73,6 @@ type Rpki struct {
 	Invalid    []string `json:"invalid"`
 }
 
-// A BackendResponse contains meta information.
-type BackendResponse struct {
-	Meta Meta `json:"api"`
-}
-
 // Meta contains response meta information
 // like cacheing time and cache ttl or the API version
 type Meta struct {
@@ -106,8 +101,8 @@ type Status struct {
 
 // StatusResponse ??
 type StatusResponse struct {
-	BackendResponse
 	Status Status `json:"status"`
+	Meta   *Meta  `json:"api"`
 }
 
 // A RouteServer is a datasource with attributes.

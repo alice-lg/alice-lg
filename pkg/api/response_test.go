@@ -10,13 +10,11 @@ func TestStatusResponseSerialization(t *testing.T) {
 
 	// Make status
 	response := StatusResponse{
-		Response: Response{
-			Meta: Meta{
-				Version:         "2.0.0",
-				CacheStatus:     CacheStatus{},
-				ResultFromCache: false,
-				TTL:             time.Now(),
-			},
+		Meta: &Meta{
+			Version:         "2.0.0",
+			CacheStatus:     CacheStatus{},
+			ResultFromCache: false,
+			TTL:             time.Now(),
 		},
 		Status: Status{
 			Message:  "Server is up and running",
