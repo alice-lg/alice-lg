@@ -16,7 +16,7 @@ func TestNeighborsCacheSetGet(t *testing.T) {
 
 	response := &api.NeighborsResponse{
 		Response: api.Response{
-			Meta: api.Meta{
+			Meta: &api.Meta{
 				TTL: time.Now().UTC().Add(23 * time.Millisecond),
 			},
 		},
