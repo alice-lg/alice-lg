@@ -7,6 +7,8 @@ import (
 	"github.com/julienschmidt/httprouter"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
+	"github.com/alice-lg/alice-lg/pkg/config"
+	"github.com/alice-lg/alice-lg/pkg/store"
 )
 
 // Handle get neighbors on routeserver
@@ -24,26 +26,26 @@ func (s *Server) apiNeighborsList(
 	// Try to fetch neighbors from store, only fall back
 	// to RS query if store is not ready yet
 	sourceStatus := s.neighborsStore.SourceStatus(rsID)
-	if sourceStatus.State == STATE_READY {
+	if sourceStatus.State == store.StateReady {
 		neighbors := s.neighborsStore.GetNeighborsAt(rsID)
 		// Make response
 		neighborsResponse = &api.NeighborsResponse{
-			Api: api.ApiStatus{
-				Version: Version,
+			Meta: &api.Meta{
+				Version: config.Version,
 				CacheStatus: api.CacheStatus{
-					OrigTtl:  0,
+					OrigTTL:  0,
 					CachedAt: sourceStatus.LastRefresh,
 				},
 				ResultFromCache: true, // you bet!
-				Ttl: sourceStatus.LastRefresh.Add(
-					s.neighborsStore.refreshInterval),
+				TTL: sourceStatus.LastRefresh.Add(
+					s.neighborsStore.RefreshInterval),
 			},
 			Neighbors: neighbors,
 		}
 	} else {
 		source := s.neighborsStore.SourceInstanceByID(rsID)
 		if source == nil {
-			return nil, SOURCE_NOT_FOUND_ERROR
+			return nil, ErrSourceNotFound
 		}
 		neighborsResponse, err = source.Neighbors()
 		if err != nil {

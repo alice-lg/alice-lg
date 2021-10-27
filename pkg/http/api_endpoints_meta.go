@@ -13,7 +13,7 @@ import (
 func (s *Server) apiStatusShow(
 	_req *http.Request,
 	_params httprouter.Params,
-) (api.Result, error) {
+) (api.Response, error) {
 	status, err := CollectAppStatus(s.routesStore, s.neighborsStore)
 	return status, err
 }
@@ -48,7 +48,7 @@ func (s *Server) apiConfigShow(
 ) (api.Response, error) {
 	result := api.ConfigResponse{
 		Asn:            s.cfg.Server.Asn,
-		BgpCommunities: s.cfg.UI.BgpCommunities,
+		BGPCommunities: s.cfg.UI.BGPCommunities,
 		RejectReasons:  s.cfg.UI.RoutesRejections.Reasons,
 		Noexport: api.Noexport{
 			LoadOnDemand: s.cfg.UI.RoutesNoexports.LoadOnDemand,
@@ -57,7 +57,7 @@ func (s *Server) apiConfigShow(
 		RejectCandidates: api.RejectCandidates{
 			Communities: s.cfg.UI.RoutesRejectCandidates.Communities,
 		},
-		Rpki:                  api.Rpki(AliceConfig.UI.Rpki),
+		Rpki:                  api.Rpki(s.cfg.UI.Rpki),
 		RoutesColumns:         s.cfg.UI.RoutesColumns,
 		RoutesColumnsOrder:    s.cfg.UI.RoutesColumnsOrder,
 		NeighborsColumns:      s.cfg.UI.NeighborsColumns,

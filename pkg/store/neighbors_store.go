@@ -22,9 +22,10 @@ type NeighborsStore struct {
 	neighborsMap          map[string]NeighborsIndex
 	cfgMap                map[string]*config.SourceConfig
 	statusMap             map[string]Status
-	refreshInterval       time.Duration
 	refreshNeighborStatus bool
 	lastRefresh           time.Time
+
+	RefreshInterval       time.Duration
 
 	sync.RWMutex
 }
@@ -48,10 +49,10 @@ func NewNeighborsStore(cfg *config.Config) *NeighborsStore {
 
 	// Set refresh interval, default to 5 minutes when
 	// interval is set to 0
-	refreshInterval := time.Duration(
+	RefreshInterval := time.Duration(
 		cfg.Server.NeighborsStoreRefreshInterval) * time.Minute
-	if refreshInterval == 0 {
-		refreshInterval = time.Duration(5) * time.Minute
+	if RefreshInterval == 0 {
+		RefreshInterval = time.Duration(5) * time.Minute
 	}
 
 	refreshNeighborStatus := cfg.Server.EnableNeighborsStatusRefresh
@@ -60,7 +61,7 @@ func NewNeighborsStore(cfg *config.Config) *NeighborsStore {
 		neighborsMap:          neighborsMap,
 		statusMap:             statusMap,
 		cfgMap:                cfgMap,
-		refreshInterval:       refreshInterval,
+		RefreshInterval:       RefreshInterval,
 		refreshNeighborStatus: refreshNeighborStatus,
 	}
 	return store
@@ -69,7 +70,7 @@ func NewNeighborsStore(cfg *config.Config) *NeighborsStore {
 // Start the store's housekeeping.
 func (s *NeighborsStore) Start() {
 	log.Println("Starting local neighbors store")
-	log.Println("Neighbors Store refresh interval set to:", s.refreshInterval)
+	log.Println("Neighbors Store refresh interval set to:", s.RefreshInterval)
 	go s.init()
 }
 
@@ -82,7 +83,7 @@ func (s *NeighborsStore) init() {
 
 	// Periodically update store
 	for {
-		time.Sleep(s.refreshInterval)
+		time.Sleep(s.RefreshInterval)
 		s.update()
 	}
 }
@@ -333,5 +334,5 @@ func (s *NeighborsStore) CachedAt() time.Time {
 // CacheTTL returns the next time when a refresh
 // will be started.
 func (s *NeighborsStore) CacheTTL() time.Time {
-	return s.lastRefresh.Add(s.refreshInterval)
+	return s.lastRefresh.Add(s.RefreshInterval)
 }

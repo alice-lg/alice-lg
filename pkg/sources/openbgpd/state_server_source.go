@@ -108,8 +108,8 @@ func (src *StateServerSource) ShowRIBRequest(ctx context.Context) (*http.Request
 // ==========
 
 // makeResponseMeta will create a new api status with cache infos
-func (src *StateServerSource) makeResponseMeta() api.Meta {
-	return api.Meta{
+func (src *StateServerSource) makeResponseMeta() *api.Meta {
+	return &api.Meta{
 		CacheStatus: api.CacheStatus{
 			CachedAt: time.Now().UTC(),
 		},
@@ -137,9 +137,7 @@ func (src *StateServerSource) Status() (*api.StatusResponse, error) {
 	}
 	status := decodeAPIStatus(body)
 	response := &api.StatusResponse{
-		Response: api.Response{
-			Meta: src.makeResponseMeta(),
-		},
+		Meta:   src.makeResponseMeta(),
 		Status: status,
 	}
 	return response, nil
@@ -185,9 +183,7 @@ func (src *StateServerSource) Neighbors() (*api.NeighborsResponse, error) {
 
 	}
 	response = &api.NeighborsResponse{
-		Response: api.Response{
-			Meta: src.makeResponseMeta(),
-		},
+		Meta:      src.makeResponseMeta(),
 		Neighbors: nb,
 	}
 	src.neighborsCache.Set(response)
@@ -220,9 +216,7 @@ func (src *StateServerSource) NeighborsStatus() (*api.NeighborsStatusResponse, e
 	}
 
 	response := &api.NeighborsStatusResponse{
-		Response: api.Response{
-			Meta: src.makeResponseMeta(),
-		},
+		Meta:      src.makeResponseMeta(),
 		Neighbors: nb,
 	}
 	return response, nil
@@ -264,9 +258,7 @@ func (src *StateServerSource) Routes(neighborID string) (*api.RoutesResponse, er
 	rejected := filterRejectedRoutes(src.cfg.RejectCommunities, routes)
 
 	response = &api.RoutesResponse{
-		Response: api.Response{
-			Meta: src.makeResponseMeta(),
-		},
+		Meta:        src.makeResponseMeta(),
 		Imported:    received,
 		NotExported: api.Routes{},
 		Filtered:    rejected,
@@ -308,9 +300,7 @@ func (src *StateServerSource) RoutesReceived(neighborID string) (*api.RoutesResp
 	received := filterReceivedRoutes(src.cfg.RejectCommunities, routes)
 
 	response = &api.RoutesResponse{
-		Response: api.Response{
-			Meta: src.makeResponseMeta(),
-		},
+		Meta:        src.makeResponseMeta(),
 		Imported:    received,
 		NotExported: api.Routes{},
 		Filtered:    api.Routes{},
@@ -352,9 +342,7 @@ func (src *StateServerSource) RoutesFiltered(neighborID string) (*api.RoutesResp
 	rejected := filterRejectedRoutes(src.cfg.RejectCommunities, routes)
 
 	response = &api.RoutesResponse{
-		Response: api.Response{
-			Meta: src.makeResponseMeta(),
-		},
+		Meta:        src.makeResponseMeta(),
 		Imported:    api.Routes{},
 		NotExported: api.Routes{},
 		Filtered:    rejected,
@@ -368,9 +356,7 @@ func (src *StateServerSource) RoutesFiltered(neighborID string) (*api.RoutesResp
 // from the rs for a neighbor.
 func (src *StateServerSource) RoutesNotExported(neighborID string) (*api.RoutesResponse, error) {
 	response := &api.RoutesResponse{
-		Response: api.Response{
-			Meta: src.makeResponseMeta(),
-		},
+		Meta:        src.makeResponseMeta(),
 		Imported:    api.Routes{},
 		NotExported: api.Routes{},
 		Filtered:    api.Routes{},
@@ -407,9 +393,7 @@ func (src *StateServerSource) AllRoutes() (*api.RoutesResponse, error) {
 	rejected := filterRejectedRoutes(src.cfg.RejectCommunities, routes)
 
 	response := &api.RoutesResponse{
-		Response: api.Response{
-			Meta: src.makeResponseMeta(),
-		},
+		Meta:        src.makeResponseMeta(),
 		Imported:    received,
 		NotExported: api.Routes{},
 		Filtered:    rejected,

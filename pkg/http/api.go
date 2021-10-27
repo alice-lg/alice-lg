@@ -96,7 +96,7 @@ func (s *Server) apiRegisterEndpoints(
 
 	// Routeservers
 	router.GET("/api/v1/routeservers",
-		endpoint(s.apiRouteserversList))
+		endpoint(s.apiRouteServersList))
 	router.GET("/api/v1/routeservers/:id/status",
 		endpoint(s.apiStatus))
 	router.GET("/api/v1/routeservers/:id/neighbors",

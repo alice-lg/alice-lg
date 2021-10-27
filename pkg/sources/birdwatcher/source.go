@@ -217,7 +217,7 @@ func (b *GenericBirdwatcher) fetchProtocolsShort() (
 		return nil, nil, fmt.Errorf("failed to fetch protocols")
 	}
 
-	return &apiStatus, bird, nil
+	return apiStatus, bird, nil
 }
 
 // ExpireCaches clears all local caches
@@ -247,9 +247,7 @@ func (b *GenericBirdwatcher) Status() (*api.StatusResponse, error) {
 	}
 
 	response := &api.StatusResponse{
-		Response: api.Response{
-			Meta: apiStatus,
-		},
+		Meta:   apiStatus,
 		Status: birdStatus,
 	}
 
@@ -274,9 +272,7 @@ func (b *GenericBirdwatcher) NeighborsStatus() (
 	}
 
 	response := &api.NeighborsStatusResponse{
-		Response: api.Response{
-			Meta: *apiStatus,
-		},
+		Meta:      apiStatus,
 		Neighbors: neighbors,
 	}
 	return response, nil // dereference for now
@@ -314,16 +310,14 @@ func (b *GenericBirdwatcher) LookupPrefix(
 		// A less bruteforce approach would be highly appreciated
 		route := &api.LookupRoute{
 			RouteServer: rs,
-			Route: src,
+			Route:       src,
 		}
 		results = append(results, route)
 	}
 
 	// Make result
 	response := &api.RoutesLookupResponse{
-		Response: api.Response{
-			Meta: apiStatus,
-		},
+		Meta:   apiStatus,
 		Routes: results,
 	}
 	return response, nil

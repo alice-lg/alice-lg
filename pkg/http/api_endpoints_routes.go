@@ -22,7 +22,7 @@ func (s *Server) apiRoutesList(
 
 	source := s.cfg.SourceInstanceByID(rsID)
 	if source == nil {
-		return nil, SOURCE_NOT_FOUND_ERROR
+		return nil, ErrSourceNotFound
 	}
 
 	result, err := source.Routes(neighborID)
@@ -83,7 +83,7 @@ func (s *Server) apiRoutesListReceived(
 
 	// Paginate results
 	page := apiQueryMustInt(req, "page", 0)
-	pageSize := AliceConfig.UI.Pagination.RoutesAcceptedPageSize
+	pageSize := s.cfg.UI.Pagination.RoutesAcceptedPageSize
 	routes, pagination := apiPaginateRoutes(routes, page, pageSize)
 
 	// Calculate query duration
@@ -156,7 +156,7 @@ func (s *Server) apiRoutesListFiltered(
 
 	// Paginate results
 	page := apiQueryMustInt(req, "page", 0)
-	pageSize := AliceConfig.UI.Pagination.RoutesFilteredPageSize
+	pageSize := s.cfg.UI.Pagination.RoutesFilteredPageSize
 	routes, pagination := apiPaginateRoutes(routes, page, pageSize)
 
 	// Calculate query duration

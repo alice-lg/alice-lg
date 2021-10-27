@@ -95,8 +95,8 @@ func (src *BgplgdSource) ShowRIBRequest(ctx context.Context) (*http.Request, err
 // ==========
 
 // makeResponseMeta will create a new api status with cache infos
-func (src *BgplgdSource) makeResponseMeta() api.Meta {
-	return api.Meta{
+func (src *BgplgdSource) makeResponseMeta() *api.Meta {
+	return &api.Meta{
 		CacheStatus: api.CacheStatus{
 			CachedAt: time.Now().UTC(),
 		},
@@ -111,9 +111,7 @@ func (src *BgplgdSource) makeResponseMeta() api.Meta {
 func (src *BgplgdSource) Status() (*api.StatusResponse, error) {
 	// Make API request and read response. We do not cache the result.
 	response := &api.StatusResponse{
-		Response: api.Response{
-			Meta: src.makeResponseMeta(),
-		},
+		Meta: src.makeResponseMeta(),
 		Status: api.Status{
 			Version: "openbgpd",
 			Message: "openbgpd up and running",
@@ -162,9 +160,7 @@ func (src *BgplgdSource) Neighbors() (*api.NeighborsResponse, error) {
 
 	}
 	response = &api.NeighborsResponse{
-		Response: api.Response{
-			Meta: src.makeResponseMeta(),
-		},
+		Meta:      src.makeResponseMeta(),
 		Neighbors: nb,
 	}
 	src.neighborsCache.Set(response)
@@ -197,9 +193,7 @@ func (src *BgplgdSource) NeighborsStatus() (*api.NeighborsStatusResponse, error)
 	}
 
 	response := &api.NeighborsStatusResponse{
-		Response: api.Response{
-			Meta: src.makeResponseMeta(),
-		},
+		Meta:      src.makeResponseMeta(),
 		Neighbors: nb,
 	}
 	return response, nil
@@ -241,9 +235,7 @@ func (src *BgplgdSource) Routes(neighborID string) (*api.RoutesResponse, error) 
 	rejected := filterRejectedRoutes(src.cfg.RejectCommunities, routes)
 
 	response = &api.RoutesResponse{
-		Response: api.Response{
-			Meta: src.makeResponseMeta(),
-		},
+		Meta:        src.makeResponseMeta(),
 		Imported:    received,
 		NotExported: api.Routes{},
 		Filtered:    rejected,
@@ -287,9 +279,7 @@ func (src *BgplgdSource) RoutesReceived(neighborID string) (*api.RoutesResponse,
 	received := filterReceivedRoutes(src.cfg.RejectCommunities, routes)
 
 	response = &api.RoutesResponse{
-		Response: api.Response{
-			Meta: src.makeResponseMeta(),
-		},
+		Meta:        src.makeResponseMeta(),
 		Imported:    received,
 		NotExported: api.Routes{},
 		Filtered:    api.Routes{},
@@ -333,9 +323,7 @@ func (src *BgplgdSource) RoutesFiltered(neighborID string) (*api.RoutesResponse,
 	rejected := filterRejectedRoutes(src.cfg.RejectCommunities, routes)
 
 	response = &api.RoutesResponse{
-		Response: api.Response{
-			Meta: src.makeResponseMeta(),
-		},
+		Meta:        src.makeResponseMeta(),
 		Imported:    api.Routes{},
 		NotExported: api.Routes{},
 		Filtered:    rejected,
@@ -349,9 +337,7 @@ func (src *BgplgdSource) RoutesFiltered(neighborID string) (*api.RoutesResponse,
 // from the rs for a neighbor.
 func (src *BgplgdSource) RoutesNotExported(neighborID string) (*api.RoutesResponse, error) {
 	response := &api.RoutesResponse{
-		Response: api.Response{
-			Meta: src.makeResponseMeta(),
-		},
+		Meta:        src.makeResponseMeta(),
 		Imported:    api.Routes{},
 		NotExported: api.Routes{},
 		Filtered:    api.Routes{},
@@ -388,9 +374,7 @@ func (src *BgplgdSource) AllRoutes() (*api.RoutesResponse, error) {
 	rejected := filterRejectedRoutes(src.cfg.RejectCommunities, routes)
 
 	response := &api.RoutesResponse{
-		Response: api.Response{
-			Meta: src.makeResponseMeta(),
-		},
+		Meta:        src.makeResponseMeta(),
 		Imported:    received,
 		NotExported: api.Routes{},
 		Filtered:    rejected,

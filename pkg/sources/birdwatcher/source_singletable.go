@@ -33,10 +33,10 @@ func (src *SingleTableBirdwatcher) fetchReceivedRoutes(
 	if err != nil {
 		log.Println("WARNING Could not retrieve received routes:", err)
 		log.Println("Is the 'routes_protocol' module active in birdwatcher?")
-		return &apiStatus, nil, err
+		return apiStatus, nil, err
 	}
 
-	return &apiStatus, received, nil
+	return apiStatus, received, nil
 }
 
 func (src *SingleTableBirdwatcher) fetchFilteredRoutes(
@@ -59,10 +59,10 @@ func (src *SingleTableBirdwatcher) fetchFilteredRoutes(
 	if err != nil {
 		log.Println("WARNING Could not retrieve filtered routes:", err)
 		log.Println("Is the 'routes_filtered' module active in birdwatcher?")
-		return &apiStatus, nil, err
+		return apiStatus, nil, err
 	}
 
-	return &apiStatus, filtered, nil
+	return apiStatus, filtered, nil
 }
 
 func (src *SingleTableBirdwatcher) fetchNotExportedRoutes(
@@ -84,7 +84,7 @@ func (src *SingleTableBirdwatcher) fetchNotExportedRoutes(
 		log.Println("Is the 'routes_noexport' module active in birdwatcher?")
 	}
 
-	return &apiStatus, notExported, nil
+	return apiStatus, notExported, nil
 }
 
 // RoutesRequired is a specialized request to fetch:
@@ -134,9 +134,7 @@ func (src *SingleTableBirdwatcher) fetchRequiredRoutes(
 	}
 
 	response = &api.RoutesResponse{
-		Response: api.Response{
-			Meta: *apiStatus,
-		},
+		Meta:     apiStatus,
 		Imported: importedRoutes,
 		Filtered: filteredRoutes,
 	}
@@ -174,9 +172,7 @@ func (src *SingleTableBirdwatcher) Neighbors() (*api.NeighborsResponse, error) {
 	}
 
 	response = &api.NeighborsResponse{
-		Response: api.Response{
-			Meta: apiStatus,
-		},
+		Meta:      apiStatus,
 		Neighbors: neighbors,
 	}
 
@@ -283,9 +279,7 @@ func (src *SingleTableBirdwatcher) RoutesNotExported(
 	}
 
 	response = &api.RoutesResponse{
-		Response: api.Response{
-			Meta: *apiStatus,
-		},
+		Meta:        apiStatus,
 		NotExported: routes,
 	}
 
@@ -317,9 +311,7 @@ func (src *SingleTableBirdwatcher) AllRoutes() (*api.RoutesResponse, error) {
 	}
 
 	response := &api.RoutesResponse{
-		Response: api.Response{
-			Meta: apiStatus,
-		},
+		Meta: apiStatus,
 	}
 
 	// Parse the routes

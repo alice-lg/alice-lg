@@ -8,6 +8,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
+	"github.com/alice-lg/alice-lg/pkg/decoders"
 )
 
 // Handle global lookup
@@ -31,7 +32,7 @@ func (s *Server) apiLookupPrefixGlobal(
 	// Check what we want to query
 	//  Prefix -> fetch prefix
 	//       _ -> fetch neighbors and routes
-	lookupPrefix := MaybePrefix(q)
+	lookupPrefix := decoders.MaybePrefix(q)
 
 	// Measure response time
 	t0 := time.Now()

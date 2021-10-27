@@ -70,7 +70,7 @@ func (src *MultiTableBirdwatcher) fetchProtocols() (*api.Meta, map[string]interf
 		return nil, nil, fmt.Errorf("failed to fetch protocols")
 	}
 
-	return &apiStatus, bird, nil
+	return apiStatus, bird, nil
 }
 
 func (src *MultiTableBirdwatcher) fetchReceivedRoutes(
@@ -107,10 +107,10 @@ func (src *MultiTableBirdwatcher) fetchReceivedRoutes(
 	if err != nil {
 		log.Println("WARNING Could not retrieve received routes:", err)
 		log.Println("Is the 'routes_peer' module active in birdwatcher?")
-		return &apiStatus, nil, err
+		return apiStatus, nil, err
 	}
 
-	return &apiStatus, received, nil
+	return apiStatus, received, nil
 }
 
 func (src *MultiTableBirdwatcher) fetchFilteredRoutes(
@@ -151,7 +151,7 @@ func (src *MultiTableBirdwatcher) fetchFilteredRoutes(
 
 	// If there is no pipe to master, there is nothing left to do
 	if pipeName == "" {
-		return &apiStatus, filtered, nil
+		return apiStatus, filtered, nil
 	}
 
 	// Query birdwatcher
@@ -160,7 +160,7 @@ func (src *MultiTableBirdwatcher) fetchFilteredRoutes(
 	if err != nil {
 		log.Println("WARNING Could not retrieve filtered routes:", err)
 		log.Println("Is the 'pipe_filtered' module active in birdwatcher?")
-		return &apiStatus, nil, err
+		return apiStatus, nil, err
 	}
 
 	// Parse the routes
@@ -171,7 +171,7 @@ func (src *MultiTableBirdwatcher) fetchFilteredRoutes(
 	filtered = append(filtered, pipeFiltered...)
 	sort.Sort(filtered)
 
-	return &apiStatus, filtered, nil
+	return apiStatus, filtered, nil
 }
 
 func (src *MultiTableBirdwatcher) fetchNotExportedRoutes(
@@ -207,7 +207,7 @@ func (src *MultiTableBirdwatcher) fetchNotExportedRoutes(
 		log.Println("Is the 'routes_noexport' module active in birdwatcher?")
 	}
 
-	return &apiStatus, notExported, nil
+	return apiStatus, notExported, nil
 }
 
 // RoutesRequired is a specialized request to fetch:
@@ -257,9 +257,7 @@ func (src *MultiTableBirdwatcher) fetchRequiredRoutes(
 	}
 
 	response = &api.RoutesResponse{
-		Response: api.Response{
-			Meta: *apiStatus,
-		},
+		Meta:     apiStatus,
 		Imported: importedRoutes,
 		Filtered: filteredRoutes,
 	}
@@ -383,9 +381,7 @@ func (src *MultiTableBirdwatcher) Neighbors() (*api.NeighborsResponse, error) {
 	}
 
 	response = &api.NeighborsResponse{
-		Response: api.Response{
-			Meta: *apiStatus,
-		},
+		Meta:      apiStatus,
 		Neighbors: neighbors,
 	}
 
@@ -491,9 +487,7 @@ func (src *MultiTableBirdwatcher) RoutesNotExported(
 	}
 
 	response = &api.RoutesResponse{
-		Response: api.Response{
-			Meta: *apiStatus,
-		},
+		Meta:        apiStatus,
 		NotExported: routes,
 	}
 
@@ -525,9 +519,7 @@ func (src *MultiTableBirdwatcher) AllRoutes() (*api.RoutesResponse, error) {
 	}
 
 	response := &api.RoutesResponse{
-		Response: api.Response{
-			Meta: apiStatus,
-		},
+		Meta: apiStatus,
 	}
 
 	// Parse the routes
