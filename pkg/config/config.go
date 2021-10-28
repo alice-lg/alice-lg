@@ -59,12 +59,19 @@ const (
 	SourceBackendOpenBGPDBgplgd = "openbgpd-bgplgd"
 )
 
+const (
+	// DefaultHTTPTimeout is the time in seconds after which the
+	// server will timeout.
+	DefaultHTTPTimeout = 120
+)
+
 // A ServerConfig holds the runtime configuration
 // for the backend.
 type ServerConfig struct {
 	Listen                        string `ini:"listen_http"`
+	HTTPTimeout                   int    `ini:"http_timeout"`
 	EnablePrefixLookup            bool   `ini:"enable_prefix_lookup"`
-	NeighborsStoreRefreshInterval int    `ini:"neighbors_store_refresh_interval"`
+	NeighborsStoreRefreshInterval int    `ini:"neighbours_store_refresh_interval"`
 	RoutesStoreRefreshInterval    int    `ini:"routes_store_refresh_interval"`
 	Asn                           int    `ini:"asn"`
 	EnableNeighborsStatusRefresh  bool   `ini:"enable_neighbors_status_refresh"`
@@ -813,6 +820,11 @@ func LoadConfig(file string) (*Config, error) {
 	server := ServerConfig{}
 	if err := parsedConfig.Section("server").MapTo(&server); err != nil {
 		return nil, err
+	}
+
+	// Set default http timeout when not configured
+	if server.HTTPTimeout == 0 {
+		server.HTTPTimeout = DefaultHTTPTimeout
 	}
 
 	housekeeping := HousekeepingConfig{}
