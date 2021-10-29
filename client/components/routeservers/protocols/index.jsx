@@ -169,12 +169,12 @@ class NeighborColumnHeader extends React.Component {
 
 
 //
-// Neighbours Columns Components
+// Neighbors Columns Components
 //
 // * Render columums either with direct property
 //   access, or
 // * Use a "widget", a rendering function to which
-//   the neighbour is passed.
+//   the neighbor is passed.
 
 // Helper:
 const lookupProperty = function(obj, path) {
@@ -188,17 +188,17 @@ const lookupProperty = function(obj, path) {
 
 // Widgets:
 const ColDescription = function(props) {
-  const neighbour = props.neighbour;
+  const neighbor = props.neighbor;
   return (
     <td>
       <RoutesLink routeserverId={props.rsId}
-                  protocol={neighbour.id}
-                  state={neighbour.state}>
-        {neighbour.description}
-        {!isUpState(neighbour.state) && 
-         neighbour.last_error &&
+                  protocol={neighbor.id}
+                  state={neighbor.state}>
+        {neighbor.description}
+        {!isUpState(neighbor.state) && 
+         neighbor.last_error &&
           <span className="protocol-state-error">
-              {neighbour.last_error}
+              {neighbor.last_error}
           </span>}
       </RoutesLink>
     </td>
@@ -208,20 +208,20 @@ const ColDescription = function(props) {
 const ColUptime = function(props) {
   return (
     <td className="date-since">
-      <RelativeTimestamp value={props.neighbour.uptime} suffix={true} />
+      <RelativeTimestamp value={props.neighbor.uptime} suffix={true} />
     </td>
   );
 }
 
 
 const ColLinked = function(props) {
-  // Access neighbour property by path
-  const property = lookupProperty(props.neighbour, props.column);
+  // Access neighbor property by path
+  const property = lookupProperty(props.neighbor, props.column);
   return (
     <td>
       <RoutesLink routeserverId={props.rsId}
-                  protocol={props.neighbour.id}
-                  state={props.neighbour.state}>
+                  protocol={props.neighbor.id}
+                  state={props.neighbor.state}>
         {property}
       </RoutesLink>
     </td>
@@ -229,8 +229,8 @@ const ColLinked = function(props) {
 }
 
 const ColPlain = function(props) {
-  // Access neighbour property by path
-  const property = lookupProperty(props.neighbour, props.column);
+  // Access neighbor property by path
+  const property = lookupProperty(props.neighbor, props.column);
   return (
     <td>{property}</td>
   );
@@ -243,8 +243,8 @@ const ColNotAvailable = function(props) {
 }
 
 // Column:
-const NeighbourColumn = function(props) {
-  const neighbour = props.neighbour;
+const NeighborColumn = function(props) {
+  const neighbor = props.neighbor;
   const column = props.column;
 
   const widgets = {
@@ -264,22 +264,22 @@ const NeighbourColumn = function(props) {
   // Get render function
   let Widget = widgets[column] || ColLinked;
   return (
-    <Widget neighbour={neighbour} column={column} rsId={props.rsId} />
+    <Widget neighbor={neighbor} column={column} rsId={props.rsId} />
   );
 }
 
 
 
-class NeighboursTableView extends React.Component {
+class NeighborsTableView extends React.Component {
 
   render() {
     const rs = this.props.routeserver;
     if(!rs) { return null; } // We wait until we have a routeserver
 
-    const columns = this.props.neighboursColumns;
-    let columnsOrder = this.props.neighboursColumnsOrder;
+    const columns = this.props.neighborsColumns;
+    let columnsOrder = this.props.neighborsColumnsOrder;
 
-    const sortedNeighbors = _sortNeighbors(this.props.neighbours,
+    const sortedNeighbors = _sortNeighbors(this.props.neighbors,
                                            this.props.sortColumn,
                                            this.props.sortOrder);
 
@@ -295,15 +295,15 @@ class NeighboursTableView extends React.Component {
       );
     });
 
-    let neighbours = sortedNeighbors.map((n) => {
-      let neighbourColumns = columnsOrder.map((col) => {
-        return <NeighbourColumn key={col}
+    let neighbors = sortedNeighbors.map((n) => {
+      let neighborColumns = columnsOrder.map((col) => {
+        return <NeighborColumn key={col}
                                 rsId={this.props.routeserverId}
                                 rsType={rs.type}
                                 column={col}
-                                neighbour={n} />
+                                neighbor={n} />
       });
-      return <tr key={n.id}>{neighbourColumns}</tr>;
+      return <tr key={n.id}>{neighborColumns}</tr>;
     });
 
     let uptimeTitle;
@@ -341,7 +341,7 @@ class NeighboursTableView extends React.Component {
             </tr>
           </thead>
           <tbody>
-            {neighbours}
+            {neighbors}
           </tbody>
         </table>
       </div>
@@ -349,7 +349,7 @@ class NeighboursTableView extends React.Component {
   }
 }
 
-const NeighboursTable = connect(
+const NeighborsTable = connect(
   (state, ownProps) => {
     const rsId = ownProps.routeserverId;
     const rs   = state.routeservers.byId[rsId];
@@ -357,15 +357,15 @@ const NeighboursTable = connect(
     return {
       routeserver: rs,
 
-      neighboursColumns:      state.config.neighbours_columns,
-      neighboursColumnsOrder: state.config.neighbours_columns_order,
+      neighborsColumns:      state.config.neighbors_columns,
+      neighborsColumnsOrder: state.config.neighbors_columns_order,
 
       sortColumn: state.neighbors.sortColumn,
       sortOrder:  state.neighbors.sortOrder,
       filterQuery: state.neighbors.filterQuery,
     };
   }
-)(NeighboursTableView);
+)(NeighborsTableView);
 
 
 class Protocols extends React.Component {
@@ -410,40 +410,40 @@ class Protocols extends React.Component {
       );
     }
 
-    // Filter neighbours
-    let neighboursUp = [];
-    let neighboursDown = [];
-    let neighboursIdle = [];
+    // Filter neighbors
+    let neighborsUp = [];
+    let neighborsDown = [];
+    let neighborsIdle = [];
 
     for (let n of protocol) {
       let s = n.state.toLowerCase();
       if (s.includes("up") || s.includes("established") ) {
-        neighboursUp.push(n);
+        neighborsUp.push(n);
       } else if (s.includes("down")) {
-        neighboursDown.push(n);
+        neighborsDown.push(n);
       } else if (s.includes("start") || s.includes("active")) {
-        neighboursIdle.push(n);
+        neighborsIdle.push(n);
       } else {
-        console.error("Couldn't classify neighbour by state:", n);
-        neighboursUp.push(n);
+        console.error("Couldn't classify neighbor by state:", n);
+        neighborsUp.push(n);
       }
     }
 
     // Render tables
     let tables = [];
-    if (neighboursUp.length) {
-      tables.push(<NeighboursTable key="up" state="up"
-                                   neighbours={neighboursUp}
+    if (neighborsUp.length) {
+      tables.push(<NeighborsTable key="up" state="up"
+                                   neighbors={neighborsUp}
                                    routeserverId={this.props.routeserverId} />);
     }
-    if (neighboursIdle.length) {
-      tables.push(<NeighboursTable key="start" state="start"
-                                   neighbours={neighboursIdle}
+    if (neighborsIdle.length) {
+      tables.push(<NeighborsTable key="start" state="start"
+                                   neighbors={neighborsIdle}
                                    routeserverId={this.props.routeserverId} />);
     }
-    if (neighboursDown.length) {
-      tables.push(<NeighboursTable key="down" state="down"
-                                   neighbours={neighboursDown}
+    if (neighborsDown.length) {
+      tables.push(<NeighborsTable key="down" state="down"
+                                   neighbors={neighborsDown}
                                    routeserverId={this.props.routeserverId} />);
     }
 
