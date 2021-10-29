@@ -41,7 +41,13 @@ backend_prod: client_prod
 backend:
 	$(MAKE) -C cmd/alice-lg/ linux
 
-alice: backend_prod
+backend_tests:
+	go test ./pkg/...
+
+test: backend_tests
+
+
+alice: backend_tests backend_prod
 	cp cmd/alice-lg/alice-lg-* bin/
 
 

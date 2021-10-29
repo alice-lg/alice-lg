@@ -10,10 +10,14 @@ import (
 	"github.com/alice-lg/alice-lg/pkg/sources"
 )
 
+// A Birdwatcher source is a variant of an alice
+// source and implements different strategies for fetching
+// route information from bird.
 type Birdwatcher interface {
 	sources.Source
 }
 
+// GenericBirdwatcher is an Alice data source.
 type GenericBirdwatcher struct {
 	config Config
 	client *Client
@@ -29,6 +33,8 @@ type GenericBirdwatcher struct {
 	routesFetchMutex *LockMap
 }
 
+// NewBirdwatcher creates a new Birdwatcher instance.
+// This might be either a GenericBirdWatcher or a MultiTableBirdwatcher.
 func NewBirdwatcher(config Config) Birdwatcher {
 	client := NewClient(config.API)
 
@@ -81,220 +87,243 @@ func NewBirdwatcher(config Config) Birdwatcher {
 	return birdwatcher
 }
 
-func (self *GenericBirdwatcher) filterProtocols(protocols map[string]interface{}, protocol string) map[string]interface{} {
+func (b *GenericBirdwatcher) filterProtocols(
+	protocols map[string]interface{},
+	protocol string,
+) map[string]interface{} {
 	response := make(map[string]interface{})
 	response["protocols"] = make(map[string]interface{})
 
-	for protocolId, protocolData := range protocols {
+	for protocolID, protocolData := range protocols {
 		if protocolData.(map[string]interface{})["bird_protocol"] == protocol {
-			response["protocols"].(map[string]interface{})[protocolId] = protocolData
+			response["protocols"].(map[string]interface{})[protocolID] = protocolData
 		}
 	}
 
 	return response
 }
 
-func (self *GenericBirdwatcher) filterProtocolsBgp(bird ClientResponse) map[string]interface{} {
-	return self.filterProtocols(bird["protocols"].(map[string]interface{}), "BGP")
+func (b *GenericBirdwatcher) filterProtocolsBgp(
+	bird ClientResponse,
+) map[string]interface{} {
+	return b.filterProtocols(bird["protocols"].(map[string]interface{}), "BGP")
 }
 
-func (self *GenericBirdwatcher) filterProtocolsPipe(bird ClientResponse) map[string]interface{} {
-	return self.filterProtocols(bird["protocols"].(map[string]interface{}), "Pipe")
+func (b *GenericBirdwatcher) filterProtocolsPipe(
+	bird ClientResponse,
+) map[string]interface{} {
+	return b.filterProtocols(bird["protocols"].(map[string]interface{}), "Pipe")
 }
 
-func (self *GenericBirdwatcher) filterRoutesByPeerOrLearntFrom(routes api.Routes, peer string, learntFrom string) api.Routes {
-	result_routes := make(api.Routes, 0, len(routes))
+func (b *GenericBirdwatcher) filterRoutesByPeerOrLearntFrom(
+	routes api.Routes,
+	peer string,
+	learntFrom string,
+) api.Routes {
+	resultRoutes := make(api.Routes, 0, len(routes))
 
-	// Choose routes with next_hop == gateway of this neighbour
+	// Choose routes with next_hop == gateway of this neighbor
 	for _, route := range routes {
 		if (route.Gateway == peer) ||
 			(route.Gateway == learntFrom) ||
 			(route.Details["learnt_from"] == peer) {
-			result_routes = append(result_routes, route)
+			resultRoutes = append(resultRoutes, route)
 		}
 	}
 
 	// Sort routes for deterministic ordering
-	sort.Sort(result_routes)
-	routes = result_routes
+	sort.Sort(resultRoutes)
+	routes = resultRoutes
 
 	return routes
 }
 
-func (self *GenericBirdwatcher) filterRoutesByDuplicates(routes api.Routes, filterRoutes api.Routes) api.Routes {
-	result_routes := make(api.Routes, 0, len(routes))
+func (b *GenericBirdwatcher) filterRoutesByDuplicates(
+	routes api.Routes,
+	filterRoutes api.Routes,
+) api.Routes {
+	resultRoutes := make(api.Routes, 0, len(routes))
 
 	routesMap := make(map[string]*api.Route) // for O(1) access
 	for _, route := range routes {
-		routesMap[route.Id] = route
+		routesMap[route.ID] = route
 	}
 
 	// Remove routes from "routes" that are contained within filterRoutes
 	for _, filterRoute := range filterRoutes {
-		if _, ok := routesMap[filterRoute.Id]; ok {
-			delete(routesMap, filterRoute.Id)
-		}
+		delete(routesMap, filterRoute.ID)
+		// in theorey this guard is unneccessary
+		//if _, ok := routesMap[filterRoute.ID]; ok {
+		// }
 	}
 
 	for _, route := range routesMap {
-		result_routes = append(result_routes, route)
+		resultRoutes = append(resultRoutes, route)
 	}
 
 	// Sort routes for deterministic ordering
-	sort.Sort(result_routes)
-	routes = result_routes
+	sort.Sort(resultRoutes)
+	routes = resultRoutes // TODO: Check if this even makes sense...
 
 	return routes
 }
 
-func (self *GenericBirdwatcher) filterRoutesByNeighborId(routes api.Routes, neighborId string) api.Routes {
-	result_routes := make(api.Routes, 0, len(routes))
+/*
+linter says: dead code.
 
-	// Choose routes with next_hop == gateway of this neighbour
+func (b *GenericBirdwatcher) filterRoutesByNeighborID(
+	routes api.Routes,
+	neighborID string,
+) api.Routes {
+	resultRoutes := make(api.Routes, 0, len(routes))
+
+	// Choose routes with next_hop == gateway of this neighbor
 	for _, route := range routes {
-		if route.Details["from_protocol"] == neighborId {
-			result_routes = append(result_routes, route)
+		if route.Details["from_protocol"] == neighborID {
+			resultRoutes = append(resultRoutes, route)
 		}
 	}
 
 	// Sort routes for deterministic ordering
-	sort.Sort(result_routes)
-	routes = result_routes
+	sort.Sort(resultRoutes)
+	routes = resultRoutes
 
 	return routes
 }
+*/
 
-func (self *GenericBirdwatcher) fetchProtocolsShort() (*api.ApiStatus, map[string]interface{}, error) {
+func (b *GenericBirdwatcher) fetchProtocolsShort() (
+	*api.Meta,
+	map[string]interface{},
+	error,
+) {
 	// Query birdwatcher
 	timeout := 2 * time.Second
-	if self.config.NeighborsRefreshTimeout > 0 {
-		timeout = time.Duration(self.config.NeighborsRefreshTimeout) * time.Second
+	if b.config.NeighborsRefreshTimeout > 0 {
+		timeout = time.Duration(b.config.NeighborsRefreshTimeout) * time.Second
 	}
-	bird, err := self.client.GetJsonTimeout(timeout, "/protocols/short?uncached=true")
+	bird, err := b.client.GetJSONTimeout(timeout, "/protocols/short?uncached=true")
 	if err != nil {
 		return nil, nil, err
 	}
 
 	// Use api status from first request
-	apiStatus, err := parseApiStatus(bird, self.config)
+	apiStatus, err := parseAPIStatus(bird, b.config)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	if _, ok := bird["protocols"]; !ok {
-		return nil, nil, fmt.Errorf("Failed to fetch protocols")
+		return nil, nil, fmt.Errorf("failed to fetch protocols")
 	}
 
-	return &apiStatus, bird, nil
+	return apiStatus, bird, nil
 }
 
-func (self *GenericBirdwatcher) ExpireCaches() int {
-	count := self.routesRequiredCache.Expire()
-	count += self.routesNotExportedCache.Expire()
-
+// ExpireCaches clears all local caches
+func (b *GenericBirdwatcher) ExpireCaches() int {
+	count := b.routesRequiredCache.Expire()
+	count += b.routesNotExportedCache.Expire()
 	return count
 }
 
-func (self *GenericBirdwatcher) Status() (*api.StatusResponse, error) {
-	// Query birdwatcher
-	bird, err := self.client.GetJson("/status")
+// Status retrievs the current backend status
+func (b *GenericBirdwatcher) Status() (*api.StatusResponse, error) {
+	bird, err := b.client.GetJSON("/status")
 	if err != nil {
 		return nil, err
 	}
 
 	// Use api status from first request
-	apiStatus, err := parseApiStatus(bird, self.config)
+	apiStatus, err := parseAPIStatus(bird, b.config)
 	if err != nil {
 		return nil, err
 	}
 
 	// Parse the status
-	birdStatus, err := parseBirdwatcherStatus(bird, self.config)
+	birdStatus, err := parseBirdwatcherStatus(bird, b.config)
 	if err != nil {
 		return nil, err
 	}
 
 	response := &api.StatusResponse{
-		Api:    apiStatus,
+		Response: api.Response{
+			Meta: apiStatus,
+		},
 		Status: birdStatus,
 	}
 
 	return response, nil
 }
 
-// Get live neighbor status
-func (self *GenericBirdwatcher) NeighboursStatus() (*api.NeighboursStatusResponse, error) {
+// NeighborsStatus retrieves neighbor status infos
+func (b *GenericBirdwatcher) NeighborsStatus() (
+	*api.NeighborsStatusResponse,
+	error,
+) {
 	// Query birdwatcher
-	apiStatus, birdProtocols, err := self.fetchProtocolsShort()
+	apiStatus, birdProtocols, err := b.fetchProtocolsShort()
 	if err != nil {
 		return nil, err
 	}
 
 	// Parse the neighbors short
-	neighbours, err := parseNeighboursShort(birdProtocols, self.config)
+	neighbors, err := parseNeighborsShort(birdProtocols, b.config)
 	if err != nil {
 		return nil, err
 	}
 
-	response := &api.NeighboursStatusResponse{
-		Api:        *apiStatus,
-		Neighbours: neighbours,
+	response := &api.NeighborsStatusResponse{
+		Response: api.Response{
+			Meta: apiStatus,
+		},
+		Neighbors: neighbors,
 	}
-
 	return response, nil // dereference for now
 }
 
-// Make routes lookup
-func (self *GenericBirdwatcher) LookupPrefix(prefix string) (*api.RoutesLookupResponse, error) {
+// LookupPrefix makes a routes lookup
+func (b *GenericBirdwatcher) LookupPrefix(
+	prefix string,
+) (*api.RoutesLookupResponse, error) {
 	// Get RS info
-	rs := api.Routeserver{
-		Id:   self.config.ID,
-		Name: self.config.Name,
+	rs := &api.RouteServer{
+		ID:   b.config.ID,
+		Name: b.config.Name,
 	}
 
 	// Query prefix on RS
-	bird, err := self.client.GetJson("/routes/prefix?prefix=" + prefix)
+	bird, err := b.client.GetJSON("/routes/prefix?prefix=" + prefix)
 	if err != nil {
 		return nil, err
 	}
 
 	// Parse API status
-	apiStatus, err := parseApiStatus(bird, self.config)
+	apiStatus, err := parseAPIStatus(bird, b.config)
 	if err != nil {
 		return nil, err
 	}
 
 	// Parse routes
-	routes, err := parseRoutes(bird, self.config)
+	routes, _ := parseRoutes(bird, b.config)
 
-	// Add corresponding neighbour and source rs to result
+	// Add corresponding neighbor and source rs to result
 	results := api.LookupRoutes{}
 	for _, src := range routes {
 		// Okay. This is actually really hacky.
 		// A less bruteforce approach would be highly appreciated
 		route := &api.LookupRoute{
-			Id: src.Id,
-
-			Routeserver: rs,
-
-			NeighbourId: src.NeighbourId,
-
-			Network:   src.Network,
-			Interface: src.Interface,
-			Gateway:   src.Gateway,
-			Metric:    src.Metric,
-			Bgp:       src.Bgp,
-			Age:       src.Age,
-			Type:      src.Type,
-
-			Details: src.Details,
+			RouteServer: rs,
+			Route:       src,
 		}
 		results = append(results, route)
 	}
 
 	// Make result
 	response := &api.RoutesLookupResponse{
-		Api:    apiStatus,
+		Response: api.Response{
+			Meta: apiStatus,
+		},
 		Routes: results,
 	}
 	return response, nil

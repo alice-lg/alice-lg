@@ -7,7 +7,7 @@ import (
 
 func makeTestRoute() *Route {
 	route := &Route{
-		Bgp: BgpInfo{
+		BGP: &BGPInfo{
 			Communities: []Community{
 				Community{23, 42},
 				Community{111, 11},
@@ -26,24 +26,26 @@ func makeTestRoute() *Route {
 
 func makeTestLookupRoute() *LookupRoute {
 	route := &LookupRoute{
-		Bgp: BgpInfo{
-			Communities: []Community{
-				Community{23, 42},
-				Community{111, 11},
-			},
-			ExtCommunities: []ExtCommunity{
-				ExtCommunity{"ro", "23", "123"},
-			},
-			LargeCommunities: []Community{
-				Community{1000, 23, 42},
+		Route: &Route{
+			BGP: &BGPInfo{
+				Communities: []Community{
+					Community{23, 42},
+					Community{111, 11},
+				},
+				ExtCommunities: []ExtCommunity{
+					ExtCommunity{"ro", "23", "123"},
+				},
+				LargeCommunities: []Community{
+					Community{1000, 23, 42},
+				},
 			},
 		},
-		Neighbour: &Neighbour{
-			Asn:         23042,
+		Neighbor: &Neighbor{
+			ASN:         23042,
 			Description: "Security Solutions Ltd.",
 		},
-		Routeserver: Routeserver{
-			Id:   "3",
+		RouteServer: &RouteServer{
+			ID:   "3",
 			Name: "test.rs.ixp",
 		},
 	}
@@ -172,20 +174,20 @@ func TestSearchFilterGroupContains(t *testing.T) {
 func TestSearchFilterGetGroupsByKey(t *testing.T) {
 	filtering := NewSearchFilters()
 
-	group := filtering.GetGroupByKey(SEARCH_KEY_ASNS)
+	group := filtering.GetGroupByKey(SearchKeyASNS)
 	if group == nil {
-		t.Error(SEARCH_KEY_ASNS, "should exis")
+		t.Error(SearchKeyASNS, "should exis")
 		return
 	}
 
-	if group.Key != SEARCH_KEY_ASNS {
-		t.Error("group should be:", SEARCH_KEY_ASNS, "but is:", group.Key)
+	if group.Key != SearchKeyASNS {
+		t.Error("group should be:", SearchKeyASNS, "but is:", group.Key)
 	}
 }
 
 func TestSearchFilterManagement(t *testing.T) {
 	filtering := NewSearchFilters()
-	group := filtering.GetGroupByKey(SEARCH_KEY_ASNS)
+	group := filtering.GetGroupByKey(SearchKeyASNS)
 
 	group.AddFilter(&SearchFilter{
 		Name:  "Tech Inc. Solutions GmbH",
@@ -232,7 +234,7 @@ func TestSearchFiltersFromQuery(t *testing.T) {
 	}
 
 	// We should have 2 asns present
-	asns := filters.GetGroupByKey(SEARCH_KEY_ASNS).Filters
+	asns := filters.GetGroupByKey(SearchKeyASNS).Filters
 	if asns[0].Value != 2342 {
 		t.Error("Expected asn.filter[0].Value to be 2342, but got:", asns[0].Value)
 	}
@@ -241,12 +243,12 @@ func TestSearchFiltersFromQuery(t *testing.T) {
 	}
 
 	// Check communities
-	communities := filters.GetGroupByKey(SEARCH_KEY_COMMUNITIES).Filters
+	communities := filters.GetGroupByKey(SearchKeyCommunities).Filters
 	if len(communities) != 0 {
 		t.Error("There should be no communities filters")
 	}
 
-	largeCommunities := filters.GetGroupByKey(SEARCH_KEY_LARGE_COMMUNITIES).Filters
+	largeCommunities := filters.GetGroupByKey(SearchKeyLargeCommunities).Filters
 	if len(largeCommunities) != 1 {
 		t.Error("There should have been 1 large community")
 	}
@@ -258,7 +260,7 @@ func TestSearchFiltersFromQuery(t *testing.T) {
 	t.Log(largeCommunities[0].Value)
 
 	// Check Sources
-	sources := filters.GetGroupByKey(SEARCH_KEY_SOURCES).Filters
+	sources := filters.GetGroupByKey(SearchKeySources).Filters
 	if len(sources) != 3 {
 		t.Error("Expected 3 source id filters")
 	}
@@ -277,10 +279,10 @@ func TestSearchFilterCompareRoute(t *testing.T) {
 	}
 
 	// Asn
-	if searchFilterMatchAsn(route, 23042) != true {
+	if searchFilterMatchASN(route, 23042) != true {
 		t.Error("Route should have ASN 23042")
 	}
-	if searchFilterMatchAsn(route, 123) == true {
+	if searchFilterMatchASN(route, 123) == true {
 		t.Error("Route should not have ASN 123")
 	}
 
@@ -520,7 +522,7 @@ func TestSearchFiltersSub(t *testing.T) {
 	}
 
 	// Modify some filters
-	g := a.GetGroupByKey(SEARCH_KEY_ASNS)
+	g := a.GetGroupByKey(SearchKeyASNS)
 	g.Filters[1].Cardinality = 9001
 
 	t.Log(a)
@@ -529,7 +531,7 @@ func TestSearchFiltersSub(t *testing.T) {
 	c := a.Sub(b)
 
 	// Check diff
-	g = c.GetGroupByKey(SEARCH_KEY_ASNS)
+	g = c.GetGroupByKey(SearchKeyASNS)
 	if len(g.Filters) != 1 {
 		t.Error("There should be now only be one filter")
 	}
@@ -543,13 +545,13 @@ func TestSearchFiltersSub(t *testing.T) {
 	}
 
 	// Should still contain community filter
-	g = c.GetGroupByKey(SEARCH_KEY_COMMUNITIES)
+	g = c.GetGroupByKey(SearchKeyCommunities)
 	if len(g.Filters) != 1 {
 		t.Error("The community filter should not have been touched")
 	}
 
 	// The large community filter should have been removed
-	g = c.GetGroupByKey(SEARCH_KEY_LARGE_COMMUNITIES)
+	g = c.GetGroupByKey(SearchKeyLargeCommunities)
 	if len(g.Filters) != 0 {
 		t.Error("The large community filter is not removed")
 	}
@@ -558,7 +560,7 @@ func TestSearchFiltersSub(t *testing.T) {
 
 func TestSearchFiltersMergeProperties(t *testing.T) {
 	filtering := NewSearchFilters()
-	group := filtering.GetGroupByKey(SEARCH_KEY_ASNS)
+	group := filtering.GetGroupByKey(SearchKeyASNS)
 
 	group.AddFilter(&SearchFilter{
 		Name:  "Tech Inc. Solutions GmbH",
@@ -572,7 +574,7 @@ func TestSearchFiltersMergeProperties(t *testing.T) {
 	offlineNet.Cardinality = 9001
 
 	other := NewSearchFilters()
-	otherGroup := other.GetGroupByKey(SEARCH_KEY_ASNS)
+	otherGroup := other.GetGroupByKey(SearchKeyASNS)
 
 	otherGroup.AddFilter(&SearchFilter{
 		Value: 1119})
@@ -596,12 +598,12 @@ func TestSearchFiltersMergeProperties(t *testing.T) {
 }
 
 func TestNeighborFilterMatch(t *testing.T) {
-	n1 := &Neighbour{
-		Asn:         2342,
+	n1 := &Neighbor{
+		ASN:         2342,
 		Description: "Foo Networks AB",
 	}
-	n2 := &Neighbour{
-		Asn:         42,
+	n2 := &Neighbor{
+		ASN:         42,
 		Description: "Bar Communications Inc.",
 	}
 

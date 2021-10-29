@@ -5,16 +5,16 @@ import (
 	"time"
 )
 
-// Prefixes
+// Route is a prefix with BGP information.
 type Route struct {
-	Id          string `json:"id"`
-	NeighbourId string `json:"neighbour_id"`
+	ID         string `json:"id"`
+	NeighborID string `json:"neighbour_id"`
 
 	Network   string        `json:"network"`
 	Interface string        `json:"interface"`
 	Gateway   string        `json:"gateway"`
 	Metric    int           `json:"metric"`
-	Bgp       BgpInfo       `json:"bgp"`
+	BGP       *BGPInfo      `json:"bgp"`
 	Age       time.Duration `json:"age"`
 	Type      []string      `json:"type"` // [BGP, unicast, univ]
 	Primary   bool          `json:"primary"`
@@ -27,31 +27,34 @@ func (r *Route) String() string {
 	return string(s)
 }
 
-// Implement Filterable interface for routes
-func (self *Route) MatchSourceId(id string) bool {
+// MatchSourceID implements Filterable interface for routes
+func (r *Route) MatchSourceID(id string) bool {
 	return true // A route has no source info so we exclude this filter
 }
 
-func (self *Route) MatchAsn(asn int) bool {
+// MatchASN is not defined
+func (r *Route) MatchASN(asn int) bool {
 	return true // Same here
 }
 
-// Only community filters are interesting at this point:
-func (self *Route) MatchCommunity(community Community) bool {
-	return self.Bgp.HasCommunity(community)
+// MatchCommunity checks for the presence of a BGP community
+func (r *Route) MatchCommunity(community Community) bool {
+	return r.BGP.HasCommunity(community)
 }
 
-func (self *Route) MatchExtCommunity(community ExtCommunity) bool {
-	return self.Bgp.HasExtCommunity(community)
+// MatchExtCommunity checks for the presence of a BGP extended community
+func (r *Route) MatchExtCommunity(community ExtCommunity) bool {
+	return r.BGP.HasExtCommunity(community)
 }
 
-func (self *Route) MatchLargeCommunity(community Community) bool {
-	return self.Bgp.HasLargeCommunity(community)
+// MatchLargeCommunity checks for the presence of a large BGP community
+func (r *Route) MatchLargeCommunity(community Community) bool {
+	return r.BGP.HasLargeCommunity(community)
 }
 
+// Routes is a collection of routes
 type Routes []*Route
 
-// Implement sorting interface for routes
 func (routes Routes) Len() int {
 	return len(routes)
 }
@@ -64,22 +67,27 @@ func (routes Routes) Swap(i, j int) {
 	routes[i], routes[j] = routes[j], routes[i]
 }
 
+// RoutesResponse contains all routes from a source
 type RoutesResponse struct {
-	Api         ApiStatus `json:"api"`
-	Imported    Routes    `json:"imported"`
-	Filtered    Routes    `json:"filtered"`
-	NotExported Routes    `json:"not_exported"`
+	Response
+	Imported    Routes `json:"imported"`
+	Filtered    Routes `json:"filtered"`
+	NotExported Routes `json:"not_exported"`
 }
 
-func (self *RoutesResponse) CacheTTL() time.Duration {
+// CacheTTL returns the cache ttl of the reponse
+func (res *RoutesResponse) CacheTTL() time.Duration {
 	now := time.Now().UTC()
-	return self.Api.Ttl.Sub(now)
+	return res.Response.Meta.TTL.Sub(now)
 }
 
+// TimedResponse include the duration of the request
 type TimedResponse struct {
 	RequestDuration float64 `json:"request_duration_ms"`
 }
 
+// Pagination strucutres information about the
+// current page, total pages, page size, etc...
 type Pagination struct {
 	Page         int `json:"page"`
 	PageSize     int `json:"page_size"`
@@ -87,111 +95,111 @@ type Pagination struct {
 	TotalResults int `json:"total_results"`
 }
 
+// A PaginatedResponse with pagination info
 type PaginatedResponse struct {
 	Pagination Pagination `json:"pagination"`
 }
 
-type FilterableResponse struct {
+// FilteredResponse includes filters applied and available
+type FilteredResponse struct {
 	FiltersAvailable *SearchFilters `json:"filters_available"`
 	FiltersApplied   *SearchFilters `json:"filters_applied"`
 }
 
-type PaginatedRoutesResponse struct {
-	*RoutesResponse
-	TimedResponse
-	FilterableResponse
-	Pagination Pagination `json:"pagination"`
-}
-
-// Lookup Prefixes
+// LookupRoute is a route with additional
+// neighbor and state information
 type LookupRoute struct {
-	Id          string     `json:"id"`
-	NeighbourId string     `json:"neighbour_id"`
-	Neighbour   *Neighbour `json:"neighbour"`
+	*Route
 
 	State string `json:"state"` // Filtered, Imported, ...
 
-	Routeserver Routeserver `json:"routeserver"`
-
-	Network   string        `json:"network"`
-	Interface string        `json:"interface"`
-	Gateway   string        `json:"gateway"`
-	Metric    int           `json:"metric"`
-	Bgp       BgpInfo       `json:"bgp"`
-	Age       time.Duration `json:"age"`
-	Type      []string      `json:"type"` // [BGP, unicast, univ]
-	Primary   bool          `json:"primary"`
-
-	Details Details `json:"details"`
+	Neighbor    *Neighbor    `json:"neighbor"`
+	RouteServer *RouteServer `json:"routeserver"`
 }
 
-// Implement Filterable interface for lookup routes
-func (self *LookupRoute) MatchSourceId(id string) bool {
-	return self.Routeserver.Id == id
+// MatchSourceID implements filterable interface for lookup routes
+func (r *LookupRoute) MatchSourceID(id string) bool {
+	return r.RouteServer.ID == id
 }
 
-func (self *LookupRoute) MatchAsn(asn int) bool {
-	return self.Neighbour.Asn == asn
+// MatchASN matches the neighbor's ASN
+func (r *LookupRoute) MatchASN(asn int) bool {
+	return r.Neighbor.MatchASN(asn)
 }
 
-// Only community filters are interesting at this point:
-func (self *LookupRoute) MatchCommunity(community Community) bool {
-	return self.Bgp.HasCommunity(community)
+// MatchCommunity checks for the presence of a BGP community.
+func (r *LookupRoute) MatchCommunity(community Community) bool {
+	return r.Route.BGP.HasCommunity(community)
 }
 
-func (self *LookupRoute) MatchExtCommunity(community ExtCommunity) bool {
-	return self.Bgp.HasExtCommunity(community)
+// MatchExtCommunity matches an extended community
+func (r *LookupRoute) MatchExtCommunity(community ExtCommunity) bool {
+	return r.Route.BGP.HasExtCommunity(community)
 }
 
-func (self *LookupRoute) MatchLargeCommunity(community Community) bool {
-	return self.Bgp.HasLargeCommunity(community)
+// MatchLargeCommunity matches large communities.
+func (r *LookupRoute) MatchLargeCommunity(community Community) bool {
+	return r.Route.BGP.HasLargeCommunity(community)
 }
 
-// Implement sorting interface for lookup routes
-func (routes LookupRoutes) Len() int {
-	return len(routes)
-}
-
-func (routes LookupRoutes) Less(i, j int) bool {
-	return routes[i].Network < routes[j].Network
-}
-
-func (routes LookupRoutes) Swap(i, j int) {
-	routes[i], routes[j] = routes[j], routes[i]
-}
-
+// LookupRoutes is a collection of lookup routes.
 type LookupRoutes []*LookupRoute
 
-// TODO: Naming is a bit yuck
-type LookupRoutesResponse struct {
-	*PaginatedResponse
-	Routes LookupRoutes `json:"routes"`
+func (r LookupRoutes) Len() int {
+	return len(r)
 }
 
-// TODO: Refactor this (might be legacy)
+func (r LookupRoutes) Less(i, j int) bool {
+	return r[i].Route.Network < r[j].Route.Network
+}
+
+func (r LookupRoutes) Swap(i, j int) {
+	r[i], r[j] = r[j], r[i]
+}
+
+// RoutesLookup contains routes and pagination info
+type RoutesLookup struct {
+	Routes     LookupRoutes `json:"routes"`
+	Pagination Pagination   `json:"pagination"`
+}
+
+// RoutesLookupResponse is a PaginatedResponse with
+// a set of lookup routes, as the result of a query of
+// a specific route server.
 type RoutesLookupResponse struct {
-	Api    ApiStatus    `json:"api"`
-	Routes LookupRoutes `json:"routes"`
-}
-
-type RoutesLookupResponseGlobal struct {
-	Routes LookupRoutes `json:"routes"`
-
-	// Pagination
-	TotalRoutes int `json:"total_routes"`
-	Limit       int `json:"limit"`
-	Offset      int `json:"offset"`
-
-	// Meta
-	Time float64 `json:"query_duration_ms"`
-}
-
-type PaginatedRoutesLookupResponse struct {
+	Response
+	PaginatedResponse
 	TimedResponse
-	FilterableResponse
+	FilteredResponse
+	Routes LookupRoutes `json:"routes"`
+}
 
-	Api ApiStatus `json:"api"` // Add to provide cache status information
+// GlobalRoutesLookupResponse is the result of a routes
+// query across all route servers.
+type GlobalRoutesLookupResponse struct {
+	Response
+	PaginatedResponse
+	TimedResponse
+	FilteredResponse
+	Routes LookupRoutes `json:"routes"`
+}
 
-	Imported *LookupRoutesResponse `json:"imported"`
-	Filtered *LookupRoutesResponse `json:"filtered"`
+// A PaginatedRoutesResponse includes routes and pagination
+// information form a single route server
+type PaginatedRoutesResponse struct {
+	Response
+	PaginatedResponse
+	TimedResponse
+	FilteredResponse
+	RoutesResponse
+}
+
+// A PaginatedRoutesLookupResponse TODO
+type PaginatedRoutesLookupResponse struct {
+	Response
+	TimedResponse
+	FilteredResponse
+
+	Imported *RoutesLookup `json:"imported"`
+	Filtered *RoutesLookup `json:"filtered"`
 }

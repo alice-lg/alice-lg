@@ -15,6 +15,7 @@ import (
 	"time"
 )
 
+// GoBGP is a source for Alice.
 type GoBGP struct {
 	config Config
 	client gobgpapi.GobgpApiClient
@@ -29,13 +30,16 @@ type GoBGP struct {
 	routesNotExportedCache *caches.RoutesCache
 }
 
+// NewGoBGP creates a new GoBGP source instance
 func NewGoBGP(config Config) *GoBGP {
 
 	dialOpts := make([]grpc.DialOption, 0)
 	if config.Insecure {
 		dialOpts = append(dialOpts, grpc.WithInsecure())
 	} else {
-		creds, err := credentials.NewClientTLSFromFile(config.TLSCert, config.TLSCommonName)
+		creds, err := credentials.NewClientTLSFromFile(
+			config.TLSCert,
+			config.TLSCommonName)
 		if err != nil {
 			log.Fatalf("could not load tls cert: %s", err)
 		}
@@ -80,19 +84,23 @@ func NewGoBGP(config Config) *GoBGP {
 	}
 }
 
+// ExpireCaches clears all local caches
 func (gobgp *GoBGP) ExpireCaches() int {
 	count := gobgp.routesRequiredCache.Expire()
 	count += gobgp.routesNotExportedCache.Expire()
-
 	return count
 }
 
-func (gobgp *GoBGP) NeighboursStatus() (*api.NeighboursStatusResponse, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(gobgp.config.ProcessingTimeout))
+// NeighborsStatus retrievs all status information
+// for all peers on the RS.
+func (gobgp *GoBGP) NeighborsStatus() (*api.NeighborsStatusResponse, error) {
+	ctx, cancel := context.WithTimeout(
+		context.Background(),
+		time.Second*time.Duration(gobgp.config.ProcessingTimeout))
 	defer cancel()
 
-	response := api.NeighboursStatusResponse{}
-	response.Neighbours = make(api.NeighboursStatus, 0)
+	response := api.NeighborsStatusResponse{}
+	response.Neighbors = make(api.NeighborsStatus, 0)
 
 	resp, err := gobgp.client.ListPeer(ctx, &gobgpapi.ListPeerRequest{})
 	if err != nil {
@@ -104,8 +112,8 @@ func (gobgp *GoBGP) NeighboursStatus() (*api.NeighboursStatusResponse, error) {
 			break
 		}
 
-		ns := api.NeighbourStatus{}
-		ns.Id = PeerHash(_resp.Peer)
+		ns := api.NeighborStatus{}
+		ns.ID = PeerHash(_resp.Peer)
 
 		switch _resp.Peer.State.SessionState {
 		case gobgpapi.PeerState_ESTABLISHED:
@@ -115,13 +123,16 @@ func (gobgp *GoBGP) NeighboursStatus() (*api.NeighboursStatusResponse, error) {
 		}
 
 		if _resp.Peer.Timers.State.Uptime != nil {
-			ns.Since = time.Now().Sub(time.Unix(_resp.Peer.Timers.State.Uptime.Seconds, int64(_resp.Peer.Timers.State.Uptime.Nanos)))
+			ns.Since = time.Since(time.Unix(
+				_resp.Peer.Timers.State.Uptime.Seconds,
+				int64(_resp.Peer.Timers.State.Uptime.Nanos)))
 		}
 
 	}
 	return &response, nil
 }
 
+// Status retrievs the routers status
 func (gobgp *GoBGP) Status() (*api.StatusResponse, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(gobgp.config.ProcessingTimeout))
 	defer cancel()
@@ -132,17 +143,20 @@ func (gobgp *GoBGP) Status() (*api.StatusResponse, error) {
 	}
 
 	response := api.StatusResponse{}
-	response.Status.RouterId = resp.Global.RouterId
+	response.Status.RouterID = resp.Global.RouterId
 	response.Status.Backend = "gobgp"
 	return &response, nil
 }
 
-func (gobgp *GoBGP) Neighbours() (*api.NeighboursResponse, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(gobgp.config.ProcessingTimeout))
+// Neighbors retrievs a list of neighbors
+func (gobgp *GoBGP) Neighbors() (*api.NeighborsResponse, error) {
+	ctx, cancel := context.WithTimeout(
+		context.Background(),
+		time.Second*time.Duration(gobgp.config.ProcessingTimeout))
 	defer cancel()
 
-	response := api.NeighboursResponse{}
-	response.Neighbours = make(api.Neighbours, 0)
+	response := api.NeighborsResponse{}
+	response.Neighbors = make(api.Neighbors, 0)
 
 	resp, err := gobgp.client.ListPeer(ctx, &gobgpapi.ListPeerRequest{EnableAdvertised: true})
 	if err != nil {
@@ -154,10 +168,10 @@ func (gobgp *GoBGP) Neighbours() (*api.NeighboursResponse, error) {
 			break
 		}
 
-		neigh := api.Neighbour{}
+		neigh := api.Neighbor{}
 
 		neigh.Address = _resp.Peer.State.NeighborAddress
-		neigh.Asn = int(_resp.Peer.State.PeerAs)
+		neigh.ASN = int(_resp.Peer.State.PeerAs)
 		switch _resp.Peer.State.SessionState {
 		case gobgpapi.PeerState_ESTABLISHED:
 			neigh.State = "up"
@@ -166,10 +180,10 @@ func (gobgp *GoBGP) Neighbours() (*api.NeighboursResponse, error) {
 		}
 		neigh.Description = _resp.Peer.Conf.Description
 
-		neigh.Id = PeerHash(_resp.Peer)
-		neigh.RouteServerId = gobgp.config.Id
+		neigh.ID = PeerHash(_resp.Peer)
+		neigh.RouteServerID = gobgp.config.ID
 
-		response.Neighbours = append(response.Neighbours, &neigh)
+		response.Neighbors = append(response.Neighbors, &neigh)
 		for _, afiSafi := range _resp.Peer.AfiSafis {
 			neigh.RoutesReceived += int(afiSafi.State.Received)
 			neigh.RoutesExported += int(afiSafi.State.Advertised)
@@ -178,7 +192,9 @@ func (gobgp *GoBGP) Neighbours() (*api.NeighboursResponse, error) {
 		}
 
 		if _resp.Peer.Timers.State.Uptime != nil {
-			neigh.Uptime = time.Now().Sub(time.Unix(_resp.Peer.Timers.State.Uptime.Seconds, int64(_resp.Peer.Timers.State.Uptime.Nanos)))
+			neigh.Uptime = time.Since(time.Unix(
+				_resp.Peer.Timers.State.Uptime.Seconds,
+				int64(_resp.Peer.Timers.State.Uptime.Nanos)))
 		}
 
 	}
@@ -186,20 +202,9 @@ func (gobgp *GoBGP) Neighbours() (*api.NeighboursResponse, error) {
 	return &response, nil
 }
 
-// Get neighbors from neighbors summary
-func (gobgp *GoBGP) summaryNeighbors() (*api.NeighboursResponse, error) {
-
-	return nil, fmt.Errorf("Not implemented summaryNeighbors")
-}
-
-// Get neighbors from protocols
-func (gobgp *GoBGP) bgpProtocolsNeighbors() (*api.NeighboursResponse, error) {
-	return nil, fmt.Errorf("Not implemented protocols")
-}
-
-// Get filtered and exported routes
-func (gobgp *GoBGP) Routes(neighbourId string) (*api.RoutesResponse, error) {
-	neigh, err := gobgp.lookupNeighbour(neighbourId)
+// Routes retrieves filtered and exported routes
+func (gobgp *GoBGP) Routes(neighborID string) (*api.RoutesResponse, error) {
+	neigh, err := gobgp.lookupNeighbor(neighborID)
 	if err != nil {
 		return nil, err
 	}
@@ -212,21 +217,8 @@ func (gobgp *GoBGP) Routes(neighbourId string) (*api.RoutesResponse, error) {
 	return &routes, nil
 }
 
-/*
-RoutesRequired is a specialized request to fetch:
-
- - RoutesExported and
- - RoutesFiltered
-
-from Birdwatcher. As the not exported routes can be very many
-these are optional and can be loaded on demand using the
-RoutesNotExported() API.
-
-A route deduplication is applied.
-*/
-
-func (gobgp *GoBGP) getRoutes(neighbourId string) (*api.RoutesResponse, error) {
-	neigh, err := gobgp.lookupNeighbour(neighbourId)
+func (gobgp *GoBGP) getRoutes(neighborID string) (*api.RoutesResponse, error) {
+	neigh, err := gobgp.lookupNeighbor(neighborID)
 	if err != nil {
 		return nil, err
 	}
@@ -239,13 +231,23 @@ func (gobgp *GoBGP) getRoutes(neighbourId string) (*api.RoutesResponse, error) {
 	return &routes, nil
 }
 
-func (gobgp *GoBGP) RoutesRequired(neighbourId string) (*api.RoutesResponse, error) {
-	return gobgp.getRoutes(neighbourId)
+// RoutesRequired is a specialized request to fetch:
+//
+// - RoutesExported and
+// - RoutesFiltered
+//
+// from Birdwatcher. As the not exported routes can be very many
+// these are optional and can be loaded on demand using the
+// RoutesNotExported() API.
+//
+// A route deduplication is applied.
+func (gobgp *GoBGP) RoutesRequired(neighborID string) (*api.RoutesResponse, error) {
+	return gobgp.getRoutes(neighborID)
 }
 
-// Get all received routes
-func (gobgp *GoBGP) RoutesReceived(neighbourId string) (*api.RoutesResponse, error) {
-	neigh, err := gobgp.lookupNeighbour(neighbourId)
+// RoutesReceived gets all received routes
+func (gobgp *GoBGP) RoutesReceived(neighborID string) (*api.RoutesResponse, error) {
+	neigh, err := gobgp.lookupNeighbor(neighborID)
 	if err != nil {
 		return nil, err
 	}
@@ -259,9 +261,9 @@ func (gobgp *GoBGP) RoutesReceived(neighbourId string) (*api.RoutesResponse, err
 	return &routes, nil
 }
 
-// Get all filtered routes
-func (gobgp *GoBGP) RoutesFiltered(neighbourId string) (*api.RoutesResponse, error) {
-	routes, err := gobgp.getRoutes(neighbourId)
+// RoutesFiltered gets all filtered routes
+func (gobgp *GoBGP) RoutesFiltered(neighborID string) (*api.RoutesResponse, error) {
+	routes, err := gobgp.getRoutes(neighborID)
 	if err != nil {
 		log.Print(err)
 	}
@@ -269,9 +271,9 @@ func (gobgp *GoBGP) RoutesFiltered(neighbourId string) (*api.RoutesResponse, err
 	return routes, err
 }
 
-// Get all not exported routes
-func (gobgp *GoBGP) RoutesNotExported(neighbourId string) (*api.RoutesResponse, error) {
-	neigh, err := gobgp.lookupNeighbour(neighbourId)
+// RoutesNotExported gets all not exported routes
+func (gobgp *GoBGP) RoutesNotExported(neighborID string) (*api.RoutesResponse, error) {
+	neigh, err := gobgp.lookupNeighbor(neighborID)
 	if err != nil {
 		return nil, err
 	}
@@ -284,28 +286,25 @@ func (gobgp *GoBGP) RoutesNotExported(neighbourId string) (*api.RoutesResponse, 
 	return &routes, nil
 }
 
-// Make routes lookup
+// LookupPrefix searches for a prefix
 func (gobgp *GoBGP) LookupPrefix(prefix string) (*api.RoutesLookupResponse, error) {
-	return nil, fmt.Errorf("Not implemented LookupPrefix")
+	return nil, fmt.Errorf("not implemented: LookupPrefix")
 }
 
-/*
-AllRoutes:
-	Here a routes dump (filtered, received) is returned, which is used to learn all prefixes to build up a local store for searching.
-*/
+// AllRoutes returns a routes dump (filtered, received),
+// which is used to learn all prefixes to build
+// up a local store for searching.
 func (gobgp *GoBGP) AllRoutes() (*api.RoutesResponse, error) {
 	routes := NewRoutesResponse()
-	peers, err := gobgp.GetNeighbours()
+	peers, err := gobgp.GetNeighbors()
 	if err != nil {
 		return nil, err
 	}
-
 	for _, peer := range peers {
 		err = gobgp.GetRoutes(peer, gobgpapi.TableType_ADJ_IN, &routes)
 		if err != nil {
 			log.Print(err)
 		}
 	}
-
 	return &routes, nil
 }

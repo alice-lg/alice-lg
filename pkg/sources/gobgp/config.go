@@ -2,7 +2,7 @@ package gobgp
 
 // Config is a GoBGP source config
 type Config struct {
-	Id   string
+	ID   string
 	Name string
 
 	Host     string `ini:"host"`

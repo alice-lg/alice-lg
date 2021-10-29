@@ -12,7 +12,7 @@ func filterReceivedRoutes(
 	for _, r := range routes {
 		received := true
 		for _, c := range rejectCommunities {
-			if r.Bgp.HasLargeCommunity(c) {
+			if r.BGP.HasLargeCommunity(c) {
 				received = false
 				break
 			}
@@ -32,7 +32,7 @@ func filterRejectedRoutes(
 	for _, r := range routes {
 		rejected := false
 		for _, c := range rejectCommunities {
-			if r.Bgp.HasLargeCommunity(c) {
+			if r.BGP.HasLargeCommunity(c) {
 				rejected = true
 				break
 			}

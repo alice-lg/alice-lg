@@ -14,9 +14,11 @@ NeighborsCache Tests
 func TestNeighborsCacheSetGet(t *testing.T) {
 	cache := NewNeighborsCache(false)
 
-	response := &api.NeighboursResponse{
-		Api: api.ApiStatus{
-			Ttl: time.Now().UTC().Add(23 * time.Millisecond),
+	response := &api.NeighborsResponse{
+		Response: api.Response{
+			Meta: &api.Meta{
+				TTL: time.Now().UTC().Add(23 * time.Millisecond),
+			},
 		},
 	}
 

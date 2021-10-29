@@ -10,15 +10,17 @@ func TestStatusResponseSerialization(t *testing.T) {
 
 	// Make status
 	response := StatusResponse{
-		Api: ApiStatus{
-			Version:         "2.0.0",
-			CacheStatus:     CacheStatus{},
-			ResultFromCache: false,
-			Ttl:             time.Now(),
+		Response: Response{
+			Meta: &Meta{
+				Version:         "2.0.0",
+				CacheStatus:     CacheStatus{},
+				ResultFromCache: false,
+				TTL:             time.Now(),
+			},
 		},
 		Status: Status{
 			Message:  "Server is up and running",
-			RouterId: "testrouter",
+			RouterID: "testrouter",
 			Version:  "1.6.3",
 			Backend:  "birdwatcher",
 		},
@@ -32,7 +34,7 @@ func TestStatusResponseSerialization(t *testing.T) {
 	_ = result
 }
 
-func TestNeighbourSerialization(t *testing.T) {
+func TestNeighborSerialization(t *testing.T) {
 
 	// Original backend response
 	payload := `{
@@ -49,16 +51,16 @@ func TestNeighbourSerialization(t *testing.T) {
 		t.Error(err)
 	}
 
-	// Make neighbour
-	neighbour := Neighbour{
-		Id:          "PROTOCOL_23_42_",
+	// Make neighbor
+	neighbor := Neighbor{
+		ID:          "PROTOCOL_23_42_",
 		State:       "Established",
 		Description: "Some peer",
 		Address:     "10.10.10.1",
 		Details:     details,
 	}
 
-	result, err := json.Marshal(neighbour)
+	result, err := json.Marshal(neighbor)
 	if err != nil {
 		t.Error(err)
 	}
@@ -81,7 +83,7 @@ func TestCommunityStringify(t *testing.T) {
 func TestHasCommunity(t *testing.T) {
 	com := Community{23, 42}
 
-	bgp := BgpInfo{
+	bgp := &BGPInfo{
 		Communities: []Community{
 			Community{42, 123},
 			Community{23, 42},

@@ -1,3 +1,5 @@
+// Package api contains the datastructures for the
+// Alice API.
 package api
 
 import (
@@ -6,15 +8,13 @@ import (
 	"time"
 )
 
-// Neighbours
-type Neighbours []*Neighbour
-
-type Neighbour struct {
-	Id string `json:"id"`
+// Neighbor is a BGP peer on the RS
+type Neighbor struct {
+	ID string `json:"id"`
 
 	// Mandatory fields
 	Address         string        `json:"address"`
-	Asn             int           `json:"asn"`
+	ASN             int           `json:"asn"`
 	State           string        `json:"state"`
 	Description     string        `json:"description"`
 	RoutesReceived  int           `json:"routes_received"`
@@ -24,7 +24,7 @@ type Neighbour struct {
 	RoutesAccepted  int           `json:"routes_accepted"`
 	Uptime          time.Duration `json:"uptime"`
 	LastError       string        `json:"last_error"`
-	RouteServerId   string        `json:"routeserver_id"`
+	RouteServerID   string        `json:"routeserver_id"`
 
 	// Original response
 	Details map[string]interface{} `json:"details"`
@@ -32,89 +32,104 @@ type Neighbour struct {
 
 // String encodes a neighbor as json. This is
 // more readable than the golang default represenation.
-func (n *Neighbour) String() string {
+func (n *Neighbor) String() string {
 	repr, _ := json.Marshal(n)
 	return string(repr)
 }
 
-// Implement sorting interface for routes
-func (neighbours Neighbours) Len() int {
-	return len(neighbours)
+// Neighbors is a collection of neighbors
+type Neighbors []*Neighbor
+
+func (neighbors Neighbors) Len() int {
+	return len(neighbors)
 }
 
-func (neighbours Neighbours) Less(i, j int) bool {
-	return neighbours[i].Asn < neighbours[j].Asn
+func (neighbors Neighbors) Less(i, j int) bool {
+	return neighbors[i].ASN < neighbors[j].ASN
 }
 
-func (neighbours Neighbours) Swap(i, j int) {
-	neighbours[i], neighbours[j] = neighbours[j], neighbours[i]
+func (neighbors Neighbors) Swap(i, j int) {
+	neighbors[i], neighbors[j] = neighbors[j], neighbors[i]
 }
 
-type NeighboursResponse struct {
-	Api        ApiStatus  `json:"api"`
-	Neighbours Neighbours `json:"neighbours"`
+// MatchSourceID implements Filterable interface
+func (n *Neighbor) MatchSourceID(id string) bool {
+	return n.RouteServerID == id
 }
 
-// Implement Filterable interface
-func (self *Neighbour) MatchSourceId(id string) bool {
-	return self.RouteServerId == id
+// MatchASN compares the neighbor's ASN.
+func (n *Neighbor) MatchASN(asn int) bool {
+	return n.ASN == asn
 }
 
-func (self *Neighbour) MatchAsn(asn int) bool {
-	return self.Asn == asn
-}
-
-func (self *Neighbour) MatchCommunity(_community Community) bool {
+// MatchCommunity is undefined for neighbors.
+func (n *Neighbor) MatchCommunity(Community) bool {
 	return true // Ignore
 }
 
-func (self *Neighbour) MatchExtCommunity(_community Community) bool {
+// MatchExtCommunity is undefined for neighbors.
+func (n *Neighbor) MatchExtCommunity(Community) bool {
 	return true // Ignore
 }
 
-func (self *Neighbour) MatchLargeCommunity(_community Community) bool {
+// MatchLargeCommunity is undefined for neighbors.
+func (n *Neighbor) MatchLargeCommunity(Community) bool {
 	return true // Ignore
 }
 
-func (self *Neighbour) MatchName(name string) bool {
+// MatchName is a case insensitive match of
+// the neighbor's description
+func (n *Neighbor) MatchName(name string) bool {
 	name = strings.ToLower(name)
-	neighName := strings.ToLower(self.Description)
+	neighName := strings.ToLower(n.Description)
 
 	return strings.Contains(neighName, name)
 }
 
-// Neighbours response is cacheable
-func (self *NeighboursResponse) CacheTTL() time.Duration {
-	now := time.Now().UTC()
-	return self.Api.Ttl.Sub(now)
+// A NeighborsResponse is a list of neighbors with
+// caching information.
+type NeighborsResponse struct {
+	Response
+	Neighbors Neighbors `json:"neighbors"`
 }
 
-type NeighboursLookupResults map[string]Neighbours
+// CacheTTL returns the duration of validity
+// of the neighbor response.
+func (res *NeighborsResponse) CacheTTL() time.Duration {
+	now := time.Now().UTC()
+	return res.Response.Meta.TTL.Sub(now)
+}
 
-type NeighboursStatus []*NeighbourStatus
+// NeighborsLookupResults is a mapping of lookup neighbors.
+// The sourceID is used as a key.
+type NeighborsLookupResults map[string]Neighbors
 
-// NeighbourStatus contains only the neighbor state and
+// NeighborStatus contains only the neighbor state and
 // uptime.
-type NeighbourStatus struct {
-	Id    string        `json:"id"`
+type NeighborStatus struct {
+	ID    string        `json:"id"`
 	State string        `json:"state"`
 	Since time.Duration `json:"uptime"`
 }
 
-// Implement sorting interface for status
-func (neighbours NeighboursStatus) Len() int {
-	return len(neighbours)
+// NeighborsStatus is a list of statuses.
+type NeighborsStatus []*NeighborStatus
+
+func (neighbors NeighborsStatus) Len() int {
+	return len(neighbors)
 }
 
-func (neighbours NeighboursStatus) Less(i, j int) bool {
-	return neighbours[i].Id < neighbours[j].Id
+func (neighbors NeighborsStatus) Less(i, j int) bool {
+	return neighbors[i].ID < neighbors[j].ID
 }
 
-func (neighbours NeighboursStatus) Swap(i, j int) {
-	neighbours[i], neighbours[j] = neighbours[j], neighbours[i]
+func (neighbors NeighborsStatus) Swap(i, j int) {
+	neighbors[i], neighbors[j] = neighbors[j], neighbors[i]
 }
 
-type NeighboursStatusResponse struct {
-	Api        ApiStatus        `json:"api"`
-	Neighbours NeighboursStatus `json:"neighbours"`
+// NeighborsStatusResponse contains the status of all neighbors
+// on a RS.
+type NeighborsStatusResponse struct {
+	Response
+	Neighbors NeighborsStatus `json:"neighbors"`
 }

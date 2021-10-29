@@ -138,7 +138,7 @@ export function loadRouteserverProtocol(routeserverId) {
         ({data}) => {
           dispatch(loadRouteserverProtocolSuccess(
             routeserverId,
-            data.neighbours,
+            data.neighbors,
             data.api,
           ));
         },

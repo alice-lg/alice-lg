@@ -10,7 +10,7 @@ import (
 func readTestData(filename string) map[string]interface{} {
 	data, _ := ioutil.ReadFile(filepath.Join("testdata", filename))
 	payload := make(map[string]interface{})
-	json.Unmarshal(data, &payload)
+	_ = json.Unmarshal(data, &payload)
 	return payload
 }
 
@@ -58,24 +58,24 @@ func TestDecodeRoutes(t *testing.T) {
 		t.Error("unexpected network:", r.Network)
 	}
 	// Community decoding
-	if r.Bgp.Communities[0][0] != 20119 {
-		t.Error("unexpected community:", r.Bgp.Communities[0])
+	if r.BGP.Communities[0][0] != 20119 {
+		t.Error("unexpected community:", r.BGP.Communities[0])
 	}
-	if r.Bgp.Communities[0][1] != 3 {
-		t.Error("unexpected community:", r.Bgp.Communities[0])
+	if r.BGP.Communities[0][1] != 3 {
+		t.Error("unexpected community:", r.BGP.Communities[0])
 	}
-	if r.Bgp.ExtCommunities[1][0] != "rt" {
-		t.Error("unexpected community:", r.Bgp.ExtCommunities[0])
+	if r.BGP.ExtCommunities[1][0] != "rt" {
+		t.Error("unexpected community:", r.BGP.ExtCommunities[0])
 	}
-	if r.Bgp.ExtCommunities[1][1] != 65000 {
-		t.Error("unexpected community:", r.Bgp.ExtCommunities[0])
+	if r.BGP.ExtCommunities[1][1] != 65000 {
+		t.Error("unexpected community:", r.BGP.ExtCommunities[0])
 	}
-	if r.Bgp.ExtCommunities[1][2] != 11000 {
-		t.Error("unexpected community:", r.Bgp.ExtCommunities[0])
+	if r.BGP.ExtCommunities[1][2] != 11000 {
+		t.Error("unexpected community:", r.BGP.ExtCommunities[0])
 	}
 
-	if r.Bgp.AsPath[0] != 1111 {
-		t.Error("unexpected as_path:", r.Bgp.AsPath)
+	if r.BGP.AsPath[0] != 1111 {
+		t.Error("unexpected as_path:", r.BGP.AsPath)
 	}
 	t.Log(r.Age)
 }

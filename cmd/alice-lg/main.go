@@ -1,14 +1,18 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 
-	"github.com/alice-lg/alice-lg/pkg/backend"
+	"github.com/alice-lg/alice-lg/pkg/config"
+	"github.com/alice-lg/alice-lg/pkg/http"
+	"github.com/alice-lg/alice-lg/pkg/store"
 )
 
 func main() {
-	quit := make(chan bool)
+	done := make(chan bool)
+	ctx := context.Background()
 
 	// Handle commandline parameters
 	configFilenameFlag := flag.String(
@@ -19,32 +23,31 @@ func main() {
 	flag.Parse()
 
 	// Load configuration
-	if err := backend.InitConfig(*configFilenameFlag); err != nil {
+	cfg, err := config.LoadConfig(*configFilenameFlag)
+	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Say hi
-	printBanner()
-
-	log.Println("Using configuration:", backend.AliceConfig.File)
-
 	// Setup local routes store
-	backend.InitStores()
+	neighborsStore := store.NewNeighborsStore(cfg)
+	routesStore := store.NewRoutesStore(neighborsStore, cfg)
+
+	// Say hi
+	printBanner(cfg, neighborsStore, routesStore)
+	log.Println("Using configuration:", cfg.File)
 
 	// Start stores
-	if backend.AliceConfig.Server.EnablePrefixLookup == true {
-		go backend.AliceRoutesStore.Start()
-	}
-
-	// Setup local neighbours store
-	if backend.AliceConfig.Server.EnablePrefixLookup == true {
-		go backend.AliceNeighboursStore.Start()
+	if cfg.Server.EnablePrefixLookup == true {
+		go neighborsStore.Start()
+		go routesStore.Start()
 	}
 
 	// Start the Housekeeping
-	go backend.Housekeeping(backend.AliceConfig)
+	go store.StartHousekeeping(ctx, cfg)
 
-	go backend.StartHTTPServer()
+	// Start HTTP API
+	server := http.NewServer(cfg, routesStore, neighborsStore)
+	go server.Start()
 
-	<-quit
+	<-done
 }

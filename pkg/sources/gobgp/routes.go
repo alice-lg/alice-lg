@@ -23,6 +23,7 @@ var families []gobgpapi.Family = []gobgpapi.Family{gobgpapi.Family{
 },
 }
 
+// NewRoutesResponse creates a new routes response
 func NewRoutesResponse() api.RoutesResponse {
 	routes := api.RoutesResponse{}
 	routes.Imported = make(api.Routes, 0)
@@ -31,27 +32,32 @@ func NewRoutesResponse() api.RoutesResponse {
 	return routes
 }
 
-func (gobgp *GoBGP) lookupNeighbour(neighborId string) (*gobgpapi.Peer, error) {
+func (gobgp *GoBGP) lookupNeighbor(neighborID string) (*gobgpapi.Peer, error) {
 
-	peers, err := gobgp.GetNeighbours()
+	peers, err := gobgp.GetNeighbors()
 	if err != nil {
 		return nil, err
 	}
 	for _, peer := range peers {
-		peerId := PeerHash(peer)
-		if neighborId == "" || peerId == neighborId {
+		peerID := PeerHash(peer)
+		if neighborID == "" || peerID == neighborID {
 			return peer, nil
 		}
 	}
 
-	return nil, fmt.Errorf("Could not lookup neighbour")
+	return nil, fmt.Errorf("could not lookup neighbor")
 }
 
-func (gobgp *GoBGP) GetNeighbours() ([]*gobgpapi.Peer, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(gobgp.config.ProcessingTimeout))
+// GetNeighbors retrievs all neighbors and returns
+// a list of peers.
+func (gobgp *GoBGP) GetNeighbors() ([]*gobgpapi.Peer, error) {
+	ctx, cancel := context.WithTimeout(
+		context.Background(),
+		time.Second*time.Duration(gobgp.config.ProcessingTimeout))
 	defer cancel()
 
-	peerStream, err := gobgp.client.ListPeer(ctx, &gobgpapi.ListPeerRequest{EnableAdvertised: true})
+	peerStream, err := gobgp.client.ListPeer(
+		ctx, &gobgpapi.ListPeerRequest{EnableAdvertised: true})
 	if err != nil {
 		return nil, err
 	}
@@ -68,83 +74,98 @@ func (gobgp *GoBGP) GetNeighbours() ([]*gobgpapi.Peer, error) {
 	return peers, nil
 }
 
-func (gobgp *GoBGP) parsePathIntoRoute(path *gobgpapi.Path, prefix string) (error, *api.Route) {
+func (gobgp *GoBGP) parsePathIntoRoute(
+	path *gobgpapi.Path,
+	prefix string,
+) (*api.Route, error) {
 
 	route := api.Route{}
-	route.Id = fmt.Sprintf("%s_%s", path.SourceId, prefix)
-	route.NeighbourId = PeerHashWithASAndAddress(path.SourceAsn, path.NeighborIp)
+	route.ID = fmt.Sprintf("%s_%s", path.SourceId, prefix)
+	route.NeighborID = PeerHashWithASAndAddress(path.SourceAsn, path.NeighborIp)
 	route.Network = prefix
 	route.Interface = "Unknown"
-	route.Age = time.Now().Sub(time.Unix(path.Age.GetSeconds(), int64(path.Age.GetNanos())))
+	route.Age = time.Since(time.Unix(path.Age.GetSeconds(), int64(path.Age.GetNanos())))
 	route.Primary = path.Best
 
 	attrs, err := apiutil.GetNativePathAttributes(path)
 	if err != nil {
-		return err, nil
+		return nil, err
 	}
 
-	route.Bgp.Communities = make(api.Communities, 0)
-	route.Bgp.LargeCommunities = make(api.Communities, 0)
-	route.Bgp.ExtCommunities = make(api.ExtCommunities, 0)
+	route.BGP = &api.BGPInfo{}
+	route.BGP.Communities = make(api.Communities, 0)
+	route.BGP.LargeCommunities = make(api.Communities, 0)
+	route.BGP.ExtCommunities = make(api.ExtCommunities, 0)
 
 	for _, attr := range attrs {
-		switch attr.(type) {
+		switch attr := attr.(type) {
 		case *bgp.PathAttributeMultiExitDisc:
-			med := attr.(*bgp.PathAttributeMultiExitDisc)
-			route.Bgp.Med = int(med.Value)
+			route.BGP.Med = int(attr.Value)
 		case *bgp.PathAttributeNextHop:
-			nh := attr.(*bgp.PathAttributeNextHop)
-			route.Gateway = nh.Value.String()
-			route.Bgp.NextHop = nh.Value.String()
+			route.Gateway = attr.Value.String()
+			route.BGP.NextHop = attr.Value.String()
 		case *bgp.PathAttributeLocalPref:
-			lp := attr.(*bgp.PathAttributeLocalPref)
-			route.Bgp.LocalPref = int(lp.Value)
+			route.BGP.LocalPref = int(attr.Value)
 		case *bgp.PathAttributeOrigin:
-			origin := attr.(*bgp.PathAttributeOrigin)
-			switch origin.Value {
+			switch attr.Value {
 			case bgp.BGP_ORIGIN_ATTR_TYPE_IGP:
-				route.Bgp.Origin = "IGP"
+				route.BGP.Origin = "IGP"
 			case bgp.BGP_ORIGIN_ATTR_TYPE_EGP:
-				route.Bgp.Origin = "EGP"
+				route.BGP.Origin = "EGP"
 			case bgp.BGP_ORIGIN_ATTR_TYPE_INCOMPLETE:
-				route.Bgp.Origin = "Incomplete"
+				route.BGP.Origin = "Incomplete"
 			}
 		case *bgp.PathAttributeAsPath:
-			aspath := attr.(*bgp.PathAttributeAsPath)
-			for _, aspth := range aspath.Value {
+			for _, aspth := range attr.Value {
 				for _, as := range aspth.GetAS() {
-					route.Bgp.AsPath = append(route.Bgp.AsPath, int(as))
+					route.BGP.AsPath = append(route.BGP.AsPath, int(as))
 				}
 			}
 		case *bgp.PathAttributeCommunities:
-			communities := attr.(*bgp.PathAttributeCommunities)
-			for _, community := range communities.Value {
-				_community := api.Community{int((0xffff0000 & community) >> 16), int(0xffff & community)}
-				route.Bgp.Communities = append(route.Bgp.Communities, _community)
-			}
+			for _, community := range attr.Value {
+				apiComm := api.Community{
+					int((0xffff0000 & community) >> 16),
+					int(0xffff & community)}
 
+				route.BGP.Communities = append(route.BGP.Communities, apiComm)
+			}
 		case *bgp.PathAttributeExtendedCommunities:
-			communities := attr.(*bgp.PathAttributeExtendedCommunities)
-			for _, community := range communities.Value {
-				if _community, ok := community.(*bgp.TwoOctetAsSpecificExtended); ok {
-					route.Bgp.ExtCommunities = append(route.Bgp.ExtCommunities, api.ExtCommunity{_community.AS, _community.LocalAdmin})
+			for _, community := range attr.Value {
+				if apiComm, ok := community.(*bgp.TwoOctetAsSpecificExtended); ok {
+					route.BGP.ExtCommunities = append(
+						route.BGP.ExtCommunities,
+						api.ExtCommunity{
+							apiComm.AS,
+							apiComm.LocalAdmin})
 				}
 			}
 		case *bgp.PathAttributeLargeCommunities:
-			communities := attr.(*bgp.PathAttributeLargeCommunities)
-			for _, community := range communities.Values {
-				route.Bgp.LargeCommunities = append(route.Bgp.LargeCommunities, api.Community{int(community.ASN), int(community.LocalData1), int(community.LocalData2)})
+			for _, community := range attr.Values {
+				route.BGP.LargeCommunities = append(
+					route.BGP.LargeCommunities,
+					api.Community{
+						int(community.ASN),
+						int(community.LocalData1),
+						int(community.LocalData2)})
 			}
 		}
 	}
 
-	route.Metric = (route.Bgp.LocalPref + route.Bgp.Med)
+	route.Metric = (route.BGP.LocalPref + route.BGP.Med)
 
-	return nil, &route
+	return &route, nil
 }
 
-func (gobgp *GoBGP) GetRoutes(peer *gobgpapi.Peer, tableType gobgpapi.TableType, response *api.RoutesResponse) error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(gobgp.config.ProcessingTimeout))
+// GetRoutes retrieves all routes from a peer
+// for a table type.
+func (gobgp *GoBGP) GetRoutes(
+	peer *gobgpapi.Peer,
+	tableType gobgpapi.TableType,
+	response *api.RoutesResponse,
+) error {
+	ctx, cancel := context.WithTimeout(
+		context.Background(),
+		time.Second*time.Duration(gobgp.config.ProcessingTimeout))
 	defer cancel()
 
 	for _, family := range families {
@@ -175,7 +196,7 @@ func (gobgp *GoBGP) GetRoutes(peer *gobgpapi.Peer, tableType gobgpapi.TableType,
 
 		for _, destination := range rib {
 			for _, path := range destination.Paths {
-				err, route := gobgp.parsePathIntoRoute(path, destination.Prefix)
+				route, err := gobgp.parsePathIntoRoute(path, destination.Prefix)
 				if err != nil {
 					log.Println(err)
 					continue

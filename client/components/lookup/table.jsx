@@ -23,7 +23,7 @@ import {showBgpAttributes}
 // Link Wrappers:
 const ColLinkedNeighbor = function(props) {
   const route = props.route;
-  const to = `/routeservers/${route.routeserver.id}/protocols/${route.neighbour.id}/routes`;
+  const to = `/routeservers/${route.routeserver.id}/protocols/${route.neighbor.id}/routes`;
   
   return (
     <td>
@@ -54,8 +54,8 @@ const RouteColumn = function(props) {
     "bgp.as_path": ColAsPath,
     "ASPath": ColAsPath,
 
-    "neighbour.description": ColLinkedNeighbor,
-    "neighbour.asn": ColLinkedNeighbor,
+    "neighbor.description": ColLinkedNeighbor,
+    "neighbor.asn": ColLinkedNeighbor,
     
     "routeserver.name": ColLinkedRouteserver
   };

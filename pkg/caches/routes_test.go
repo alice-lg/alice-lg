@@ -11,27 +11,29 @@ func TestRoutesCacheSetGet(t *testing.T) {
 	cache := NewRoutesCache(false, 2)
 
 	response := &api.RoutesResponse{
-		Api: api.ApiStatus{
-			Ttl: time.Now().UTC().Add(23 * time.Millisecond),
+		Response: api.Response{
+			Meta: &api.Meta{
+				TTL: time.Now().UTC().Add(23 * time.Millisecond),
+			},
 		},
 	}
 
-	nId := "neighbor_42"
+	nID := "neighbor_42"
 
-	if cache.Get(nId) != nil {
+	if cache.Get(nID) != nil {
 		t.Error("There should not be anything cached yet!")
 	}
 
-	cache.Set(nId, response)
+	cache.Set(nID, response)
 
-	fromCache := cache.Get(nId)
+	fromCache := cache.Get(nID)
 	if fromCache != response {
 		t.Error("Expected", response, "got", fromCache)
 	}
 
 	time.Sleep(33 * time.Millisecond)
 
-	fromCache = cache.Get(nId)
+	fromCache = cache.Get(nID)
 	if fromCache != nil {
 		t.Error("Expected empty cache result, got:", fromCache)
 	}
@@ -41,8 +43,10 @@ func TestRoutesCacheLru(t *testing.T) {
 	cache := NewRoutesCache(false, 2)
 
 	response := &api.RoutesResponse{
-		Api: api.ApiStatus{
-			Ttl: time.Now().UTC().Add(23 * time.Millisecond),
+		Response: api.Response{
+			Meta: &api.Meta{
+				TTL: time.Now().UTC().Add(23 * time.Millisecond),
+			},
 		},
 	}
 

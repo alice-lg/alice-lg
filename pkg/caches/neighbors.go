@@ -16,7 +16,7 @@ when we are paginating the results for better client performance.)
 
 // NeighborsCache implements a cache to store neighbors
 type NeighborsCache struct {
-	response *api.NeighboursResponse
+	response *api.NeighborsResponse
 	disabled bool
 }
 
@@ -32,7 +32,7 @@ func NewNeighborsCache(disabled bool) *NeighborsCache {
 
 // Get retrievs the neighbors response from the cache, if present,
 // and makes sure the information is still up to date.
-func (cache *NeighborsCache) Get() *api.NeighboursResponse {
+func (cache *NeighborsCache) Get() *api.NeighborsResponse {
 	if cache.disabled {
 		return nil
 	}
@@ -50,7 +50,7 @@ func (cache *NeighborsCache) Get() *api.NeighboursResponse {
 
 // Set updates the neighbors cache with a new response retrieved
 // from a backend source.
-func (cache *NeighborsCache) Set(response *api.NeighboursResponse) {
+func (cache *NeighborsCache) Set(response *api.NeighborsResponse) {
 	if cache.disabled {
 		return
 	}

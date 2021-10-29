@@ -3,7 +3,7 @@ import React from 'react'
 import {connect} from 'react-redux'
 
 /*
- * Show current neighbour if selected
+ * Show current neighbor if selected
  * This should help to create a breadcrumb style navigation
  * in the header.
  */
