@@ -91,10 +91,10 @@ func (s *Server) apiRoutesListReceived(
 
 	// Make paginated response
 	response := api.PaginatedRoutesResponse{
+		Response: api.Response{
+			Meta: result.Response.Meta,
+		},
 		RoutesResponse: api.RoutesResponse{
-			Response: api.Response{
-				Meta: result.Response.Meta,
-			},
 			Imported: routes,
 		},
 		TimedResponse: api.TimedResponse{
@@ -168,10 +168,10 @@ func (s *Server) apiRoutesListFiltered(
 
 	// Make response
 	response := api.PaginatedRoutesResponse{
+		Response: api.Response{
+			Meta: result.Response.Meta,
+		},
 		RoutesResponse: api.RoutesResponse{
-			Response: api.Response{
-				Meta: result.Response.Meta,
-			},
 			Filtered: routes,
 		},
 		TimedResponse: api.TimedResponse{
