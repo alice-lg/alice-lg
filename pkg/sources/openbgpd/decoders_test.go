@@ -79,3 +79,14 @@ func TestDecodeRoutes(t *testing.T) {
 	}
 	t.Log(r.Age)
 }
+
+func TestDecodeExtendedCommunities(t *testing.T) {
+	data := []interface{}{"rt 123:456", "error invalid community"}
+	comms := decodeExtendedCommunities(data)
+	if len(comms) != 1 {
+		t.Fatal("expected 1 valid community")
+	}
+	if comms[0][0] != "rt" && comms[0][1] != 123 && comms[0][2] != 456 {
+		t.Fatal("unexpected result:", comms[0])
+	}
+}
