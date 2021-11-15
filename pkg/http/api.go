@@ -109,7 +109,7 @@ func (s *Server) apiRegisterEndpoints(
 		endpoint(s.apiRoutesListNotExported))
 
 	// Querying
-	if s.cfg.Server.EnablePrefixLookup == true {
+	if s.cfg.Server.EnablePrefixLookup {
 		router.GET("/api/v1/lookup/prefix",
 			endpoint(s.apiLookupPrefixGlobal))
 		router.GET("/api/v1/lookup/neighbors",

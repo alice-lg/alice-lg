@@ -16,7 +16,7 @@ import (
 
 // Prepare client HTML:
 // Set paths and add version to assets.
-func (s*Server)webPrepareClientHTML(html string) string {
+func (s *Server) webPrepareClientHTML(html string) string {
 	status, _ := CollectAppStatus(s.routesStore, s.neighborsStore)
 
 	// Replace paths and tags
@@ -85,7 +85,7 @@ func (s *Server) webRegisterAssets(router *httprouter.Router) error {
 	// ...install a catch all for /alice for graceful backwards compatibility
 	router.GET("/alice/*path",
 		func(res http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-			http.Redirect(res, req, "/", 301)
+			http.Redirect(res, req, "/", http.StatusMovedPermanently)
 		})
 
 	return nil

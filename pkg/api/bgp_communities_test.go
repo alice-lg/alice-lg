@@ -17,12 +17,12 @@ func TestCommunityLookup(t *testing.T) {
 	}
 
 	// Okay now try some fails
-	label, err = c.Lookup("65535")
+	_, err = c.Lookup("65535")
 	if err == nil {
 		t.Error("Expected error!")
 	}
 
-	label, err = c.Lookup("65535:23:42")
+	_, err = c.Lookup("65535:23:42")
 	if err == nil {
 		t.Error("Expected not found error!")
 	}

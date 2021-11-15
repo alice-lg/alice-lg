@@ -71,10 +71,8 @@ func (s *Server) apiLookupPrefixGlobal(
 		switch r.State {
 		case "filtered":
 			filtered = append(filtered, r)
-			break
 		case "imported":
 			imported = append(imported, r)
-			break
 		}
 
 		filtersAvailable.UpdateFromLookupRoute(r)

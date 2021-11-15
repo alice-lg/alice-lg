@@ -1,3 +1,5 @@
+// Package http provides the server and API implementation
+// for the webclient. The webclient's static files are also served.
 package http
 
 import (

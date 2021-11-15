@@ -104,17 +104,17 @@ func TestThemeIncludes(t *testing.T) {
 	if !strings.HasPrefix(scriptsHTML, "<script") {
 		t.Error("Script include should start with <script")
 	}
-	if strings.Index(scriptsHTML, "script.js") == -1 {
+	if !strings.Contains(scriptsHTML, "script.js") {
 		t.Error("Scripts include should contain script.js")
 	}
 
 	if !strings.HasPrefix(stylesHTML, "<link") {
 		t.Error("Stylesheet include should start with <link")
 	}
-	if strings.Index(stylesHTML, "extra.css") == -1 {
+	if !strings.Contains(stylesHTML, "extra.css") {
 		t.Error("Stylesheet include should contain extra.css")
 	}
-	if strings.Index(stylesHTML, "script.js") != -1 {
+	if !strings.Contains(stylesHTML, "script.js") {
 		t.Error("Stylesheet include should not contain script.js")
 	}
 
