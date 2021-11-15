@@ -255,7 +255,7 @@ func filterRoutesByNeighborIDs(
 	results := api.LookupRoutes{}
 	for _, route := range routes {
 		// Filtering:
-		if MemberOf(neighborIDs, route.NeighborID) == true {
+		if MemberOf(neighborIDs, route.NeighborID) {
 			lookup := routeToLookupRoute(nStore, source, state, route)
 			results = append(results, lookup)
 		}
@@ -290,9 +290,7 @@ func (rs *RoutesStore) LookupNeighborsPrefixesAt(
 			neighborIDs,
 			"imported")
 
-		var result api.LookupRoutes
-		result = append(filtered, imported...)
-
+		result := append(filtered, imported...)
 		response <- result
 	}()
 
@@ -326,9 +324,7 @@ func (rs *RoutesStore) LookupPrefixAt(
 			prefix,
 			"imported")
 
-		var result api.LookupRoutes
-		result = append(filtered, imported...)
-
+		result := append(filtered, imported...)
 		response <- result
 	}()
 
