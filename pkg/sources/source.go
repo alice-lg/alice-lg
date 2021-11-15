@@ -1,3 +1,5 @@
+// Package sources provides the base interface for all
+// route server data source implementations.
 package sources
 
 import (
