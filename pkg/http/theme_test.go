@@ -114,7 +114,7 @@ func TestThemeIncludes(t *testing.T) {
 	if !strings.Contains(stylesHTML, "extra.css") {
 		t.Error("Stylesheet include should contain extra.css")
 	}
-	if !strings.Contains(stylesHTML, "script.js") {
+	if strings.Contains(stylesHTML, "script.js") {
 		t.Error("Stylesheet include should not contain script.js")
 	}
 

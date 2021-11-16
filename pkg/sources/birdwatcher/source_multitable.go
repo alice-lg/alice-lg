@@ -156,7 +156,7 @@ func (src *MultiTableBirdwatcher) fetchFilteredRoutes(
 
 	// Query birdwatcher
 	birdPipeFiltered, err := src.client.GetJSON(
-		"/routes/pipe/filtered/?table=" + table + "&pipe=" + pipeName)
+		"/routes/pipe/filtered?table=" + table + "&pipe=" + pipeName)
 	if err != nil {
 		log.Println("WARNING Could not retrieve filtered routes:", err)
 		log.Println("Is the 'pipe_filtered' module active in birdwatcher?")
