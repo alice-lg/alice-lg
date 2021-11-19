@@ -1,6 +1,7 @@
 package store
 
 import (
+	"log"
 	"sync"
 	"time"
 
@@ -12,58 +13,70 @@ import (
 const (
 	StateInit = iota
 	StateReady
-	StateUpdatingNeighbors
-	StateUpdatingRoutes
+	StateBusy
 	StateError
 )
 
-// Status defines a status the store can be in
-type Status struct {
-	LastNeighborsRefresh time.Time
-	LastRoutesRefresh    time.Time
-	LastError            error
-	State                int
-}
+// State is an enum of the above States
+type State int
 
-// stateToString converts a state into a string
-func stateToString(state int) string {
-	switch state {
+// String()  converts a state into a string
+func (s State) String() string {
+	switch s {
 	case StateInit:
 		return "INIT"
 	case StateReady:
 		return "READY"
-	case StateUpdating:
-		return "UPDATING"
+	case StateBusy:
+		return "BUSY"
 	case StateError:
 		return "ERROR"
 	}
 	return "INVALID"
 }
 
+// Status defines a status the store can be in
+type Status struct {
+	RefreshInterval     time.Duration
+	LastRefresh         time.Time
+	LastRefreshDuration time.Duration
+	LastError           interface{}
+	State               State
+
+	lastRefreshStart time.Time
+}
+
 // SourcesStore provides methods for retrieving
 // the current status of a source.
 type SourcesStore struct {
-	status  map[string]*Status
-	sources map[string]*config.SourceConfig
-
+	refreshInterval time.Duration
+	status          map[string]*Status
+	sources         map[string]*config.SourceConfig
 	sync.Mutex
 }
 
 // NewSourcesStore initializes a new source store
-func NewSourcesStore() *SourcesStore {
-	return &SourcesStore{
-		status:  make(map[string]*Status),
-		sources: make(map[string]*config.SourceConfig),
-	}
-}
+func NewSourcesStore(
+	cfg *config.Config,
+	refreshInterval time.Duration,
+) *SourcesStore {
+	status := make(map[string]*Status)
+	sources := make(map[string]*config.SourceConfig)
 
-// AddSource registers the source
-func (s *SourcesStore) AddSource(src *config.SourceConfig) {
-	s.Lock()
-	defer s.Unlock()
-	sourceID := src.ID
-	sources[sourceID] = src
-	status[sourceID] = &Status{}
+	// Add sources from config
+	for _, src := range cfg.Sources {
+		sourceID := src.ID
+		sources[sourceID] = src
+		status[sourceID] = &Status{
+			RefreshInterval: refreshInterval,
+		}
+	}
+
+	return &SourcesStore{
+		status:          status,
+		sources:         sources,
+		refreshInterval: refreshInterval,
+	}
 }
 
 // GetStatus will retrieve the status of a source
@@ -79,35 +92,24 @@ func (s *SourcesStore) getStatus(sourceID string) (*Status, error) {
 	if !ok {
 		return nil, sources.ErrSourceNotFound
 	}
+	return status, nil
 }
 
-// ShouldRefreshNeighbors checks if the source needs a
+// ShouldRefresh checks if the source needs a
 // new refresh according to the provided refreshInterval.
-func (s *SourcesStore) ShouldRefreshNeighbors(
+func (s *SourcesStore) ShouldRefresh(
 	sourceID string,
-	interval time.Duration,
 ) bool {
-	status = s.GetStatus(sourceID)
-	if status.State == StateUpdating {
+	status, err := s.GetStatus(sourceID)
+	if err != nil {
+		log.Println("get status error:", err)
+		return false
+	}
+	if status.State == StateBusy {
 		return false // Source is busy
 	}
-	nextRefresh := status.LastNeighborsRefresh.Add(interval)
-	if time.Now().UTC().Before(nextRefresh) {
-		return false // Too soon
-	}
-	return true // Go for it
-}
-
-// ShouldRefreshRoutes checks if the source needs a
-// new refresh according to the provided refreshInterval.
-func (s *SourcesStore) ShouldRefreshRoutes(
-	sourceID string, interval time.Duration,
-) bool {
-	status = s.GetStatus(sourceID)
-	if status.State == StateUpdating {
-		return false // Source is busy
-	}
-	nextRefresh := status.LastRoutesRefresh.Add(interval)
+	nextRefresh := status.LastRefresh.Add(
+		s.refreshInterval)
 	if time.Now().UTC().Before(nextRefresh) {
 		return false // Too soon
 	}
@@ -147,35 +149,47 @@ func (s *SourcesStore) LockSource(sourceID string) error {
 	if err != nil {
 		return err
 	}
-	if status.State == StateUpdating {
+	if status.State == StateBusy {
 		return sources.ErrSourceBusy
 	}
-	status.State = StateUpdating
+	status.State = StateBusy
+	status.lastRefreshStart = time.Now()
 	return nil
 }
 
-// NeighborsRefreshSuccess indicates a successfull refresh
-func (s *SourcesStore) NeighborsRefreshSuccess(sourceID string) error {
+// RefreshSuccess indicates a successfull update
+// of the store's content.
+func (s *SourcesStore) RefreshSuccess(sourceID string) error {
 	s.Lock()
 	defer s.Unlock()
-	status, err := getStatus(sourceID)
+	status, err := s.getStatus(sourceID)
 	if err != nil {
 		return err
 	}
 	status.State = StateReady
-	status.LastNeighborsRefresh = time.Now().UTC()
+	status.LastRefresh = time.Now().UTC()
+	status.LastRefreshDuration = time.Now().Sub(
+		status.lastRefreshStart)
 	status.LastError = nil
+	return nil
 }
 
-// NeighborsRefreshError indicates that the refresh has failed
-func (s *SourcesStore) NeighborsRefreshError(sourceID string, err error) error {
+// RefreshError indicates that the refresh has failed
+func (s *SourcesStore) RefreshError(
+	sourceID string,
+	err interface{},
+) {
 	s.Lock()
 	defer s.Unlock()
-	status, err := getStatus(sourceID)
+	status, err := s.getStatus(sourceID)
 	if err != nil {
-		return err
+		log.Println("error getting source status:", err)
+		return
 	}
 	status.State = StateError
-	status.LastNeighborsRefresh = time.Now().UTC()
-	status.LastError = err.String()
+	status.LastRefresh = time.Now().UTC()
+	status.LastRefreshDuration = time.Now().Sub(
+		status.lastRefreshStart)
+	status.LastError = err
+	return
 }

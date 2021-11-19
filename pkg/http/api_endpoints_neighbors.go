@@ -25,7 +25,10 @@ func (s *Server) apiNeighborsList(
 
 	// Try to fetch neighbors from store, only fall back
 	// to RS query if store is not ready yet
-	sourceStatus := s.neighborsStore.SourceStatus(rsID)
+	sourceStatus, err := s.neighborsStore.SourceStatus(rsID)
+	if err != nil {
+		return nil, err
+	}
 	if sourceStatus.State == store.StateReady {
 		neighbors := s.neighborsStore.GetNeighborsAt(rsID)
 		// Make response

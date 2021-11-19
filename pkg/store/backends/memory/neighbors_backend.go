@@ -43,7 +43,7 @@ func (b *NeighborsBackend) SetNeighbors(
 	// Make index
 	idx := make(NeighborIndex)
 	for _, neighbor := range neighbors {
-		index[neighbor.ID] = neighbor
+		idx[neighbor.ID] = neighbor
 	}
 
 	b.neighbors[sourceID] = idx
@@ -59,8 +59,13 @@ func (b *NeighborsBackend) GetNeighborsAt(
 	b.Lock()
 	defer b.Unlock()
 
-	ret := make(api.Neighbors, 0, len(b.neighbors))
-	for _, neighbor := range b.neighbors {
+	neighbors, ok := b.neighbors[sourceID]
+	if !ok {
+		return nil, sources.ErrSourceNotFound
+	}
+
+	ret := make(api.Neighbors, 0, len(neighbors))
+	for _, neighbor := range neighbors {
 		ret = append(ret, neighbor)
 	}
 	return ret, nil
@@ -71,7 +76,8 @@ func (b *NeighborsBackend) GetNeighborsAt(
 func (b *NeighborsBackend) GetNeighborAt(
 	ctx context.Context,
 	sourceID string,
-) (api.Neighbors, error) {
+	neighborID string,
+) (*api.Neighbor, error) {
 	b.Lock()
 	defer b.Unlock()
 
@@ -80,5 +86,18 @@ func (b *NeighborsBackend) GetNeighborAt(
 		return nil, sources.ErrSourceNotFound
 	}
 
-	return ret, nil
+	return neighbors[neighborID], nil
+}
+
+// CountNeighborsAt retrievs the number of neighbors
+// at this source.
+func (b *NeighborsBackend) CountNeighborsAt(
+	ctx context.Context,
+	sourceID string,
+) (int, error) {
+	neighbors, err := b.GetNeighborsAt(ctx, sourceID)
+	if err != nil {
+		return 0, err
+	}
+	return len(neighbors), nil
 }
