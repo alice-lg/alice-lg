@@ -1,7 +1,9 @@
 package store
 
 import (
+	"context"
 	"log"
+	"math/rand"
 	"regexp"
 	"strconv"
 	"sync"
@@ -9,60 +11,60 @@ import (
 
 	"github.com/alice-lg/alice-lg/pkg/api"
 	"github.com/alice-lg/alice-lg/pkg/config"
+	"github.com/alice-lg/alice-lg/pkg/sources"
 )
 
 // ReMatchASLookup matches lookups with an 'AS' prefix
 var ReMatchASLookup = regexp.MustCompile(`(?i)^AS(\d+)`)
 
-// NeighborsIndex is a mapping from a string to a neighbor.
-type NeighborsIndex map[string]*api.Neighbor
+// NeighborsStoreBackend interface
+type NeighborsStoreBackend interface {
+	// SetNeighbors replaces all neighbors for a given
+	// route server identified by sourceID.
+	SetNeighbors(
+		ctx context.Context,
+		sourceID string,
+		neighbors api.Neighbors,
+	)
+}
 
 // NeighborsStore is queryable for neighbor information
 type NeighborsStore struct {
-	neighborsMap          map[string]NeighborsIndex
-	cfgMap                map[string]*config.SourceConfig
-	statusMap             map[string]Status
-	refreshNeighborStatus bool
-	lastRefresh           time.Time
+	backend NeighborsBackend
+	sources *SourcesStore
 
-	RefreshInterval       time.Duration
+	refreshInterval      time.Duration
+	forceNeighborRefresh bool
 
 	sync.RWMutex
 }
 
 // NewNeighborsStore creates a new store for neighbors
-func NewNeighborsStore(cfg *config.Config) *NeighborsStore {
-	// Build source mapping
-	neighborsMap := make(map[string]NeighborsIndex)
-	cfgMap := make(map[string]*config.SourceConfig)
-	statusMap := make(map[string]Status)
-
-	for _, source := range cfg.Sources {
-		id := source.ID
-		cfgMap[id] = source
-		statusMap[id] = Status{
-			State: StateInit,
-		}
-
-		neighborsMap[id] = make(NeighborsIndex)
-	}
-
+func NewNeighborsStore(
+	cfg *config.Config,
+	sources *SourcesStore,
+	backend NeighborsBackend,
+) *NeighborsStore {
 	// Set refresh interval, default to 5 minutes when
 	// interval is set to 0
-	RefreshInterval := time.Duration(
+	refreshInterval := time.Duration(
 		cfg.Server.NeighborsStoreRefreshInterval) * time.Minute
-	if RefreshInterval == 0 {
-		RefreshInterval = time.Duration(5) * time.Minute
+	if refreshInterval == 0 {
+		refreshInterval = time.Duration(5) * time.Minute
 	}
 
-	refreshNeighborStatus := cfg.Server.EnableNeighborsStatusRefresh
+	// Neighbors will be refreshed on every GetNeighborsAt
+	// invocation. Why? I (Annika) don't know. I have to ask Patrick.
+	// TODO: This feels wrong here. Figure out reason why it
+	//       was added and refactor.
+	// At least now the variable name is a bit more honest.
+	forceNeighborRefresh := config.Server.EnableNeighborsStatusRefresh
 
 	store := &NeighborsStore{
-		neighborsMap:          neighborsMap,
-		statusMap:             statusMap,
-		cfgMap:                cfgMap,
-		RefreshInterval:       RefreshInterval,
-		refreshNeighborStatus: refreshNeighborStatus,
+		backend:              backend,
+		sources:              sources,
+		refreshInterval:      refreshInterval,
+		forceNeighborRefresh: forceNeighborRefresh,
 	}
 	return store
 }
@@ -70,30 +72,24 @@ func NewNeighborsStore(cfg *config.Config) *NeighborsStore {
 // Start the store's housekeeping.
 func (s *NeighborsStore) Start() {
 	log.Println("Starting local neighbors store")
-	log.Println("Neighbors Store refresh interval set to:", s.RefreshInterval)
+	log.Println("Neighbors Store refresh interval set to:", s.refreshInterval)
 	go s.init()
 }
 
 func (s *NeighborsStore) init() {
-	// Perform initial update
-	s.update()
-
-	// Initial logging
-	s.Stats().Log()
-
-	// Periodically update store
+	// Periodically trigger updates. Sources with an
+	// LastNeighborsRefresh < refreshInterval or currently
+	// updating will be skipped.
 	for {
-		time.Sleep(s.RefreshInterval)
 		s.update()
+		time.Sleep(time.Second)
 	}
 }
 
 // SourceStatus retrievs the status for a route server
 // identified by sourceID.
 func (s *NeighborsStore) SourceStatus(sourceID string) Status {
-	s.RLock()
-	defer s.RUnlock()
-	return s.statusMap[sourceID]
+	return s.sources.GetStatus(sourceID)
 }
 
 // SourceState gets the state by source ID
@@ -102,122 +98,84 @@ func (s *NeighborsStore) SourceState(sourceID string) int {
 	return status.State
 }
 
-// Update all neighbors
-func (s *NeighborsStore) update() {
-	successCount := 0
-	errorCount := 0
-	t0 := time.Now()
-	for sourceID := range s.neighborsMap {
-		// Get current state
-		if s.statusMap[sourceID].State == StateUpdating {
-			continue // nothing to do here. really.
-		}
+// updateSource will update a single source. This
+// function may crash or return errors.
+func (s *NeighborsStore) updateSource(src sources.Source) error {
+	// Get neighbors form source instance and update backend
+	res, err := source.Neighbors()
+	if err != nil {
+		return err
+	}
+	if err := s.backend.SetNeighbors(id, res); err != nil {
+		return err
+	}
+	return s.sources.RefreshNeighborsSuccess(id)
+}
 
-		// Start updating
-		s.Lock()
-		s.statusMap[sourceID] = Status{
-			State: StateUpdating,
-		}
-		s.Unlock()
-
-		sourceConfig := s.cfgMap[sourceID]
-		source := sourceConfig.GetInstance()
-
-		neighborsRes, err := source.Neighbors()
-		if err != nil {
-			log.Println(
-				"Refreshing the neighbors store failed for:",
-				sourceConfig.Name, "(", sourceConfig.ID, ")",
-				"with:", err,
-				"- NEXT STATE: ERROR",
-			)
-			// That's sad.
-			s.Lock()
-			s.statusMap[sourceID] = Status{
-				State:       StateError,
-				LastError:   err,
-				LastRefresh: time.Now(),
-			}
-			s.Unlock()
-
-			errorCount++
-			continue
-		}
-
-		neighbors := neighborsRes.Neighbors
-
-		// Update data
-		// Make neighbors index
-		index := make(NeighborsIndex)
-		for _, neighbor := range neighbors {
-			index[neighbor.ID] = neighbor
-		}
-
-		s.Lock()
-		s.neighborsMap[sourceID] = index
-		// Update state
-		s.statusMap[sourceID] = Status{
-			LastRefresh: time.Now(),
-			State:       StateReady,
-		}
-		s.lastRefresh = time.Now().UTC()
-		s.Unlock()
-		successCount++
+// safeUpdateSource will try to update a source but
+// will recover from a panic if something goes wrong.
+// In that case, the LastError and State will be updated.
+func (s *NeighborsStore) safeUpdateSource(id string) {
+	if !s.sources.ShouldRefreshNeighbors(id, s.refreshInterval) {
+		return // Nothing to do here
 	}
 
-	refreshDuration := time.Since(t0)
-	log.Println(
-		"Refreshed neighbors store for", successCount, "of", successCount+errorCount,
-		"sources with", errorCount, "error(s) in", refreshDuration,
-	)
+	if err := s.sources.LockSource(id); err != nil {
+		log.Println("Cloud not start neighbor refresh:", err)
+		return
+	}
+
+	// Apply jitter so, we do not hit everything at once.
+	// TODO: Make configurable
+	time.Sleep(time.Duration(rand.Intn(30) * time.Second))
+
+	src := s.sources.GetSource(id)
+	srcName := s.sources.GetName(id)
+
+	// Prepare for impact.
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(
+				"Recovering after failed neighbors refresh of",
+				srcName, "from:", err)
+			s.sources.NeighborsRefreshError(id, err)
+		}
+	}()
+
+	if err := s.updateSource(id); err != nil {
+		log.Println(
+			"Refeshing neighbors of", srcName, "failed:", err)
+		s.sources.NeighborsRefreshError(id, err)
+	}
+}
+
+// Update all neighbors from all sources, where the
+// sources last neighbor refresh is longer ago
+// than the configured refresh period.
+func (s *NeighborsStore) update() {
+	for _, id := range s.sources.GetSourceIDs() {
+		go safeUpdateSource(id)
+	}
 }
 
 // GetNeighborsAt gets all neighbors from a routeserver
-func (s *NeighborsStore) GetNeighborsAt(sourceID string) api.Neighbors {
-	s.RLock()
-	neighborsIDx := s.neighborsMap[sourceID]
-	s.RUnlock()
+func (s *NeighborsStore) GetNeighborsAt(sourceID string) (api.Neighbors, error) {
+	ctx := context.Background()
 
-	var neighborsStatus map[string]api.NeighborStatus
-	if s.refreshNeighborStatus {
-		sourceConfig := s.cfgMap[sourceID]
-		source := sourceConfig.GetInstance()
-
-		neighborsStatusData, err := source.NeighborsStatus()
-		if err == nil {
-			neighborsStatus = make(
-				map[string]api.NeighborStatus,
-				len(neighborsStatusData.Neighbors))
-
-			for _, neighbor := range neighborsStatusData.Neighbors {
-				neighborsStatus[neighbor.ID] = *neighbor
-			}
+	if s.forceNeighborRefresh {
+		if err := s.updateSource(sourceID); err != nil {
+			return nil, err
 		}
 	}
 
-	neighbors := make(api.Neighbors, 0, len(neighborsIDx))
-	for _, neighbor := range neighborsIDx {
-		if s.refreshNeighborStatus {
-			if _, ok := neighborsStatus[neighbor.ID]; ok {
-				s.Lock()
-				neighbor.State = neighborsStatus[neighbor.ID].State
-				s.Unlock()
-			}
-		}
-		neighbors = append(neighbors, neighbor)
-	}
-	return neighbors
+	return s.backend.GetNeighborsAt(ctx, sourceID)
 }
 
 // GetNeighborAt looks up a neighbor on a RS by ID.
 func (s *NeighborsStore) GetNeighborAt(
-	sourceID string,
-	id string,
-) *api.Neighbor {
-	s.RLock()
-	defer s.RUnlock()
-	neighborsIDx := s.neighborsMap[sourceID]
-	return neighborsIDx[id]
+	sourceID string, neighborID string,
+) (*api.Neighbor, error) {
+	return s.backend.GetNeighborAt(ctx, sourceID, neighborID)
 }
 
 // LookupNeighborsAt filters for neighbors at a route
@@ -227,10 +185,7 @@ func (s *NeighborsStore) LookupNeighborsAt(
 	query string,
 ) api.Neighbors {
 	results := api.Neighbors{}
-
-	s.RLock()
-	neighbors := s.neighborsMap[sourceID]
-	s.RUnlock()
+	neighbors := s.backend.GetNeighborsAt(sourceID)
 
 	asn := -1
 	if ReMatchASLookup.MatchString(query) {
@@ -325,14 +280,20 @@ func (s *NeighborsStore) Stats() *api.NeighborsStoreStats {
 	return storeStats
 }
 
-// CachedAt returns the last time the store content
+// SourceCachedAt returns the last time the store content
 // was refreshed.
-func (s *NeighborsStore) CachedAt() time.Time {
-	return s.lastRefresh
+func (s *NeighborsStore) SourceCachedAt(sourceID string) time.Time {
+	status, err := s.sources.GetStatus(sourceID)
+	if err != nil {
+		log.Println("error while getting source cached at:", err)
+		return time.Time{}
+	}
+	return status.LastNeighborsRefresh
 }
 
-// CacheTTL returns the next time when a refresh
+// SourceCacheTTL returns the next time when a refresh
 // will be started.
-func (s *NeighborsStore) CacheTTL() time.Time {
-	return s.lastRefresh.Add(s.RefreshInterval)
+func (s *NeighborsStore) SourceCacheTTL(sourceID string) time.Time {
+	lastRefresh := s.SourceCachedAt(sourceID)
+	return lastRefresh.Add(s.refreshInterval)
 }
