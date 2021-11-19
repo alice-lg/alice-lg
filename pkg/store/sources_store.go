@@ -95,6 +95,21 @@ func (s *SourcesStore) getStatus(sourceID string) (*Status, error) {
 	return status, nil
 }
 
+// NextRefresh calculates the next refresh time
+func (s *SourcesStore) NextRefresh(sourceID string) time.Time {
+	status, err := s.GetStatus(sourceID)
+	if err != nil {
+		log.Println("get status error:", err)
+		return false
+	}
+	if status.State == StateBusy {
+		return false // Source is busy
+	}
+	nextRefresh := status.LastRefresh.Add(
+		s.refreshInterval)
+	return nextRefresh
+}
+
 // ShouldRefresh checks if the source needs a
 // new refresh according to the provided refreshInterval.
 func (s *SourcesStore) ShouldRefresh(

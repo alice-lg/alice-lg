@@ -54,7 +54,6 @@ type NeighborsStore struct {
 	backend NeighborsStoreBackend
 	sources *SourcesStore
 
-	refreshInterval      time.Duration
 	forceNeighborRefresh bool
 
 	sync.RWMutex
@@ -73,6 +72,8 @@ func NewNeighborsStore(
 		refreshInterval = time.Duration(5) * time.Minute
 	}
 
+	log.Println("Neighbors Store refresh interval set to:", refreshInterval)
+
 	// Store refresh information per store
 	sources := NewSourcesStore(cfg, refreshInterval)
 
@@ -86,7 +87,6 @@ func NewNeighborsStore(
 	store := &NeighborsStore{
 		backend:              backend,
 		sources:              sources,
-		refreshInterval:      refreshInterval,
 		forceNeighborRefresh: forceNeighborRefresh,
 	}
 	return store
@@ -95,7 +95,6 @@ func NewNeighborsStore(
 // Start the store's housekeeping.
 func (s *NeighborsStore) Start() {
 	log.Println("Starting local neighbors store")
-	log.Println("Neighbors Store refresh interval set to:", s.refreshInterval)
 	go s.init()
 }
 
@@ -344,6 +343,5 @@ func (s *NeighborsStore) SourceCachedAt(sourceID string) time.Time {
 // SourceCacheTTL returns the next time when a refresh
 // will be started.
 func (s *NeighborsStore) SourceCacheTTL(sourceID string) time.Time {
-	lastRefresh := s.SourceCachedAt(sourceID)
-	return lastRefresh.Add(s.refreshInterval)
+	return s.sources.NextRefresh(sourceID)
 }

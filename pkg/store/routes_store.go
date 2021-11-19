@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"log"
 	"strings"
 	"sync"
@@ -10,17 +11,22 @@ import (
 	"github.com/alice-lg/alice-lg/pkg/config"
 )
 
+// RoutesStoreBackend interface
+type RoutesStoreBackend interface {
+	// SetRoutes updates the routes in the store after a refresh.
+	SetRoutes(
+		ctx context.Context,
+		sourceID string,
+		routes *api.RoutesResponse,
+	) error
+}
+
 // The RoutesStore holds a mapping of routes,
 // status and cfgs and will be queried instead
 // of a backend by the API
 type RoutesStore struct {
-	routesMap map[string]*api.RoutesResponse
-	statusMap map[string]Status
-	cfgMap    map[string]*config.SourceConfig
-
-	refreshInterval time.Duration
-	lastRefresh     time.Time
-
+	backend        RoutesStoreBackend
+	sources        *SourceStore
 	neighborsStore *NeighborsStore
 
 	sync.RWMutex
@@ -31,22 +37,8 @@ type RoutesStore struct {
 func NewRoutesStore(
 	neighborsStore *NeighborsStore,
 	cfg *config.Config,
+	backend RoutesStoreBackend,
 ) *RoutesStore {
-	// Build mapping based on source instances
-	routesMap := make(map[string]*api.RoutesResponse)
-	statusMap := make(map[string]Status)
-	cfgMap := make(map[string]*config.SourceConfig)
-
-	for _, source := range cfg.Sources {
-		id := source.ID
-
-		cfgMap[id] = source
-		routesMap[id] = &api.RoutesResponse{}
-		statusMap[id] = Status{
-			State: StateInit,
-		}
-	}
-
 	// Set refresh interval as duration, fall back to
 	// five minutes if no interval is set.
 	refreshInterval := time.Duration(
@@ -54,61 +46,57 @@ func NewRoutesStore(
 	if refreshInterval == 0 {
 		refreshInterval = time.Duration(5) * time.Minute
 	}
+
+	log.Println("Neighbors Store refresh interval set to:", refreshInterval)
+
+	// Store refresh information per store
+	sources := NewSourcesStore(cfg, refreshInterval)
+
 	store := &RoutesStore{
-		routesMap:       routesMap,
-		statusMap:       statusMap,
-		cfgMap:          cfgMap,
-		refreshInterval: refreshInterval,
-		neighborsStore:  neighborsStore,
+		backend:        backend,
+		neighborsStore: neighborsStore,
 	}
 	return store
 }
 
 // Start starts the routes store
-func (rs *RoutesStore) Start() {
+func (s *RoutesStore) Start() {
 	log.Println("Starting local routes store")
-	log.Println("Routes Store refresh interval set to:", rs.refreshInterval)
-	if err := rs.init(); err != nil {
+	if err := s.init(); err != nil {
 		log.Fatal(err)
 	}
 }
 
 // Service initialization
-func (rs *RoutesStore) init() error {
-	// Initial refresh
-	rs.update()
-
-	// Initial stats
-	rs.Stats().Log()
-
-	// Periodically update store
+func (s *RoutesStore) init() error {
+	// Periodically trigger updates
 	for {
-		time.Sleep(rs.refreshInterval)
-		rs.update()
+		s.update()
+		time.Sleep(time.Second)
 	}
 }
 
 // Update all routes
-func (rs *RoutesStore) update() {
+func (s *RoutesStore) update() {
 	successCount := 0
 	errorCount := 0
 	t0 := time.Now()
 
-	for sourceID := range rs.routesMap {
-		sourceConfig := rs.cfgMap[sourceID]
+	for sourceID := range s.routesMap {
+		sourceConfig := s.cfgMap[sourceID]
 		source := sourceConfig.GetInstance()
 
 		// Get current update state
-		if rs.statusMap[sourceID].State == StateUpdating {
+		if s.statusMap[sourceID].State == StateUpdating {
 			continue // nothing to do here
 		}
 
 		// Set update state
-		rs.Lock()
-		rs.statusMap[sourceID] = Status{
+		s.Lock()
+		s.statusMap[sourceID] = Status{
 			State: StateUpdating,
 		}
-		rs.Unlock()
+		s.Unlock()
 
 		routes, err := source.AllRoutes()
 		if err != nil {
@@ -119,28 +107,28 @@ func (rs *RoutesStore) update() {
 				"- NEXT STATE: ERROR",
 			)
 
-			rs.Lock()
-			rs.statusMap[sourceID] = Status{
+			s.Lock()
+			s.statusMap[sourceID] = Status{
 				State:       StateError,
 				LastError:   err,
 				LastRefresh: time.Now(),
 			}
-			rs.Unlock()
+			s.Unlock()
 
 			errorCount++
 			continue
 		}
 
-		rs.Lock()
+		s.Lock()
 		// Update data
-		rs.routesMap[sourceID] = routes
+		s.routesMap[sourceID] = routes
 		// Update state
-		rs.statusMap[sourceID] = Status{
+		s.statusMap[sourceID] = Status{
 			LastRefresh: time.Now(),
 			State:       StateReady,
 		}
-		rs.lastRefresh = time.Now().UTC()
-		rs.Unlock()
+		s.lastRefresh = time.Now().UTC()
+		s.Unlock()
 
 		successCount++
 	}
@@ -154,21 +142,21 @@ func (rs *RoutesStore) update() {
 }
 
 // Stats calculates some store insights
-func (rs *RoutesStore) Stats() *api.RoutesStoreStats {
+func (s *RoutesStore) Stats() *api.RoutesStoreStats {
 	totalImported := 0
 	totalFiltered := 0
 
 	rsStats := []api.RouteServerRoutesStats{}
 
-	rs.RLock()
-	for sourceID, routes := range rs.routesMap {
-		status := rs.statusMap[sourceID]
+	s.RLock()
+	for sourceID, routes := range s.routesMap {
+		status := s.statusMap[sourceID]
 
 		totalImported += len(routes.Imported)
 		totalFiltered += len(routes.Filtered)
 
 		serverStats := api.RouteServerRoutesStats{
-			Name: rs.cfgMap[sourceID].Name,
+			Name: s.cfgMap[sourceID].Name,
 
 			Routes: api.RoutesStats{
 				Filtered: len(routes.Filtered),
@@ -179,9 +167,9 @@ func (rs *RoutesStore) Stats() *api.RoutesStoreStats {
 			UpdatedAt: status.LastRefresh,
 		}
 
-		rsStats = append(rsStats, serverStats)
+		rsStats = append(sStats, serverStats)
 	}
-	rs.RUnlock()
+	s.RUnlock()
 
 	// Make stats
 	storeStats := &api.RoutesStoreStats{
@@ -195,13 +183,13 @@ func (rs *RoutesStore) Stats() *api.RoutesStoreStats {
 }
 
 // CachedAt provides a cache status
-func (rs *RoutesStore) CachedAt() time.Time {
-	return rs.lastRefresh
+func (s *RoutesStore) CachedAt() time.Time {
+	return s.lastRefresh
 }
 
 // CacheTTL returns the TTL time
-func (rs *RoutesStore) CacheTTL() time.Time {
-	return rs.lastRefresh.Add(rs.refreshInterval)
+func (s *RoutesStore) CacheTTL() time.Time {
+	return s.lastRefresh.Add(s.refreshInterval)
 }
 
 // Lookup routes transform
@@ -265,26 +253,26 @@ func filterRoutesByNeighborIDs(
 
 // LookupNeighborsPrefixesAt performs a single route server
 // routes lookup by neighbor id
-func (rs *RoutesStore) LookupNeighborsPrefixesAt(
+func (s *RoutesStore) LookupNeighborsPrefixesAt(
 	sourceID string,
 	neighborIDs []string,
 ) chan api.LookupRoutes {
 	response := make(chan api.LookupRoutes)
 
 	go func() {
-		rs.RLock()
-		source := rs.cfgMap[sourceID]
-		routes := rs.routesMap[sourceID]
-		rs.RUnlock()
+		s.RLock()
+		source := s.cfgMap[sourceID]
+		routes := s.routesMap[sourceID]
+		s.RUnlock()
 
 		filtered := filterRoutesByNeighborIDs(
-			rs.neighborsStore,
+			s.neighborsStore,
 			source,
 			routes.Filtered,
 			neighborIDs,
 			"filtered")
 		imported := filterRoutesByNeighborIDs(
-			rs.neighborsStore,
+			s.neighborsStore,
 			source,
 			routes.Imported,
 			neighborIDs,
@@ -298,7 +286,7 @@ func (rs *RoutesStore) LookupNeighborsPrefixesAt(
 }
 
 // LookupPrefixAt performs a single RS lookup
-func (rs *RoutesStore) LookupPrefixAt(
+func (s *RoutesStore) LookupPrefixAt(
 	sourceID string,
 	prefix string,
 ) chan api.LookupRoutes {
@@ -306,19 +294,19 @@ func (rs *RoutesStore) LookupPrefixAt(
 	response := make(chan api.LookupRoutes)
 
 	go func() {
-		rs.RLock()
-		cfg := rs.cfgMap[sourceID]
-		routes := rs.routesMap[sourceID]
-		rs.RUnlock()
+		s.RLock()
+		cfg := s.cfgMap[sourceID]
+		routes := s.routesMap[sourceID]
+		s.RUnlock()
 
 		filtered := filterRoutesByPrefix(
-			rs.neighborsStore,
+			s.neighborsStore,
 			cfg,
 			routes.Filtered,
 			prefix,
 			"filtered")
 		imported := filterRoutesByPrefix(
-			rs.neighborsStore,
+			s.neighborsStore,
 			cfg,
 			routes.Imported,
 			prefix,
@@ -332,7 +320,7 @@ func (rs *RoutesStore) LookupPrefixAt(
 }
 
 // LookupPrefix performs a lookup over all route servers
-func (rs *RoutesStore) LookupPrefix(prefix string) api.LookupRoutes {
+func (s *RoutesStore) LookupPrefix(prefix string) api.LookupRoutes {
 	result := api.LookupRoutes{}
 	responses := []chan api.LookupRoutes{}
 
@@ -340,12 +328,12 @@ func (rs *RoutesStore) LookupPrefix(prefix string) api.LookupRoutes {
 	prefix = strings.ToLower(prefix)
 
 	// Dispatch
-	rs.RLock()
-	for sourceID := range rs.routesMap {
-		res := rs.LookupPrefixAt(sourceID, prefix)
+	s.RLock()
+	for sourceID := range s.routesMap {
+		res := s.LookupPrefixAt(sourceID, prefix)
 		responses = append(responses, res)
 	}
-	rs.RUnlock()
+	s.RUnlock()
 
 	// Collect
 	for _, response := range responses {
@@ -358,8 +346,8 @@ func (rs *RoutesStore) LookupPrefix(prefix string) api.LookupRoutes {
 }
 
 // LookupPrefixForNeighbors returns all routes for
-// a set of neighbors.
-func (rs *RoutesStore) LookupPrefixForNeighbors(
+// a set of neighbos.
+func (s *RoutesStore) LookupPrefixForNeighbors(
 	neighbors api.NeighborsLookupResults,
 ) api.LookupRoutes {
 
@@ -372,7 +360,7 @@ func (rs *RoutesStore) LookupPrefixForNeighbors(
 		for _, n := range locals {
 			lookupNeighborIDs = append(lookupNeighborIDs, n.ID)
 		}
-		res := rs.LookupNeighborsPrefixesAt(sourceID, lookupNeighborIDs)
+		res := s.LookupNeighborsPrefixesAt(sourceID, lookupNeighborIDs)
 		responses = append(responses, res)
 	}
 
