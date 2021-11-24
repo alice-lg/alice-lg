@@ -3,12 +3,13 @@ package store
 import (
 	"context"
 	"log"
+	"math/rand"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
 	"github.com/alice-lg/alice-lg/pkg/config"
+	"github.com/alice-lg/alice-lg/pkg/sources"
 )
 
 // RoutesStoreBackend interface
@@ -19,6 +20,13 @@ type RoutesStoreBackend interface {
 		sourceID string,
 		routes *api.RoutesResponse,
 	) error
+
+	// CountRoutesAt returns the number of imported
+	// and filtered routes for a given route server.
+	// Example: (imported, filtered, error)
+	CountRoutesAt(
+		ctx context.Context,
+		sourceID string) (uint, error)
 }
 
 // The RoutesStore holds a mapping of routes,
@@ -26,10 +34,8 @@ type RoutesStoreBackend interface {
 // of a backend by the API
 type RoutesStore struct {
 	backend        RoutesStoreBackend
-	sources        *SourceStore
+	sources        *SourcesStore
 	neighborsStore *NeighborsStore
-
-	sync.RWMutex
 }
 
 // NewRoutesStore makes a new store instance
@@ -47,13 +53,13 @@ func NewRoutesStore(
 		refreshInterval = time.Duration(5) * time.Minute
 	}
 
-	log.Println("Neighbors Store refresh interval set to:", refreshInterval)
+	log.Println("Routes refresh interval set to:", refreshInterval)
 
 	// Store refresh information per store
 	sources := NewSourcesStore(cfg, refreshInterval)
-
 	store := &RoutesStore{
 		backend:        backend,
+		sources:        sources,
 		neighborsStore: neighborsStore,
 	}
 	return store
@@ -62,13 +68,7 @@ func NewRoutesStore(
 // Start starts the routes store
 func (s *RoutesStore) Start() {
 	log.Println("Starting local routes store")
-	if err := s.init(); err != nil {
-		log.Fatal(err)
-	}
-}
 
-// Service initialization
-func (s *RoutesStore) init() error {
 	// Periodically trigger updates
 	for {
 		s.update()
@@ -76,100 +76,112 @@ func (s *RoutesStore) init() error {
 	}
 }
 
-// Update all routes
+// Update all routes from all sources, where the
+// sources last refresh is longer ago than the configured
+// refresh period. This is totally the same as the
+// NeighborsStore.update and maybe these functions can be merged (TODO)
 func (s *RoutesStore) update() {
-	successCount := 0
-	errorCount := 0
-	t0 := time.Now()
+	for _, id := range s.sources.GetSourceIDs() {
+		go s.safeUpdateSource(id)
+	}
+}
 
-	for sourceID := range s.routesMap {
-		sourceConfig := s.cfgMap[sourceID]
-		source := sourceConfig.GetInstance()
+// safeUpdateSource will try to update a source but
+// will recover from a panic if something goes wrong.
+// In that case, the LastError and State will be updated.
+// Again. The similarity to the NeighborsStore is really sus.
+func (s *RoutesStore) safeUpdateSource(id string) {
+	ctx := context.TODO()
 
-		// Get current update state
-		if s.statusMap[sourceID].State == StateUpdating {
-			continue // nothing to do here
-		}
-
-		// Set update state
-		s.Lock()
-		s.statusMap[sourceID] = Status{
-			State: StateUpdating,
-		}
-		s.Unlock()
-
-		routes, err := source.AllRoutes()
-		if err != nil {
-			log.Println(
-				"Refreshing the routes store failed for:", sourceConfig.Name,
-				"(", sourceConfig.ID, ")",
-				"with:", err,
-				"- NEXT STATE: ERROR",
-			)
-
-			s.Lock()
-			s.statusMap[sourceID] = Status{
-				State:       StateError,
-				LastError:   err,
-				LastRefresh: time.Now(),
-			}
-			s.Unlock()
-
-			errorCount++
-			continue
-		}
-
-		s.Lock()
-		// Update data
-		s.routesMap[sourceID] = routes
-		// Update state
-		s.statusMap[sourceID] = Status{
-			LastRefresh: time.Now(),
-			State:       StateReady,
-		}
-		s.lastRefresh = time.Now().UTC()
-		s.Unlock()
-
-		successCount++
+	if !s.sources.ShouldRefresh(id) {
+		return // Nothing to do here
 	}
 
-	refreshDuration := time.Since(t0)
-	log.Println(
-		"Refreshed routes store for", successCount, "of", successCount+errorCount,
-		"sources with", errorCount, "error(s) in", refreshDuration,
-	)
+	if err := s.sources.LockSource(id); err != nil {
+		log.Println("Cloud not start routes refresh:", err)
+		return
+	}
 
+	// Apply jitter so, we do not hit everything at once.
+	// TODO: Make configurable
+	time.Sleep(time.Duration(rand.Intn(30)) * time.Second)
+
+	src := s.sources.GetInstance(id)
+	srcName := s.sources.GetName(id)
+
+	// Prepare for impact.
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(
+				"Recovering after failed routes refresh of",
+				srcName, "from:", err)
+			s.sources.RefreshError(id, err)
+		}
+	}()
+
+	if err := s.updateSource(ctx, src, id); err != nil {
+		log.Println(
+			"Refeshing routes of", srcName, "failed:", err)
+		s.sources.RefreshError(id, err)
+	}
+}
+
+// Update all routes
+func (s *RoutesStore) updateSource(
+	ctx context.Context,
+	src sources.Source,
+	srcID string,
+) error {
+	routes, err := src.AllRoutes()
+	if err != nil {
+		return err
+	}
+
+	if err = s.backend.SetRoutes(ctx, srcID, routes); err != nil {
+		return err
+	}
+
+	return s.sources.RefreshSuccess(srcID)
 }
 
 // Stats calculates some store insights
 func (s *RoutesStore) Stats() *api.RoutesStoreStats {
+	ctx := context.TODO()
+
 	totalImported := 0
 	totalFiltered := 0
 
 	rsStats := []api.RouteServerRoutesStats{}
 
-	s.RLock()
-	for sourceID, routes := range s.routesMap {
-		status := s.statusMap[sourceID]
+	for _, sourceID := range s.sources.GetSourceIDs() {
+		status, err := s.sources.GetStatus(sourceID)
+		if err != nil {
+			log.Println("error while getting source status:", err)
+			continue
+		}
 
-		totalImported += len(routes.Imported)
-		totalFiltered += len(routes.Filtered)
+		nImported, nFiltered, err := s.backend.CountRoutes(ctx, sourceID)
+		if err != nil {
+			log.Println("error during routes count:", err)
+		}
+
+		totalImported += nImported
+		totalFiltered += nFiltered
 
 		serverStats := api.RouteServerRoutesStats{
 			Name: s.cfgMap[sourceID].Name,
 
 			Routes: api.RoutesStats{
-				Filtered: len(routes.Filtered),
-				Imported: len(routes.Imported),
+				Imported: nImported,
+				Filtered: nFiltered,
 			},
 
-			State:     stateToString(status.State),
+			State:     status.State.String(),
 			UpdatedAt: status.LastRefresh,
 		}
 
 		rsStats = append(sStats, serverStats)
 	}
-	s.RUnlock()
 
 	// Make stats
 	storeStats := &api.RoutesStoreStats{
@@ -182,14 +194,19 @@ func (s *RoutesStore) Stats() *api.RoutesStoreStats {
 	return storeStats
 }
 
-// CachedAt provides a cache status
-func (s *RoutesStore) CachedAt() time.Time {
-	return s.lastRefresh
+// SourceCachedAt provides a cache status (TODO: do we need this?)
+func (s *RoutesStore) SourceCachedAt(id string) time.Time {
+	status, err := s.sources.GetStatus(sourceID)
+	if err != nil {
+		log.Println("error while getting source cached at:", err)
+		return time.Time{}
+	}
+	return status.LastRefresh
 }
 
 // CacheTTL returns the TTL time
 func (s *RoutesStore) CacheTTL() time.Time {
-	return s.lastRefresh.Add(s.refreshInterval)
+	return s.sources.NextRefresh(sourceID)
 }
 
 // Lookup routes transform
@@ -346,7 +363,7 @@ func (s *RoutesStore) LookupPrefix(prefix string) api.LookupRoutes {
 }
 
 // LookupPrefixForNeighbors returns all routes for
-// a set of neighbos.
+// a set of neighbors.
 func (s *RoutesStore) LookupPrefixForNeighbors(
 	neighbors api.NeighborsLookupResults,
 ) api.LookupRoutes {

@@ -19,7 +19,7 @@ type NeighborsMap map[string]NeighborIndex
 // the neighbors store.
 type NeighborsBackend struct {
 	neighbors NeighborsMap
-	sync.RWMutex
+	sync.Mutex
 }
 
 // NewNeighborsBackend instanciates a new in memory

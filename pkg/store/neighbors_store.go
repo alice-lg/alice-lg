@@ -6,7 +6,6 @@ import (
 	"math/rand"
 	"regexp"
 	"strconv"
-	"sync"
 	"time"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
@@ -55,8 +54,6 @@ type NeighborsStore struct {
 	sources *SourcesStore
 
 	forceNeighborRefresh bool
-
-	sync.RWMutex
 }
 
 // NewNeighborsStore creates a new store for neighbors
