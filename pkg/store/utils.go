@@ -14,17 +14,6 @@ func ContainsCi(s, substr string) bool {
 	)
 }
 
-// MemberOf checks if a key is present in
-// a list of strings.
-func MemberOf(list []string, key string) bool {
-	for _, v := range list {
-		if v == key {
-			return true
-		}
-	}
-	return false
-}
-
 // SerializeReasons asserts the bgp communitiy parts are
 // actually strings, because there are no such things as
 // integers as keys in json.

@@ -26,7 +26,16 @@ type RoutesStoreBackend interface {
 	// Example: (imported, filtered, error)
 	CountRoutesAt(
 		ctx context.Context,
-		sourceID string) (uint, error)
+		sourceID string,
+	) (uint, error)
+
+	// GetNeighborPrefixesAt retrieves the prefixes
+	// announced by the neighbor at a given source
+	GetNeighborPrefixesAt(
+		ctx context.Context,
+		sourceID string,
+		neighborID string,
+	) (api.LookupRoutes, error)
 }
 
 // The RoutesStore holds a mapping of routes,
@@ -35,7 +44,7 @@ type RoutesStoreBackend interface {
 type RoutesStore struct {
 	backend        RoutesStoreBackend
 	sources        *SourcesStore
-	neighborsStore *NeighborsStore
+	neighbors *NeighborsStore
 }
 
 // NewRoutesStore makes a new store instance
@@ -129,20 +138,40 @@ func (s *RoutesStore) safeUpdateSource(id string) {
 // Update all routes
 func (s *RoutesStore) updateSource(
 	ctx context.Context,
-	src sources.Source,
-	srcID string,
+	src* config.SourceConfig,
 ) error {
-	routes, err := src.AllRoutes()
+	routesRes, err := src.AllRoutes()
 	if err != nil {
 		return err
 	}
 
-	if err = s.backend.SetRoutes(ctx, srcID, routes); err != nil {
+	// Prepare imported routes for lookup
+	lookupRoutes := make(api.LookupRoutes, 0, len(routes))
+	for _, route := range routes {
+		neighbor := nStore.GetNeighborAt(source.ID, route.NeighborID)
+		lr := &api.LookupRoute{
+			Route:    route,
+			State:    state,
+			Neighbor: neighbor,
+			RouteServer: &api.RouteServer{
+				ID:   src.ID,
+				Name: src.Name,
+			},
+		}
+		lookupRoutes = append(lookupRoutes, lr)
+	}
+
+	if err = s.backend.SetRoutes(ctx, src.ID, lookupRoutes); err != nil {
 		return err
 	}
 
-	return s.sources.RefreshSuccess(srcID)
+	return s.sources.RefreshSuccess(src.ID)
 }
+
+func (s* RoutesStore) routesToLookupRoutes(
+	src sources.Source,
+	routes api.Routes,
+
 
 // Stats calculates some store insights
 func (s *RoutesStore) Stats() *api.RoutesStoreStats {
@@ -170,16 +199,13 @@ func (s *RoutesStore) Stats() *api.RoutesStoreStats {
 
 		serverStats := api.RouteServerRoutesStats{
 			Name: s.cfgMap[sourceID].Name,
-
 			Routes: api.RoutesStats{
 				Imported: nImported,
 				Filtered: nFiltered,
 			},
-
 			State:     status.State.String(),
 			UpdatedAt: status.LastRefresh,
 		}
-
 		rsStats = append(sStats, serverStats)
 	}
 
@@ -230,76 +256,15 @@ func routeToLookupRoute(
 	return lookup
 }
 
-// Routes filter
-func filterRoutesByPrefix(
-	nStore *NeighborsStore,
-	source *config.SourceConfig,
-	routes api.Routes,
-	prefix string,
-	state string,
-) api.LookupRoutes {
-	results := api.LookupRoutes{}
-	for _, route := range routes {
-		// Naiive filtering:
-		if strings.HasPrefix(strings.ToLower(route.Network), prefix) {
-			lookup := routeToLookupRoute(nStore, source, state, route)
-			results = append(results, lookup)
-		}
-	}
-	return results
-}
-
-func filterRoutesByNeighborIDs(
-	nStore *NeighborsStore,
-	source *config.SourceConfig,
-	routes api.Routes,
-	neighborIDs []string,
-	state string,
-) api.LookupRoutes {
-
-	results := api.LookupRoutes{}
-	for _, route := range routes {
-		// Filtering:
-		if MemberOf(neighborIDs, route.NeighborID) {
-			lookup := routeToLookupRoute(nStore, source, state, route)
-			results = append(results, lookup)
-		}
-	}
-	return results
-}
-
 // LookupNeighborsPrefixesAt performs a single route server
 // routes lookup by neighbor id
 func (s *RoutesStore) LookupNeighborsPrefixesAt(
 	sourceID string,
 	neighborIDs []string,
-) chan api.LookupRoutes {
-	response := make(chan api.LookupRoutes)
-
-	go func() {
-		s.RLock()
-		source := s.cfgMap[sourceID]
-		routes := s.routesMap[sourceID]
-		s.RUnlock()
-
-		filtered := filterRoutesByNeighborIDs(
-			s.neighborsStore,
-			source,
-			routes.Filtered,
-			neighborIDs,
-			"filtered")
-		imported := filterRoutesByNeighborIDs(
-			s.neighborsStore,
-			source,
-			routes.Imported,
-			neighborIDs,
-			"imported")
-
-		result := append(filtered, imported...)
-		response <- result
-	}()
-
-	return response
+) (api.LookupRoutes, error) {
+	ctx := context.TODO()
+	return s.backend.GetNeighborsPrefixesAt(
+		ctx, sourceID, neighborIDs)
 }
 
 // LookupPrefixAt performs a single RS lookup
