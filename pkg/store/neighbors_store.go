@@ -111,6 +111,13 @@ func (s *NeighborsStore) SourceStatus(sourceID string) (*Status, error) {
 	return s.sources.GetStatus(sourceID)
 }
 
+// IsReady retrieves the status for a route server
+// and checks if it is ready.
+func (s *NeighborsStore) IsReady(sourceID string) bool {
+	rdy, _ := s.sources.IsReady(sourceID)
+	return rdy
+}
+
 // updateSource will update a single source. This
 // function may crash or return errors.
 func (s *NeighborsStore) updateSource(

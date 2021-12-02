@@ -86,6 +86,18 @@ func (s *SourcesStore) GetStatus(sourceID string) (*Status, error) {
 	return s.getStatus(sourceID)
 }
 
+// IsReady will retrieve the status of the source
+// and check if the state is ready.
+func (s *SourcesStore) IsReady(sourceID string) (bool, error) {
+	s.Lock()
+	defer s.Unlock()
+	status, err := getStatus(sourceID)
+	if err != nil {
+		return false, err
+	}
+	return status.State == StateReady
+}
+
 // Internal getStatus
 func (s *SourcesStore) getStatus(sourceID string) (*Status, error) {
 	status, ok := s.status[sourceID]
@@ -143,6 +155,13 @@ func (s *SourcesStore) GetName(sourceID string) string {
 	s.Lock()
 	defer s.Unlock()
 	return s.sources[sourceID].Name
+}
+
+// Get retrieves the source
+func (s *SourcesStore) Get(sourceID string) *config.SourceConfig {
+	s.Lock()
+	defer s.Unlock()
+	return s.sources[sourceID]
 }
 
 // GetSourceIDs returns a list of registered source ids.
