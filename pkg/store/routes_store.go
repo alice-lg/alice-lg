@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"math/rand"
-	"strings"
 	"time"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
@@ -28,12 +27,17 @@ type RoutesStoreBackend interface {
 		sourceID string,
 	) (uint, uint, error)
 
-	// GetNeighborPrefixesAt retrieves the prefixes
+	// FindByNeighbors retrieves the prefixes
 	// announced by the neighbor at a given source
-	GetNeighborPrefixesAt(
+	FindByNeighbors(
 		ctx context.Context,
-		sourceID string,
-		neighborID string,
+		neighborIDs []string,
+	) (api.LookupRoutes, error)
+
+	// FindByPrefix
+	FindByPrefix(
+		ctx context.Context,
+		prefix string,
 	) (api.LookupRoutes, error)
 }
 
@@ -138,13 +142,13 @@ func (s *RoutesStore) updateSource(
 	ctx context.Context,
 	src *config.SourceConfig,
 ) error {
-	if err := s.awaitNeighborStore(ctx, src.ID); err != nil {
-		return err
-	}
-
 	rs := src.GetInstance()
 	res, err := rs.AllRoutes()
 	if err != nil {
+		return err
+	}
+
+	if err := s.awaitNeighborStore(ctx, src.ID); err != nil {
 		return err
 	}
 
@@ -158,6 +162,24 @@ func (s *RoutesStore) updateSource(
 	}
 
 	return s.sources.RefreshSuccess(src.ID)
+}
+
+// awaitNeighborStore polls the neighbor store state
+// for the sourceID until the context is not longer valid.
+func (s *RoutesStore) awaitNeighborStore(
+	ctx context.Context,
+	srcID string,
+) error {
+	for {
+		err := ctx.Err()
+		if err != nil {
+			return err
+		}
+		if s.neighbors.IsInitialized(srcID) {
+			return nil
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
 }
 
 func (s *RoutesStore) routesToLookupRoutes(
@@ -181,27 +203,10 @@ func (s *RoutesStore) routesToLookupRoutes(
 				Name: src.Name,
 			},
 		}
+		lr.Route.Details = nil
 		lookupRoutes = append(lookupRoutes, lr)
 	}
 	return lookupRoutes
-}
-
-func (s *RoutesStore) awaitNeighborStore(
-	ctx context.Context,
-	srcID string,
-) error {
-	// Poll the neighbor store state for the sourceID
-	// until the context is not longer valid
-	for {
-		err := ctx.Err()
-		if err != nil {
-			return err
-		}
-		if s.neighbors.IsReady(srcID) {
-			return nil
-		}
-		time.Sleep(100 * time.Millisecond)
-	}
 }
 
 // Stats calculates some store insights
@@ -239,7 +244,7 @@ func (s *RoutesStore) Stats() *api.RoutesStoreStats {
 			State:     status.State.String(),
 			UpdatedAt: status.LastRefresh,
 		}
-		rsStats = append(sStats, serverStats)
+		rsStats = append(rsStats, serverStats)
 	}
 
 	// Make stats
@@ -255,7 +260,7 @@ func (s *RoutesStore) Stats() *api.RoutesStoreStats {
 
 // SourceCachedAt provides a cache status (TODO: do we need this?)
 func (s *RoutesStore) SourceCachedAt(id string) time.Time {
-	status, err := s.sources.GetStatus(sourceID)
+	status, err := s.sources.GetStatus(id)
 	if err != nil {
 		log.Println("error while getting source cached at:", err)
 		return time.Time{}
@@ -264,8 +269,8 @@ func (s *RoutesStore) SourceCachedAt(id string) time.Time {
 }
 
 // CacheTTL returns the TTL time
-func (s *RoutesStore) CacheTTL() time.Time {
-	return s.sources.NextRefresh(sourceID)
+func (s *RoutesStore) CacheTTL(id string) time.Time {
+	return s.sources.NextRefresh(id)
 }
 
 // Lookup routes transform
@@ -289,102 +294,26 @@ func routeToLookupRoute(
 	return lookup
 }
 
-// LookupNeighborsPrefixesAt performs a single route server
-// routes lookup by neighbor id
-func (s *RoutesStore) LookupNeighborsPrefixesAt(
-	sourceID string,
-	neighborIDs []string,
-) (api.LookupRoutes, error) {
-	ctx := context.TODO()
-	return s.backend.GetNeighborsPrefixesAt(
-		ctx, sourceID, neighborIDs)
-}
-
-// LookupPrefixAt performs a single RS lookup
-func (s *RoutesStore) LookupPrefixAt(
-	sourceID string,
-	prefix string,
-) chan api.LookupRoutes {
-
-	response := make(chan api.LookupRoutes)
-
-	go func() {
-		s.RLock()
-		cfg := s.cfgMap[sourceID]
-		routes := s.routesMap[sourceID]
-		s.RUnlock()
-
-		filtered := filterRoutesByPrefix(
-			s.neighbors,
-			cfg,
-			routes.Filtered,
-			prefix,
-			"filtered")
-		imported := filterRoutesByPrefix(
-			s.neighbors,
-			cfg,
-			routes.Imported,
-			prefix,
-			"imported")
-
-		result := append(filtered, imported...)
-		response <- result
-	}()
-
-	return response
-}
-
 // LookupPrefix performs a lookup over all route servers
-func (s *RoutesStore) LookupPrefix(prefix string) api.LookupRoutes {
-	result := api.LookupRoutes{}
-	responses := []chan api.LookupRoutes{}
-
-	// Normalize prefix to lower case
-	prefix = strings.ToLower(prefix)
-
-	// Dispatch
-	s.RLock()
-	for sourceID := range s.routesMap {
-		res := s.LookupPrefixAt(sourceID, prefix)
-		responses = append(responses, res)
-	}
-	s.RUnlock()
-
-	// Collect
-	for _, response := range responses {
-		routes := <-response
-		result = append(result, routes...)
-		close(response)
-	}
-
-	return result
+func (s *RoutesStore) LookupPrefix(
+	ctx context.Context,
+	prefix string,
+) (api.LookupRoutes, error) {
+	return s.backend.FindByPrefix(ctx, prefix)
 }
 
 // LookupPrefixForNeighbors returns all routes for
 // a set of neighbors.
 func (s *RoutesStore) LookupPrefixForNeighbors(
+	ctx context.Context,
 	neighbors api.NeighborsLookupResults,
-) api.LookupRoutes {
-
-	result := api.LookupRoutes{}
-	responses := []chan api.LookupRoutes{}
-
-	// Dispatch
-	for sourceID, locals := range neighbors {
-		lookupNeighborIDs := []string{}
-		for _, n := range locals {
-			lookupNeighborIDs = append(lookupNeighborIDs, n.ID)
+) (api.LookupRoutes, error) {
+	neighborIDs := []string{}
+	for _, rs := range neighbors {
+		for _, neighbor := range rs {
+			neighborIDs = append(neighborIDs, neighbor.ID)
 		}
-		res := s.LookupNeighborsPrefixesAt(sourceID, lookupNeighborIDs)
-		responses = append(responses, res)
 	}
 
-	// Collect
-	for _, response := range responses {
-		routes := <-response
-		result = append(result, routes...)
-		close(response)
-	}
-
-	return result
+	return s.backend.FindByNeighbors(ctx, neighborIDs)
 }

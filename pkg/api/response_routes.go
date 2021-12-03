@@ -106,6 +106,15 @@ type FilteredResponse struct {
 	FiltersApplied   *SearchFilters `json:"filters_applied"`
 }
 
+const (
+	// RouteStateFiltered indicates that the route
+	// was not accepted by the route server.
+	RouteStateFiltered = "filtered"
+	// RouteStateImported indicates that the route was
+	// imported by the route server.
+	RouteStateImported = "imported"
+)
+
 // LookupRoute is a route with additional
 // neighbor and state information
 type LookupRoute struct {

@@ -111,10 +111,10 @@ func (s *NeighborsStore) SourceStatus(sourceID string) (*Status, error) {
 	return s.sources.GetStatus(sourceID)
 }
 
-// IsReady retrieves the status for a route server
+// IsInitialized retrieves the status for a route server
 // and checks if it is ready.
-func (s *NeighborsStore) IsReady(sourceID string) bool {
-	rdy, _ := s.sources.IsReady(sourceID)
+func (s *NeighborsStore) IsInitialized(sourceID string) bool {
+	rdy, _ := s.sources.IsInitialized(sourceID)
 	return rdy
 }
 
@@ -211,13 +211,13 @@ func (s *NeighborsStore) GetNeighborAt(
 	return s.backend.GetNeighborAt(ctx, sourceID, neighborID)
 }
 
-// LookupNeighborsAt filters for neighbors at a route
+// lookupNeighborsAt filters for neighbors at a route
 // server matching a given query string.
-func (s *NeighborsStore) LookupNeighborsAt(
+func (s *NeighborsStore) lookupNeighborsAt(
+	ctx context.Context,
 	sourceID string,
 	query string,
 ) (api.Neighbors, error) {
-	ctx := context.TODO()
 
 	results := api.Neighbors{}
 	neighbors, err := s.backend.GetNeighborsAt(ctx, sourceID)
@@ -252,9 +252,10 @@ func (s *NeighborsStore) LookupNeighbors(
 	query string,
 ) api.NeighborsLookupResults {
 	// Create empty result set
+	ctx := context.TODO()
 	results := make(api.NeighborsLookupResults)
 	for _, sourceID := range s.sources.GetSourceIDs() {
-		neighbors, err := s.LookupNeighborsAt(sourceID, query)
+		neighbors, err := s.lookupNeighborsAt(ctx, sourceID, query)
 		if err != nil {
 			log.Println("error during lookup:", query, err)
 			continue

@@ -6,13 +6,8 @@ import (
 	"sync"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
-	"github.com/alice-lg/alice-lg/pkg/config"
 	"github.com/alice-lg/alice-lg/pkg/sources"
 )
-
-// A RoutesMap is a mapping between a source ID and a
-// routes response.
-type RoutesMap [string]*api.RoutesResponse
 
 // RoutesBackend implements an in memory backend
 // for the routes store.
@@ -24,7 +19,7 @@ type RoutesBackend struct {
 // NewRoutesBackend creates a new instance
 func NewRoutesBackend() *RoutesBackend {
 	return &RoutesBackend{
-		routes: make(RoutesMap),
+		routes: make(map[string]api.LookupRoutes),
 	}
 }
 
@@ -38,7 +33,7 @@ func (r *RoutesBackend) SetRoutes(
 ) error {
 	r.Lock()
 	defer r.Unlock()
-	r.routesMap[sourceID] = routes
+	r.routes[sourceID] = routes
 	return nil
 }
 
@@ -55,38 +50,68 @@ func (r *RoutesBackend) CountRoutesAt(
 		return 0, 0, sources.ErrSourceNotFound
 	}
 
-	imported := len(routes.Imported)
-	filtered := len(routes.Filtered)
+	var (
+		imported uint = 0
+		filtered uint = 0
+	)
+
+	for _, route := range routes {
+		if route.State == api.RouteStateFiltered {
+			filtered++
+		}
+		if route.State == api.RouteStateImported {
+			imported++
+		}
+	}
 
 	return imported, filtered, nil
 }
 
-// GetNeighborsPrefixesAt retrieves the announced
-// prefixes of a set of neighbor ids.
-func (r *RoutesBackend) GetNeighborsPrefixesAt(
+// FindByNeighbors will return the prefixes for a
+// list of neighbors identified by ID.
+func (r *RoutesBackend) FindByNeighbors(
 	ctx context.Context,
-	sourceID string,
 	neighborIDs []string,
 ) (api.LookupRoutes, error) {
 	r.Lock()
 	defer r.Unlock()
 
 	result := api.LookupRoutes{}
-	routes, ok := s.routes[sourceID]
-	if !ok {
-		return nil, sources.ErrSourceNotFound
-	}
-
-	for _, route := range routes {
-		if isMemberOf(route.NeighborID, neighborIDs) {
-			result = append(result, route)
+	for _, rs := range r.routes {
+		for _, route := range rs {
+			if isMemberOf(neighborIDs, route.NeighborID) {
+				result = append(result, route)
+			}
 		}
 	}
+	return result, nil
+}
 
+// FindByPrefix will return the prefixes matching a pattern
+func (r *RoutesBackend) FindByPrefix(
+	ctx context.Context,
+	prefix string,
+) (api.LookupRoutes, error) {
+	r.Lock()
+	defer r.Unlock()
+
+	// We make our compare case insensitive
+	prefix = strings.ToLower(prefix)
+
+	result := api.LookupRoutes{}
+	for _, rs := range r.routes {
+		for _, route := range rs {
+			// Naiive string filtering:
+			if strings.HasPrefix(strings.ToLower(route.Network), prefix) {
+				result = append(result, route)
+			}
+		}
+	}
 	return result, nil
 }
 
 // Routes filter
+/*
 func filterRoutesByPrefix(
 	nStore *NeighborsStore,
 	source *config.SourceConfig,
@@ -105,6 +130,7 @@ func filterRoutesByPrefix(
 	return results
 }
 
+
 func filterRoutesByNeighborIDs(
 	nStore *NeighborsStore,
 	source *config.SourceConfig,
@@ -116,13 +142,14 @@ func filterRoutesByNeighborIDs(
 	results := api.LookupRoutes{}
 	for _, route := range routes {
 		// Filtering:
-		if isMemberOf(route.NeighborID, neighborIDs) {
+		if isMemberOf(neighborIDs, route.NeighborID) {
 			lookup := routeToLookupRoute(nStore, source, state, route)
 			results = append(results, lookup)
 		}
 	}
 	return results
 }
+*/
 
 // isMemberOf checks if a key is present in
 // a list of strings.

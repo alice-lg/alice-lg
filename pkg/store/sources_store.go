@@ -42,6 +42,7 @@ type Status struct {
 	LastRefreshDuration time.Duration
 	LastError           interface{}
 	State               State
+	Initialized         bool
 
 	lastRefreshStart time.Time
 }
@@ -86,18 +87,6 @@ func (s *SourcesStore) GetStatus(sourceID string) (*Status, error) {
 	return s.getStatus(sourceID)
 }
 
-// IsReady will retrieve the status of the source
-// and check if the state is ready.
-func (s *SourcesStore) IsReady(sourceID string) (bool, error) {
-	s.Lock()
-	defer s.Unlock()
-	status, err := getStatus(sourceID)
-	if err != nil {
-		return false, err
-	}
-	return status.State == StateReady
-}
-
 // Internal getStatus
 func (s *SourcesStore) getStatus(sourceID string) (*Status, error) {
 	status, ok := s.status[sourceID]
@@ -107,15 +96,25 @@ func (s *SourcesStore) getStatus(sourceID string) (*Status, error) {
 	return status, nil
 }
 
+// IsInitialized will retrieve the status of the source
+// and check if a successful refresh happend at least
+// once.
+func (s *SourcesStore) IsInitialized(sourceID string) (bool, error) {
+	s.Lock()
+	defer s.Unlock()
+	status, err := s.getStatus(sourceID)
+	if err != nil {
+		return false, err
+	}
+	return status.Initialized, nil
+}
+
 // NextRefresh calculates the next refresh time
 func (s *SourcesStore) NextRefresh(sourceID string) time.Time {
 	status, err := s.GetStatus(sourceID)
 	if err != nil {
 		log.Println("get status error:", err)
-		return false
-	}
-	if status.State == StateBusy {
-		return false // Source is busy
+		return time.Time{}
 	}
 	nextRefresh := status.LastRefresh.Add(
 		s.refreshInterval)
@@ -205,6 +204,7 @@ func (s *SourcesStore) RefreshSuccess(sourceID string) error {
 	status.LastRefreshDuration = time.Now().Sub(
 		status.lastRefreshStart)
 	status.LastError = nil
+	status.Initialized = true // We now have data
 	return nil
 }
 
