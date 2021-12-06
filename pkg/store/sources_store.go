@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"log"
 	"sync"
 	"time"
@@ -110,7 +111,7 @@ func (s *SourcesStore) IsInitialized(sourceID string) (bool, error) {
 }
 
 // NextRefresh calculates the next refresh time
-func (s *SourcesStore) NextRefresh(sourceID string) time.Time {
+func (s *SourcesStore) NextRefresh(ctx context.Context) time.Time {
 	status, err := s.GetStatus(sourceID)
 	if err != nil {
 		log.Println("get status error:", err)

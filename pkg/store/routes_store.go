@@ -258,19 +258,17 @@ func (s *RoutesStore) Stats() *api.RoutesStoreStats {
 	return storeStats
 }
 
-// SourceCachedAt provides a cache status (TODO: do we need this?)
-func (s *RoutesStore) SourceCachedAt(id string) time.Time {
-	status, err := s.sources.GetStatus(id)
-	if err != nil {
-		log.Println("error while getting source cached at:", err)
-		return time.Time{}
-	}
-	return status.LastRefresh
+// CachedAt returns the time of the most recent partial
+// refresh of the dataset.
+func (s *RoutesStore) CachedAt(
+	ctx context.Context,
+) (time.Time, error) {
+	return s.sources.CachedAt(ctx)
 }
 
 // CacheTTL returns the TTL time
 func (s *RoutesStore) CacheTTL(id string) time.Time {
-	return s.sources.NextRefresh(id)
+	return s.sources.NextRefresh(ctx)
 }
 
 // Lookup routes transform

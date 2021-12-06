@@ -8,14 +8,14 @@ import (
 
 	"github.com/alice-lg/alice-lg/pkg/api"
 	"github.com/alice-lg/alice-lg/pkg/config"
-	"github.com/alice-lg/alice-lg/pkg/store"
 )
 
 // Handle get neighbors on routeserver
 func (s *Server) apiNeighborsList(
-	_req *http.Request,
+	req *http.Request,
 	params httprouter.Params,
 ) (response, error) {
+	ctx := req.Context()
 	rsID, err := validateSourceID(params.ByName("id"))
 	if err != nil {
 		return nil, err
@@ -25,12 +25,12 @@ func (s *Server) apiNeighborsList(
 
 	// Try to fetch neighbors from store, only fall back
 	// to RS query if store is not ready yet
-	sourceStatus, err := s.neighborsStore.SourceStatus(rsID)
-	if err != nil {
-		return nil, err
-	}
-	if sourceStatus.State == store.StateReady {
-		neighbors := s.neighborsStore.GetNeighborsAt(rsID)
+	if s.neighborsStore.IsInitialized(rsID) {
+		status, err := s.neighborsStore.GetStatus(rsID)
+		neighbors, err := s.neighborsStore.GetNeighborsAt(ctx, rsID)
+		if err != nil {
+			return nil, err
+		}
 		// Make response
 		neighborsResponse = &api.NeighborsResponse{
 			Response: api.Response{
@@ -38,11 +38,10 @@ func (s *Server) apiNeighborsList(
 					Version: config.Version,
 					CacheStatus: api.CacheStatus{
 						OrigTTL:  0,
-						CachedAt: sourceStatus.LastRefresh,
+						CachedAt: status.LastRefresh,
 					},
 					ResultFromCache: true, // you bet!
-					TTL: sourceStatus.LastRefresh.Add(
-						s.neighborsStore.RefreshInterval),
+					TTL:             s.neighborsStore.SourceCacheTTL(rsID),
 				},
 			},
 			Neighbors: neighbors,

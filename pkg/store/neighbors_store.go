@@ -105,9 +105,9 @@ func (s *NeighborsStore) init() {
 	}
 }
 
-// SourceStatus retrievs the status for a route server
+// GetStatus retrievs the status for a route server
 // identified by sourceID.
-func (s *NeighborsStore) SourceStatus(sourceID string) (*Status, error) {
+func (s *NeighborsStore) GetStatus(sourceID string) (*Status, error) {
 	return s.sources.GetStatus(sourceID)
 }
 
@@ -187,9 +187,10 @@ func (s *NeighborsStore) update() {
 }
 
 // GetNeighborsAt gets all neighbors from a routeserver
-func (s *NeighborsStore) GetNeighborsAt(sourceID string) (api.Neighbors, error) {
-	ctx := context.TODO()
-
+func (s *NeighborsStore) GetNeighborsAt(
+	ctx context.Context,
+	sourceID string,
+) (api.Neighbors, error) {
 	if s.forceNeighborRefresh {
 		src := s.sources.GetInstance(sourceID)
 		if src == nil {
@@ -199,7 +200,6 @@ func (s *NeighborsStore) GetNeighborsAt(sourceID string) (api.Neighbors, error) 
 			return nil, err
 		}
 	}
-
 	return s.backend.GetNeighborsAt(ctx, sourceID)
 }
 
@@ -249,40 +249,17 @@ func (s *NeighborsStore) lookupNeighborsAt(
 // LookupNeighbors filters for neighbors matching a query
 // on all route servers.
 func (s *NeighborsStore) LookupNeighbors(
+	ctx context.Context,
 	query string,
-) api.NeighborsLookupResults {
+) (api.NeighborsLookupResults, error) {
 	// Create empty result set
-	ctx := context.TODO()
 	results := make(api.NeighborsLookupResults)
 	for _, sourceID := range s.sources.GetSourceIDs() {
 		neighbors, err := s.lookupNeighborsAt(ctx, sourceID, query)
 		if err != nil {
-			log.Println("error during lookup:", query, err)
-			continue
+			return nil, err
 		}
 		results[sourceID] = neighbors
-	}
-	return results
-}
-
-// FilterNeighborsAt filters neighbors from a single route server.
-func (s *NeighborsStore) FilterNeighborsAt(
-	sourceID string,
-	filter *api.NeighborFilter,
-) (api.Neighbors, error) {
-	ctx := context.TODO()
-
-	results := []*api.Neighbor{}
-	neighbors, err := s.backend.GetNeighborsAt(ctx, sourceID)
-	if err != nil {
-		return nil, err
-	}
-
-	// Apply filters
-	for _, neighbor := range neighbors {
-		if filter.Match(neighbor) {
-			results = append(results, neighbor)
-		}
 	}
 	return results, nil
 }
@@ -290,25 +267,30 @@ func (s *NeighborsStore) FilterNeighborsAt(
 // FilterNeighbors retrieves neighbors by name or by ASN
 // from all route servers.
 func (s *NeighborsStore) FilterNeighbors(
+	ctx context.Context,
 	filter *api.NeighborFilter,
-) api.Neighbors {
+) (api.Neighbors, error) {
 	results := []*api.Neighbor{}
 	// Get neighbors from all routeservers
 	for _, sourceID := range s.sources.GetSourceIDs() {
-		neighbors, err := s.FilterNeighborsAt(sourceID, filter)
+		neighbors, err := s.backend.GetNeighborsAt(ctx, sourceID)
 		if err != nil {
-			log.Println("error during filter lookup:", err)
-			continue
+			return nil, err
 		}
-		results = append(results, neighbors...)
+		// Apply filters
+		for _, neighbor := range neighbors {
+			if filter.Match(neighbor) {
+				results = append(results, neighbor)
+			}
+		}
 	}
-	return results
+	return results, nil
 }
 
 // Stats exports some statistics for monitoring.
-func (s *NeighborsStore) Stats() *api.NeighborsStoreStats {
-	ctx := context.TODO()
-
+func (s *NeighborsStore) Stats(
+	ctx context.Context,
+) *api.NeighborsStoreStats {
 	totalNeighbors := 0
 	rsStats := []api.RouteServerNeighborsStats{}
 
