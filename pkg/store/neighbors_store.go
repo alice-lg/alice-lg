@@ -186,6 +186,21 @@ func (s *NeighborsStore) update() {
 	}
 }
 
+// CachedAt returns the time of the oldest partial
+// refresh of the dataset.
+func (s *NeighborsStore) CachedAt(
+	ctx context.Context,
+) time.Time {
+	return s.sources.CachedAt(ctx)
+}
+
+// CacheTTL returns the TTL time
+func (s *NeighborsStore) CacheTTL(
+	ctx context.Context,
+) time.Time {
+	return s.sources.NextRefresh(ctx)
+}
+
 // GetNeighborsAt gets all neighbors from a routeserver
 func (s *NeighborsStore) GetNeighborsAt(
 	ctx context.Context,
@@ -329,6 +344,9 @@ func (s *NeighborsStore) SourceCachedAt(sourceID string) time.Time {
 
 // SourceCacheTTL returns the next time when a refresh
 // will be started.
-func (s *NeighborsStore) SourceCacheTTL(sourceID string) time.Time {
-	return s.sources.NextRefresh(sourceID)
+func (s *NeighborsStore) SourceCacheTTL(
+	ctx context.Context,
+	sourceID string,
+) time.Time {
+	return s.sources.NextRefresh(ctx)
 }

@@ -258,16 +258,18 @@ func (s *RoutesStore) Stats() *api.RoutesStoreStats {
 	return storeStats
 }
 
-// CachedAt returns the time of the most recent partial
+// CachedAt returns the time of the oldest partial
 // refresh of the dataset.
 func (s *RoutesStore) CachedAt(
 	ctx context.Context,
-) (time.Time, error) {
+) time.Time {
 	return s.sources.CachedAt(ctx)
 }
 
 // CacheTTL returns the TTL time
-func (s *RoutesStore) CacheTTL(id string) time.Time {
+func (s *RoutesStore) CacheTTL(
+	ctx context.Context,
+) time.Time {
 	return s.sources.NextRefresh(ctx)
 }
 

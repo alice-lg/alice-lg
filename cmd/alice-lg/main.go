@@ -8,10 +8,10 @@ import (
 	"github.com/alice-lg/alice-lg/pkg/config"
 	"github.com/alice-lg/alice-lg/pkg/http"
 	"github.com/alice-lg/alice-lg/pkg/store"
+	"github.com/alice-lg/alice-lg/pkg/store/backends/memory"
 )
 
 func main() {
-	done := make(chan bool)
 	ctx := context.Background()
 
 	// Handle commandline parameters
@@ -29,8 +29,11 @@ func main() {
 	}
 
 	// Setup local routes store
-	neighborsStore := store.NewNeighborsStore(cfg)
-	routesStore := store.NewRoutesStore(neighborsStore, cfg)
+	neighborsBackend := memory.NewNeighborsBackend()
+	routesBackend := memory.NewRoutesBackend()
+
+	neighborsStore := store.NewNeighborsStore(cfg, neighborsBackend)
+	routesStore := store.NewRoutesStore(neighborsStore, cfg, routesBackend)
 
 	// Say hi
 	printBanner(cfg, neighborsStore, routesStore)
@@ -49,5 +52,5 @@ func main() {
 	server := http.NewServer(cfg, routesStore, neighborsStore)
 	go server.Start()
 
-	<-done
+	<-ctx.Done()
 }

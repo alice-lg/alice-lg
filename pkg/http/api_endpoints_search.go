@@ -112,15 +112,8 @@ func (s *Server) apiLookupPrefixGlobal(
 	// Calculate query duration
 	queryDuration := time.Since(t0)
 
-	cachedAt, err := s.routesStore.CachedAt(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	ttl, err := s.routesStore.CacheTTL(ctx)
-	if err != nil {
-		return nil, err
-	}
+	cachedAt := s.routesStore.CachedAt(ctx)
+	ttl := s.routesStore.CacheTTL(ctx)
 
 	// Make response
 	response := api.PaginatedRoutesLookupResponse{
@@ -157,9 +150,13 @@ func (s *Server) apiLookupNeighborsGlobal(
 	req *http.Request,
 	params httprouter.Params,
 ) (response, error) {
+	ctx := req.Context()
 	// Query neighbors store
 	filter := api.NeighborFilterFromQuery(req.URL.Query())
-	neighbors := s.neighborsStore.FilterNeighbors(filter)
+	neighbors, err := s.neighborsStore.FilterNeighbors(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
 
 	sort.Sort(neighbors)
 
@@ -168,10 +165,10 @@ func (s *Server) apiLookupNeighborsGlobal(
 		Response: api.Response{
 			Meta: &api.Meta{
 				CacheStatus: api.CacheStatus{
-					CachedAt: s.neighborsStore.CachedAt(),
+					CachedAt: s.neighborsStore.CachedAt(ctx),
 				},
 				ResultFromCache: true, // You would not have guessed.
-				TTL:             s.neighborsStore.CacheTTL(),
+				TTL:             s.neighborsStore.CacheTTL(ctx),
 			},
 		},
 		Neighbors: neighbors,

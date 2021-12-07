@@ -111,15 +111,24 @@ func (s *SourcesStore) IsInitialized(sourceID string) (bool, error) {
 }
 
 // NextRefresh calculates the next refresh time
-func (s *SourcesStore) NextRefresh(ctx context.Context) time.Time {
-	status, err := s.GetStatus(sourceID)
-	if err != nil {
-		log.Println("get status error:", err)
-		return time.Time{}
+// TODO: I doubt the usefulness of these numbers.
+//
+func (s *SourcesStore) NextRefresh(
+	ctx context.Context,
+) time.Time {
+	s.Lock()
+	defer s.Unlock()
+
+	t := time.Time{}
+
+	for _, status := range s.status {
+		nextRefresh := status.LastRefresh.Add(
+			s.refreshInterval)
+		if nextRefresh.After(t) {
+			t = nextRefresh
+		}
 	}
-	nextRefresh := status.LastRefresh.Add(
-		s.refreshInterval)
-	return nextRefresh
+	return t
 }
 
 // ShouldRefresh checks if the source needs a
@@ -141,6 +150,22 @@ func (s *SourcesStore) ShouldRefresh(
 		return false // Too soon
 	}
 	return true // Go for it
+}
+
+// CachedAt retrievs the oldest refresh time
+// from all sources. All data is then guaranteed to be older
+// than the CachedAt date.
+func (s *SourcesStore) CachedAt(ctx context.Context) time.Time {
+	s.Lock()
+	defer s.Unlock()
+
+	t := time.Now().UTC()
+	for _, status := range s.status {
+		if status.LastRefresh.Before(t) {
+			t = status.LastRefresh
+		}
+	}
+	return t
 }
 
 // GetInstance retrieves a source instance by ID

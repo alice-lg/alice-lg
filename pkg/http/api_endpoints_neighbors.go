@@ -41,7 +41,7 @@ func (s *Server) apiNeighborsList(
 						CachedAt: status.LastRefresh,
 					},
 					ResultFromCache: true, // you bet!
-					TTL:             s.neighborsStore.SourceCacheTTL(rsID),
+					TTL:             s.neighborsStore.SourceCacheTTL(ctx, rsID),
 				},
 			},
 			Neighbors: neighbors,
