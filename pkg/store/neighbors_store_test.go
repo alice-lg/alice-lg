@@ -46,6 +46,16 @@ func makeTestNeighborsStore() *NeighborsStore {
 			ASN:         2344,
 			Description: "PEER AS2344 192.9.23.44 3rd Peer from the sun",
 		},
+		&api.Neighbor{
+			ID:          "ID163_AS31078",
+			ASN:         31078,
+			Description: "PEER AS31078 1.2.3.4 Peer Peer",
+		},
+		&api.Neighbor{
+			ID:          "ID7254_AS31334",
+			ASN:         31078,
+			Description: "PEER AS31334 4.3.2.1 Peer",
+		},
 	}
 	rs2 := api.Neighbors{
 		&api.Neighbor{
@@ -99,10 +109,7 @@ func TestGetNeighbors(t *testing.T) {
 	}
 
 	neighbors, err = store.GetNeighborsAt(context.Background(), "rs3")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(neighbors) != 0 {
+	if err == nil {
 		t.Error("Unknown source should have yielded zero results")
 	}
 

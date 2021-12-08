@@ -195,6 +195,10 @@ func (s *RoutesStore) routesToLookupRoutes(
 			log.Println("prepare route, neighbor lookup failed:", err)
 			continue
 		}
+		if neighbor == nil {
+			log.Println("prepare route, neighbor not found:", route.NeighborID)
+			continue
+		}
 		lr := &api.LookupRoute{
 			Route:    route,
 			State:    state,

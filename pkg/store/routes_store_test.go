@@ -170,7 +170,6 @@ func TestLookupPrefixForNeighbors(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log(results)
 
 	// We should have retrived 8 prefixes,
 	if len(results) != 8 {

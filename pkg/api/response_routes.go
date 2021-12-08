@@ -8,7 +8,7 @@ import (
 // Route is a prefix with BGP information.
 type Route struct {
 	ID         string `json:"id"`
-	NeighborID string `json:"neighbour_id"`
+	NeighborID string `json:"neighbor_id"`
 
 	Network   string        `json:"network"`
 	Interface string        `json:"interface"`
