@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"log"
 	"os"
 	"strings"
@@ -37,12 +38,14 @@ func importRoutes(
 	src *config.SourceConfig,
 	res *api.RoutesResponse,
 ) error {
+	ctx := context.Background()
+
 	// Prepare imported routes for lookup
 	imported := s.routesToLookupRoutes(ctx, "imported", src, res.Imported)
 	filtered := s.routesToLookupRoutes(ctx, "filtered", src, res.Filtered)
 	lookupRoutes := append(imported, filtered...)
 
-	if err = s.backend.SetRoutes(ctx, src.ID, lookupRoutes); err != nil {
+	if err := s.backend.SetRoutes(ctx, src.ID, lookupRoutes); err != nil {
 		return err
 	}
 
@@ -72,11 +75,11 @@ func makeTestRoutesStore() *RoutesStore {
 		},
 	}
 	rs1 := loadTestRoutesResponse()
-	s := NewRoutesStore(cfg, neighborsStore)
+	s := NewRoutesStore(neighborsStore, cfg, be)
 	if err := importRoutes(s, cfg.Sources[0], rs1); err != nil {
 		log.Panic(err)
 	}
-	return store
+	return s
 }
 
 // Check for presence of network in result set
@@ -125,31 +128,14 @@ func TestRoutesStoreStats(t *testing.T) {
 	}
 }
 
-func TestLookupPrefixAt(t *testing.T) {
-	store := makeTestRoutesStore()
-
-	query := "193.200."
-	results := store.LookupPrefixAt("rs1", query)
-
-	prefixes := <-results
-
-	// Check results
-	for _, prefix := range prefixes {
-		if strings.HasPrefix(prefix.Network, query) == false {
-			t.Error(
-				"All network addresses should start with the",
-				"queried prefix",
-			)
-		}
-	}
-
-}
-
 func TestLookupPrefix(t *testing.T) {
 	store := makeTestRoutesStore()
 	query := "193.200."
 
-	results := store.LookupPrefix(query)
+	results, err := store.LookupPrefix(context.Background(), query)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if len(results) == 0 {
 		t.Error("Expected lookup results. None present.")
@@ -167,27 +153,6 @@ func TestLookupPrefix(t *testing.T) {
 	}
 }
 
-func TestLookupNeighborsPrefixesAt(t *testing.T) {
-	store := makeTestRoutesStore()
-
-	// Query
-	results := store.LookupNeighborsPrefixesAt("rs1", []string{
-		"ID163_AS31078",
-	})
-
-	// Check prefixes
-	presence := []string{
-		"193.200.230.0/24", "193.34.24.0/22", "31.220.136.0/21",
-	}
-
-	resultset := []string{}
-	for _, prefix := range <-results {
-		resultset = append(resultset, prefix.Network)
-	}
-
-	testCheckPrefixesPresence(presence, resultset, t)
-}
-
 func TestLookupPrefixForNeighbors(t *testing.T) {
 	// Construct a neighbors lookup result
 	neighbors := api.NeighborsLookupResults{
@@ -201,7 +166,10 @@ func TestLookupPrefixForNeighbors(t *testing.T) {
 	store := makeTestRoutesStore()
 
 	// Query
-	results := store.LookupPrefixForNeighbors(neighbors)
+	results, err := store.LookupPrefixForNeighbors(context.Background(), neighbors)
+	if err != nil {
+		t.Fatal(err)
+	}
 	t.Log(results)
 
 	// We should have retrived 8 prefixes,
