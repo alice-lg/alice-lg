@@ -220,9 +220,10 @@ func (s *NeighborsStore) GetNeighborsAt(
 
 // GetNeighborAt looks up a neighbor on a RS by ID.
 func (s *NeighborsStore) GetNeighborAt(
-	sourceID string, neighborID string,
+	ctx context.Context,
+	sourceID string,
+	neighborID string,
 ) (*api.Neighbor, error) {
-	ctx := context.TODO()
 	return s.backend.GetNeighborAt(ctx, sourceID, neighborID)
 }
 

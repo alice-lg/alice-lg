@@ -153,8 +153,8 @@ func (s *RoutesStore) updateSource(
 	}
 
 	// Prepare imported routes for lookup
-	imported := s.routesToLookupRoutes("imported", src, res.Imported)
-	filtered := s.routesToLookupRoutes("filtered", src, res.Filtered)
+	imported := s.routesToLookupRoutes(ctx, "imported", src, res.Imported)
+	filtered := s.routesToLookupRoutes(ctx, "filtered", src, res.Filtered)
 	lookupRoutes := append(imported, filtered...)
 
 	if err = s.backend.SetRoutes(ctx, src.ID, lookupRoutes); err != nil {
@@ -183,13 +183,14 @@ func (s *RoutesStore) awaitNeighborStore(
 }
 
 func (s *RoutesStore) routesToLookupRoutes(
+	ctx context.Context,
 	state string,
 	src *config.SourceConfig,
 	routes api.Routes,
 ) api.LookupRoutes {
 	lookupRoutes := make(api.LookupRoutes, 0, len(routes))
 	for _, route := range routes {
-		neighbor, err := s.neighbors.GetNeighborAt(src.ID, route.NeighborID)
+		neighbor, err := s.neighbors.GetNeighborAt(ctx, src.ID, route.NeighborID)
 		if err != nil {
 			log.Println("prepare route, neighbor lookup failed:", err)
 			continue
@@ -271,27 +272,6 @@ func (s *RoutesStore) CacheTTL(
 	ctx context.Context,
 ) time.Time {
 	return s.sources.NextRefresh(ctx)
-}
-
-// Lookup routes transform
-func routeToLookupRoute(
-	nStore *NeighborsStore,
-	source *config.SourceConfig,
-	state string,
-	route *api.Route,
-) *api.LookupRoute {
-	// Get neighbor and make route
-	neighbor, _ := nStore.GetNeighborAt(source.ID, route.NeighborID)
-	lookup := &api.LookupRoute{
-		Route:    route,
-		State:    state,
-		Neighbor: neighbor,
-		RouteServer: &api.RouteServer{
-			ID:   source.ID,
-			Name: source.Name,
-		},
-	}
-	return lookup
 }
 
 // LookupPrefix performs a lookup over all route servers
