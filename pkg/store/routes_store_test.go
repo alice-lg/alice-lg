@@ -11,36 +11,75 @@ import (
 
 	"github.com/alice-lg/alice-lg/pkg/api"
 	"github.com/alice-lg/alice-lg/pkg/config"
-	"github.com/alice-lg/alice-lg/pkg/sources/birdwatcher"
+	"github.com/alice-lg/alice-lg/pkg/store/backends/memory"
 )
 
-//
-// Api Tets Helpers
-//
 func loadTestRoutesResponse() *api.RoutesResponse {
-	file, err := os.Open("../../testdata/api/routes_response.json")
+	file, err := os.Open("testdata/routes_response.json")
 	if err != nil {
 		log.Panic("could not load test data:", err)
 	}
 	defer file.Close()
-
 	data, err := ioutil.ReadAll(file)
 	if err != nil {
 		log.Panic("could not read test data:", err)
 	}
-
 	response := &api.RoutesResponse{}
 	err = json.Unmarshal(data, &response)
 	if err != nil {
 		log.Panic("could not unmarshal response test data:", err)
 	}
-
 	return response
 }
 
-/*
- Check for presence of network in result set
-*/
+func importRoutes(
+	s *RoutesStore,
+	src *config.SourceConfig,
+	res *api.RoutesResponse,
+) error {
+	// Prepare imported routes for lookup
+	imported := s.routesToLookupRoutes(ctx, "imported", src, res.Imported)
+	filtered := s.routesToLookupRoutes(ctx, "filtered", src, res.Filtered)
+	lookupRoutes := append(imported, filtered...)
+
+	if err = s.backend.SetRoutes(ctx, src.ID, lookupRoutes); err != nil {
+		return err
+	}
+
+	return s.sources.RefreshSuccess(src.ID)
+}
+
+//
+// Route Store Tests
+//
+func makeTestRoutesStore() *RoutesStore {
+	neighborsStore := makeTestNeighborsStore()
+	be := memory.NewRoutesBackend()
+
+	cfg := &config.Config{
+		Server: config.ServerConfig{
+			RoutesStoreRefreshInterval: 1,
+		},
+		Sources: []*config.SourceConfig{
+			{
+				ID:   "rs1",
+				Name: "rs1",
+			},
+			{
+				ID:   "rs2",
+				Name: "rs2",
+			},
+		},
+	}
+	rs1 := loadTestRoutesResponse()
+	s := NewRoutesStore(cfg, neighborsStore)
+	if err := importRoutes(s, cfg.Sources[0], rs1); err != nil {
+		log.Panic(err)
+	}
+	return store
+}
+
+// Check for presence of network in result set
 func testCheckPrefixesPresence(prefixes, resultset []string, t *testing.T) {
 	// Check prefixes
 	presence := map[string]bool{}
@@ -62,49 +101,6 @@ func testCheckPrefixesPresence(prefixes, resultset []string, t *testing.T) {
 			t.Error(net, "not found in result set")
 		}
 	}
-}
-
-//
-// Route Store Tests
-//
-
-func makeTestRoutesStore() *RoutesStore {
-
-	neighborsStore := makeTestNeighborsStore()
-
-	rs1RoutesResponse := loadTestRoutesResponse()
-
-	// Build mapping based on source instances:
-	//   rs : <response>
-	statusMap := make(map[string]Status)
-	routesMap := map[string]*api.RoutesResponse{
-		"rs1": rs1RoutesResponse,
-	}
-
-	configMap := map[string]*config.SourceConfig{
-		"rs1": &config.SourceConfig{
-			ID:   "rs1",
-			Name: "rs1.test",
-			Type: config.SourceTypeBird,
-
-			Birdwatcher: birdwatcher.Config{
-				API:             "http://localhost:2342",
-				Timezone:        "UTC",
-				ServerTime:      "2006-01-02T15:04:05",
-				ServerTimeShort: "2006-01-02",
-				ServerTimeExt:   "Mon, 02 Jan 2006 15:04: 05 -0700",
-			},
-		},
-	}
-
-	store := &RoutesStore{
-		routesMap:      routesMap,
-		statusMap:      statusMap,
-		cfgMap:         configMap,
-		neighborsStore: neighborsStore,
-	}
-
-	return store
 }
 
 func TestRoutesStoreStats(t *testing.T) {

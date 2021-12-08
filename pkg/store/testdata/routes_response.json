@@ -11,7 +11,7 @@
     "imported": [
         {
             "id": "193.200.230.0/24",
-            "neighbour_id": "ID163_AS31078",
+            "neighbor_id": "ID163_AS31078",
             "network": "193.200.230.0/24",
             "interface": "unknown interface",
             "gateway": "193.42.155.9",
@@ -81,7 +81,7 @@
         },
         {
             "id": "193.34.24.0/22",
-            "neighbour_id": "ID163_AS31078",
+            "neighbor_id": "ID163_AS31078",
             "network": "193.34.24.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.9",
@@ -149,7 +149,7 @@
         },
         {
             "id": "195.43.89.0/24",
-            "neighbour_id": "ID163_AS31078",
+            "neighbor_id": "ID163_AS31078",
             "network": "195.43.89.0/24",
             "interface": "unknown interface",
             "gateway": "193.42.155.9",
@@ -219,7 +219,7 @@
         },
         {
             "id": "217.115.0.0/20",
-            "neighbour_id": "ID163_AS31078",
+            "neighbor_id": "ID163_AS31078",
             "network": "217.115.0.0/20",
             "interface": "unknown interface",
             "gateway": "193.42.155.9",
@@ -287,7 +287,7 @@
         },
         {
             "id": "31.220.136.0/21",
-            "neighbour_id": "ID163_AS31078",
+            "neighbor_id": "ID163_AS31078",
             "network": "31.220.136.0/21",
             "interface": "unknown interface",
             "gateway": "193.42.155.9",
@@ -355,7 +355,7 @@
         },
         {
             "id": "62.69.148.0/22",
-            "neighbour_id": "ID163_AS31078",
+            "neighbor_id": "ID163_AS31078",
             "network": "62.69.148.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.9",
@@ -425,7 +425,7 @@
         },
         {
             "id": "62.69.151.0/24",
-            "neighbour_id": "ID163_AS31078",
+            "neighbor_id": "ID163_AS31078",
             "network": "62.69.151.0/24",
             "interface": "unknown interface",
             "gateway": "193.42.155.9",
@@ -495,7 +495,7 @@
         },
         {
             "id": "91.223.211.0/24",
-            "neighbour_id": "ID163_AS31078",
+            "neighbor_id": "ID163_AS31078",
             "network": "91.223.211.0/24",
             "interface": "unknown interface",
             "gateway": "193.42.155.9",
@@ -567,7 +567,7 @@
     "filtered": [
         {
             "id": "42.23.0.0/16",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "42.23.0.0/16",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -666,7 +666,7 @@
     "not_exported": [
         {
             "id": "146.52.0.0/16",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "146.52.0.0/16",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -763,7 +763,7 @@
         },
         {
             "id": "146.52.0.0/18",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "146.52.0.0/18",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -860,7 +860,7 @@
         },
         {
             "id": "146.52.128.0/18",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "146.52.128.0/18",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -957,7 +957,7 @@
         },
         {
             "id": "146.52.192.0/18",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "146.52.192.0/18",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -1054,7 +1054,7 @@
         },
         {
             "id": "146.52.64.0/18",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "146.52.64.0/18",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -1151,7 +1151,7 @@
         },
         {
             "id": "178.24.0.0/14",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "178.24.0.0/14",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -1248,7 +1248,7 @@
         },
         {
             "id": "178.24.0.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "178.24.0.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -1345,7 +1345,7 @@
         },
         {
             "id": "178.24.128.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "178.24.128.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -1442,7 +1442,7 @@
         },
         {
             "id": "178.25.0.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "178.25.0.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -1539,7 +1539,7 @@
         },
         {
             "id": "178.25.128.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "178.25.128.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -1636,7 +1636,7 @@
         },
         {
             "id": "178.26.0.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "178.26.0.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -1733,7 +1733,7 @@
         },
         {
             "id": "178.26.128.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "178.26.128.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -1830,7 +1830,7 @@
         },
         {
             "id": "178.27.0.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "178.27.0.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -1927,7 +1927,7 @@
         },
         {
             "id": "178.27.128.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "178.27.128.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -2024,7 +2024,7 @@
         },
         {
             "id": "185.10.192.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "185.10.192.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -2123,7 +2123,7 @@
         },
         {
             "id": "185.146.204.0/22",
-            "neighbour_id": "ID8409_AS12931",
+            "neighbor_id": "ID8409_AS12931",
             "network": "185.146.204.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.69",
@@ -2244,7 +2244,7 @@
         },
         {
             "id": "185.160.204.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "185.160.204.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -2343,7 +2343,7 @@
         },
         {
             "id": "185.19.196.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "185.19.196.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -2440,7 +2440,7 @@
         },
         {
             "id": "185.74.216.0/22",
-            "neighbour_id": "ID8409_AS12931",
+            "neighbor_id": "ID8409_AS12931",
             "network": "185.74.216.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.69",
@@ -2561,7 +2561,7 @@
         },
         {
             "id": "188.192.0.0/14",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "188.192.0.0/14",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -2658,7 +2658,7 @@
         },
         {
             "id": "188.192.0.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "188.192.0.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -2755,7 +2755,7 @@
         },
         {
             "id": "188.192.128.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "188.192.128.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -2852,7 +2852,7 @@
         },
         {
             "id": "188.193.0.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "188.193.0.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -2949,7 +2949,7 @@
         },
         {
             "id": "188.193.128.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "188.193.128.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -3046,7 +3046,7 @@
         },
         {
             "id": "188.194.0.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "188.194.0.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -3143,7 +3143,7 @@
         },
         {
             "id": "188.194.128.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "188.194.128.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -3240,7 +3240,7 @@
         },
         {
             "id": "188.195.0.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "188.195.0.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -3337,7 +3337,7 @@
         },
         {
             "id": "188.195.128.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "188.195.128.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -3434,7 +3434,7 @@
         },
         {
             "id": "188.94.96.0/21",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "188.94.96.0/21",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -3533,7 +3533,7 @@
         },
         {
             "id": "193.21.251.0/24",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "193.21.251.0/24",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -3632,7 +3632,7 @@
         },
         {
             "id": "193.97.137.0/24",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "193.97.137.0/24",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -3731,7 +3731,7 @@
         },
         {
             "id": "194.0.247.0/24",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "194.0.247.0/24",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -3838,7 +3838,7 @@
         },
         {
             "id": "194.180.28.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "194.180.28.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -3937,7 +3937,7 @@
         },
         {
             "id": "212.21.160.0/19",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "212.21.160.0/19",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -4036,7 +4036,7 @@
         },
         {
             "id": "213.182.0.0/19",
-            "neighbour_id": "ID8409_AS12931",
+            "neighbor_id": "ID8409_AS12931",
             "network": "213.182.0.0/19",
             "interface": "unknown interface",
             "gateway": "193.42.155.69",
@@ -4157,7 +4157,7 @@
         },
         {
             "id": "217.151.144.0/20",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "217.151.144.0/20",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -4256,7 +4256,7 @@
         },
         {
             "id": "24.134.0.0/16",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "24.134.0.0/16",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -4353,7 +4353,7 @@
         },
         {
             "id": "24.134.0.0/18",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "24.134.0.0/18",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -4450,7 +4450,7 @@
         },
         {
             "id": "24.134.128.0/18",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "24.134.128.0/18",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -4547,7 +4547,7 @@
         },
         {
             "id": "24.134.192.0/18",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "24.134.192.0/18",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -4644,7 +4644,7 @@
         },
         {
             "id": "24.134.64.0/18",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "24.134.64.0/18",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -4741,7 +4741,7 @@
         },
         {
             "id": "31.16.0.0/14",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "31.16.0.0/14",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -4838,7 +4838,7 @@
         },
         {
             "id": "31.16.0.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "31.16.0.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -4935,7 +4935,7 @@
         },
         {
             "id": "31.16.128.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "31.16.128.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -5032,7 +5032,7 @@
         },
         {
             "id": "31.16.248.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "31.16.248.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -5129,7 +5129,7 @@
         },
         {
             "id": "31.16.252.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "31.16.252.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -5226,7 +5226,7 @@
         },
         {
             "id": "31.17.0.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "31.17.0.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -5323,7 +5323,7 @@
         },
         {
             "id": "31.17.128.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "31.17.128.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -5420,7 +5420,7 @@
         },
         {
             "id": "31.17.248.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "31.17.248.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -5517,7 +5517,7 @@
         },
         {
             "id": "31.17.252.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "31.17.252.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -5614,7 +5614,7 @@
         },
         {
             "id": "31.18.0.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "31.18.0.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -5711,7 +5711,7 @@
         },
         {
             "id": "31.18.128.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "31.18.128.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -5808,7 +5808,7 @@
         },
         {
             "id": "31.18.238.0/24",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "31.18.238.0/24",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -5905,7 +5905,7 @@
         },
         {
             "id": "31.18.248.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "31.18.248.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -6002,7 +6002,7 @@
         },
         {
             "id": "31.18.252.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "31.18.252.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -6099,7 +6099,7 @@
         },
         {
             "id": "31.19.0.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "31.19.0.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -6196,7 +6196,7 @@
         },
         {
             "id": "31.19.124.0/24",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "31.19.124.0/24",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -6293,7 +6293,7 @@
         },
         {
             "id": "31.19.128.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "31.19.128.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -6390,7 +6390,7 @@
         },
         {
             "id": "37.4.0.0/15",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "37.4.0.0/15",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -6487,7 +6487,7 @@
         },
         {
             "id": "37.4.0.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "37.4.0.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -6584,7 +6584,7 @@
         },
         {
             "id": "37.4.128.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "37.4.128.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -6681,7 +6681,7 @@
         },
         {
             "id": "37.4.248.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "37.4.248.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -6778,7 +6778,7 @@
         },
         {
             "id": "37.4.252.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "37.4.252.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -6875,7 +6875,7 @@
         },
         {
             "id": "37.5.0.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "37.5.0.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -6972,7 +6972,7 @@
         },
         {
             "id": "37.5.128.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "37.5.128.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -7069,7 +7069,7 @@
         },
         {
             "id": "37.5.240.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "37.5.240.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -7166,7 +7166,7 @@
         },
         {
             "id": "46.35.48.0/20",
-            "neighbour_id": "ID8409_AS12931",
+            "neighbor_id": "ID8409_AS12931",
             "network": "46.35.48.0/20",
             "interface": "unknown interface",
             "gateway": "193.42.155.69",
@@ -7287,7 +7287,7 @@
         },
         {
             "id": "5.154.160.0/21",
-            "neighbour_id": "ID8409_AS12931",
+            "neighbor_id": "ID8409_AS12931",
             "network": "5.154.160.0/21",
             "interface": "unknown interface",
             "gateway": "193.42.155.69",
@@ -7408,7 +7408,7 @@
         },
         {
             "id": "77.20.0.0/14",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "77.20.0.0/14",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -7505,7 +7505,7 @@
         },
         {
             "id": "77.20.0.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "77.20.0.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -7602,7 +7602,7 @@
         },
         {
             "id": "77.20.128.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "77.20.128.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -7699,7 +7699,7 @@
         },
         {
             "id": "77.20.248.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "77.20.248.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -7796,7 +7796,7 @@
         },
         {
             "id": "77.20.252.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "77.20.252.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -7893,7 +7893,7 @@
         },
         {
             "id": "77.21.0.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "77.21.0.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -7990,7 +7990,7 @@
         },
         {
             "id": "77.21.128.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "77.21.128.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -8087,7 +8087,7 @@
         },
         {
             "id": "77.21.248.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "77.21.248.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -8184,7 +8184,7 @@
         },
         {
             "id": "77.21.252.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "77.21.252.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -8281,7 +8281,7 @@
         },
         {
             "id": "77.22.0.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "77.22.0.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -8378,7 +8378,7 @@
         },
         {
             "id": "77.22.128.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "77.22.128.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -8475,7 +8475,7 @@
         },
         {
             "id": "77.22.248.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "77.22.248.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -8572,7 +8572,7 @@
         },
         {
             "id": "77.22.252.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "77.22.252.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -8669,7 +8669,7 @@
         },
         {
             "id": "77.23.0.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "77.23.0.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -8766,7 +8766,7 @@
         },
         {
             "id": "77.23.128.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "77.23.128.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -8863,7 +8863,7 @@
         },
         {
             "id": "80.208.232.0/21",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "80.208.232.0/21",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -8962,7 +8962,7 @@
         },
         {
             "id": "83.169.128.0/18",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "83.169.128.0/18",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -9059,7 +9059,7 @@
         },
         {
             "id": "88.134.0.0/16",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "88.134.0.0/16",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -9156,7 +9156,7 @@
         },
         {
             "id": "88.134.0.0/18",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "88.134.0.0/18",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -9253,7 +9253,7 @@
         },
         {
             "id": "88.134.128.0/18",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "88.134.128.0/18",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -9350,7 +9350,7 @@
         },
         {
             "id": "88.134.192.0/18",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "88.134.192.0/18",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -9447,7 +9447,7 @@
         },
         {
             "id": "88.134.64.0/18",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "88.134.64.0/18",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -9544,7 +9544,7 @@
         },
         {
             "id": "90.187.0.0/16",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "90.187.0.0/16",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -9641,7 +9641,7 @@
         },
         {
             "id": "91.198.187.0/24",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "91.198.187.0/24",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -9740,7 +9740,7 @@
         },
         {
             "id": "91.64.0.0/14",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "91.64.0.0/14",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -9837,7 +9837,7 @@
         },
         {
             "id": "91.64.0.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "91.64.0.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -9934,7 +9934,7 @@
         },
         {
             "id": "91.64.128.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "91.64.128.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -10031,7 +10031,7 @@
         },
         {
             "id": "91.65.0.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "91.65.0.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -10128,7 +10128,7 @@
         },
         {
             "id": "91.65.128.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "91.65.128.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -10225,7 +10225,7 @@
         },
         {
             "id": "91.66.0.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "91.66.0.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -10322,7 +10322,7 @@
         },
         {
             "id": "91.66.128.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "91.66.128.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -10419,7 +10419,7 @@
         },
         {
             "id": "91.67.0.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "91.67.0.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -10516,7 +10516,7 @@
         },
         {
             "id": "91.67.128.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "91.67.128.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -10613,7 +10613,7 @@
         },
         {
             "id": "95.88.0.0/14",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.88.0.0/14",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -10710,7 +10710,7 @@
         },
         {
             "id": "95.88.0.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.88.0.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -10807,7 +10807,7 @@
         },
         {
             "id": "95.88.128.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.88.128.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -10904,7 +10904,7 @@
         },
         {
             "id": "95.89.0.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.89.0.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -11001,7 +11001,7 @@
         },
         {
             "id": "95.89.128.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.89.128.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -11098,7 +11098,7 @@
         },
         {
             "id": "95.90.0.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.90.0.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -11195,7 +11195,7 @@
         },
         {
             "id": "95.90.128.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.90.128.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -11292,7 +11292,7 @@
         },
         {
             "id": "95.90.184.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.90.184.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -11389,7 +11389,7 @@
         },
         {
             "id": "95.90.188.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.90.188.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -11486,7 +11486,7 @@
         },
         {
             "id": "95.90.192.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.90.192.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -11583,7 +11583,7 @@
         },
         {
             "id": "95.90.196.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.90.196.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -11680,7 +11680,7 @@
         },
         {
             "id": "95.90.200.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.90.200.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -11777,7 +11777,7 @@
         },
         {
             "id": "95.90.204.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.90.204.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -11874,7 +11874,7 @@
         },
         {
             "id": "95.90.208.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.90.208.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -11971,7 +11971,7 @@
         },
         {
             "id": "95.90.212.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.90.212.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -12068,7 +12068,7 @@
         },
         {
             "id": "95.90.216.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.90.216.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -12165,7 +12165,7 @@
         },
         {
             "id": "95.90.220.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.90.220.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -12262,7 +12262,7 @@
         },
         {
             "id": "95.90.224.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.90.224.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -12359,7 +12359,7 @@
         },
         {
             "id": "95.90.228.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.90.228.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -12456,7 +12456,7 @@
         },
         {
             "id": "95.90.232.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.90.232.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -12553,7 +12553,7 @@
         },
         {
             "id": "95.90.236.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.90.236.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -12650,7 +12650,7 @@
         },
         {
             "id": "95.90.240.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.90.240.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -12747,7 +12747,7 @@
         },
         {
             "id": "95.90.244.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.90.244.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -12844,7 +12844,7 @@
         },
         {
             "id": "95.90.248.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.90.248.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -12941,7 +12941,7 @@
         },
         {
             "id": "95.90.252.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.90.252.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -13038,7 +13038,7 @@
         },
         {
             "id": "95.91.0.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.91.0.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -13135,7 +13135,7 @@
         },
         {
             "id": "95.91.128.0/17",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.91.128.0/17",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -13232,7 +13232,7 @@
         },
         {
             "id": "95.91.200.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.91.200.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -13329,7 +13329,7 @@
         },
         {
             "id": "95.91.204.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.91.204.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -13426,7 +13426,7 @@
         },
         {
             "id": "95.91.208.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.91.208.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -13523,7 +13523,7 @@
         },
         {
             "id": "95.91.212.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.91.212.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -13620,7 +13620,7 @@
         },
         {
             "id": "95.91.216.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.91.216.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -13717,7 +13717,7 @@
         },
         {
             "id": "95.91.220.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.91.220.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -13814,7 +13814,7 @@
         },
         {
             "id": "95.91.224.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.91.224.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -13911,7 +13911,7 @@
         },
         {
             "id": "95.91.228.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.91.228.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -14008,7 +14008,7 @@
         },
         {
             "id": "95.91.232.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.91.232.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -14105,7 +14105,7 @@
         },
         {
             "id": "95.91.236.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.91.236.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -14202,7 +14202,7 @@
         },
         {
             "id": "95.91.240.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.91.240.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -14299,7 +14299,7 @@
         },
         {
             "id": "95.91.244.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.91.244.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -14396,7 +14396,7 @@
         },
         {
             "id": "95.91.248.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.91.248.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
@@ -14493,7 +14493,7 @@
         },
         {
             "id": "95.91.252.0/22",
-            "neighbour_id": "ID7254_AS31334",
+            "neighbor_id": "ID7254_AS31334",
             "network": "95.91.252.0/22",
             "interface": "unknown interface",
             "gateway": "193.42.155.51",
