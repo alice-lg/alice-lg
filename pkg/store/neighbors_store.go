@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"errors"
 	"log"
 	"math/rand"
 	"regexp"
@@ -314,7 +315,9 @@ func (s *NeighborsStore) Stats(
 		status, _ := s.sources.GetStatus(sourceID)
 		ncount, err := s.backend.CountNeighborsAt(ctx, sourceID)
 		if err != nil {
-			log.Println("error during neighbor count:", err)
+			if !errors.Is(err, sources.ErrSourceNotFound) {
+				log.Println("error during neighbor count:", err)
+			}
 		}
 		totalNeighbors += ncount
 		serverStats := api.RouteServerNeighborsStats{

@@ -2,12 +2,14 @@ package store
 
 import (
 	"context"
+	"errors"
 	"log"
 	"math/rand"
 	"time"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
 	"github.com/alice-lg/alice-lg/pkg/config"
+	"github.com/alice-lg/alice-lg/pkg/sources"
 )
 
 // RoutesStoreBackend interface
@@ -234,7 +236,9 @@ func (s *RoutesStore) Stats() *api.RoutesStoreStats {
 
 		nImported, nFiltered, err := s.backend.CountRoutesAt(ctx, sourceID)
 		if err != nil {
-			log.Println("error during routes count:", err)
+			if !errors.Is(err, sources.ErrSourceNotFound) {
+				log.Println("error during routes count:", err)
+			}
 		}
 
 		totalImported += nImported
