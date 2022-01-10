@@ -19,6 +19,15 @@ And checkout the API at:
 - https://lg.de-cix.net/api/v1/routeservers/rs1_fra_ipv4/neighbors/R194_106/routes
 - https://lg.de-cix.net/api/v1/lookup/prefix?q=217.115.0.0
 
+
+## Breaking Changes
+
+### 5.1.0
+
+The spelling of "neighbors" is now harmonized. Please update your config and
+replace e.g. neighbour.asn with neighbor.asn (in case of java script errors).
+
+
 ## Explanations
 Alice-LG is a BGP looking glass which gets its data from external APIs.
 
