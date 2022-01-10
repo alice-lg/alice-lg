@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -35,7 +36,8 @@ func printBanner(
 	neighborsStore *store.NeighborsStore,
 	routesStore *store.RoutesStore,
 ) {
-	status, _ := http.CollectAppStatus(routesStore, neighborsStore)
+	ctx := context.Background()
+	status, _ := http.CollectAppStatus(ctx, routesStore, neighborsStore)
 	mapper := strings.NewReplacer(
 		"?VERSION", status.Version,
 		"?LISTEN", cfg.Server.Listen,

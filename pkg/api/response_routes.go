@@ -8,7 +8,7 @@ import (
 // Route is a prefix with BGP information.
 type Route struct {
 	ID         string `json:"id"`
-	NeighborID string `json:"neighbour_id"`
+	NeighborID string `json:"neighbor_id"`
 
 	Network   string        `json:"network"`
 	Interface string        `json:"interface"`
@@ -105,6 +105,15 @@ type FilteredResponse struct {
 	FiltersAvailable *SearchFilters `json:"filters_available"`
 	FiltersApplied   *SearchFilters `json:"filters_applied"`
 }
+
+const (
+	// RouteStateFiltered indicates that the route
+	// was not accepted by the route server.
+	RouteStateFiltered = "filtered"
+	// RouteStateImported indicates that the route was
+	// imported by the route server.
+	RouteStateImported = "imported"
+)
 
 // LookupRoute is a route with additional
 // neighbor and state information

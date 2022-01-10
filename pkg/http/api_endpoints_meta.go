@@ -11,10 +11,11 @@ import (
 // Handle Status Endpoint, this is intended for
 // monitoring and service health checks
 func (s *Server) apiStatusShow(
-	_req *http.Request,
+	req *http.Request,
 	_params httprouter.Params,
 ) (response, error) {
-	status, err := CollectAppStatus(s.routesStore, s.neighborsStore)
+	ctx := req.Context()
+	status, err := CollectAppStatus(ctx, s.routesStore, s.neighborsStore)
 	return status, err
 }
 

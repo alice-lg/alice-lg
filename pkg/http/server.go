@@ -3,6 +3,7 @@
 package http
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"time"
@@ -38,9 +39,10 @@ func NewServer(
 // on the configured port.
 func (s *Server) Start() {
 	router := httprouter.New()
+	ctx := context.Background()
 
 	// Register routes
-	if err := s.webRegisterAssets(router); err != nil {
+	if err := s.webRegisterAssets(ctx, router); err != nil {
 		log.Fatal(err)
 	}
 	if err := s.apiRegisterEndpoints(router); err != nil {

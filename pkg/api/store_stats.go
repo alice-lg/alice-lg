@@ -8,8 +8,8 @@ import (
 // RoutesStats provides number of filtered and
 // imported prefixes in the store
 type RoutesStats struct {
-	Filtered int `json:"filtered"`
-	Imported int `json:"imported"`
+	Filtered uint `json:"filtered"`
+	Imported uint `json:"imported"`
 }
 
 // RouteServerRoutesStats provides the number of

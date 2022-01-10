@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"io"
 	"log"
 	"net/http"
@@ -16,8 +17,11 @@ import (
 
 // Prepare client HTML:
 // Set paths and add version to assets.
-func (s *Server) webPrepareClientHTML(html string) string {
-	status, _ := CollectAppStatus(s.routesStore, s.neighborsStore)
+func (s *Server) webPrepareClientHTML(
+	ctx context.Context,
+	html string,
+) string {
+	status, _ := CollectAppStatus(ctx, s.routesStore, s.neighborsStore)
 
 	// Replace paths and tags
 	rewriter := strings.NewReplacer(
@@ -34,7 +38,10 @@ func (s *Server) webPrepareClientHTML(html string) string {
 
 // Register assets handler and index handler
 // at /static and /
-func (s *Server) webRegisterAssets(router *httprouter.Router) error {
+func (s *Server) webRegisterAssets(
+	ctx context.Context,
+	router *httprouter.Router,
+) error {
 	log.Println("Preparing and installing assets")
 
 	// Prepare client html: Rewrite paths
@@ -51,7 +58,7 @@ func (s *Server) webRegisterAssets(router *httprouter.Router) error {
 	}
 
 	// Update paths
-	indexHTML = s.webPrepareClientHTML(indexHTML)
+	indexHTML = s.webPrepareClientHTML(ctx, indexHTML)
 
 	// Register static assets
 	router.Handler("GET", "/static/*path", client.AssetsHTTPHandler("/static"))
