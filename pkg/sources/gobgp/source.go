@@ -202,6 +202,11 @@ func (gobgp *GoBGP) Neighbors() (*api.NeighborsResponse, error) {
 	return &response, nil
 }
 
+// NeighborsSummary is an alias of Neighbors for now
+func (gobgp *GoBGP) NeighborsSummary() (*api.NeighborsResponse, error) {
+	return gobgp.Neighbors()
+}
+
 // Routes retrieves filtered and exported routes
 func (gobgp *GoBGP) Routes(neighborID string) (*api.RoutesResponse, error) {
 	neigh, err := gobgp.lookupNeighbor(neighborID)

@@ -24,7 +24,10 @@ func (s *Server) apiNeighborsList(
 	var neighborsResponse *api.NeighborsResponse
 
 	// Try to fetch neighbors from store, only fall back
-	// to RS query if store is not ready yet
+	// to RS query if store is not ready yet.
+	// The stored neighbors response includes details like
+	// the number of filtered routes which might be lacking
+	// from the summary.
 	if s.neighborsStore.IsInitialized(rsID) {
 		status, err := s.neighborsStore.GetStatus(rsID)
 		neighbors, err := s.neighborsStore.GetNeighborsAt(ctx, rsID)
@@ -51,7 +54,7 @@ func (s *Server) apiNeighborsList(
 		if source == nil {
 			return nil, ErrSourceNotFound
 		}
-		neighborsResponse, err = source.Neighbors()
+		neighborsResponse, err = source.NeighborsSummary()
 		if err != nil {
 			s.logSourceError("neighbors", rsID, err)
 			return nil, err

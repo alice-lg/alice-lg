@@ -2,6 +2,7 @@ package memory
 
 import (
 	"context"
+	"errors"
 	"sync"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
@@ -97,6 +98,9 @@ func (b *NeighborsBackend) CountNeighborsAt(
 ) (int, error) {
 	neighbors, err := b.GetNeighborsAt(ctx, sourceID)
 	if err != nil {
+		if errors.Is(err, sources.ErrSourceNotFound) {
+			return 0, nil
+		}
 		return 0, err
 	}
 	return len(neighbors), nil

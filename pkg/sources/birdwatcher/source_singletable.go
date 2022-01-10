@@ -182,8 +182,12 @@ func (src *SingleTableBirdwatcher) Neighbors() (*api.NeighborsResponse, error) {
 
 	// Cache result
 	src.neighborsCache.Set(response)
-
 	return response, nil // dereference for now
+}
+
+// NeighborsSummary is for now an alias of Neighbors
+func (src *SingleTableBirdwatcher) NeighborsSummary() (*api.NeighborsResponse, error) {
+	return src.Neighbors()
 }
 
 // Routes gets filtered and exported routes

@@ -395,6 +395,11 @@ func (src *MultiTableBirdwatcher) Neighbors() (*api.NeighborsResponse, error) {
 	return response, nil // dereference for now
 }
 
+// NeighborsSummary is for now using Neighbors
+func (src *MultiTableBirdwatcher) NeighborsSummary() (*api.NeighborsResponse, error) {
+	return src.Neighbors()
+}
+
 // Routes gets filtered and exported route
 // from the birdwatcher backend.
 func (src *MultiTableBirdwatcher) Routes(

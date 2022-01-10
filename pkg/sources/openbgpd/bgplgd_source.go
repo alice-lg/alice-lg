@@ -23,7 +23,8 @@ type BgplgdSource struct {
 	cfg *Config
 
 	// Store the neighbor responses from the server here
-	neighborsCache *caches.NeighborsCache
+	neighborsCache        *caches.NeighborsCache
+	neighborsSummaryCache *caches.NeighborsCache
 
 	// Store the routes responses from the server
 	// here identified by neighborID
@@ -38,16 +39,18 @@ func NewBgplgdSource(cfg *Config) *BgplgdSource {
 
 	// Initialize caches
 	nc := caches.NewNeighborsCache(cacheDisabled)
+	nsc := caches.NewNeighborsCache(cacheDisabled)
 	rc := caches.NewRoutesCache(cacheDisabled, cfg.RoutesCacheSize)
 	rrc := caches.NewRoutesCache(cacheDisabled, cfg.RoutesCacheSize)
 	rfc := caches.NewRoutesCache(cacheDisabled, cfg.RoutesCacheSize)
 
 	return &BgplgdSource{
-		cfg:                 cfg,
-		neighborsCache:      nc,
-		routesCache:         rc,
-		routesReceivedCache: rrc,
-		routesFilteredCache: rfc,
+		cfg:                   cfg,
+		neighborsCache:        nc,
+		neighborsSummaryCache: nsc,
+		routesCache:           rc,
+		routesReceivedCache:   rrc,
+		routesFilteredCache:   rfc,
 	}
 }
 
@@ -169,6 +172,51 @@ func (src *BgplgdSource) Neighbors() (*api.NeighborsResponse, error) {
 	}
 	src.neighborsCache.Set(response)
 
+	return response, nil
+}
+
+// NeighborsSummary retrievs list of neighbors, which
+// might lack details like with number of rejected routes.
+// It is much faster though.
+func (src *BgplgdSource) NeighborsSummary() (*api.NeighborsResponse, error) {
+	// Query cache and see if we have a hit
+	response := src.neighborsSummaryCache.Get()
+	if response != nil {
+		response.Meta.ResultFromCache = true
+		return response, nil
+	}
+
+	// Make API request and read response
+	req, err := src.ShowNeighborsRequest(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	body, err := decoders.ReadJSONResponse(res)
+	if err != nil {
+		return nil, err
+	}
+
+	nb, err := decodeNeighbors(body)
+	if err != nil {
+		return nil, err
+	}
+	// Set route server id (sourceID) for all neighbors and
+	// calculate the filtered routes.
+	for _, n := range nb {
+		n.RouteServerID = src.cfg.ID
+
+	}
+	response = &api.NeighborsResponse{
+		Response: api.Response{
+			Meta: src.makeResponseMeta(),
+		},
+		Neighbors: nb,
+	}
+	src.neighborsSummaryCache.Set(response)
 	return response, nil
 }
 

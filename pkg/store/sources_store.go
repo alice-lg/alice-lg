@@ -141,14 +141,23 @@ func (s *SourcesStore) ShouldRefresh(
 		log.Println("get status error:", err)
 		return false
 	}
+
+	nextRefresh := status.LastRefresh.Add(s.refreshInterval)
+
 	if status.State == StateBusy {
 		return false // Source is busy
 	}
-	nextRefresh := status.LastRefresh.Add(
-		s.refreshInterval)
+	if status.State == StateError {
+		// The refresh interval in the config is ok if the
+		// success case. When an error occures it is desireable
+		// to retry sooner, without spamming the server.
+		nextRefresh = status.LastRefresh.Add(10 * time.Second)
+	}
+
 	if time.Now().UTC().Before(nextRefresh) {
 		return false // Too soon
 	}
+
 	return true // Go for it
 }
 
