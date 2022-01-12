@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
+
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
