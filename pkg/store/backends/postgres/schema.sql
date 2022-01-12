@@ -5,8 +5,13 @@
 -- ----------------------
 --
 -- %% Author:      annika
--- %% Description: Create alice-lg db schema.
+-- %% Description: Apply alice-lg db schema.
 --
+
+-- Clear state
+DROP TABLE IF EXISTS routes;
+DROP TABLE IF EXISTS neighbors;
+DROP TABLE IF EXISTS __meta__;
 
 -- Neighbors
 CREATE TABLE neighbors (
@@ -19,7 +24,7 @@ CREATE TABLE neighbors (
     neighbor     jsonb NOT NULL,
 
     -- Timestamps
-    updated_at  TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_neighbors_rs_id 
@@ -39,7 +44,7 @@ CREATE TABLE routes (
     route         jsonb        NOT NULL,
 
     -- Timestamps
-    updated_at  TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_routes_network ON routes ( network );

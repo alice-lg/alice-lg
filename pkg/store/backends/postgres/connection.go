@@ -10,11 +10,6 @@ import (
 )
 
 var (
-	// ErrNotInitialized will be returned if the
-	// database pool is accessed before initializing using
-	// Connect.
-	ErrNotInitialized = errors.New("store not initialized, pool not ready")
-
 	// ErrMaxConnsUnconfigured will be returned, if the
 	// the maximum connections are zero.
 	ErrMaxConnsUnconfigured = errors.New("MaxConns not configured")
