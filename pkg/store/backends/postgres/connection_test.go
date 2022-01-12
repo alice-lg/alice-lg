@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/alice-lg/alice-lg/pkg/config"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
@@ -16,7 +17,7 @@ func ConnectTest() *pgxpool.Pool {
 	if url == "" {
 		url = "postgres://postgres:postgres@localhost:5432/alice_test"
 	}
-	p, err := Connect(ctx, &ConnectOpts{
+	p, err := Connect(ctx, &config.PostgresConfig{
 		URL:      url,
 		MinConns: 2,
 		MaxConns: 16})

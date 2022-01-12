@@ -78,15 +78,16 @@ func makeTestNeighborsStore() *NeighborsStore {
 	return store
 }
 
-func TestGetNeighborAt(t *testing.T) {
+func TestGetNeighborsMapAt(t *testing.T) {
 	store := makeTestNeighborsStore()
 
-	neighbor, err := store.GetNeighborAt(context.Background(), "rs1", "ID2233_AS2343")
+	neighbors, err := store.GetNeighborsMapAt(context.Background(), "rs1")
 	if err != nil {
 		t.Fatal(err)
 	}
+	neighbor := neighbors["ID2233_AS2343"]
 	if neighbor.ID != "ID2233_AS2343" {
-		t.Error("Expected another peer in GetNeighborAt")
+		t.Error("unexpected neighbor:", neighbor)
 	}
 }
 

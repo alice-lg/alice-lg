@@ -15,7 +15,7 @@ DROP TABLE IF EXISTS __meta__;
 
 -- Neighbors
 CREATE TABLE neighbors (
-    id    VARCHAR(255) NOT NULL PRIMARY KEY,
+    id    VARCHAR(255) NOT NULL,
 
     -- Indexed attributes
     rs_id VARCHAR(255) NOT NULL,
@@ -24,7 +24,10 @@ CREATE TABLE neighbors (
     neighbor     jsonb NOT NULL,
 
     -- Timestamps
-    updated_at  TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at  TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    -- Constraints
+    PRIMARY KEY(id, rs_id)
 );
 
 CREATE INDEX idx_neighbors_rs_id 
@@ -32,10 +35,9 @@ CREATE INDEX idx_neighbors_rs_id
 
 -- Routes
 CREATE TABLE routes (
-    id            VARCHAR(255) NOT NULL PRIMARY KEY,
-    neighbor_id   VARCHAR(255) NOT NULL
-                  REFERENCES   neighbors(id)
-                  ON DELETE    CASCADE,
+    id            VARCHAR(255) NOT NULL,
+    rs_id         VARCHAR(255) NOT NULL,
+    neighbor_id   VARCHAR(255) NOT NULL,
 
     -- Indexed attributes 
     network       cidr         NOT NULL,
@@ -44,7 +46,12 @@ CREATE TABLE routes (
     route         jsonb        NOT NULL,
 
     -- Timestamps
-    updated_at  TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at  TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    -- Constraints
+    PRIMARY KEY(id, rs_id),
+    FOREIGN KEY(rs_id, neighbor_id) 
+     REFERENCES neighbors(rs_id, id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_routes_network ON routes ( network );

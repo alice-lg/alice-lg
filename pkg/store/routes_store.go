@@ -191,13 +191,11 @@ func (s *RoutesStore) routesToLookupRoutes(
 	routes api.Routes,
 ) api.LookupRoutes {
 	lookupRoutes := make(api.LookupRoutes, 0, len(routes))
+	neighbors := s.neighbors.GetNeighborsMapAt(ctx, src.ID)
+
 	for _, route := range routes {
-		neighbor, err := s.neighbors.GetNeighborAt(ctx, src.ID, route.NeighborID)
-		if err != nil {
-			log.Println("prepare route, neighbor lookup failed:", err)
-			continue
-		}
-		if neighbor == nil {
+		neighbor, ok := neighbors[route.NeighborID]
+		if !ok {
 			log.Println("prepare route, neighbor not found:", route.NeighborID)
 			continue
 		}

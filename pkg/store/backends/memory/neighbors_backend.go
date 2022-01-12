@@ -86,7 +86,12 @@ func (b *NeighborsBackend) GetNeighborAt(
 		return nil, sources.ErrSourceNotFound
 	}
 
-	return neighbors[neighborID], nil
+	// Copy neighbors map
+	result := make(map[string]*Neighbor)
+	for k, v := range neighbors {
+		result[k] = v
+	}
+	return result, nil
 }
 
 // CountNeighborsAt retrievs the number of neighbors
