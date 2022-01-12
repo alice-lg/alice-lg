@@ -231,3 +231,17 @@ func TestDefaultHTTPTimeout(t *testing.T) {
 			"but got", config.Server.HTTPTimeout)
 	}
 }
+
+func TestPostgresStoreConfig(t *testing.T) {
+	config, _ := LoadConfig("testdata/alice.conf")
+	if config.Server.StoreBackend != "postgres" {
+		t.Error("unexpected StoreBackend:", config.Server.StoreBackend)
+	}
+	if config.Postgres.MinConns != 10 {
+		t.Error("unexpected MinConns:", config.Postgres.MinConns)
+	}
+	if config.Postgres.MaxConns != 128 {
+		t.Error("unexpected MaxConns:", config.Postgres.MaxConns)
+	}
+	t.Log(config.Postgres)
+}
