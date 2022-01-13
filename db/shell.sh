@@ -4,7 +4,7 @@
 # @author      : annika
 # @file        : init
 # @created     : Tuesday Jan 11, 2022 15:35:20 CET
-# @description :  Initialize the database
+# @description : Start `psql` as database shell
 ######################################################################
 
 if [ -z $PSQL ]; then
@@ -55,5 +55,5 @@ if [ $OPT_TESTING -eq 1 ]; then
     export PGDATABASE=$NAME
 fi
 
-psql
+exec psql
 

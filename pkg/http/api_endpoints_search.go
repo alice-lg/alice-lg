@@ -25,11 +25,6 @@ func (s *Server) apiLookupPrefixGlobal(
 		return nil, err
 	}
 
-	q, err = validatePrefixQuery(q)
-	if err != nil {
-		return nil, err
-	}
-
 	// Check what we want to query
 	//  Prefix -> fetch prefix
 	//       _ -> fetch neighbors and routes
@@ -47,6 +42,10 @@ func (s *Server) apiLookupPrefixGlobal(
 	// Perform query
 	var routes api.LookupRoutes
 	if lookupPrefix {
+		q, err = validatePrefixQuery(q)
+		if err != nil {
+			return nil, err
+		}
 		routes, err = s.routesStore.LookupPrefix(ctx, q)
 		if err != nil {
 			return nil, err

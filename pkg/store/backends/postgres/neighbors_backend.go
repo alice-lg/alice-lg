@@ -32,30 +32,52 @@ func (b *NeighborsBackend) SetNeighbors(
 	sourceID string,
 	neighbors api.Neighbors,
 ) error {
+	// Clear current neighbors
+	now := time.Now().UTC()
 	for _, n := range neighbors {
-		if err := b.persistNeighbor(ctx, sourceID, n); err != nil {
+		if err := b.persist(ctx, sourceID, n, now); err != nil {
 			return err
 		}
+	}
+	// Remove old neighbors
+	if err := b.deleteStale(ctx, sourceID, now); err != nil {
+		return err
 	}
 	return nil
 }
 
-// Private persistNeighbor saves a neighbor to the database
-func (b *NeighborsBackend) persistNeighbor(
+// Private persist saves a neighbor to the database
+func (b *NeighborsBackend) persist(
 	ctx context.Context,
 	sourceID string,
 	neighbor *api.Neighbor,
+	now time.Time,
 ) error {
-	now := time.Now().UTC()
 	qry := `
 	  INSERT INTO neighbors (
 	  		id, rs_id, neighbor, updated_at
 		) VALUES ( $1, $2, $3, $4 )
 	  ON CONFLICT ON CONSTRAINT neighbors_pkey DO UPDATE
-	    SET neighbor   = EXCLUDED.neighbor,
-			updated_at = EXCLUDED.updated_at
+       SET neighbor   = EXCLUDED.neighbor,
+		   updated_at = EXCLUDED.updated_at
 	`
 	_, err := b.pool.Exec(ctx, qry, neighbor.ID, sourceID, neighbor, now)
+	return err
+}
+
+// Private deleteStale removes all neighbors not inserted or
+// updated at a specific time.
+func (b *NeighborsBackend) deleteStale(
+	ctx context.Context,
+	sourceID string,
+	t time.Time,
+) error {
+	qry := `
+	  DELETE FROM neighbors
+	        WHERE rs_id = $1 
+			  AND updated_at <> $2
+	`
+	_, err := b.pool.Exec(ctx, qry, sourceID, t)
 	return err
 }
 

@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
 )
@@ -14,24 +15,25 @@ func TestPersistNeighborLookup(t *testing.T) {
 		ID:      "n2342",
 		Address: "test123",
 	}
-	if err := b.persistNeighbor(context.Background(), "rs1", n); err != nil {
+	now := time.Now().UTC()
+	if err := b.persist(context.Background(), "rs1", n, now); err != nil {
 		t.Fatal(err)
 	}
 
 	// make an update
 	n.Address = "test234"
-	if err := b.persistNeighbor(context.Background(), "rs1", n); err != nil {
+	if err := b.persist(context.Background(), "rs1", n, now); err != nil {
 		t.Fatal(err)
 	}
 
 	// Add a second
 	n.ID = "foo23"
-	if err := b.persistNeighbor(context.Background(), "rs1", n); err != nil {
+	if err := b.persist(context.Background(), "rs1", n, now); err != nil {
 		t.Fatal(err)
 	}
 
 	// Add to different rs
-	if err := b.persistNeighbor(context.Background(), "rs2", n); err != nil {
+	if err := b.persist(context.Background(), "rs2", n, now); err != nil {
 		t.Fatal(err)
 	}
 
