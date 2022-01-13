@@ -40,7 +40,6 @@ type NeighborsStoreBackend interface {
 	GetNeighborsMapAt(
 		ctx context.Context,
 		sourceID string,
-		neighborID string,
 	) (map[string]*api.Neighbor, error)
 
 	// CountNeighborsAt retrieves the current number of

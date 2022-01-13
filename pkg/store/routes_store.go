@@ -154,9 +154,14 @@ func (s *RoutesStore) updateSource(
 		return err
 	}
 
+	neighbors, err := s.neighbors.GetNeighborsMapAt(ctx, src.ID)
+	if err != nil {
+		return err
+	}
+
 	// Prepare imported routes for lookup
-	imported := s.routesToLookupRoutes(ctx, "imported", src, res.Imported)
-	filtered := s.routesToLookupRoutes(ctx, "filtered", src, res.Filtered)
+	imported := s.routesToLookupRoutes(ctx, "imported", src, neighbors, res.Imported)
+	filtered := s.routesToLookupRoutes(ctx, "filtered", src, neighbors, res.Filtered)
 	lookupRoutes := append(imported, filtered...)
 
 	if err = s.backend.SetRoutes(ctx, src.ID, lookupRoutes); err != nil {
@@ -188,11 +193,10 @@ func (s *RoutesStore) routesToLookupRoutes(
 	ctx context.Context,
 	state string,
 	src *config.SourceConfig,
+	neighbors map[string]*api.Neighbor,
 	routes api.Routes,
 ) api.LookupRoutes {
 	lookupRoutes := make(api.LookupRoutes, 0, len(routes))
-	neighbors := s.neighbors.GetNeighborsMapAt(ctx, src.ID)
-
 	for _, route := range routes {
 		neighbor, ok := neighbors[route.NeighborID]
 		if !ok {
