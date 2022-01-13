@@ -26,8 +26,7 @@ func ConnectTest() *pgxpool.Pool {
 	}
 
 	m := NewManager(p)
-	err = m.Initialize(ctx)
-	if err != nil {
+	if err := m.Initialize(ctx); err != nil {
 		panic(err)
 	}
 

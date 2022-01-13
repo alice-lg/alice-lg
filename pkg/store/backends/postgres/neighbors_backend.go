@@ -49,7 +49,7 @@ func (b *NeighborsBackend) persistNeighbor(
 	now := time.Now().UTC()
 	qry := `
 	  INSERT INTO neighbors (
-	  		id, rs_id, neighbor, updated_at,
+	  		id, rs_id, neighbor, updated_at
 		) VALUES ( $1, $2, $3, $4 )
 	  ON CONFLICT ON CONSTRAINT neighbors_pkey DO UPDATE
 	    SET neighbor   = EXCLUDED.neighbor,
@@ -92,7 +92,7 @@ func (b *NeighborsBackend) GetNeighborsAt(
 		}
 		results = append(results, neighbor)
 	}
-	return nil, nil
+	return results, nil
 }
 
 // GetNeighborsMapAt retrieve a neighbor map for a route server.
