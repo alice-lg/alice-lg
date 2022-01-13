@@ -104,8 +104,8 @@ func (b *RoutesBackend) queryCountByState(
 	state string,
 ) pgx.Row {
 	qry := `SELECT COUNT(1) FROM routes
-			 WHERE rs_id = $1 AND route->'state' = $2`
-	return b.pool.QueryRow(ctx, qry, sourceID, state)
+			 WHERE rs_id = $1 AND route -> 'state' = $2`
+	return b.pool.QueryRow(ctx, qry, sourceID, "\""+state+"\"")
 }
 
 // CountRoutesAt returns the number of filtered and imported
@@ -135,18 +135,22 @@ func (b *RoutesBackend) CountRoutesAt(
 // list of neighbors identified by ID.
 func (b *RoutesBackend) FindByNeighbors(
 	ctx context.Context,
-	neighborIDs []interface{},
+	neighborIDs []string,
 ) (api.LookupRoutes, error) {
-	vars := make([]string, 0, len(neighborIDs))
-	for n := range neighborIDs {
-		vars = append(vars, fmt.Sprintf("$%d", n+1))
+	vals := make([]interface{}, len(neighborIDs))
+	for i := range neighborIDs {
+		vals[i] = neighborIDs[i]
+	}
+	vars := make([]string, len(neighborIDs))
+	for i := range neighborIDs {
+		vars[i] = fmt.Sprintf("$%d", i+1)
 	}
 	listQry := strings.Join(vars, ",")
 	qry := `
 		SELECT route FROM routes
 		 WHERE neighbor_id IN (` + listQry + `)`
 
-	rows, err := b.pool.Query(ctx, qry, neighborIDs...)
+	rows, err := b.pool.Query(ctx, qry, vals...)
 	if err != nil {
 		return nil, err
 	}

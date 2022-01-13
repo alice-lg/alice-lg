@@ -300,6 +300,5 @@ func (s *RoutesStore) LookupPrefixForNeighbors(
 			neighborIDs = append(neighborIDs, neighbor.ID)
 		}
 	}
-
 	return s.backend.FindByNeighbors(ctx, neighborIDs)
 }

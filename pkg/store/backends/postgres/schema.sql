@@ -51,9 +51,7 @@ CREATE TABLE routes (
     updated_at  TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     -- Constraints
-    PRIMARY KEY(id, rs_id),
-    FOREIGN KEY(rs_id, neighbor_id) 
-     REFERENCES neighbors(rs_id, id) ON DELETE CASCADE
+    PRIMARY KEY(id, rs_id)
 );
 
 CREATE INDEX idx_routes_network    ON routes ( network );
