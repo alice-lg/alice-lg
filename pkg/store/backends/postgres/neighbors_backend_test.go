@@ -53,3 +53,47 @@ func TestPersistNeighborLookup(t *testing.T) {
 		t.Error("unexpected neighbors list:", list)
 	}
 }
+
+func TestSetNeighbors(t *testing.T) {
+	ctx := context.Background()
+	pool := ConnectTest()
+	b := &NeighborsBackend{pool: pool}
+
+	// Persist an old neighbor, should be gone because stale
+	n := &api.Neighbor{
+		ID:      "n1",
+		Address: "foo",
+	}
+	b.persist(ctx, "rs1", n, time.Time{})
+
+	result, _ := b.GetNeighborsAt(context.Background(), "rs1")
+	if len(result) != 1 {
+		t.Fatal("unexpected neighbors:", result)
+	}
+
+	neighbors := api.Neighbors{
+		{
+			ID:      "n2342",
+			Address: "test123",
+		},
+		{
+			ID:      "n2343",
+			Address: "test124",
+		},
+		{
+			ID:      "n2345",
+			Address: "test125",
+		},
+	}
+	if err := b.SetNeighbors(ctx, "rs1", neighbors); err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := b.GetNeighborsAt(context.Background(), "rs1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result) != len(neighbors) {
+		t.Error("unexpected neighbors:", result)
+	}
+}
