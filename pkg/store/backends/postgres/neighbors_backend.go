@@ -122,5 +122,14 @@ func (b *NeighborsBackend) CountNeighborsAt(
 	ctx context.Context,
 	sourceID string,
 ) (int, error) {
-	return 0, nil
+	qry := `
+		SELECT COUNT(1) FROM neighbors
+		 WHERE rs_id = $1
+	`
+	count := 0
+	err := b.pool.QueryRow(ctx, qry, sourceID).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }
