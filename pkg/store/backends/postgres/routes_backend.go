@@ -143,14 +143,35 @@ func (b *RoutesBackend) FindByNeighbors(
 	}
 	listQry := strings.Join(vars, ",")
 	qry := `
-		SELECT route 
-		  FROM routes
+		SELECT route FROM routes
 		 WHERE neighbor_id IN (` + listQry + `)`
 
 	rows, err := b.pool.Query(ctx, qry, neighborIDs...)
 	if err != nil {
 		return nil, err
 	}
+	return fetchRoutes(rows)
+}
+
+// FindByPrefix will return the prefixes matching a pattern
+func (b *RoutesBackend) FindByPrefix(
+	ctx context.Context,
+	prefix string,
+) (api.LookupRoutes, error) {
+	// We are searching route.Network
+	qry := `
+		SELECT route FROM routes
+		 WHERE network ILIKE $1
+	`
+	rows, err := b.pool.Query(ctx, qry, prefix+"%")
+	if err != nil {
+		return nil, err
+	}
+	return fetchRoutes(rows)
+}
+
+// Private fetchRoutes will load the queried result set
+func fetchRoutes(rows pgx.Rows) (api.LookupRoutes, error) {
 	cmd := rows.CommandTag()
 	results := make(api.LookupRoutes, 0, cmd.RowsAffected())
 	for rows.Next() {
@@ -161,13 +182,4 @@ func (b *RoutesBackend) FindByNeighbors(
 		results = append(results, route)
 	}
 	return results, nil
-}
-
-// FindByPrefix will return the prefixes matching a pattern
-func (b *RoutesBackend) FindByPrefix(
-	ctx context.Context,
-	prefix string,
-) (api.LookupRoutes, error) {
-	// We are searching route.Network
-	return nil, nil
 }
