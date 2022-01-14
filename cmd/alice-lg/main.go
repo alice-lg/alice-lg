@@ -10,6 +10,8 @@ import (
 	"github.com/alice-lg/alice-lg/pkg/store"
 	"github.com/alice-lg/alice-lg/pkg/store/backends/memory"
 	"github.com/alice-lg/alice-lg/pkg/store/backends/postgres"
+
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 func main() {
@@ -36,9 +38,11 @@ func main() {
 	var (
 		neighborsBackend store.NeighborsStoreBackend = memory.NewNeighborsBackend()
 		routesBackend    store.RoutesStoreBackend    = memory.NewRoutesBackend()
+
+		pool *pgxpool.Pool
 	)
 	if cfg.Server.StoreBackend == "postgres" {
-		pool, err := postgres.Connect(ctx, cfg.Postgres)
+		pool, err = postgres.Connect(ctx, cfg.Postgres)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -76,7 +80,7 @@ func main() {
 	go store.StartHousekeeping(ctx, cfg)
 
 	// Start HTTP API
-	server := http.NewServer(cfg, routesStore, neighborsStore)
+	server := http.NewServer(cfg, pool, routesStore, neighborsStore)
 	go server.Start()
 
 	<-ctx.Done()

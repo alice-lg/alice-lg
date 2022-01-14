@@ -37,7 +37,7 @@ func printBanner(
 	routesStore *store.RoutesStore,
 ) {
 	ctx := context.Background()
-	status, _ := http.CollectAppStatus(ctx, routesStore, neighborsStore)
+	status, _ := http.CollectAppStatus(ctx, nil, routesStore, neighborsStore)
 	mapper := strings.NewReplacer(
 		"?VERSION", status.Version,
 		"?LISTEN", cfg.Server.Listen,

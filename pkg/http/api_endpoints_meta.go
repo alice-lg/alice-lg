@@ -15,7 +15,7 @@ func (s *Server) apiStatusShow(
 	_params httprouter.Params,
 ) (response, error) {
 	ctx := req.Context()
-	status, err := CollectAppStatus(ctx, s.routesStore, s.neighborsStore)
+	status, err := CollectAppStatus(ctx, s.pool, s.routesStore, s.neighborsStore)
 	return status, err
 }
 
