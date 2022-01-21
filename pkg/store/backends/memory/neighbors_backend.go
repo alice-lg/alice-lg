@@ -71,13 +71,12 @@ func (b *NeighborsBackend) GetNeighborsAt(
 	return ret, nil
 }
 
-// GetNeighborAt retrieves all neighbors for a source
-// identified by its ID.
-func (b *NeighborsBackend) GetNeighborAt(
+// GetNeighborsMapAt retrieves all neighbors for a source
+// identified by its ID and returns a map.
+func (b *NeighborsBackend) GetNeighborsMapAt(
 	ctx context.Context,
 	sourceID string,
-	neighborID string,
-) (*api.Neighbor, error) {
+) (map[string]*api.Neighbor, error) {
 	b.Lock()
 	defer b.Unlock()
 
@@ -86,7 +85,12 @@ func (b *NeighborsBackend) GetNeighborAt(
 		return nil, sources.ErrSourceNotFound
 	}
 
-	return neighbors[neighborID], nil
+	// Copy neighbors map
+	result := make(map[string]*api.Neighbor)
+	for k, v := range neighbors {
+		result[k] = v
+	}
+	return result, nil
 }
 
 // CountNeighborsAt retrievs the number of neighbors

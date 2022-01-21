@@ -21,7 +21,7 @@ func (s *Server) webPrepareClientHTML(
 	ctx context.Context,
 	html string,
 ) string {
-	status, _ := CollectAppStatus(ctx, s.routesStore, s.neighborsStore)
+	status, _ := CollectAppStatus(ctx, nil, s.routesStore, s.neighborsStore)
 
 	// Replace paths and tags
 	rewriter := strings.NewReplacer(

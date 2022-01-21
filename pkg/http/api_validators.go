@@ -1,9 +1,22 @@
 package http
 
 import (
+	"errors"
 	"fmt"
+	"strings"
 
 	"net/http"
+)
+
+var (
+	// ErrQueryTooShort will be returned when the query
+	// is less than 2 characters.
+	ErrQueryTooShort = errors.New("query too short")
+
+	// ErrQueryIncomplete will be returned when the
+	// prefix query lacks a : or .
+	ErrQueryIncomplete = errors.New(
+		"prefix query must contain at least on '.' or ':'")
 )
 
 // Helper: Validate source Id
@@ -34,11 +47,15 @@ func validateQueryString(req *http.Request, key string) (string, error) {
 	return value, nil
 }
 
-// Helper: Validate prefix query
+// Helper: Validate prefix query. It should contain
+// at least one dot or :
 func validatePrefixQuery(value string) (string, error) {
 	// We should at least provide 2 chars
 	if len(value) < 2 {
-		return "", fmt.Errorf("query too short")
+		return "", ErrQueryTooShort
+	}
+	if !strings.Contains(value, ":") && !strings.Contains(value, ".") {
+		return "", ErrQueryIncomplete
 	}
 	return value, nil
 }

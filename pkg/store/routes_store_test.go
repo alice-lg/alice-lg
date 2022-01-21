@@ -41,8 +41,16 @@ func importRoutes(
 	ctx := context.Background()
 
 	// Prepare imported routes for lookup
-	imported := s.routesToLookupRoutes(ctx, "imported", src, res.Imported)
-	filtered := s.routesToLookupRoutes(ctx, "filtered", src, res.Filtered)
+	neighbors := map[string]*api.Neighbor{
+		"ID163_AS31078": &api.Neighbor{
+			ID: "ID163_AS31078",
+		},
+		"ID7254_AS31334": &api.Neighbor{
+			ID: "ID7254_AS31334",
+		},
+	}
+	imported := s.routesToLookupRoutes(ctx, "imported", src, neighbors, res.Imported)
+	filtered := s.routesToLookupRoutes(ctx, "filtered", src, neighbors, res.Filtered)
 	lookupRoutes := append(imported, filtered...)
 
 	if err := s.backend.SetRoutes(ctx, src.ID, lookupRoutes); err != nil {

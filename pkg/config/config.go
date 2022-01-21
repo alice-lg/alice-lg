@@ -27,6 +27,11 @@ var (
 	// ErrSourceTypeUnknown will be used if the type could
 	// not be identified from the section.
 	ErrSourceTypeUnknown = errors.New("source type unknown")
+
+	// ErrPostgresUnconfigured will occure when the
+	// postgres database URL is required, but missing.
+	ErrPostgresUnconfigured = errors.New(
+		"the selected postgres backend requires configuration")
 )
 
 const (
@@ -73,8 +78,17 @@ type ServerConfig struct {
 	EnablePrefixLookup            bool   `ini:"enable_prefix_lookup"`
 	NeighborsStoreRefreshInterval int    `ini:"neighbours_store_refresh_interval"`
 	RoutesStoreRefreshInterval    int    `ini:"routes_store_refresh_interval"`
+	StoreBackend                  string `ini:"store_backend"`
 	Asn                           int    `ini:"asn"`
 	EnableNeighborsStatusRefresh  bool   `ini:"enable_neighbors_status_refresh"`
+}
+
+// PostgresConfig is the configuration for the database
+// connection when the postgres backend is used.
+type PostgresConfig struct {
+	URL      string `ini:"url"`
+	MaxConns int32  `ini:"max_connections"`
+	MinConns int32  `ini:"min_connections"`
 }
 
 // HousekeepingConfig describes the housekeeping interval
@@ -176,6 +190,7 @@ type SourceConfig struct {
 // Config is the application configuration
 type Config struct {
 	Server       ServerConfig
+	Postgres     *PostgresConfig
 	Housekeeping HousekeepingConfig
 	UI           UIConfig
 	Sources      []*SourceConfig
@@ -817,14 +832,24 @@ func LoadConfig(file string) (*Config, error) {
 	}
 
 	// Map sections
-	server := ServerConfig{}
+	server := ServerConfig{
+		HTTPTimeout:  DefaultHTTPTimeout,
+		StoreBackend: "memory",
+	}
 	if err := parsedConfig.Section("server").MapTo(&server); err != nil {
 		return nil, err
 	}
 
-	// Set default http timeout when not configured
-	if server.HTTPTimeout == 0 {
-		server.HTTPTimeout = DefaultHTTPTimeout
+	// Database config
+	psql := &PostgresConfig{
+		MinConns: 2,
+		MaxConns: 128,
+	}
+	parsedConfig.Section("postgres").MapTo(&psql)
+	if server.StoreBackend == "postgres" {
+		if psql.URL == "" {
+			return nil, ErrPostgresUnconfigured
+		}
 	}
 
 	housekeeping := HousekeepingConfig{}
@@ -846,6 +871,7 @@ func LoadConfig(file string) (*Config, error) {
 
 	config := &Config{
 		Server:       server,
+		Postgres:     psql,
 		Housekeeping: housekeeping,
 		UI:           ui,
 		Sources:      sources,

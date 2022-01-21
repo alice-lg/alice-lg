@@ -34,12 +34,13 @@ type NeighborsStoreBackend interface {
 		sourceID string,
 	) (api.Neighbors, error)
 
-	// GetNeighborAt retrieve a neighbor at a route server.
-	GetNeighborAt(
+	// GetNeighborsMapAt retrieve a map of neighbor ids
+	// to the neighbor for a given route server for quick
+	// consecutive lookup.
+	GetNeighborsMapAt(
 		ctx context.Context,
 		sourceID string,
-		neighborID string,
-	) (*api.Neighbor, error)
+	) (map[string]*api.Neighbor, error)
 
 	// CountNeighborsAt retrieves the current number of
 	// stored neighbors.
@@ -219,13 +220,12 @@ func (s *NeighborsStore) GetNeighborsAt(
 	return s.backend.GetNeighborsAt(ctx, sourceID)
 }
 
-// GetNeighborAt looks up a neighbor on a RS by ID.
-func (s *NeighborsStore) GetNeighborAt(
+// GetNeighborsMapAt looks up a neighbor on a RS by ID.
+func (s *NeighborsStore) GetNeighborsMapAt(
 	ctx context.Context,
 	sourceID string,
-	neighborID string,
-) (*api.Neighbor, error) {
-	return s.backend.GetNeighborAt(ctx, sourceID, neighborID)
+) (map[string]*api.Neighbor, error) {
+	return s.backend.GetNeighborsMapAt(ctx, sourceID)
 }
 
 // lookupNeighborsAt filters for neighbors at a route

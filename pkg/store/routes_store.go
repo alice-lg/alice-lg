@@ -154,9 +154,14 @@ func (s *RoutesStore) updateSource(
 		return err
 	}
 
+	neighbors, err := s.neighbors.GetNeighborsMapAt(ctx, src.ID)
+	if err != nil {
+		return err
+	}
+
 	// Prepare imported routes for lookup
-	imported := s.routesToLookupRoutes(ctx, "imported", src, res.Imported)
-	filtered := s.routesToLookupRoutes(ctx, "filtered", src, res.Filtered)
+	imported := s.routesToLookupRoutes(ctx, "imported", src, neighbors, res.Imported)
+	filtered := s.routesToLookupRoutes(ctx, "filtered", src, neighbors, res.Filtered)
 	lookupRoutes := append(imported, filtered...)
 
 	if err = s.backend.SetRoutes(ctx, src.ID, lookupRoutes); err != nil {
@@ -188,16 +193,13 @@ func (s *RoutesStore) routesToLookupRoutes(
 	ctx context.Context,
 	state string,
 	src *config.SourceConfig,
+	neighbors map[string]*api.Neighbor,
 	routes api.Routes,
 ) api.LookupRoutes {
 	lookupRoutes := make(api.LookupRoutes, 0, len(routes))
 	for _, route := range routes {
-		neighbor, err := s.neighbors.GetNeighborAt(ctx, src.ID, route.NeighborID)
-		if err != nil {
-			log.Println("prepare route, neighbor lookup failed:", err)
-			continue
-		}
-		if neighbor == nil {
+		neighbor, ok := neighbors[route.NeighborID]
+		if !ok {
 			log.Println("prepare route, neighbor not found:", route.NeighborID)
 			continue
 		}
@@ -302,6 +304,5 @@ func (s *RoutesStore) LookupPrefixForNeighbors(
 			neighborIDs = append(neighborIDs, neighbor.ID)
 		}
 	}
-
 	return s.backend.FindByNeighbors(ctx, neighborIDs)
 }

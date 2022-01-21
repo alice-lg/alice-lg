@@ -10,6 +10,7 @@ import (
 
 	"github.com/alice-lg/alice-lg/pkg/config"
 	"github.com/alice-lg/alice-lg/pkg/store"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -20,11 +21,13 @@ type Server struct {
 	cfg            *config.Config
 	routesStore    *store.RoutesStore
 	neighborsStore *store.NeighborsStore
+	pool           *pgxpool.Pool
 }
 
 // NewServer creates a new server
 func NewServer(
 	cfg *config.Config,
+	pool *pgxpool.Pool,
 	routesStore *store.RoutesStore,
 	neighborsStore *store.NeighborsStore,
 ) *Server {
@@ -32,6 +35,7 @@ func NewServer(
 		cfg:            cfg,
 		routesStore:    routesStore,
 		neighborsStore: neighborsStore,
+		pool:           pool,
 	}
 }
 
