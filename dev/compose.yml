@@ -1,0 +1,26 @@
+version: "3.7"
+
+# Composefile for developing with alice. A postgres server
+# and the ui live dev server are started.
+
+services:
+  db:
+    image: postgres:12
+    environment:
+      POSTGRES_USER: alice 
+      POSTGRES_PASSWORD: alice 
+      POSTGRES_DB: alice 
+    ports:
+      - 5432:5432
+
+  ui:
+    image: node:latest
+    working_dir: /ui
+    volumes:
+      - ../ui:/ui
+    ports:
+      - 8072:3000
+    entrypoint: yarn
+    command:
+      - start
+

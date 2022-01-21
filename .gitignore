@@ -18,6 +18,7 @@ venv/
 django_backend/birdseye/static
 
 node_modules/
+ui/node_modules/
 
 builds/
 

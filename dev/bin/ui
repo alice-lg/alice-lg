@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+COMPOSE=${COMPOSE:-docker-compose}
+
+CMD=$@
+if [ -z "$CMD" ]; then
+    CMD="help"
+fi
+
+cd $(dirname $0)/../
+$COMPOSE run --rm ui $CMD
+
