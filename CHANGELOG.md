@@ -1,6 +1,20 @@
 
 # Changelog
 
+## 5.1.0
+
+ * **BREAKING CHANGE** The spelling of "neighbors" is now harmonized.
+   Please update your config and replace e.g. `neighbour.asn` 
+   with `neighbor.asn` (in case of java script errors).
+   This also applies to the API.
+
+ * Parallel route / neighbor store refreshs: Route servers are not
+   longer queried sequentially. A jitter is applied to not hit all
+   servers exactly at once.
+
+ * Postgres store backend: Not keeping routes and neighbors in
+   memory might reduce the memory footprint.
+
 ## 5.0.1 (2021-11-01)
 
 * Fixed parsing extended communities in openbgpd source causing a crash.
