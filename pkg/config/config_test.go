@@ -65,6 +65,10 @@ func TestSourceConfig(t *testing.T) {
 			"Example routeserver %s should have been identified as a birdwatcher source but was not",
 			rs2.Name,
 		)
+	} else {
+		if rs2.Birdwatcher.AltPipeSuffix != "_lg" {
+			t.Error("unexpected alt_pipe_suffix:", rs2.Birdwatcher.AltPipeSuffix)
+		}
 	}
 	nilGoBGPConfig := gobgp.Config{}
 	if rs3.GoBGP == nilGoBGPConfig {
