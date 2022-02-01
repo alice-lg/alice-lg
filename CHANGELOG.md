@@ -15,6 +15,9 @@
  * Postgres store backend: Not keeping routes and neighbors in
    memory might reduce the memory footprint.
 
+ * Support for alternative pipe in `multi_table` birdwatcher
+   configurations.
+
 ## 5.0.1 (2021-11-01)
 
 * Fixed parsing extended communities in openbgpd source causing a crash.
