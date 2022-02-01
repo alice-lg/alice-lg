@@ -17,7 +17,7 @@ type Config struct {
 	MainTable               string `ini:"main_table"`
 	PeerTablePrefix         string `ini:"peer_table_prefix"`
 	PipeProtocolPrefix      string `ini:"pipe_protocol_prefix"`
-	AltPipePrefix           string `ini:"alt_pipe_prefix"`
-	AltPipeSuffix           string `ini:"alt_pipe_suffix"`
+	AltPipeProtocolPrefix   string `ini:"alt_pipe_protocol_prefix"`
+	AltPipeProtocolSuffix   string `ini:"alt_pipe_protocol_suffix"`
 	NeighborsRefreshTimeout int    `ini:"neighbors_refresh_timeout"`
 }

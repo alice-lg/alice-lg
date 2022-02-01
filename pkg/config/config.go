@@ -739,10 +739,10 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 				c.Name, "of type", sourceType,
 				"with peer_table_prefix", peerTablePrefix,
 				"and pipe_protocol_prefix", pipeProtocolPrefix)
-			if c.AltPipeSuffix != "" {
+			if c.AltPipeProtocolSuffix != "" {
 				log.Println(
-					"Alt pipe prefix:", c.AltPipePrefix,
-					"suffix:", c.AltPipeSuffix,
+					"Alt pipe protocol prefix:", c.AltPipeProtocolPrefix,
+					"suffix:", c.AltPipeProtocolSuffix,
 				)
 			}
 

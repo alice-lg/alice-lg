@@ -28,7 +28,7 @@ func (src *MultiTableBirdwatcher) getMasterPipeName(table string) string {
 // known suffix, e.g. "_lg". If the alt_pipe_suffix is
 // not configured, this will always be false.
 func (src *MultiTableBirdwatcher) isAltSession(pipe string) bool {
-	suffix := src.config.AltPipeSuffix
+	suffix := src.config.AltPipeProtocolSuffix
 	if suffix == "" {
 		return false
 	}
@@ -37,7 +37,7 @@ func (src *MultiTableBirdwatcher) isAltSession(pipe string) bool {
 
 func (src *MultiTableBirdwatcher) getAltPipeName(pipe string) string {
 	prefix := src.config.PipeProtocolPrefix
-	return src.config.AltPipePrefix + pipe[len(prefix):]
+	return src.config.AltPipeProtocolPrefix + pipe[len(prefix):]
 }
 
 func (src *MultiTableBirdwatcher) parseProtocolToTableTree(

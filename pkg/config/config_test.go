@@ -66,8 +66,8 @@ func TestSourceConfig(t *testing.T) {
 			rs2.Name,
 		)
 	} else {
-		if rs2.Birdwatcher.AltPipeSuffix != "_lg" {
-			t.Error("unexpected alt_pipe_suffix:", rs2.Birdwatcher.AltPipeSuffix)
+		if rs2.Birdwatcher.AltPipeProtocolSuffix != "_lg" {
+			t.Error("unexpected alt_pipe_suffix:", rs2.Birdwatcher.AltPipeProtocolSuffix)
 		}
 	}
 	nilGoBGPConfig := gobgp.Config{}
