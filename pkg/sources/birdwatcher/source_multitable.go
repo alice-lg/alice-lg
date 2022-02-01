@@ -24,6 +24,22 @@ func (src *MultiTableBirdwatcher) getMasterPipeName(table string) string {
 	return ""
 }
 
+// isAltSession checks if the pipe ends in a
+// known suffix, e.g. "_lg". If the alt_pipe_suffix is
+// not configured, this will always be false.
+func (src *MultiTableBirdwatcher) isAltSession(pipe string) bool {
+	suffix := src.config.AltPipeSuffix
+	if suffix == "" {
+		return false
+	}
+	return strings.HasSuffix(pipe, suffix)
+}
+
+func (src *MultiTableBirdwatcher) getAltPipeName(pipe string) string {
+	prefix := src.config.PipeProtocolPrefix
+	return src.config.AltPipePrefix + pipe[len(prefix):]
+}
+
 func (src *MultiTableBirdwatcher) parseProtocolToTableTree(
 	bird ClientResponse,
 ) map[string]interface{} {
@@ -43,7 +59,8 @@ func (src *MultiTableBirdwatcher) parseProtocolToTableTree(
 			}
 
 			if _, ok := response[table].(map[string]interface{})[neighborAddress]; !ok {
-				response[table].(map[string]interface{})[neighborAddress] = make(map[string]interface{})
+				response[table].(map[string]interface{})[neighborAddress] = make(
+					map[string]interface{})
 			}
 
 			response[table].(map[string]interface{})[neighborAddress] = protocol
@@ -53,7 +70,11 @@ func (src *MultiTableBirdwatcher) parseProtocolToTableTree(
 	return response
 }
 
-func (src *MultiTableBirdwatcher) fetchProtocols() (*api.Meta, map[string]interface{}, error) {
+func (src *MultiTableBirdwatcher) fetchProtocols() (
+	*api.Meta,
+	map[string]interface{},
+	error,
+) {
 	// Query birdwatcher
 	bird, err := src.client.GetJSON("/protocols")
 	if err != nil {
@@ -89,9 +110,16 @@ func (src *MultiTableBirdwatcher) fetchReceivedRoutes(
 	}
 
 	peer := protocols[neighborID].(map[string]interface{})["neighbor_address"].(string)
+	table := protocols[neighborID].(map[string]interface{})["table"].(string)
+	pipe := src.getMasterPipeName(table)
+
+	qryURL := "/routes/peer/" + peer
+	if src.isAltSession(pipe) {
+		qryURL = "/routes/table/" + table + "/peer/" + peer
+	}
 
 	// Query birdwatcher
-	bird, err := src.client.GetJSON("/routes/peer/" + peer)
+	bird, err := src.client.GetJSON(qryURL)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -109,7 +137,6 @@ func (src *MultiTableBirdwatcher) fetchReceivedRoutes(
 		log.Println("Is the 'routes_peer' module active in birdwatcher?")
 		return apiStatus, nil, err
 	}
-
 	return apiStatus, received, nil
 }
 
@@ -154,6 +181,11 @@ func (src *MultiTableBirdwatcher) fetchFilteredRoutes(
 		return apiStatus, filtered, nil
 	}
 
+	// Check if this is an alternative session and query the alt pipe instead
+	if src.isAltSession(pipeName) {
+		pipeName = src.getAltPipeName(pipeName)
+	}
+
 	// Query birdwatcher
 	birdPipeFiltered, err := src.client.GetJSON(
 		"/routes/pipe/filtered?table=" + table + "&pipe=" + pipeName)
@@ -178,7 +210,7 @@ func (src *MultiTableBirdwatcher) fetchNotExportedRoutes(
 	neighborID string,
 ) (*api.Meta, api.Routes, error) {
 	// Query birdwatcher
-	_, birdProtocols, err := src.fetchProtocols()
+	apiStatus, birdProtocols, err := src.fetchProtocols()
 	if err != nil {
 		return nil, nil, err
 	}
@@ -192,11 +224,18 @@ func (src *MultiTableBirdwatcher) fetchNotExportedRoutes(
 	table := protocols[neighborID].(map[string]interface{})["table"].(string)
 	pipeName := src.getMasterPipeName(table)
 
+	// Check if this is a monitoring session, if so return no routes
+	// as a monitoring session never export routes. We reuse the apiStatus
+	// from the fetchProtocols.
+	if src.isAltSession(pipeName) {
+		return apiStatus, api.Routes{}, nil
+	}
+
 	// Query birdwatcher
 	bird, _ := src.client.GetJSON("/routes/noexport/" + pipeName)
 
 	// Use api status from first request
-	apiStatus, err := parseAPIStatus(bird, src.config)
+	apiStatus, err = parseAPIStatus(bird, src.config)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -311,7 +350,13 @@ func (src *MultiTableBirdwatcher) Neighbors() (*api.NeighborsResponse, error) {
 			}
 			allRoutesImported += int64(protocol.(map[string]interface{})["routes"].(map[string]interface{})["imported"].(float64))
 
+			table := protocol.(map[string]interface{})["table"].(string)
 			pipeName := src.getMasterPipeName(table)
+
+			// Check if this is an alternative session and query the alt pipe instead
+			if src.isAltSession(pipeName) {
+				pipeName = src.getAltPipeName(pipeName)
+			}
 
 			if _, ok := pipes[pipeName]; ok {
 				if _, ok := pipes[pipeName].(map[string]interface{})["routes"].(map[string]interface{})["imported"]; ok {
@@ -358,6 +403,10 @@ func (src *MultiTableBirdwatcher) Neighbors() (*api.NeighborsResponse, error) {
 				for neighborAddress, protocol := range tree[table].(map[string]interface{}) {
 					table := protocol.(map[string]interface{})["table"].(string)
 					pipe := src.getMasterPipeName(table)
+					// Check if this is an alternative session and query the alt pipe instead
+					if src.isAltSession(pipe) {
+						pipe = src.getAltPipeName(pipe)
+					}
 
 					count, err := src.client.GetJSON("/routes/pipe/filtered/count?table=" + table + "&pipe=" + pipe + "&address=" + neighborAddress)
 					if err != nil {
