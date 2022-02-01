@@ -715,10 +715,6 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 				log.Fatal("Configuration error (birdwatcher source) unknown birdwatcher type:", sourceType)
 			}
 
-			log.Println("Adding birdwatcher source of type", sourceType,
-				"with peer_table_prefix", peerTablePrefix,
-				"and pipe_protocol_prefix", pipeProtocolPrefix)
-
 			c := birdwatcher.Config{
 				ID:   srcCfg.ID,
 				Name: srcCfg.Name,
@@ -738,6 +734,17 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 				return nil, err
 			}
 			srcCfg.Birdwatcher = c
+
+			log.Println("Adding birdwatcher source",
+				c.Name, "of type", sourceType,
+				"with peer_table_prefix", peerTablePrefix,
+				"and pipe_protocol_prefix", pipeProtocolPrefix)
+			if c.AltPipeSuffix != "" {
+				log.Println(
+					"Alt pipe prefix:", c.AltPipePrefix,
+					"suffix:", c.AltPipeSuffix,
+				)
+			}
 
 		case SourceBackendGoBGP:
 			c := gobgp.Config{
