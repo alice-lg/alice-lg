@@ -82,3 +82,11 @@ func TestWildcardLookup(t *testing.T) {
 		t.Error("Unexpected label for key")
 	}
 }
+
+func TestAPICommunities(t *testing.T) {
+	c := MakeWellKnownBgpCommunities()
+	comm := c.APICommunities()
+	if len(comm) != 14 {
+		t.Error("unexpected len(communities) = ", len(comm))
+	}
+}

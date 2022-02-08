@@ -79,12 +79,12 @@ func makeTestRoutesStore() *RoutesStore {
 
 	configMap := map[string]*SourceConfig{
 		"rs1": &SourceConfig{
-			Id:   "rs1",
+			ID:   "rs1",
 			Name: "rs1.test",
-			Type: SOURCE_BIRDWATCHER,
+			Type: SourceTypeBird,
 
 			Birdwatcher: birdwatcher.Config{
-				Api:             "http://localhost:2342",
+				API:             "http://localhost:2342",
 				Timezone:        "UTC",
 				ServerTime:      "2006-01-02T15:04:05",
 				ServerTimeShort: "2006-01-02",

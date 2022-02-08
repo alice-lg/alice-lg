@@ -46,6 +46,15 @@ class Details extends React.Component {
       ];
     };
 
+    let lastReconfig = rsStatus.last_reconfig;
+
+    // We have some capabilities: openbgpd does not support
+    // last reboot or last reconfig
+    if (rs.type == "openbgpd") {
+      lastReboot = null;
+      lastReconfig = null;
+    }
+
     return (
       <table className="routeserver-status">
         <tbody>
@@ -54,10 +63,11 @@ class Details extends React.Component {
             <td><i className="fa fa-clock-o"></i></td>
             <td>Last Reboot: <b><Datetime value={lastReboot} /></b></td>
           </tr>}
+        {lastReconfig &&
         <tr>
           <td><i className="fa fa-clock-o"></i></td>
-          <td>Last Reconfig: <b><Datetime value={rsStatus.last_reconfig} /></b></td>
-        </tr>
+          <td>Last Reconfig: <b><Datetime value={lastReconfig} /></b></td>
+        </tr>}
 
         <tr>
           <td><i className="fa fa-thumbs-up"></i></td>

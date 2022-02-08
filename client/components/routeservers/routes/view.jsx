@@ -183,6 +183,7 @@ class RoutesView extends React.Component {
   }
 
   renderLoadTrigger() {
+    const rs = this.props.routeserver;
     const type = this.props.type;
     const state = this.props.routes[type];
     const name = {
@@ -191,6 +192,10 @@ class RoutesView extends React.Component {
       [ROUTES_NOT_EXPORTED]: "routes-not-exported",
     }[type];
 
+    // We do not support this with openbgpd based route servers.
+    if (rs && rs.type == "openbgpd") {
+      return null;
+    }
 
     // This is an artificial delay, to make the user wait until
     // filtered and recieved routes are fetched
@@ -234,7 +239,8 @@ class RoutesView extends React.Component {
 }
 
 export default connect(
-  (state) => {
+  (state, ownProps) => {
+    const rs = state.routeservers.byId[ownProps.routeserverId];
     const received = {
       routes:       state.routes.received,
       requested:    state.routes.receivedRequested,
@@ -278,6 +284,7 @@ export default connect(
         state.routes.notExportedFiltersApplied
     );
     return({
+      routeserver: rs,
       filterQuery: state.routes.filterQuery,
       routes: {
           [ROUTES_RECEIVED]:     received,

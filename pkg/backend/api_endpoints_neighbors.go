@@ -14,7 +14,7 @@ func apiNeighborsList(
 	_req *http.Request,
 	params httprouter.Params,
 ) (api.Response, error) {
-	rsId, err := validateSourceID(params.ByName("id"))
+	rsID, err := validateSourceID(params.ByName("id"))
 	if err != nil {
 		return nil, err
 	}
@@ -23,9 +23,9 @@ func apiNeighborsList(
 
 	// Try to fetch neighbors from store, only fall back
 	// to RS query if store is not ready yet
-	sourceStatus := AliceNeighboursStore.SourceStatus(rsId)
+	sourceStatus := AliceNeighboursStore.SourceStatus(rsID)
 	if sourceStatus.State == STATE_READY {
-		neighbors := AliceNeighboursStore.GetNeighborsAt(rsId)
+		neighbors := AliceNeighboursStore.GetNeighborsAt(rsID)
 		// Make response
 		neighborsResponse = &api.NeighboursResponse{
 			Api: api.ApiStatus{
@@ -41,14 +41,14 @@ func apiNeighborsList(
 			Neighbours: neighbors,
 		}
 	} else {
-		source := AliceConfig.SourceInstanceById(rsId)
+		source := AliceConfig.SourceInstanceByID(rsID)
 		if source == nil {
 			return nil, SOURCE_NOT_FOUND_ERROR
 		}
 
 		neighborsResponse, err = source.Neighbours()
 		if err != nil {
-			apiLogSourceError("neighbors", rsId, err)
+			apiLogSourceError("neighbors", rsID, err)
 			return nil, err
 		}
 	}

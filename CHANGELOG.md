@@ -1,6 +1,20 @@
 
 # Changelog
 
+## 5.0.1 (2021-11-01)
+
+* Fixed parsing extended communities in openbgpd source causing a crash.
+
+## 5.0.0 (2021-10-09)
+
+* OpenBGPD support! Thanks to the Route Server Support Foundation
+  for sponsoring this feature!
+
+* Backend cleanup and restructured go codebase.
+  This should improve a bit working with containers.
+
+* Fixed links to the IRR Explorer.
+
 ## 4.3.0 (2021-04-15)
 
 * Added configurable main table

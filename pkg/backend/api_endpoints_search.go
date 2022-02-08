@@ -89,13 +89,13 @@ func apiLookupPrefixGlobal(
 
 	// Paginate results
 	pageImported := apiQueryMustInt(req, "page_imported", 0)
-	pageSizeImported := AliceConfig.Ui.Pagination.RoutesAcceptedPageSize
+	pageSizeImported := AliceConfig.UI.Pagination.RoutesAcceptedPageSize
 	routesImported, paginationImported := apiPaginateLookupRoutes(
 		imported, pageImported, pageSizeImported,
 	)
 
 	pageFiltered := apiQueryMustInt(req, "page_filtered", 0)
-	pageSizeFiltered := AliceConfig.Ui.Pagination.RoutesFilteredPageSize
+	pageSizeFiltered := AliceConfig.UI.Pagination.RoutesFilteredPageSize
 	routesFiltered, paginationFiltered := apiPaginateLookupRoutes(
 		filtered, pageFiltered, pageSizeFiltered,
 	)

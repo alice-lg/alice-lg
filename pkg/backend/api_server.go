@@ -3,6 +3,7 @@ package backend
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -15,7 +16,7 @@ func StartHTTPServer() {
 	router := httprouter.New()
 
 	// Serve static content
-	if err := webRegisterAssets(AliceConfig.Ui, router); err != nil {
+	if err := webRegisterAssets(AliceConfig.UI, router); err != nil {
 		log.Fatal(err)
 	}
 
@@ -23,6 +24,17 @@ func StartHTTPServer() {
 		log.Fatal(err)
 	}
 
+	httpTimeout := time.Duration(AliceConfig.Server.HttpTimeout) * time.Second
+	log.Println("Web server HTTP timeout set to:", httpTimeout)
+
+	server := &http.Server{
+		Addr:         AliceConfig.Server.Listen,
+		Handler:      router,
+		ReadTimeout:  httpTimeout,
+		WriteTimeout: httpTimeout,
+		IdleTimeout:  httpTimeout,
+	}
+
 	// Start http server
-	log.Fatal(http.ListenAndServe(AliceConfig.Server.Listen, router))
+	log.Fatal(server.ListenAndServe())
 }
