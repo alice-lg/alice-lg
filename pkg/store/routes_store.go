@@ -66,11 +66,16 @@ func NewRoutesStore(
 	if refreshInterval == 0 {
 		refreshInterval = time.Duration(5) * time.Minute
 	}
+	refreshParallelism := cfg.Server.NeighborsStoreRefreshParallelism
+	if refreshParallelism <= 0 {
+		refreshParallelism = 1
+	}
 
 	log.Println("Routes refresh interval set to:", refreshInterval)
+	log.Println("Routes refresh parallelism:", refreshParallelism)
 
 	// Store refresh information per store
-	sources := NewSourcesStore(cfg, refreshInterval)
+	sources := NewSourcesStore(cfg, refreshInterval, refreshParallelism)
 	store := &RoutesStore{
 		backend:   backend,
 		sources:   sources,
