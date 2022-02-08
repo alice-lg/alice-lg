@@ -40,6 +40,9 @@ WORKDIR /src/alice-lg/cmd/alice-lg
 RUN make alpine
 
 FROM alpine:latest
+
+RUN apk add -U tzdata
+
 COPY --from=backend /src/alice-lg/cmd/alice-lg/alice-lg-linux-amd64 /usr/bin/alice-lg
 RUN ls -lsha /usr/bin/alice-lg
 
