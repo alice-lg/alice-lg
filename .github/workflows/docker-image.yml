@@ -37,10 +37,15 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
+      - name: Generate branch tag
+        id: set_tag
+        run: |
+          echo "::set-output name=tag::${{ github.ref_name }}-$(git rev-parse --short HEAD)-$(date +%s)"
+
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ steps.meta.outputs.tags }}, ${{ env.REGISTRY }}/${{env.IMAGE_NAME}}:${{ steps.set_tag.outputs.tag }}
           labels: ${{ steps.meta.outputs.labels }}
