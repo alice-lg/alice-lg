@@ -3,7 +3,12 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
+	"os"
+	"runtime"
+	"runtime/pprof"
+	"time"
 
 	"github.com/alice-lg/alice-lg/pkg/config"
 	"github.com/alice-lg/alice-lg/pkg/http"
@@ -13,6 +18,44 @@ import (
 
 	"github.com/jackc/pgx/v4/pgxpool"
 )
+
+func createHeapProfile(filename string) {
+	f, err := os.Create(filename)
+	if err != nil {
+		log.Fatal("could not create memory profile: ", err)
+	}
+	defer f.Close() // error handling omitted for example
+	runtime.GC()    // get up-to-date statistics
+	if err := pprof.WriteHeapProfile(f); err != nil {
+		log.Fatal("could not write memory profile: ", err)
+	}
+}
+
+func createAllocProfile(filename string) {
+	f, err := os.Create(filename)
+	if err != nil {
+		log.Fatal("could not create alloc profile: ", err)
+	}
+	defer f.Close() // error handling omitted for example
+	runtime.GC()    // get up-to-date statistics
+	if err := pprof.Lookup("allocs").WriteTo(f, 0); err != nil {
+		log.Fatal("could not write alloc profile: ", err)
+	}
+}
+
+func startMemoryProfile(prefix string) {
+	for {
+		t := 0
+		filename := fmt.Sprintf("%s-heap-%03d", prefix, t)
+		createHeapProfile(filename)
+		log.Println("wrote memory heap profile:", filename)
+		filename = fmt.Sprintf("%s-allocs-%03d", prefix, t)
+		log.Println("wrote memory allocs profile:", filename)
+		createAllocProfile(filename)
+		time.Sleep(30 * time.Second)
+		t++
+	}
+}
 
 func main() {
 	ctx := context.Background()
@@ -26,7 +69,14 @@ func main() {
 		"db-init", false,
 		"Initialize the database. Clears all data.",
 	)
+	memprofile := flag.String(
+		"memprofile", "", "write memory profile to `file`",
+	)
 	flag.Parse()
+
+	if *memprofile != "" {
+		go startMemoryProfile(*memprofile)
+	}
 
 	// Load configuration
 	cfg, err := config.LoadConfig(*configFilenameFlag)
