@@ -23,7 +23,7 @@ ADD client .
 RUN DISABLE_LOGGING=1 NODE_ENV=production /usr/local/bin/gulp
 
 # Build the backend
-FROM golang:1.16 AS backend
+FROM golang:1.17 AS backend
 
 # Install dependencies
 WORKDIR /src/alice-lg
