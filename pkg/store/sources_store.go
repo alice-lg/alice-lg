@@ -249,6 +249,8 @@ func (s *SourcesStore) GetSourceIDsForRefresh() []string {
 		}
 	}
 
+	log.Println(locked)
+
 	// Sort by refresh start time ascending
 	sort.Sort(sources)
 
