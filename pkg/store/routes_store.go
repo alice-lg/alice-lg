@@ -100,7 +100,7 @@ func (s *RoutesStore) Start() {
 // refresh period. This is totally the same as the
 // NeighborsStore.update and maybe these functions can be merged (TODO)
 func (s *RoutesStore) update() {
-	for _, id := range s.sources.GetSourceIDs() {
+	for _, id := range s.sources.GetSourceIDsForRefresh() {
 		go s.safeUpdateSource(id)
 	}
 }

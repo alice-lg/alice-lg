@@ -188,7 +188,7 @@ func (s *NeighborsStore) safeUpdateSource(id string) {
 // sources last neighbor refresh is longer ago
 // than the configured refresh period.
 func (s *NeighborsStore) update() {
-	for _, id := range s.sources.GetSourceIDs() {
+	for _, id := range s.sources.GetSourceIDsForRefresh() {
 		go s.safeUpdateSource(id)
 	}
 }

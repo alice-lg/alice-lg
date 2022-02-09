@@ -22,7 +22,7 @@ const (
 // State is an enum of the above States
 type State int
 
-// String()  converts a state into a string
+// String  converts a state into a string
 func (s State) String() string {
 	switch s {
 	case StateInit:
@@ -249,8 +249,6 @@ func (s *SourcesStore) GetSourceIDsForRefresh() []string {
 		}
 	}
 
-	log.Println(locked)
-
 	// Sort by refresh start time ascending
 	sort.Sort(sources)
 
@@ -298,8 +296,7 @@ func (s *SourcesStore) RefreshSuccess(sourceID string) error {
 	}
 	status.State = StateReady
 	status.LastRefresh = time.Now().UTC()
-	status.LastRefreshDuration = time.Now().Sub(
-		status.lastRefreshStart)
+	status.LastRefreshDuration = time.Since(status.lastRefreshStart)
 	status.LastError = nil
 	status.Initialized = true // We now have data
 	return nil
@@ -308,7 +305,7 @@ func (s *SourcesStore) RefreshSuccess(sourceID string) error {
 // RefreshError indicates that the refresh has failed
 func (s *SourcesStore) RefreshError(
 	sourceID string,
-	err interface{},
+	sourceErr interface{},
 ) {
 	s.Lock()
 	defer s.Unlock()
@@ -319,8 +316,7 @@ func (s *SourcesStore) RefreshError(
 	}
 	status.State = StateError
 	status.LastRefresh = time.Now().UTC()
-	status.LastRefreshDuration = time.Now().Sub(
-		status.lastRefreshStart)
-	status.LastError = err
+	status.LastRefreshDuration = time.Since(status.lastRefreshStart)
+	status.LastError = sourceErr
 	return
 }
