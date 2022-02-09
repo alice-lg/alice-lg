@@ -42,8 +42,8 @@ func createAllocProfile(filename string) {
 }
 
 func startMemoryProfile(prefix string) {
+	t := 0
 	for {
-		t := 0
 		filename := fmt.Sprintf("%s-heap-%03d", prefix, t)
 		runtime.GC() // get up-to-date statistics (according to docs)
 		createHeapProfile(filename)

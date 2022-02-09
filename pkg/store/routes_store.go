@@ -66,7 +66,7 @@ func NewRoutesStore(
 	if refreshInterval == 0 {
 		refreshInterval = time.Duration(5) * time.Minute
 	}
-	refreshParallelism := cfg.Server.NeighborsStoreRefreshParallelism
+	refreshParallelism := cfg.Server.RoutesStoreRefreshParallelism
 	if refreshParallelism <= 0 {
 		refreshParallelism = 1
 	}
