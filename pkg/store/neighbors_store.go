@@ -70,11 +70,16 @@ func NewNeighborsStore(
 	if refreshInterval == 0 {
 		refreshInterval = time.Duration(5) * time.Minute
 	}
+	refreshParallelism := cfg.Server.NeighborsStoreRefreshParallelism
+	if refreshParallelism <= 0 {
+		refreshParallelism = 1
+	}
 
-	log.Println("Neighbors Store refresh interval set to:", refreshInterval)
+	log.Println("Neighbors refresh interval set to:", refreshInterval)
+	log.Println("Neighbors refresh parallelism:", refreshParallelism)
 
 	// Store refresh information per store
-	sources := NewSourcesStore(cfg, refreshInterval)
+	sources := NewSourcesStore(cfg, refreshInterval, refreshParallelism)
 
 	// Neighbors will be refreshed on every GetNeighborsAt
 	// invocation. Why? I (Annika) don't know. I have to ask Patrick.
@@ -183,7 +188,7 @@ func (s *NeighborsStore) safeUpdateSource(id string) {
 // sources last neighbor refresh is longer ago
 // than the configured refresh period.
 func (s *NeighborsStore) update() {
-	for _, id := range s.sources.GetSourceIDs() {
+	for _, id := range s.sources.GetSourceIDsForRefresh() {
 		go s.safeUpdateSource(id)
 	}
 }

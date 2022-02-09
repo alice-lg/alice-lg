@@ -73,14 +73,16 @@ const (
 // A ServerConfig holds the runtime configuration
 // for the backend.
 type ServerConfig struct {
-	Listen                        string `ini:"listen_http"`
-	HTTPTimeout                   int    `ini:"http_timeout"`
-	EnablePrefixLookup            bool   `ini:"enable_prefix_lookup"`
-	NeighborsStoreRefreshInterval int    `ini:"neighbours_store_refresh_interval"`
-	RoutesStoreRefreshInterval    int    `ini:"routes_store_refresh_interval"`
-	StoreBackend                  string `ini:"store_backend"`
-	Asn                           int    `ini:"asn"`
-	EnableNeighborsStatusRefresh  bool   `ini:"enable_neighbors_status_refresh"`
+	Listen                           string `ini:"listen_http"`
+	HTTPTimeout                      int    `ini:"http_timeout"`
+	EnablePrefixLookup               bool   `ini:"enable_prefix_lookup"`
+	NeighborsStoreRefreshInterval    int    `ini:"neighbors_store_refresh_interval"`
+	NeighborsStoreRefreshParallelism int    `ini:"neighbors_store_refresh_parallelism"`
+	RoutesStoreRefreshInterval       int    `ini:"routes_store_refresh_interval"`
+	RoutesStoreRefreshParallelism    int    `ini:"routes_store_refresh_parallelism"`
+	StoreBackend                     string `ini:"store_backend"`
+	Asn                              int    `ini:"asn"`
+	EnableNeighborsStatusRefresh     bool   `ini:"enable_neighbors_status_refresh"`
 }
 
 // PostgresConfig is the configuration for the database
@@ -840,8 +842,10 @@ func LoadConfig(file string) (*Config, error) {
 
 	// Map sections
 	server := ServerConfig{
-		HTTPTimeout:  DefaultHTTPTimeout,
-		StoreBackend: "memory",
+		HTTPTimeout:                      DefaultHTTPTimeout,
+		StoreBackend:                     "memory",
+		RoutesStoreRefreshParallelism:    1,
+		NeighborsStoreRefreshParallelism: 1,
 	}
 	if err := parsedConfig.Section("server").MapTo(&server); err != nil {
 		return nil, err

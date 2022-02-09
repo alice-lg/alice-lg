@@ -66,11 +66,16 @@ func NewRoutesStore(
 	if refreshInterval == 0 {
 		refreshInterval = time.Duration(5) * time.Minute
 	}
+	refreshParallelism := cfg.Server.RoutesStoreRefreshParallelism
+	if refreshParallelism <= 0 {
+		refreshParallelism = 1
+	}
 
 	log.Println("Routes refresh interval set to:", refreshInterval)
+	log.Println("Routes refresh parallelism:", refreshParallelism)
 
 	// Store refresh information per store
-	sources := NewSourcesStore(cfg, refreshInterval)
+	sources := NewSourcesStore(cfg, refreshInterval, refreshParallelism)
 	store := &RoutesStore{
 		backend:   backend,
 		sources:   sources,
@@ -95,7 +100,7 @@ func (s *RoutesStore) Start() {
 // refresh period. This is totally the same as the
 // NeighborsStore.update and maybe these functions can be merged (TODO)
 func (s *RoutesStore) update() {
-	for _, id := range s.sources.GetSourceIDs() {
+	for _, id := range s.sources.GetSourceIDsForRefresh() {
 		go s.safeUpdateSource(id)
 	}
 }

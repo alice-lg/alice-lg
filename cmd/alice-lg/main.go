@@ -25,7 +25,6 @@ func createHeapProfile(filename string) {
 		log.Fatal("could not create memory profile: ", err)
 	}
 	defer f.Close() // error handling omitted for example
-	runtime.GC()    // get up-to-date statistics
 	if err := pprof.WriteHeapProfile(f); err != nil {
 		log.Fatal("could not write memory profile: ", err)
 	}
@@ -37,16 +36,16 @@ func createAllocProfile(filename string) {
 		log.Fatal("could not create alloc profile: ", err)
 	}
 	defer f.Close() // error handling omitted for example
-	runtime.GC()    // get up-to-date statistics
 	if err := pprof.Lookup("allocs").WriteTo(f, 0); err != nil {
 		log.Fatal("could not write alloc profile: ", err)
 	}
 }
 
 func startMemoryProfile(prefix string) {
+	t := 0
 	for {
-		t := 0
 		filename := fmt.Sprintf("%s-heap-%03d", prefix, t)
+		runtime.GC() // get up-to-date statistics (according to docs)
 		createHeapProfile(filename)
 		log.Println("wrote memory heap profile:", filename)
 		filename = fmt.Sprintf("%s-allocs-%03d", prefix, t)
