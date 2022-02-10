@@ -310,8 +310,6 @@ func (b *GenericBirdwatcher) LookupPrefix(
 	// Add corresponding neighbor and source rs to result
 	results := api.LookupRoutes{}
 	for _, src := range routes {
-		// Okay. This is actually really hacky.
-		// A less bruteforce approach would be highly appreciated
 		route := &api.LookupRoute{
 			RouteServer: rs,
 			Route:       src,
