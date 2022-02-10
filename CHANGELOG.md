@@ -28,7 +28,7 @@
  * Support for alternative pipe in `multi_table` birdwatcher
    configurations.
 
-
+ * Reduced memory footprint by precomputing route details
 
 
 ## 5.0.1 (2021-11-01)
