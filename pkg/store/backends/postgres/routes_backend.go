@@ -32,6 +32,8 @@ func (b *RoutesBackend) SetRoutes(
 	sourceID string,
 	routes api.LookupRoutes,
 ) error {
+
+	// Acquire connection
 	now := time.Now().UTC()
 	for _, r := range routes {
 		if err := b.persist(ctx, sourceID, r, now); err != nil {

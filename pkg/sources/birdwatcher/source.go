@@ -281,7 +281,7 @@ func (b *GenericBirdwatcher) LookupPrefix(
 	}
 
 	// Parse routes
-	routes, _ := parseRoutes(bird, b.config)
+	routes, _ := parseRoutes(bird, b.config, true)
 
 	// Add corresponding neighbor and source rs to result
 	results := api.LookupRoutes{}

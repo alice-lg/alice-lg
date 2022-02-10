@@ -303,7 +303,11 @@ func parseExtBgpCommunities(data interface{}) []api.ExtCommunity {
 }
 
 // Parse partial routes response
-func parseRoutesData(birdRoutes []interface{}, config Config) api.Routes {
+func parseRoutesData(
+	birdRoutes []interface{},
+	config Config,
+	keepDetails bool,
+) api.Routes {
 	routes := api.Routes{}
 
 	for _, data := range birdRoutes {
@@ -314,11 +318,14 @@ func parseRoutesData(birdRoutes []interface{}, config Config) api.Routes {
 		bgpInfo := parseRouteBgpInfo(rdata["bgp"])
 
 		// Precompute details as raw json message
-		detailsJSON, err := json.Marshal(rdata)
-		if err != nil {
-			log.Println("error while encoding details:", err)
+		var details json.RawMessage = nil
+		if keepDetails {
+			detailsJSON, err := json.Marshal(rdata)
+			if err != nil {
+				log.Println("error while encoding details:", err)
+			}
+			details = json.RawMessage(detailsJSON)
 		}
-		details := json.RawMessage(detailsJSON)
 
 		gateway := decoders.String(rdata["gateway"], "unknown gateway")
 
@@ -345,13 +352,17 @@ func parseRoutesData(birdRoutes []interface{}, config Config) api.Routes {
 }
 
 // Parse routes response
-func parseRoutes(bird ClientResponse, config Config) (api.Routes, error) {
+func parseRoutes(
+	bird ClientResponse,
+	config Config,
+	keepDetails bool,
+) (api.Routes, error) {
 	birdRoutes, ok := bird["routes"].([]interface{})
 	if !ok {
 		return api.Routes{}, fmt.Errorf("routes response missing")
 	}
 
-	routes := parseRoutesData(birdRoutes, config)
+	routes := parseRoutesData(birdRoutes, config, keepDetails)
 
 	// Sort routes
 	sort.Sort(routes)

@@ -33,6 +33,12 @@ func (r *RoutesBackend) SetRoutes(
 ) error {
 	r.Lock()
 	defer r.Unlock()
+
+	// Remove details from routes
+	for _, r := range routes {
+		r.Route.Details = nil
+	}
+
 	r.routes[sourceID] = routes
 	return nil
 }

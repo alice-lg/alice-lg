@@ -131,7 +131,7 @@ func (src *MultiTableBirdwatcher) fetchReceivedRoutes(
 	}
 
 	// Parse the routes
-	received, err := parseRoutes(bird, src.config)
+	received, err := parseRoutes(bird, src.config, true)
 	if err != nil {
 		log.Println("WARNING Could not retrieve received routes:", err)
 		log.Println("Is the 'routes_peer' module active in birdwatcher?")
@@ -142,6 +142,7 @@ func (src *MultiTableBirdwatcher) fetchReceivedRoutes(
 
 func (src *MultiTableBirdwatcher) fetchFilteredRoutes(
 	neighborID string,
+	keepDetails bool,
 ) (*api.Meta, api.Routes, error) {
 	// Query birdwatcher
 	_, birdProtocols, err := src.fetchProtocols()
@@ -170,7 +171,8 @@ func (src *MultiTableBirdwatcher) fetchFilteredRoutes(
 	}
 
 	// Parse the routes
-	filtered := parseRoutesData(birdFiltered["routes"].([]interface{}), src.config)
+	filtered := parseRoutesData(
+		birdFiltered["routes"].([]interface{}), src.config, keepDetails)
 
 	// Stage 2 filters
 	table := protocols[neighborID].(map[string]interface{})["table"].(string)
@@ -197,11 +199,15 @@ func (src *MultiTableBirdwatcher) fetchFilteredRoutes(
 
 	// Parse the routes
 	pipeFiltered := parseRoutesData(
-		birdPipeFiltered["routes"].([]interface{}), src.config)
+		birdPipeFiltered["routes"].([]interface{}), src.config, keepDetails)
 
 	// Sort routes for deterministic ordering
 	filtered = append(filtered, pipeFiltered...)
-	sort.Sort(filtered)
+
+	if !keepDetails {
+		// Yes this is not the right variable name to convey this...
+		sort.Sort(filtered)
+	}
 
 	return apiStatus, filtered, nil
 }
@@ -240,7 +246,7 @@ func (src *MultiTableBirdwatcher) fetchNotExportedRoutes(
 		return nil, nil, err
 	}
 
-	notExported, err := parseRoutes(bird, src.config)
+	notExported, err := parseRoutes(bird, src.config, true)
 	if err != nil {
 		log.Println("WARNING Could not retrieve routes not exported:", err)
 		log.Println("Is the 'routes_noexport' module active in birdwatcher?")
@@ -280,7 +286,7 @@ func (src *MultiTableBirdwatcher) fetchRequiredRoutes(
 	}
 
 	// Second: get routes filtered
-	_, filteredRoutes, err := src.fetchFilteredRoutes(neighborID)
+	_, filteredRoutes, err := src.fetchFilteredRoutes(neighborID, true)
 	if err != nil {
 		return nil, err
 	}
@@ -585,9 +591,9 @@ func (src *MultiTableBirdwatcher) AllRoutes() (*api.RoutesResponse, error) {
 	}
 
 	// Parse the routes
-	imported := parseRoutesData(birdImported["routes"].([]interface{}), src.config)
+	imported := parseRoutesData(birdImported["routes"].([]interface{}), src.config, false)
 	// Sort routes for deterministic ordering
-	sort.Sort(imported)
+	// sort.Sort(imported)
 	response.Imported = imported
 
 	// Iterate over all the protocols and fetch the filtered routes for everyone
@@ -597,7 +603,7 @@ func (src *MultiTableBirdwatcher) AllRoutes() (*api.RoutesResponse, error) {
 		learntFrom := decoders.String(protocolsData.(map[string]interface{})["learnt_from"], peer)
 
 		// Fetch filtered routes
-		_, filtered, err := src.fetchFilteredRoutes(protocolID)
+		_, filtered, err := src.fetchFilteredRoutes(protocolID, false)
 		if err != nil {
 			continue
 		}

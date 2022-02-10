@@ -182,6 +182,13 @@ func (s *NeighborsStore) safeUpdateSource(id string) {
 			"Refeshing neighbors of", srcName, "failed:", err)
 		s.sources.RefreshError(id, err)
 	}
+
+	status, err := s.sources.GetStatus(id)
+	if err != nil {
+		log.Println(err)
+	} else {
+		log.Println("Refreshed neighbors of", srcName, "in", status.LastRefreshDuration)
+	}
 }
 
 // Update all neighbors from all sources, where the

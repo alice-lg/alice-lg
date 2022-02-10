@@ -126,6 +126,9 @@ func (s *RoutesStore) safeUpdateSource(id string) {
 	time.Sleep(time.Duration(rand.Intn(30)) * time.Second)
 
 	src := s.sources.Get(id)
+	srcName := s.sources.GetName(id)
+
+	log.Println("[routes store] begin routes refresh of:", srcName)
 
 	// Prepare for impact.
 	defer func() {
@@ -141,6 +144,13 @@ func (s *RoutesStore) safeUpdateSource(id string) {
 		log.Println(
 			"Refeshing routes of", src.Name, "failed:", err)
 		s.sources.RefreshError(id, err)
+	} else {
+		status, err := s.sources.GetStatus(id)
+		if err != nil {
+			log.Println(err)
+		} else {
+			log.Println("Refreshed routes of", srcName, "in", status.LastRefreshDuration)
+		}
 	}
 }
 
@@ -149,30 +159,42 @@ func (s *RoutesStore) updateSource(
 	ctx context.Context,
 	src *config.SourceConfig,
 ) error {
+
+	log.Println("[routes store] start retrive routes dump from RS", src.Name)
+
 	rs := src.GetInstance()
 	res, err := rs.AllRoutes()
 	if err != nil {
 		return err
 	}
 
+	log.Println("[routes store] finished fetching routes dump from RS", src.Name)
+
+	log.Println("[routes store] awaiting neighbor store HAS DATA for", src.Name)
 	if err := s.awaitNeighborStore(ctx, src.ID); err != nil {
 		return err
 	}
+	log.Println("[routes store] neighbor store HAS DATA for", src.Name)
 
 	neighbors, err := s.neighbors.GetNeighborsMapAt(ctx, src.ID)
 	if err != nil {
 		return err
 	}
 
+	log.Println("[routes store] retrieved neighbors for:", src.Name)
+
+	log.Println("[routes store] preparing routes for import of", src.Name)
 	// Prepare imported routes for lookup
 	imported := s.routesToLookupRoutes(ctx, "imported", src, neighbors, res.Imported)
 	filtered := s.routesToLookupRoutes(ctx, "filtered", src, neighbors, res.Filtered)
 	lookupRoutes := append(imported, filtered...)
 
+	log.Println("[routes store] importing", len(lookupRoutes), "into store from", src.Name)
 	if err = s.backend.SetRoutes(ctx, src.ID, lookupRoutes); err != nil {
 		return err
 	}
 
+	log.Println("[routes store] import success.")
 	return s.sources.RefreshSuccess(src.ID)
 }
 
