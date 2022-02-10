@@ -1,7 +1,9 @@
 package openbgpd
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -186,6 +188,12 @@ func decodeRoute(details map[string]interface{}) (*api.Route, error) {
 		LocalPref:        localPref,
 	}
 
+	detailsJSON, err := json.Marshal(details)
+	if err != nil {
+		log.Println("error while encoding details:", err)
+	}
+	rawDetails := json.RawMessage(detailsJSON)
+
 	r := &api.Route{
 		ID:         prefix,
 		NeighborID: neighborID,
@@ -195,7 +203,7 @@ func decodeRoute(details map[string]interface{}) (*api.Route, error) {
 		Age:        lastUpdate,
 		Type:       []string{origin},
 		Primary:    isPrimary,
-		Details:    api.Details(details),
+		Details:    &rawDetails,
 	}
 	return r, nil
 }

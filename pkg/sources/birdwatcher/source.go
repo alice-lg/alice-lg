@@ -126,7 +126,7 @@ func (b *GenericBirdwatcher) filterRoutesByPeerOrLearntFrom(
 	for _, route := range routes {
 		if (route.Gateway == peer) ||
 			(route.Gateway == learntFrom) ||
-			(route.Details["learnt_from"] == peer) {
+			(route.LearntFrom == peer) {
 			resultRoutes = append(resultRoutes, route)
 		}
 	}
@@ -167,30 +167,6 @@ func (b *GenericBirdwatcher) filterRoutesByDuplicates(
 
 	return routes
 }
-
-/*
-linter says: dead code.
-
-func (b *GenericBirdwatcher) filterRoutesByNeighborID(
-	routes api.Routes,
-	neighborID string,
-) api.Routes {
-	resultRoutes := make(api.Routes, 0, len(routes))
-
-	// Choose routes with next_hop == gateway of this neighbor
-	for _, route := range routes {
-		if route.Details["from_protocol"] == neighborID {
-			resultRoutes = append(resultRoutes, route)
-		}
-	}
-
-	// Sort routes for deterministic ordering
-	sort.Sort(resultRoutes)
-	routes = resultRoutes
-
-	return routes
-}
-*/
 
 func (b *GenericBirdwatcher) fetchProtocolsShort() (
 	*api.Meta,

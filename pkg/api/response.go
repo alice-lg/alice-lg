@@ -12,9 +12,6 @@ type Response struct {
 	Meta *Meta `json:"api"`
 }
 
-// Details are usually the original backend response
-type Details map[string]interface{}
-
 // ErrorResponse encodes an error message and code
 type ErrorResponse struct {
 	Message       string `json:"message"`

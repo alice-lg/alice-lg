@@ -10,16 +10,17 @@ type Route struct {
 	ID         string `json:"id"`
 	NeighborID string `json:"neighbor_id"`
 
-	Network   string        `json:"network"`
-	Interface string        `json:"interface"`
-	Gateway   string        `json:"gateway"`
-	Metric    int           `json:"metric"`
-	BGP       *BGPInfo      `json:"bgp"`
-	Age       time.Duration `json:"age"`
-	Type      []string      `json:"type"` // [BGP, unicast, univ]
-	Primary   bool          `json:"primary"`
+	Network    string        `json:"network"`
+	Interface  string        `json:"interface"`
+	Gateway    string        `json:"gateway"`
+	Metric     int           `json:"metric"`
+	BGP        *BGPInfo      `json:"bgp"`
+	Age        time.Duration `json:"age"`
+	Type       []string      `json:"type"` // [BGP, unicast, univ]
+	Primary    bool          `json:"primary"`
+	LearntFrom string        `json:"learnt_from"`
 
-	Details Details `json:"details"`
+	Details *json.RawMessage `json:"details"`
 }
 
 func (r *Route) String() string {

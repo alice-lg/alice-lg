@@ -5,7 +5,6 @@ import (
 	"sort"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
-	"github.com/alice-lg/alice-lg/pkg/decoders"
 )
 
 // SingleTableBirdwatcher is an Alice Source
@@ -127,7 +126,7 @@ func (src *SingleTableBirdwatcher) fetchRequiredRoutes(
 	importedRoutes := api.Routes{}
 	if len(receivedRoutes) > 0 {
 		peer := receivedRoutes[0].Gateway
-		learntFrom := decoders.String(receivedRoutes[0].Details["learnt_from"], peer)
+		learntFrom := receivedRoutes[0].LearntFrom
 
 		filteredRoutes = src.filterRoutesByPeerOrLearntFrom(filteredRoutes, peer, learntFrom)
 		importedRoutes = src.filterRoutesByDuplicates(receivedRoutes, filteredRoutes)
