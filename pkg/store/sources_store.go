@@ -318,5 +318,4 @@ func (s *SourcesStore) RefreshError(
 	status.LastRefresh = time.Now().UTC()
 	status.LastRefreshDuration = time.Since(status.lastRefreshStart)
 	status.LastError = sourceErr
-	return
 }
