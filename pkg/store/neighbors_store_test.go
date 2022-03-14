@@ -113,6 +113,7 @@ func TestGetNeighbors(t *testing.T) {
 	if err == nil {
 		t.Error("Unknown source should have yielded zero results")
 	}
+  t.Log(neighbors)
 
 }
 

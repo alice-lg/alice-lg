@@ -120,7 +120,7 @@ func main() {
 	log.Println("Using configuration:", cfg.File)
 
 	// Start stores
-	if cfg.Server.EnablePrefixLookup == true {
+	if cfg.Server.EnablePrefixLookup {
 		go neighborsStore.Start()
 		go routesStore.Start()
 	}

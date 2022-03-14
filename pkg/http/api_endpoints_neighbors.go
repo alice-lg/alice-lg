@@ -30,6 +30,9 @@ func (s *Server) apiNeighborsList(
 	// from the summary.
 	if s.neighborsStore.IsInitialized(rsID) {
 		status, err := s.neighborsStore.GetStatus(rsID)
+		if err != nil {
+			return nil, err
+		}
 		neighbors, err := s.neighborsStore.GetNeighborsAt(ctx, rsID)
 		if err != nil {
 			return nil, err
