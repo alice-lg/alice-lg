@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"time"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
@@ -12,13 +13,55 @@ import (
 	"github.com/alice-lg/alice-lg/pkg/store/backends/postgres"
 )
 
-func makeRoute() *api.LookupRoute {
-	jjj
+func randomNet() string {
+	return fmt.Sprintf("fd42:%d:%d:%d::%d",
+		1+rand.Intn(9999),
+		1+rand.Intn(9999),
+		1+rand.Intn(9999),
+		1+rand.Intn(99))
+
 }
 
-func makeRoutes(count uint) api.LookupRoutes {
-	routes := make(api.LookupRoutes, 0, count)
+func makeRoute(n int) *api.LookupRoute {
+	id := fmt.Sprintf("route_%d", n)
+	nid := fmt.Sprintf("neighbor_%d", n%50)
+	gw := fmt.Sprintf("fd23:2342:%04d::1", n%50)
+	net := randomNet()
+	return &api.LookupRoute{
+		Route: &api.Route{
+			ID:         id,
+			NeighborID: nid,
+			Network:    net,
+			Interface:  "enp0s23",
+			Gateway:    gw,
+			Metric:     100,
+			Age:        30 * time.Second,
+			Type:       []string{"BGP", "unicast", "univ"},
+			Primary:    true,
+			LearntFrom: gw,
+		},
+		State: "imported",
+		Neighbor: &api.Neighbor{
+			ID:              nid,
+			Address:         gw,
+			State:           "up",
+			Description:     fmt.Sprintf("Neighbor AS 2342%d", n%50),
+			RoutesReceived:  23000,
+			RoutesFiltered:  0,
+			RoutesExported:  42000,
+			RoutesPreferred: 23,
+			RoutesAccepted:  23910,
+			Uptime:          20 * time.Minute,
+			RouteServerID:   "rsid",
+		},
+	}
+}
 
+func makeRoutes(count int) api.LookupRoutes {
+	routes := make(api.LookupRoutes, 0, count)
+	for i := 0; i < count; i++ {
+		routes = append(routes, makeRoute(i))
+	}
 	return routes
 }
 
@@ -30,7 +73,10 @@ func main() {
 		"Alice looking glass configuration file",
 	)
 
+	flag.Parse()
+
 	ctx := context.Background()
+	fmt.Println("using config:", *configFilenameFlag)
 
 	// Load configuration
 	cfg, err := config.LoadConfig(*configFilenameFlag)
@@ -52,8 +98,8 @@ func main() {
 	backend := postgres.NewRoutesBackend(pool)
 
 	// Now insert tons of routes...
-	routes := makeRoutes(1000)
 	for i := 0; i < 10; i++ {
+		routes := makeRoutes(100000)
 		t := time.Now()
 		if err := backend.SetRoutes(
 			ctx, "rs1-example-fra1", routes); err != nil {
