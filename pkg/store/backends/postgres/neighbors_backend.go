@@ -43,7 +43,7 @@ func (b *NeighborsBackend) SetNeighbors(
 	defer tx.Rollback(ctx)
 
 	// Clear current neighbors
-	if err := b.clear(ctx, tx, sourceID, now); err != nil {
+	if err := b.clear(ctx, tx, sourceID); err != nil {
 		return err
 	}
 
@@ -79,12 +79,11 @@ func (b *NeighborsBackend) clear(
 	ctx context.Context,
 	tx pgx.Tx,
 	sourceID string,
-	t time.Time,
 ) error {
 	qry := `
 	  DELETE FROM neighbors WHERE rs_id = $1 
 	`
-	_, err := tx.Exec(ctx, qry, sourceID, t)
+	_, err := tx.Exec(ctx, qry, sourceID)
 	return err
 }
 
