@@ -51,6 +51,7 @@ func (b *RoutesBackend) SetRoutes(
 			return err
 		}
 	}
+
 	if err := tx.Commit(ctx); err != nil {
 		return err
 	}
