@@ -18,7 +18,7 @@ services:
     volumes:
       - ../pkg/ui:/ui
     ports:
-      - 8040:3000
+      - 3000:3000
     command:
       - start 
 
