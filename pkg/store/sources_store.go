@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"log"
+	"sort"
 	"sync"
 	"time"
 
@@ -21,7 +22,7 @@ const (
 // State is an enum of the above States
 type State int
 
-// String()  converts a state into a string
+// String  converts a state into a string
 func (s State) String() string {
 	switch s {
 	case StateInit:
@@ -36,24 +37,45 @@ func (s State) String() string {
 	return "INVALID"
 }
 
-// Status defines a status the store can be in
+// Status defines a status the store can be in.
 type Status struct {
 	RefreshInterval     time.Duration
+	RefreshParallelism  int
 	LastRefresh         time.Time
 	LastRefreshDuration time.Duration
 	LastError           interface{}
 	State               State
 	Initialized         bool
+	SourceID            string
 
 	lastRefreshStart time.Time
+}
+
+// SourceStatusList is a sortable list of source status
+type SourceStatusList []*Status
+
+// Len implements the sort interface
+func (l SourceStatusList) Len() int {
+	return len(l)
+}
+
+// Less implements the sort interface
+func (l SourceStatusList) Less(i, j int) bool {
+	return l[i].lastRefreshStart.Before(l[j].lastRefreshStart)
+}
+
+// Swap implements the sort interface
+func (l SourceStatusList) Swap(i, j int) {
+	l[i], l[j] = l[j], l[i]
 }
 
 // SourcesStore provides methods for retrieving
 // the current status of a source.
 type SourcesStore struct {
-	refreshInterval time.Duration
-	status          map[string]*Status
-	sources         map[string]*config.SourceConfig
+	refreshInterval    time.Duration
+	refreshParallelism int
+	status             map[string]*Status
+	sources            map[string]*config.SourceConfig
 	sync.Mutex
 }
 
@@ -61,6 +83,7 @@ type SourcesStore struct {
 func NewSourcesStore(
 	cfg *config.Config,
 	refreshInterval time.Duration,
+	refreshParallelism int,
 ) *SourcesStore {
 	status := make(map[string]*Status)
 	sources := make(map[string]*config.SourceConfig)
@@ -71,13 +94,15 @@ func NewSourcesStore(
 		sources[sourceID] = src
 		status[sourceID] = &Status{
 			RefreshInterval: refreshInterval,
+			SourceID:        sourceID,
 		}
 	}
 
 	return &SourcesStore{
-		status:          status,
-		sources:         sources,
-		refreshInterval: refreshInterval,
+		status:             status,
+		sources:            sources,
+		refreshInterval:    refreshInterval,
+		refreshParallelism: refreshParallelism,
 	}
 }
 
@@ -111,8 +136,6 @@ func (s *SourcesStore) IsInitialized(sourceID string) (bool, error) {
 }
 
 // NextRefresh calculates the next refresh time
-// TODO: I doubt the usefulness of these numbers.
-//
 func (s *SourcesStore) NextRefresh(
 	ctx context.Context,
 ) time.Time {
@@ -209,6 +232,43 @@ func (s *SourcesStore) GetSourceIDs() []string {
 	return ids
 }
 
+// GetSourceIDsForRefresh will retrieve a list of source IDs,
+// which are currently not locked, sorted by least refreshed.
+// The number of sources returned is limited through the
+// refresh parallelism parameter.
+func (s *SourcesStore) GetSourceIDsForRefresh() []string {
+	s.Lock()
+	defer s.Unlock()
+
+	locked := 0
+	sources := make(SourceStatusList, 0, len(s.status))
+	for _, status := range s.status {
+		sources = append(sources, status)
+		if status.State == StateBusy {
+			locked++
+		}
+	}
+
+	// Sort by refresh start time ascending
+	sort.Sort(sources)
+
+	slots := s.refreshParallelism - locked
+	if slots <= 0 {
+		slots = 0
+	}
+
+	ids := make([]string, 0, slots)
+	i := 0
+	for _, status := range sources {
+		if i >= slots {
+			break
+		}
+		ids = append(ids, status.SourceID)
+		i++
+	}
+	return ids
+}
+
 // LockSource indicates the start of a refresh
 func (s *SourcesStore) LockSource(sourceID string) error {
 	s.Lock()
@@ -236,8 +296,7 @@ func (s *SourcesStore) RefreshSuccess(sourceID string) error {
 	}
 	status.State = StateReady
 	status.LastRefresh = time.Now().UTC()
-	status.LastRefreshDuration = time.Now().Sub(
-		status.lastRefreshStart)
+	status.LastRefreshDuration = time.Since(status.lastRefreshStart)
 	status.LastError = nil
 	status.Initialized = true // We now have data
 	return nil
@@ -246,7 +305,7 @@ func (s *SourcesStore) RefreshSuccess(sourceID string) error {
 // RefreshError indicates that the refresh has failed
 func (s *SourcesStore) RefreshError(
 	sourceID string,
-	err interface{},
+	sourceErr interface{},
 ) {
 	s.Lock()
 	defer s.Unlock()
@@ -257,8 +316,6 @@ func (s *SourcesStore) RefreshError(
 	}
 	status.State = StateError
 	status.LastRefresh = time.Now().UTC()
-	status.LastRefreshDuration = time.Now().Sub(
-		status.lastRefreshStart)
-	status.LastError = err
-	return
+	status.LastRefreshDuration = time.Since(status.lastRefreshStart)
+	status.LastError = sourceErr
 }

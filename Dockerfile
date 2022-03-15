@@ -23,7 +23,7 @@ ADD client .
 RUN DISABLE_LOGGING=1 NODE_ENV=production /usr/local/bin/gulp
 
 # Build the backend
-FROM golang:1.16 AS backend
+FROM golang:1.17 AS backend
 
 # Install dependencies
 WORKDIR /src/alice-lg
@@ -40,6 +40,9 @@ WORKDIR /src/alice-lg/cmd/alice-lg
 RUN make alpine
 
 FROM alpine:latest
+
+RUN apk add -U tzdata
+
 COPY --from=backend /src/alice-lg/cmd/alice-lg/alice-lg-linux-amd64 /usr/bin/alice-lg
 RUN ls -lsha /usr/bin/alice-lg
 

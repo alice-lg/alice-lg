@@ -53,7 +53,11 @@ export const ColNetwork = function(props) {
 
 // Special AS Path Widget
 export const ColAsPath = function(props) {
-    const asns = _lookup(props.route, "bgp.as_path");
+    let asns = _lookup(props.route, "bgp.as_path");
+    if(!asns){
+      asns = [];
+    }
+
     const baseUrl = "https://irrexplorer.nlnog.net/asn/AS"
 
     let asnLinks = asns.map((asn, i) => {

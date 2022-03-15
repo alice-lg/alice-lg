@@ -8,12 +8,28 @@
    with `neighbor.asn` (in case of java script errors).
    This also applies to the API.
 
+   In the config `neighbors_store_refresh_interval` needs to be updated.
+
  * Parallel route / neighbor store refreshs: Route servers are not
    longer queried sequentially. A jitter is applied to not hit all
    servers exactly at once.
 
+ * Parallelism can be tuned through the config parameters:
+    [server]
+
+    routes_store_refresh_parallelism = 5
+    neighbors_store_refresh_parallelism = 10000
+
+   A value of 1 is a sequential refresh.
+
  * Postgres store backend: Not keeping routes and neighbors in
    memory might reduce the memory footprint.
+
+ * Support for alternative pipe in `multi_table` birdwatcher
+   configurations.
+
+ * Reduced memory footprint by precomputing route details
+
 
 ## 5.0.1 (2021-11-01)
 

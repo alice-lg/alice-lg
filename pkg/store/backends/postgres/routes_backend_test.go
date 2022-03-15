@@ -12,6 +12,12 @@ func TestCountRoutesAt(t *testing.T) {
 	ctx := context.Background()
 	now := time.Now().UTC()
 	pool := ConnectTest()
+	tx, err := pool.Begin(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer tx.Rollback(ctx)
+
 	b := &RoutesBackend{pool: pool}
 	r := &api.LookupRoute{
 		State: "filtered",
@@ -23,14 +29,18 @@ func TestCountRoutesAt(t *testing.T) {
 			Network: "1.2.3.0/24",
 		},
 	}
-	b.persist(ctx, "rs1", r, now)
+	b.persist(ctx, tx, "rs1", r, now)
 
 	r.Route.ID = "r4242"
-	b.persist(ctx, "rs1", r, now)
+	b.persist(ctx, tx, "rs1", r, now)
 
 	r.Route.ID = "r4243"
 	r.State = "imported"
-	b.persist(ctx, "rs1", r, now)
+	b.persist(ctx, tx, "rs1", r, now)
+
+	if err := tx.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
 
 	imported, filtered, err := b.CountRoutesAt(ctx, "rs1")
 	if err != nil {
@@ -48,6 +58,11 @@ func TestFindByNeighbors(t *testing.T) {
 	ctx := context.Background()
 	now := time.Now().UTC()
 	pool := ConnectTest()
+	tx, err := pool.Begin(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer tx.Rollback(ctx)
 	b := &RoutesBackend{pool: pool}
 	r := &api.LookupRoute{
 		State: "filtered",
@@ -59,18 +74,22 @@ func TestFindByNeighbors(t *testing.T) {
 			Network: "1.2.3.0/24",
 		},
 	}
-	b.persist(ctx, "rs1", r, now)
+	b.persist(ctx, tx, "rs1", r, now)
 
 	r.Route.ID = "r4242"
-	b.persist(ctx, "rs1", r, now)
+	b.persist(ctx, tx, "rs1", r, now)
 
 	r.Route.ID = "r4243"
 	r.Neighbor.ID = "n24"
-	b.persist(ctx, "rs1", r, now)
+	b.persist(ctx, tx, "rs1", r, now)
 
 	r.Route.ID = "r4244"
 	r.Neighbor.ID = "n25"
-	b.persist(ctx, "rs1", r, now)
+	b.persist(ctx, tx, "rs1", r, now)
+
+	if err := tx.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
 
 	routes, err := b.FindByNeighbors(ctx, []string{
 		"n24", "n25",
@@ -89,6 +108,11 @@ func TestFindByPrefix(t *testing.T) {
 	ctx := context.Background()
 	now := time.Now().UTC()
 	pool := ConnectTest()
+	tx, err := ConnectTest().Begin(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer tx.Rollback(ctx)
 	b := &RoutesBackend{pool: pool}
 	r := &api.LookupRoute{
 		State: "filtered",
@@ -100,21 +124,25 @@ func TestFindByPrefix(t *testing.T) {
 			Network: "1.2.3.0/24",
 		},
 	}
-	b.persist(ctx, "rs1", r, now)
+	b.persist(ctx, tx, "rs1", r, now)
 
 	r.Route.ID = "r4242"
 	r.Route.Network = "1.2.4.0/24"
-	b.persist(ctx, "rs1", r, now)
+	b.persist(ctx, tx, "rs1", r, now)
 
 	r.Route.ID = "r4243"
 	r.Route.Network = "1.2.5.0/24"
 	r.Neighbor.ID = "n24"
-	b.persist(ctx, "rs1", r, now)
+	b.persist(ctx, tx, "rs1", r, now)
 
 	r.Route.ID = "r4244"
 	r.Route.Network = "5.5.5.0/24"
 	r.Neighbor.ID = "n25"
-	b.persist(ctx, "rs1", r, now)
+	b.persist(ctx, tx, "rs1", r, now)
+
+	if err := tx.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
 
 	routes, err := b.FindByPrefix(ctx, "1.2.")
 	if err != nil {

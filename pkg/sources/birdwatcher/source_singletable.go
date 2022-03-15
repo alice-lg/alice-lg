@@ -2,10 +2,8 @@ package birdwatcher
 
 import (
 	"log"
-	"sort"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
-	"github.com/alice-lg/alice-lg/pkg/decoders"
 )
 
 // SingleTableBirdwatcher is an Alice Source
@@ -29,7 +27,7 @@ func (src *SingleTableBirdwatcher) fetchReceivedRoutes(
 	}
 
 	// Parse the routes
-	received, err := parseRoutes(bird, src.config)
+	received, err := parseRoutes(bird, src.config, true)
 	if err != nil {
 		log.Println("WARNING Could not retrieve received routes:", err)
 		log.Println("Is the 'routes_protocol' module active in birdwatcher?")
@@ -55,7 +53,7 @@ func (src *SingleTableBirdwatcher) fetchFilteredRoutes(
 	}
 
 	// Parse the routes
-	filtered, err := parseRoutes(bird, src.config)
+	filtered, err := parseRoutes(bird, src.config, true)
 	if err != nil {
 		log.Println("WARNING Could not retrieve filtered routes:", err)
 		log.Println("Is the 'routes_filtered' module active in birdwatcher?")
@@ -78,7 +76,7 @@ func (src *SingleTableBirdwatcher) fetchNotExportedRoutes(
 	}
 
 	// Parse the routes
-	notExported, err := parseRoutes(bird, src.config)
+	notExported, err := parseRoutes(bird, src.config, true)
 	if err != nil {
 		log.Println("WARNING Could not retrieve routes not exported:", err)
 		log.Println("Is the 'routes_noexport' module active in birdwatcher?")
@@ -127,7 +125,7 @@ func (src *SingleTableBirdwatcher) fetchRequiredRoutes(
 	importedRoutes := api.Routes{}
 	if len(receivedRoutes) > 0 {
 		peer := receivedRoutes[0].Gateway
-		learntFrom := decoders.String(receivedRoutes[0].Details["learnt_from"], peer)
+		learntFrom := receivedRoutes[0].LearntFrom
 
 		filteredRoutes = src.filterRoutesByPeerOrLearntFrom(filteredRoutes, peer, learntFrom)
 		importedRoutes = src.filterRoutesByDuplicates(receivedRoutes, filteredRoutes)
@@ -327,15 +325,15 @@ func (src *SingleTableBirdwatcher) AllRoutes() (*api.RoutesResponse, error) {
 	}
 
 	// Parse the routes
-	imported := parseRoutesData(birdImported["routes"].([]interface{}), src.config)
+	imported := parseRoutesData(birdImported["routes"].([]interface{}), src.config, false)
 	// Sort routes for deterministic ordering
-	sort.Sort(imported)
+	// sort.Sort(imported)
 	response.Imported = imported
 
 	// Parse the routes
-	filtered := parseRoutesData(birdFiltered["routes"].([]interface{}), src.config)
+	filtered := parseRoutesData(birdFiltered["routes"].([]interface{}), src.config, false)
 	// Sort routes for deterministic ordering
-	sort.Sort(filtered)
+	// sort.Sort(filtered)
 	response.Filtered = filtered
 
 	return response, nil

@@ -9,43 +9,51 @@ import (
 )
 
 func TestPersistNeighborLookup(t *testing.T) {
+	ctx := context.Background()
 	pool := ConnectTest()
+	tx, err := pool.Begin(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer tx.Rollback(ctx)
 	b := &NeighborsBackend{pool: pool}
 	n := &api.Neighbor{
 		ID:      "n2342",
 		Address: "test123",
 	}
+
 	now := time.Now().UTC()
-	if err := b.persist(context.Background(), "rs1", n, now); err != nil {
+	if err := b.clear(ctx, tx, "rs1"); err != nil {
 		t.Fatal(err)
 	}
 
-	// make an update
-	n.Address = "test234"
-	if err := b.persist(context.Background(), "rs1", n, now); err != nil {
+	if err := b.persist(ctx, tx, "rs1", n, now); err != nil {
 		t.Fatal(err)
 	}
 
 	// Add a second
 	n.ID = "foo23"
-	if err := b.persist(context.Background(), "rs1", n, now); err != nil {
+	if err := b.persist(ctx, tx, "rs1", n, now); err != nil {
 		t.Fatal(err)
 	}
 
 	// Add to different rs
-	if err := b.persist(context.Background(), "rs2", n, now); err != nil {
+	if err := b.persist(ctx, tx, "rs2", n, now); err != nil {
+		t.Fatal(err)
+	}
+	if err := tx.Commit(ctx); err != nil {
 		t.Fatal(err)
 	}
 
-	neighbors, err := b.GetNeighborsMapAt(context.Background(), "rs1")
+	neighbors, err := b.GetNeighborsMapAt(ctx, "rs1")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if neighbors["n2342"].Address != "test234" {
+	if neighbors["n2342"].Address != "test123" {
 		t.Error("unexpected neighbors:", neighbors)
 	}
 
-	list, err := b.GetNeighborsAt(context.Background(), "rs2")
+	list, err := b.GetNeighborsAt(ctx, "rs2")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -57,6 +65,11 @@ func TestPersistNeighborLookup(t *testing.T) {
 func TestSetNeighbors(t *testing.T) {
 	ctx := context.Background()
 	pool := ConnectTest()
+	tx, err := pool.Begin(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer tx.Rollback(ctx)
 	b := &NeighborsBackend{pool: pool}
 
 	// Persist an old neighbor, should be gone because stale
@@ -64,9 +77,13 @@ func TestSetNeighbors(t *testing.T) {
 		ID:      "n1",
 		Address: "foo",
 	}
-	b.persist(ctx, "rs1", n, time.Time{})
+	b.persist(ctx, tx, "rs1", n, time.Time{})
 
-	result, _ := b.GetNeighborsAt(context.Background(), "rs1")
+	if err := tx.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	result, _ := b.GetNeighborsAt(ctx, "rs1")
 	if len(result) != 1 {
 		t.Fatal("unexpected neighbors:", result)
 	}
@@ -89,7 +106,7 @@ func TestSetNeighbors(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	result, err := b.GetNeighborsAt(context.Background(), "rs1")
+	result, err = b.GetNeighborsAt(ctx, "rs1")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -97,7 +97,7 @@ func Test_RoutesParsing(t *testing.T) {
 	config := Config{Timezone: "UTC"} // Or ""
 	bird, _ := parseTestResponse(APIResponseRoutes)
 
-	routes, err := parseRoutes(bird, config)
+	routes, err := parseRoutes(bird, config, true)
 	if err != nil {
 		t.Error(err)
 	}
