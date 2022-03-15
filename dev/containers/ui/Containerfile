@@ -1,0 +1,9 @@
+
+FROM node:latest
+
+WORKDIR /ui
+
+ADD entrypoint /bin/entrypoint
+
+ENTRYPOINT ["entrypoint"]
+

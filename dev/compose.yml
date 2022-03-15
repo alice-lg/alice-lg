@@ -14,13 +14,11 @@ services:
       - 5432:5432
 
   ui:
-    image: node:latest
-    working_dir: /ui
+    build: containers/ui
     volumes:
-      - ../ui:/ui
+      - ../pkg/ui:/ui
     ports:
       - 8072:3000
-    entrypoint: yarn
     command:
-      - start
+      - start 
 
