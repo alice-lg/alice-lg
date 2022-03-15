@@ -18,7 +18,15 @@ services:
     volumes:
       - ../pkg/ui:/ui
     ports:
-      - 8072:3000
+      - 8040:3000
     command:
       - start 
 
+  backend:
+    build: 
+      dockerfile: dev/containers/backend/Containerfile
+      context: ../.
+    volumes:
+      - ../.:/src/alice-lg
+    ports:
+      - 7340:7340
