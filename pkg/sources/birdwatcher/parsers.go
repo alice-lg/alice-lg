@@ -369,6 +369,17 @@ func parseRoutes(
 	return routes, nil
 }
 
+// ParseRoutesData public
+func ParseRoutesData(
+	res ClientResponse,
+	config Config,
+	keepDetails bool,
+) api.Routes {
+	birdRoutes, _ := res["routes"].([]interface{})
+	routes := parseRoutesData(birdRoutes, config, keepDetails)
+	return routes
+}
+
 /*
 
 Linter says parseRoutesDump is dead code.
