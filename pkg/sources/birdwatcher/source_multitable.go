@@ -5,6 +5,7 @@ import (
 	"log"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
 	"github.com/alice-lg/alice-lg/pkg/decoders"
@@ -565,6 +566,10 @@ func (src *MultiTableBirdwatcher) RoutesNotExported(
 
 // AllRoutes retrieves a routes dump from the server
 func (src *MultiTableBirdwatcher) AllRoutes() (*api.RoutesResponse, error) {
+	t0 := time.Now()
+
+	log.Println("[RD] begin AllRoutes for:", src.config.ID, src.config.Name)
+
 	// Query birdwatcher
 	_, birdProtocols, err := src.fetchProtocols()
 	if err != nil {
@@ -572,11 +577,17 @@ func (src *MultiTableBirdwatcher) AllRoutes() (*api.RoutesResponse, error) {
 	}
 	mainTable := src.GenericBirdwatcher.config.MainTable
 
+	t1 := time.Now()
+	log.Println("[RD] fetchProtocols:", t1.Sub(t0))
+
 	// Fetch received routes first
 	birdImported, err := src.client.GetJSON("/routes/table/" + mainTable)
 	if err != nil {
 		return nil, err
 	}
+
+	t2 := time.Now()
+	log.Println("[RD] fetch received from /routes/table/", mainTable, t2.Sub(t1))
 
 	// Use api status from first request
 	apiStatus, err := parseAPIStatus(birdImported, src.config)
@@ -596,6 +607,10 @@ func (src *MultiTableBirdwatcher) AllRoutes() (*api.RoutesResponse, error) {
 	// sort.Sort(imported)
 	response.Imported = imported
 
+	t3 := time.Now()
+	log.Println("[RD] parsed recieved in", t3.Sub(t2))
+
+	log.Println("[RD] begin fetching filtered for all neighbors")
 	// Iterate over all the protocols and fetch the filtered routes for everyone
 	protocolsBgp := src.filterProtocolsBgp(birdProtocols)
 	for protocolID, protocolsData := range protocolsBgp["protocols"].(map[string]interface{}) {
@@ -603,15 +618,26 @@ func (src *MultiTableBirdwatcher) AllRoutes() (*api.RoutesResponse, error) {
 		learntFrom := decoders.String(protocolsData.(map[string]interface{})["learnt_from"], peer)
 
 		// Fetch filtered routes
+		t4 := time.Now()
 		_, filtered, err := src.fetchFilteredRoutes(protocolID, false)
 		if err != nil {
 			continue
 		}
 
+		t5 := time.Now()
+		log.Println("[RD] fetched filtered for", protocolID, "in:", t5.Sub(t4))
+
 		// Perform route deduplication
 		filtered = src.filterRoutesByPeerOrLearntFrom(filtered, peer, learntFrom)
 		response.Filtered = append(response.Filtered, filtered...)
+
+		t6 := time.Now()
+		log.Println("[RD] deduplication of", protocolID, "in:", t6.Sub(t5))
 	}
+
+	t7 := time.Now()
+	log.Println("[RD] total time filtered:", t7.Sub(t3))
+	log.Println("[RD] total time:", t7.Sub(t0))
 
 	return response, nil
 }
