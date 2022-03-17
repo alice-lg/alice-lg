@@ -92,6 +92,11 @@ func (src *MultiTableBirdwatcher) fetchProtocols() (
 		return nil, nil, fmt.Errorf("failed to fetch protocols")
 	}
 
+	for k := range bird {
+		delete(bird, k)
+	}
+	bird = nil
+
 	return apiStatus, bird, nil
 }
 
@@ -138,6 +143,12 @@ func (src *MultiTableBirdwatcher) fetchReceivedRoutes(
 		log.Println("Is the 'routes_peer' module active in birdwatcher?")
 		return apiStatus, nil, err
 	}
+
+	for k := range bird {
+		delete(bird, k)
+	}
+	bird = nil
+
 	return apiStatus, received, nil
 }
 
