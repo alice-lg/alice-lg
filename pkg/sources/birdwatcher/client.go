@@ -3,6 +3,7 @@ package birdwatcher
 // Http Birdwatcher Client
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -24,6 +25,23 @@ func NewClient(api string) *Client {
 		api: api,
 	}
 	return client
+}
+
+// GetEndpoint makes an API request and returns the
+// response. The response body will be parsed further
+// downstream.
+func (c *Client) GetEndpoint(
+	ctx context.Context,
+	endpoint string,
+) (*http.Response, error) {
+	url := c.api + endpoint
+	req, err := http.NewRequestWithContext(
+		ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	client := &http.Client{}
+	return client.Do(req)
 }
 
 // Get makes an API request.

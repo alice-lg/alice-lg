@@ -1,6 +1,7 @@
 package birdwatcher
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"sort"
@@ -147,6 +148,65 @@ func (src *MultiTableBirdwatcher) fetchReceivedRoutes(
 	return apiStatus, received, nil
 }
 
+func (src *MultiTableBirdwatcher) fetchFilteredRoutesStream(
+	ctx context.Context,
+	protocols map[string]interface{},
+	neighborID string,
+) (*api.Meta, api.Routes, error) {
+	if _, ok := protocols[neighborID]; !ok {
+		return nil, nil, fmt.Errorf("invalid Neighbor")
+	}
+
+	// Stage 1 filters
+	res, err := src.client.GetEndpoint(ctx, "/routes/filtered/"+neighborID)
+	if err != nil {
+		log.Println("WARNING Could not retrieve filtered routes:", err)
+		log.Println("Is the 'routes_filtered' module active in birdwatcher?")
+		return nil, nil, err
+	}
+	defer res.Body.Close()
+
+	meta, filtered, err := parseRoutesResponseStream(res.Body, src.config)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Stage 2 filters
+	table := protocols[neighborID].(map[string]interface{})["table"].(string)
+	pipeName := src.getMasterPipeName(table)
+
+	// If there is no pipe to master, there is nothing left to do
+	if pipeName == "" {
+		return meta, filtered, nil
+	}
+
+	// Check if this is an alternative session and query the alt pipe instead
+	if src.isAltSession(pipeName) {
+		pipeName = src.getAltPipeName(pipeName)
+	}
+
+	// Query birdwatcher
+	res, err = src.client.GetEndpoint(
+		ctx,
+		"/routes/pipe/filtered?table="+table+"&pipe="+pipeName)
+	if err != nil {
+		log.Println("WARNING Could not retrieve filtered routes:", err)
+		log.Println("Is the 'pipe_filtered' module active in birdwatcher?")
+		return meta, nil, err
+	}
+	defer res.Body.Close()
+
+	// Parse the routes
+	_, pipeFiltered, err := parseRoutesResponseStream(res.Body, src.config)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	filtered = append(filtered, pipeFiltered...)
+
+	return meta, filtered, nil
+}
+
 func (src *MultiTableBirdwatcher) fetchFilteredRoutes(
 	neighborID string,
 	keepDetails bool,
@@ -180,12 +240,6 @@ func (src *MultiTableBirdwatcher) fetchFilteredRoutes(
 	// Parse the routes
 	filtered := parseRoutesData(
 		birdFiltered["routes"].([]interface{}), src.config, keepDetails)
-
-	// Try to free memory
-	for k := range birdFiltered {
-		delete(birdFiltered, k)
-	}
-	birdFiltered = nil
 
 	// Stage 2 filters
 	table := protocols[neighborID].(map[string]interface{})["table"].(string)
@@ -578,39 +632,33 @@ func (src *MultiTableBirdwatcher) RoutesNotExported(
 
 // AllRoutes retrieves a routes dump from the server
 func (src *MultiTableBirdwatcher) AllRoutes() (*api.RoutesResponse, error) {
+	ctx := context.Background() // TODO
+
 	// Query birdwatcher
 	_, birdProtocols, err := src.fetchProtocols()
 	if err != nil {
 		return nil, err
 	}
+	protocols := birdProtocols["protocols"].(map[string]interface{})
 	mainTable := src.GenericBirdwatcher.config.MainTable
 
 	// Fetch received routes first
-	birdImported, err := src.client.GetJSON("/routes/table/" + mainTable)
+	res, err := src.client.GetEndpoint(ctx, "/routes/table/"+mainTable)
 	if err != nil {
 		return nil, err
 	}
+	defer res.Body.Close()
 
-	// Use api status from first request
-	apiStatus, err := parseAPIStatus(birdImported, src.config)
+	meta, imported, err := parseRoutesResponseStream(res.Body, src.config)
 	if err != nil {
 		return nil, err
 	}
 
 	response := &api.RoutesResponse{
 		Response: api.Response{
-			Meta: apiStatus,
+			Meta: meta,
 		},
 	}
-
-	// Parse the routes
-	imported := parseRoutesData(birdImported["routes"].([]interface{}), src.config, false)
-
-	// Try to free memory
-	for k := range birdImported {
-		delete(birdImported, k)
-	}
-	birdImported = nil
 
 	// Sort routes for deterministic ordering
 	// sort.Sort(imported)
@@ -637,7 +685,7 @@ func (src *MultiTableBirdwatcher) AllRoutes() (*api.RoutesResponse, error) {
 			defer wg.Done()
 			for req := range reqQ {
 				// Fetch filtered routes
-				_, filtered, err := src.fetchFilteredRoutes(req.protocolID, false)
+				_, filtered, err := src.fetchFilteredRoutesStream(ctx, protocols, req.protocolID)
 				if err != nil {
 					log.Println("error while fetching filtered routes:", err)
 				}
