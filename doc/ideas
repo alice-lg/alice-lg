@@ -1,0 +1,5 @@
+
+pgstore:
+
+ - per RS table could mitigate insert issue
+
