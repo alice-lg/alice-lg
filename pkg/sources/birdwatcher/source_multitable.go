@@ -92,11 +92,6 @@ func (src *MultiTableBirdwatcher) fetchProtocols() (
 		return nil, nil, fmt.Errorf("failed to fetch protocols")
 	}
 
-	for k := range bird {
-		delete(bird, k)
-	}
-	bird = nil
-
 	return apiStatus, bird, nil
 }
 
