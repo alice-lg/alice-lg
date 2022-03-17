@@ -5,6 +5,7 @@ import (
 	"log"
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
 	"github.com/alice-lg/alice-lg/pkg/decoders"
@@ -91,6 +92,11 @@ func (src *MultiTableBirdwatcher) fetchProtocols() (
 		return nil, nil, fmt.Errorf("failed to fetch protocols")
 	}
 
+	for k := range bird {
+		delete(bird, k)
+	}
+	bird = nil
+
 	return apiStatus, bird, nil
 }
 
@@ -137,6 +143,12 @@ func (src *MultiTableBirdwatcher) fetchReceivedRoutes(
 		log.Println("Is the 'routes_peer' module active in birdwatcher?")
 		return apiStatus, nil, err
 	}
+
+	for k := range bird {
+		delete(bird, k)
+	}
+	bird = nil
+
 	return apiStatus, received, nil
 }
 
@@ -173,6 +185,12 @@ func (src *MultiTableBirdwatcher) fetchFilteredRoutes(
 	// Parse the routes
 	filtered := parseRoutesData(
 		birdFiltered["routes"].([]interface{}), src.config, keepDetails)
+
+	// Try to free memory
+	for k := range birdFiltered {
+		delete(birdFiltered, k)
+	}
+	birdFiltered = nil
 
 	// Stage 2 filters
 	table := protocols[neighborID].(map[string]interface{})["table"].(string)
@@ -592,24 +610,73 @@ func (src *MultiTableBirdwatcher) AllRoutes() (*api.RoutesResponse, error) {
 
 	// Parse the routes
 	imported := parseRoutesData(birdImported["routes"].([]interface{}), src.config, false)
+
+	// Try to free memory
+	for k := range birdImported {
+		delete(birdImported, k)
+	}
+	birdImported = nil
+
 	// Sort routes for deterministic ordering
 	// sort.Sort(imported)
 	response.Imported = imported
 
 	// Iterate over all the protocols and fetch the filtered routes for everyone
 	protocolsBgp := src.filterProtocolsBgp(birdProtocols)
-	for protocolID, protocolsData := range protocolsBgp["protocols"].(map[string]interface{}) {
-		peer := protocolsData.(map[string]interface{})["neighbor_address"].(string)
-		learntFrom := decoders.String(protocolsData.(map[string]interface{})["learnt_from"], peer)
 
-		// Fetch filtered routes
-		_, filtered, err := src.fetchFilteredRoutes(protocolID, false)
-		if err != nil {
-			continue
+	// We load the filtered routes asynchronously with workers.
+	type fetchFilteredReq struct {
+		protocolID string
+		peer       string
+		learntFrom string
+	}
+	reqQ := make(chan fetchFilteredReq, 1000)
+	resQ := make(chan api.Routes, 1000)
+	wg := &sync.WaitGroup{}
+
+	// Start workers
+	for i := 0; i < 42; i++ {
+		wg.Add(1)
+		go func() {
+			// This is a worker for fetching filtered routes
+			defer wg.Done()
+			for req := range reqQ {
+				// Fetch filtered routes
+				_, filtered, err := src.fetchFilteredRoutes(req.protocolID, false)
+				if err != nil {
+					log.Println("error while fetching filtered routes:", err)
+				}
+				// Perform route deduplication
+				filtered = src.filterRoutesByPeerOrLearntFrom(
+					filtered, req.peer, req.learntFrom)
+
+				resQ <- filtered
+			}
+		}()
+	}
+
+	// Fill request queue
+	go func() {
+		for protocolID, protocolsData := range protocolsBgp["protocols"].(map[string]interface{}) {
+			peer := protocolsData.(map[string]interface{})["neighbor_address"].(string)
+			learntFrom := decoders.String(protocolsData.(map[string]interface{})["learnt_from"], peer)
+			reqQ <- fetchFilteredReq{
+				protocolID: protocolID,
+				peer:       peer,
+				learntFrom: learntFrom,
+			}
 		}
+		close(reqQ)
+	}()
 
-		// Perform route deduplication
-		filtered = src.filterRoutesByPeerOrLearntFrom(filtered, peer, learntFrom)
+	// Await all workers done and close channel
+	go func() {
+		wg.Wait()
+		close(resQ)
+	}()
+
+	// Collect results
+	for filtered := range resQ {
 		response.Filtered = append(response.Filtered, filtered...)
 	}
 
