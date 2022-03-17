@@ -34,8 +34,14 @@ func (c *Client) GetEndpoint(
 	ctx context.Context,
 	endpoint string,
 ) (*http.Response, error) {
+	url := c.api + endpoint
+	req, err := http.NewRequestWithContext(
+		ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
 	client := &http.Client{}
-	return client.Get(c.api + endpoint)
+	return client.Do(req)
 }
 
 // Get makes an API request.
