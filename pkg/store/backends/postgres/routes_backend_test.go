@@ -9,6 +9,14 @@ import (
 	"github.com/alice-lg/alice-lg/pkg/config"
 )
 
+func TestRoutesTable(t *testing.T) {
+	b := &RoutesBackend{}
+	tbl := b.routesTable("rs0-example!/;")
+	if tbl != "routes_rs0_example___" {
+		t.Error("unexpected table:", tbl)
+	}
+}
+
 func TestCountRoutesAt(t *testing.T) {
 	ctx := context.Background()
 	now := time.Now().UTC()

@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -11,6 +12,12 @@ import (
 
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
+)
+
+var (
+	// ReMatchNonChar will match on all characters not
+	// within a to Z or 0 to 9
+	ReMatchNonChar = regexp.MustCompile(`[^a-zA-Z0-9]`)
 )
 
 // RoutesBackend implements a postgres store for routes.
@@ -29,6 +36,24 @@ func NewRoutesBackend(
 		pool:    pool,
 		sources: sources,
 	}
+}
+
+// Init will initialize all the route tables
+func (b *RoutesBackend) Init(ctx context.Context) error {
+	tx, err := b.pool.BeginTx(ctx, pgx.TxOptions{
+		IsoLevel: pgx.ReadCommitted,
+	})
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	for _, src := range b.sources {
+		if err := b.initTable(ctx, tx, src.ID); err != nil {
+			return err
+		}
+	}
+	return tx.Commit(ctx)
 }
 
 // SetRoutes implements the RoutesStoreBackend interface
@@ -70,6 +95,7 @@ func (b *RoutesBackend) SetRoutes(
 // Private routesTable returns the name of the routes table
 // for a sourceID
 func (b *RoutesBackend) routesTable(sourceID string) string {
+	sourceID = ReMatchNonChar.ReplaceAllString(sourceID, "_")
 	return "routes_" + sourceID
 }
 
