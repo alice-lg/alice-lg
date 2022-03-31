@@ -109,7 +109,11 @@ func main() {
 		go m.Start(ctx)
 
 		neighborsBackend = postgres.NewNeighborsBackend(pool)
-		routesBackend = postgres.NewRoutesBackend(pool)
+		routesBackend = postgres.NewRoutesBackend(
+			pool, cfg.Sources)
+		if err := routesBackend.(*postgres.RoutesBackend).Init(ctx); err != nil {
+			log.Println("error while initializing routes backend:", err)
+		}
 	}
 
 	neighborsStore := store.NewNeighborsStore(cfg, neighborsBackend)
