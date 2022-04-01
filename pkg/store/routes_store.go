@@ -159,6 +159,11 @@ func (s *RoutesStore) updateSource(
 	ctx context.Context,
 	src *config.SourceConfig,
 ) error {
+	log.Println("[routes store] awaiting neighbor store HAS DATA for", src.Name)
+	if err := s.awaitNeighborStore(ctx, src.ID); err != nil {
+		return err
+	}
+	log.Println("[routes store] neighbor store HAS DATA for", src.Name)
 
 	log.Println("[routes store] start retrive routes dump from RS", src.Name)
 
@@ -170,18 +175,14 @@ func (s *RoutesStore) updateSource(
 
 	log.Println("[routes store] finished fetching routes dump from RS", src.Name)
 
-	log.Println("[routes store] awaiting neighbor store HAS DATA for", src.Name)
-	if err := s.awaitNeighborStore(ctx, src.ID); err != nil {
-		return err
-	}
-	log.Println("[routes store] neighbor store HAS DATA for", src.Name)
-
 	neighbors, err := s.neighbors.GetNeighborsMapAt(ctx, src.ID)
 	if err != nil {
 		return err
 	}
 
-	log.Println("[routes store] retrieved neighbors for:", src.Name)
+	log.Println(
+		"[routes store] retrieved", len(res.Imported),
+		"accepted and", len(res.Filtered), "filtered routes for:", src.Name)
 
 	log.Println("[routes store] preparing routes for import of", src.Name)
 	// Prepare imported routes for lookup
