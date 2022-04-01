@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"runtime/debug"
 	"runtime/pprof"
 	"time"
 
@@ -82,6 +83,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Tune garbage collection
+	debug.SetGCPercent(10)
 
 	// Setup local routes store and use backend from configuration
 	var (
