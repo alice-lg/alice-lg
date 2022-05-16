@@ -6,7 +6,7 @@
 
 FROM node:11
 
-RUN npm install -g gulp@4.0.0
+RUN npm install -g gulp@3.9.1
 RUN npm install -g gulp-cli
 
 
