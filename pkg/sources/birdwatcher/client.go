@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 )
 
@@ -39,6 +40,11 @@ func (c *Client) GetEndpoint(
 	if err != nil {
 		return nil, err
 	}
+
+	if _, ok := ctx.Deadline(); !ok {
+		log.Println("CRITICAL CODE ERROR: GetEndpoint", endpoint, "without deadline.")
+	}
+
 	return client.Do(req)
 }
 
