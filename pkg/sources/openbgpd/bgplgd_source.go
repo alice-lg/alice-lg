@@ -8,7 +8,11 @@ import (
 	"github.com/alice-lg/alice-lg/pkg/api"
 	"github.com/alice-lg/alice-lg/pkg/caches"
 	"github.com/alice-lg/alice-lg/pkg/decoders"
+	"github.com/alice-lg/alice-lg/pkg/sources"
 )
+
+// Ensure source interface is implemented
+var _OpenBGPBgplgdSource sources.Source = &BgplgdSource{}
 
 const (
 	// BgplgdSourceVersion is currently fixed at 1.0
