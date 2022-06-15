@@ -182,8 +182,12 @@ func (s *RoutesStore) updateSource(
 		"accepted and", len(res.Filtered), "filtered routes for:", src.Name)
 
 	// Prepare imported routes for lookup
-	imported := s.routesToLookupRoutes("imported", src, neighbors, res.Imported)
-	filtered := s.routesToLookupRoutes("filtered", src, neighbors, res.Filtered)
+	srcRS := &api.RouteServer{
+		ID:   src.ID,
+		Name: src.Name,
+	}
+	imported := res.Imported.ToLookupRoutes("imported", srcRS, neighbors)
+	filtered := res.Filtered.ToLookupRoutes("filtered", srcRS, neighbors)
 	lookupRoutes := append(imported, filtered...)
 
 	log.Println("[routes store] importing", len(lookupRoutes), "into store from", src.Name)
@@ -212,34 +216,6 @@ func (s *RoutesStore) awaitNeighborStore(
 
 		time.Sleep(100 * time.Millisecond)
 	}
-}
-
-func (s *RoutesStore) routesToLookupRoutes(
-	state string,
-	src *config.SourceConfig,
-	neighbors map[string]*api.Neighbor,
-	routes api.Routes,
-) api.LookupRoutes {
-	lookupRoutes := make(api.LookupRoutes, 0, len(routes))
-	for _, route := range routes {
-		neighbor, ok := neighbors[route.NeighborID]
-		if !ok {
-			log.Println("prepare route, neighbor not found:", route.NeighborID)
-			continue
-		}
-		lr := &api.LookupRoute{
-			Route:    route,
-			State:    state,
-			Neighbor: neighbor,
-			RouteServer: &api.RouteServer{
-				ID:   src.ID,
-				Name: src.Name,
-			},
-		}
-		lr.Route.Details = nil
-		lookupRoutes = append(lookupRoutes, lr)
-	}
-	return lookupRoutes
 }
 
 // Stats calculates some store insights

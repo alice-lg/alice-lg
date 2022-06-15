@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"log"
 	"time"
 )
 
@@ -66,6 +67,31 @@ func (routes Routes) Less(i, j int) bool {
 
 func (routes Routes) Swap(i, j int) {
 	routes[i], routes[j] = routes[j], routes[i]
+}
+
+// ToLookupRoutes prepares routes for lookup
+func (routes Routes) ToLookupRoutes(
+	state string,
+	rs *RouteServer,
+	neighbors map[string]*Neighbor,
+) LookupRoutes {
+	lookupRoutes := make(LookupRoutes, 0, len(routes))
+	for _, route := range routes {
+		neighbor, ok := neighbors[route.NeighborID]
+		if !ok {
+			log.Println("prepare route, neighbor not found:", route.NeighborID)
+			continue
+		}
+		lr := &LookupRoute{
+			Route:       route,
+			State:       state,
+			Neighbor:    neighbor,
+			RouteServer: rs,
+		}
+		lr.Route.Details = nil
+		lookupRoutes = append(lookupRoutes, lr)
+	}
+	return lookupRoutes
 }
 
 // RoutesResponse contains all routes from a source
