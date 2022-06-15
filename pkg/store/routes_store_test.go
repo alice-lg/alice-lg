@@ -49,8 +49,8 @@ func importRoutes(
 			ID: "ID7254_AS31334",
 		},
 	}
-	imported := s.routesToLookupRoutes(ctx, "imported", src, neighbors, res.Imported)
-	filtered := s.routesToLookupRoutes(ctx, "filtered", src, neighbors, res.Filtered)
+	imported := s.routesToLookupRoutes("imported", src, neighbors, res.Imported)
+	filtered := s.routesToLookupRoutes("filtered", src, neighbors, res.Filtered)
 	lookupRoutes := append(imported, filtered...)
 
 	if err := s.backend.SetRoutes(ctx, src.ID, lookupRoutes); err != nil {
@@ -117,7 +117,7 @@ func testCheckPrefixesPresence(prefixes, resultset []string, t *testing.T) {
 func TestRoutesStoreStats(t *testing.T) {
 
 	store := makeTestRoutesStore()
-	stats := store.Stats()
+	stats := store.Stats(context.Background())
 
 	// Check total routes
 	// There should be 8 imported, and 1 filtered route
