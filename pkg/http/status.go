@@ -30,7 +30,7 @@ func CollectAppStatus(
 ) (*AppStatus, error) {
 	routesStatus := &api.RoutesStoreStats{}
 	if routesStore != nil {
-		routesStatus = routesStore.Stats()
+		routesStatus = routesStore.Stats(ctx)
 	}
 
 	neighborsStatus := &api.NeighborsStoreStats{}

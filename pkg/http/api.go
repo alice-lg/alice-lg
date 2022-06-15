@@ -2,6 +2,7 @@ package http
 
 import (
 	"compress/gzip"
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -32,7 +33,11 @@ import (
 
 type response interface{}
 
-type apiEndpoint func(*http.Request, httprouter.Params) (response, error)
+type apiEndpoint func(
+	context.Context,
+	*http.Request,
+	httprouter.Params,
+) (response, error)
 
 // Wrap handler for access controll, throtteling and compression
 func endpoint(wrapped apiEndpoint) httprouter.Handle {
@@ -41,7 +46,7 @@ func endpoint(wrapped apiEndpoint) httprouter.Handle {
 		params httprouter.Params) {
 
 		// Get result from handler
-		result, err := wrapped(req, params)
+		result, err := wrapped(req.Context(), req, params)
 		if err != nil {
 			// Get affected rs id
 			rsID, paramErr := validateSourceID(params.ByName("id"))

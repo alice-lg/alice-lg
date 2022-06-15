@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"net/http"
 	"sort"
 
@@ -12,10 +13,10 @@ import (
 
 // Handle get neighbors on routeserver
 func (s *Server) apiNeighborsList(
+	ctx context.Context,
 	req *http.Request,
 	params httprouter.Params,
 ) (response, error) {
-	ctx := req.Context()
 	rsID, err := validateSourceID(params.ByName("id"))
 	if err != nil {
 		return nil, err
@@ -57,7 +58,7 @@ func (s *Server) apiNeighborsList(
 		if source == nil {
 			return nil, ErrSourceNotFound
 		}
-		neighborsResponse, err = source.NeighborsSummary()
+		neighborsResponse, err = source.NeighborsSummary(ctx)
 		if err != nil {
 			s.logSourceError("neighbors", rsID, err)
 			return nil, err

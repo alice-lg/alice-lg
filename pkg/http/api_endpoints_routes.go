@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"net/http"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 
 // Handle routes
 func (s *Server) apiRoutesList(
+	ctx context.Context,
 	_req *http.Request,
 	params httprouter.Params,
 ) (response, error) {
@@ -25,7 +27,7 @@ func (s *Server) apiRoutesList(
 		return nil, ErrSourceNotFound
 	}
 
-	result, err := source.Routes(neighborID)
+	result, err := source.Routes(ctx, neighborID)
 	if err != nil {
 		s.logSourceError("routes", rsID, neighborID, err)
 	}
@@ -35,6 +37,7 @@ func (s *Server) apiRoutesList(
 
 // Paginated Routes Respponse: Received routes
 func (s *Server) apiRoutesListReceived(
+	ctx context.Context,
 	req *http.Request,
 	params httprouter.Params,
 ) (response, error) {
@@ -52,7 +55,7 @@ func (s *Server) apiRoutesListReceived(
 		return nil, ErrSourceNotFound
 	}
 
-	result, err := source.RoutesReceived(neighborID)
+	result, err := source.RoutesReceived(ctx, neighborID)
 	if err != nil {
 		s.logSourceError("routes_received", rsID, neighborID, err)
 		return nil, err
@@ -113,6 +116,7 @@ func (s *Server) apiRoutesListReceived(
 }
 
 func (s *Server) apiRoutesListFiltered(
+	ctx context.Context,
 	req *http.Request,
 	params httprouter.Params,
 ) (response, error) {
@@ -129,7 +133,7 @@ func (s *Server) apiRoutesListFiltered(
 		return nil, ErrSourceNotFound
 	}
 
-	result, err := source.RoutesFiltered(neighborID)
+	result, err := source.RoutesFiltered(ctx, neighborID)
 	if err != nil {
 		s.logSourceError("routes_filtered", rsID, neighborID, err)
 		return nil, err
@@ -190,6 +194,7 @@ func (s *Server) apiRoutesListFiltered(
 }
 
 func (s *Server) apiRoutesListNotExported(
+	ctx context.Context,
 	req *http.Request,
 	params httprouter.Params,
 ) (response, error) {
@@ -206,7 +211,7 @@ func (s *Server) apiRoutesListNotExported(
 		return nil, ErrSourceNotFound
 	}
 
-	result, err := source.RoutesNotExported(neighborID)
+	result, err := source.RoutesNotExported(ctx, neighborID)
 	if err != nil {
 		s.logSourceError("routes_not_exported", rsID, neighborID, err)
 		return nil, err
