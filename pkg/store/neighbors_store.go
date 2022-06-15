@@ -97,17 +97,13 @@ func NewNeighborsStore(
 }
 
 // Start the store's housekeeping.
-func (s *NeighborsStore) Start() {
+func (s *NeighborsStore) Start(ctx context.Context) {
 	log.Println("Starting local neighbors store")
-	go s.init()
-}
-
-func (s *NeighborsStore) init() {
-	// Periodically trigger updates. Sources with an
-	// LastNeighborsRefresh < refreshInterval or currently
-	// updating will be skipped.
 	for {
-		s.update()
+		if err := ctx.Err(); err != nil {
+			return // Context invalid
+		}
+		s.update(ctx)
 		time.Sleep(time.Second)
 	}
 }
@@ -133,7 +129,7 @@ func (s *NeighborsStore) updateSource(
 	srcID string,
 ) error {
 	// Get neighbors form source instance and update backend
-	res, err := src.Neighbors()
+	res, err := src.Neighbors(ctx)
 	if err != nil {
 		return err
 	}
@@ -148,9 +144,7 @@ func (s *NeighborsStore) updateSource(
 // safeUpdateSource will try to update a source but
 // will recover from a panic if something goes wrong.
 // In that case, the LastError and State will be updated.
-func (s *NeighborsStore) safeUpdateSource(id string) {
-	ctx := context.TODO()
-
+func (s *NeighborsStore) safeUpdateSource(ctx context.Context, id string) {
 	if !s.sources.ShouldRefresh(id) {
 		return // Nothing to do here
 	}
@@ -194,9 +188,9 @@ func (s *NeighborsStore) safeUpdateSource(id string) {
 // Update all neighbors from all sources, where the
 // sources last neighbor refresh is longer ago
 // than the configured refresh period.
-func (s *NeighborsStore) update() {
+func (s *NeighborsStore) update(ctx context.Context) {
 	for _, id := range s.sources.GetSourceIDsForRefresh() {
-		go s.safeUpdateSource(id)
+		go s.safeUpdateSource(ctx, id)
 	}
 }
 

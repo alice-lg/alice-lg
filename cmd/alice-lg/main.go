@@ -129,8 +129,8 @@ func main() {
 
 	// Start stores
 	if cfg.Server.EnablePrefixLookup {
-		go neighborsStore.Start()
-		go routesStore.Start()
+		go neighborsStore.Start(ctx)
+		go routesStore.Start(ctx)
 	}
 
 	// Start the Housekeeping
@@ -138,7 +138,7 @@ func main() {
 
 	// Start HTTP API
 	server := http.NewServer(cfg, pool, routesStore, neighborsStore)
-	go server.Start()
+	go server.Start(ctx)
 
 	<-ctx.Done()
 }

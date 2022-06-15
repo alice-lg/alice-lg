@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"net/http"
 	"sort"
 	"time"
@@ -13,11 +14,11 @@ import (
 
 // Handle global lookup
 func (s *Server) apiLookupPrefixGlobal(
+	ctx context.Context,
 	req *http.Request,
 	params httprouter.Params,
 ) (response, error) {
 	// TODO: This function is way too long
-	ctx := req.Context()
 
 	// Get prefix to query
 	q, err := validateQueryString(req, "q")
@@ -146,10 +147,10 @@ func (s *Server) apiLookupPrefixGlobal(
 }
 
 func (s *Server) apiLookupNeighborsGlobal(
+	ctx context.Context,
 	req *http.Request,
 	params httprouter.Params,
 ) (response, error) {
-	ctx := req.Context()
 	// Query neighbors store
 	filter := api.NeighborFilterFromQuery(req.URL.Query())
 	neighbors, err := s.neighborsStore.FilterNeighbors(ctx, filter)

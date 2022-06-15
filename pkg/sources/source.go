@@ -3,6 +3,7 @@
 package sources
 
 import (
+	"context"
 	"errors"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
@@ -23,13 +24,14 @@ var (
 // All route server adapters implement this interface.
 type Source interface {
 	ExpireCaches() int
-	Status() (*api.StatusResponse, error)
-	Neighbors() (*api.NeighborsResponse, error)
-	NeighborsSummary() (*api.NeighborsResponse, error)
-	NeighborsStatus() (*api.NeighborsStatusResponse, error)
-	Routes(neighborID string) (*api.RoutesResponse, error)
-	RoutesReceived(neighborID string) (*api.RoutesResponse, error)
-	RoutesFiltered(neighborID string) (*api.RoutesResponse, error)
-	RoutesNotExported(neighborID string) (*api.RoutesResponse, error)
-	AllRoutes() (*api.RoutesResponse, error)
+
+	Status(context.Context) (*api.StatusResponse, error)
+	Neighbors(context.Context) (*api.NeighborsResponse, error)
+	NeighborsSummary(context.Context) (*api.NeighborsResponse, error)
+	NeighborsStatus(context.Context) (*api.NeighborsStatusResponse, error)
+	Routes(ctx context.Context, neighborID string) (*api.RoutesResponse, error)
+	RoutesReceived(ctx context.Context, neighborID string) (*api.RoutesResponse, error)
+	RoutesFiltered(ctx context.Context, neighborID string) (*api.RoutesResponse, error)
+	RoutesNotExported(ctx context.Context, neighborID string) (*api.RoutesResponse, error)
+	AllRoutes(context.Context) (*api.RoutesResponse, error)
 }

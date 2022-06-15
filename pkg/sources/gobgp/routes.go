@@ -32,9 +32,12 @@ func NewRoutesResponse() api.RoutesResponse {
 	return routes
 }
 
-func (gobgp *GoBGP) lookupNeighbor(neighborID string) (*gobgpapi.Peer, error) {
+func (gobgp *GoBGP) lookupNeighbor(
+	ctx context.Context,
+	neighborID string,
+) (*gobgpapi.Peer, error) {
 
-	peers, err := gobgp.GetNeighbors()
+	peers, err := gobgp.GetNeighbors(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -50,10 +53,11 @@ func (gobgp *GoBGP) lookupNeighbor(neighborID string) (*gobgpapi.Peer, error) {
 
 // GetNeighbors retrievs all neighbors and returns
 // a list of peers.
-func (gobgp *GoBGP) GetNeighbors() ([]*gobgpapi.Peer, error) {
+func (gobgp *GoBGP) GetNeighbors(
+	ctx context.Context,
+) ([]*gobgpapi.Peer, error) {
 	ctx, cancel := context.WithTimeout(
-		context.Background(),
-		time.Second*time.Duration(gobgp.config.ProcessingTimeout))
+		ctx, time.Second*time.Duration(gobgp.config.ProcessingTimeout))
 	defer cancel()
 
 	peerStream, err := gobgp.client.ListPeer(
@@ -159,13 +163,13 @@ func (gobgp *GoBGP) parsePathIntoRoute(
 // GetRoutes retrieves all routes from a peer
 // for a table type.
 func (gobgp *GoBGP) GetRoutes(
+	ctx context.Context,
 	peer *gobgpapi.Peer,
 	tableType gobgpapi.TableType,
 	response *api.RoutesResponse,
 ) error {
 	ctx, cancel := context.WithTimeout(
-		context.Background(),
-		time.Second*time.Duration(gobgp.config.ProcessingTimeout))
+		ctx, time.Second*time.Duration(gobgp.config.ProcessingTimeout))
 	defer cancel()
 
 	for _, family := range families {

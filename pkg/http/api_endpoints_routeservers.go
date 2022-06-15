@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"net/http"
 	"sort"
 
@@ -11,6 +12,7 @@ import (
 
 // Handle RouteServers List
 func (s *Server) apiRouteServersList(
+	ctx context.Context,
 	_req *http.Request,
 	_params httprouter.Params,
 ) (response, error) {
