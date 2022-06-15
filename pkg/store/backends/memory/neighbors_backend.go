@@ -11,22 +11,17 @@ import (
 // NeighborIndex is a mapping of a neighborID to a Neighbor
 type NeighborIndex map[string]*api.Neighbor
 
-// NeighborsMap associate a route server source (ID) with
-// a neighbor index.
-type NeighborsMap map[string]NeighborIndex
-
 // NeighborsBackend is an in-memory backend implementation for
 // the neighbors store.
 type NeighborsBackend struct {
-	neighbors NeighborsMap
-	sync.Mutex
+	neighbors *sync.Map
 }
 
 // NewNeighborsBackend instanciates a new in memory
 // neighbors backend.
 func NewNeighborsBackend() *NeighborsBackend {
 	return &NeighborsBackend{
-		neighbors: make(NeighborsMap),
+		neighbors: &sync.Map{},
 	}
 }
 
@@ -37,16 +32,13 @@ func (b *NeighborsBackend) SetNeighbors(
 	sourceID string,
 	neighbors api.Neighbors,
 ) error {
-	b.Lock()
-	defer b.Unlock()
-
 	// Make index
 	idx := make(NeighborIndex)
 	for _, neighbor := range neighbors {
 		idx[neighbor.ID] = neighbor
 	}
 
-	b.neighbors[sourceID] = idx
+	b.neighbors.Store(sourceID, idx)
 	return nil
 }
 
@@ -56,16 +48,13 @@ func (b *NeighborsBackend) GetNeighborsAt(
 	ctx context.Context,
 	sourceID string,
 ) (api.Neighbors, error) {
-	b.Lock()
-	defer b.Unlock()
-
-	neighbors, ok := b.neighbors[sourceID]
+	neighbors, ok := b.neighbors.Load(sourceID)
 	if !ok {
 		return nil, sources.ErrSourceNotFound
 	}
 
-	ret := make(api.Neighbors, 0, len(neighbors))
-	for _, neighbor := range neighbors {
+	ret := make(api.Neighbors, 0, len(neighbors.(NeighborIndex)))
+	for _, neighbor := range neighbors.(NeighborIndex) {
 		ret = append(ret, neighbor)
 	}
 	return ret, nil
@@ -77,17 +66,14 @@ func (b *NeighborsBackend) GetNeighborsMapAt(
 	ctx context.Context,
 	sourceID string,
 ) (map[string]*api.Neighbor, error) {
-	b.Lock()
-	defer b.Unlock()
-
-	neighbors, ok := b.neighbors[sourceID]
+	neighbors, ok := b.neighbors.Load(sourceID)
 	if !ok {
 		return nil, sources.ErrSourceNotFound
 	}
 
 	// Copy neighbors map
 	result := make(map[string]*api.Neighbor)
-	for k, v := range neighbors {
+	for k, v := range neighbors.(NeighborIndex) {
 		result[k] = v
 	}
 	return result, nil
