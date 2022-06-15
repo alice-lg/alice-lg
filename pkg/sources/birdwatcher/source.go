@@ -180,10 +180,10 @@ func (b *GenericBirdwatcher) fetchProtocolsShort(ctx context.Context) (
 		timeout = time.Duration(b.config.NeighborsRefreshTimeout) * time.Second
 	}
 
-	timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	bird, err := b.client.GetJSON(timeoutCtx, "/protocols/short?uncached=true")
+	bird, err := b.client.GetJSON(ctx, "/protocols/short?uncached=true")
 	if err != nil {
 		return nil, nil, err
 	}
