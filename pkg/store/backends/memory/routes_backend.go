@@ -12,14 +12,13 @@ import (
 // RoutesBackend implements an in memory backend
 // for the routes store.
 type RoutesBackend struct {
-	routes map[string]api.LookupRoutes
-	sync.Mutex
+	routes *sync.Map
 }
 
 // NewRoutesBackend creates a new instance
 func NewRoutesBackend() *RoutesBackend {
 	return &RoutesBackend{
-		routes: make(map[string]api.LookupRoutes),
+		routes: &sync.Map{},
 	}
 }
 
@@ -31,15 +30,7 @@ func (r *RoutesBackend) SetRoutes(
 	sourceID string,
 	routes api.LookupRoutes,
 ) error {
-	r.Lock()
-	defer r.Unlock()
-
-	// Remove details from routes
-	for _, r := range routes {
-		r.Route.Details = nil
-	}
-
-	r.routes[sourceID] = routes
+	r.routes.Store(sourceID, routes)
 	return nil
 }
 
@@ -49,9 +40,7 @@ func (r *RoutesBackend) CountRoutesAt(
 	ctx context.Context,
 	sourceID string,
 ) (uint, uint, error) {
-	r.Lock()
-	defer r.Unlock()
-	routes, ok := r.routes[sourceID]
+	routes, ok := r.routes.Load(sourceID)
 	if !ok {
 		return 0, 0, sources.ErrSourceNotFound
 	}
@@ -61,7 +50,7 @@ func (r *RoutesBackend) CountRoutesAt(
 		filtered uint = 0
 	)
 
-	for _, route := range routes {
+	for _, route := range routes.(api.LookupRoutes) {
 		if route.State == api.RouteStateFiltered {
 			filtered++
 		}
@@ -79,17 +68,17 @@ func (r *RoutesBackend) FindByNeighbors(
 	ctx context.Context,
 	neighborIDs []string,
 ) (api.LookupRoutes, error) {
-	r.Lock()
-	defer r.Unlock()
-
 	result := api.LookupRoutes{}
-	for _, rs := range r.routes {
-		for _, route := range rs {
+
+	r.routes.Range(func(k, rs interface{}) bool {
+		for _, route := range rs.(api.LookupRoutes) {
 			if isMemberOf(neighborIDs, route.NeighborID) {
 				result = append(result, route)
 			}
 		}
-	}
+		return true
+	})
+
 	return result, nil
 }
 
@@ -98,64 +87,20 @@ func (r *RoutesBackend) FindByPrefix(
 	ctx context.Context,
 	prefix string,
 ) (api.LookupRoutes, error) {
-	r.Lock()
-	defer r.Unlock()
-
 	// We make our compare case insensitive
 	prefix = strings.ToLower(prefix)
-
 	result := api.LookupRoutes{}
-	for _, rs := range r.routes {
-		for _, route := range rs {
+	r.routes.Range(func(k, rs interface{}) bool {
+		for _, route := range rs.(api.LookupRoutes) {
 			// Naiive string filtering:
 			if strings.HasPrefix(strings.ToLower(route.Network), prefix) {
 				result = append(result, route)
 			}
 		}
-	}
+		return true
+	})
 	return result, nil
 }
-
-// Routes filter
-/*
-func filterRoutesByPrefix(
-	nStore *NeighborsStore,
-	source *config.SourceConfig,
-	routes api.Routes,
-	prefix string,
-	state string,
-) api.LookupRoutes {
-	results := api.LookupRoutes{}
-	for _, route := range routes {
-		// Naiive filtering:
-		if strings.HasPrefix(strings.ToLower(route.Network), prefix) {
-			lookup := routeToLookupRoute(nStore, source, state, route)
-			results = append(results, lookup)
-		}
-	}
-	return results
-}
-
-
-func filterRoutesByNeighborIDs(
-	nStore *NeighborsStore,
-	source *config.SourceConfig,
-	routes api.Routes,
-	neighborIDs []string,
-	state string,
-) api.LookupRoutes {
-
-	results := api.LookupRoutes{}
-	for _, route := range routes {
-		// Filtering:
-		if isMemberOf(neighborIDs, route.NeighborID) {
-			lookup := routeToLookupRoute(nStore, source, state, route)
-			results = append(results, lookup)
-		}
-	}
-	return results
-}
-*/
 
 // isMemberOf checks if a key is present in
 // a list of strings.
