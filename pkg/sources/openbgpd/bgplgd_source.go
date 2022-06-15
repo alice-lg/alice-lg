@@ -115,7 +115,7 @@ func (src *BgplgdSource) makeResponseMeta() *api.Meta {
 
 // Status returns an API status response. In our case
 // this is pretty much only that the service is available.
-func (src *BgplgdSource) Status() (*api.StatusResponse, error) {
+func (src *BgplgdSource) Status(ctx context.Context) (*api.StatusResponse, error) {
 	// Make API request and read response. We do not cache the result.
 	response := &api.StatusResponse{
 		Response: api.Response{
@@ -130,7 +130,9 @@ func (src *BgplgdSource) Status() (*api.StatusResponse, error) {
 }
 
 // Neighbors retrievs a full list of all neighbors
-func (src *BgplgdSource) Neighbors() (*api.NeighborsResponse, error) {
+func (src *BgplgdSource) Neighbors(
+	ctx context.Context,
+) (*api.NeighborsResponse, error) {
 	// Query cache and see if we have a hit
 	response := src.neighborsCache.Get()
 	if response != nil {
@@ -139,7 +141,7 @@ func (src *BgplgdSource) Neighbors() (*api.NeighborsResponse, error) {
 	}
 
 	// Make API request and read response
-	req, err := src.ShowNeighborsRequest(context.Background())
+	req, err := src.ShowNeighborsRequest(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +162,7 @@ func (src *BgplgdSource) Neighbors() (*api.NeighborsResponse, error) {
 	// calculate the filtered routes.
 	for _, n := range nb {
 		n.RouteServerID = src.cfg.ID
-		rejectedRes, err := src.RoutesFiltered(n.ID)
+		rejectedRes, err := src.RoutesFiltered(ctx, n.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -175,14 +177,15 @@ func (src *BgplgdSource) Neighbors() (*api.NeighborsResponse, error) {
 		Neighbors: nb,
 	}
 	src.neighborsCache.Set(response)
-
 	return response, nil
 }
 
 // NeighborsSummary retrievs list of neighbors, which
 // might lack details like with number of rejected routes.
 // It is much faster though.
-func (src *BgplgdSource) NeighborsSummary() (*api.NeighborsResponse, error) {
+func (src *BgplgdSource) NeighborsSummary(
+	ctx context.Context,
+) (*api.NeighborsResponse, error) {
 	// Query cache and see if we have a hit
 	response := src.neighborsSummaryCache.Get()
 	if response != nil {
@@ -191,7 +194,7 @@ func (src *BgplgdSource) NeighborsSummary() (*api.NeighborsResponse, error) {
 	}
 
 	// Make API request and read response
-	req, err := src.ShowNeighborsRequest(context.Background())
+	req, err := src.ShowNeighborsRequest(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -226,9 +229,11 @@ func (src *BgplgdSource) NeighborsSummary() (*api.NeighborsResponse, error) {
 
 // NeighborsStatus retrives the status summary
 // for all neightbors
-func (src *BgplgdSource) NeighborsStatus() (*api.NeighborsStatusResponse, error) {
+func (src *BgplgdSource) NeighborsStatus(
+	ctx context.Context,
+) (*api.NeighborsStatusResponse, error) {
 	// Make API request and read response
-	req, err := src.ShowNeighborsSummaryRequest(context.Background())
+	req, err := src.ShowNeighborsSummaryRequest(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -259,7 +264,10 @@ func (src *BgplgdSource) NeighborsStatus() (*api.NeighborsStatusResponse, error)
 
 // Routes retrieves the routes for a specific neighbor
 // identified by ID.
-func (src *BgplgdSource) Routes(neighborID string) (*api.RoutesResponse, error) {
+func (src *BgplgdSource) Routes(
+	ctx context.Context,
+	neighborID string,
+) (*api.RoutesResponse, error) {
 	response := src.routesCache.Get(neighborID)
 	if response != nil {
 		response.Meta.ResultFromCache = true
@@ -267,7 +275,7 @@ func (src *BgplgdSource) Routes(neighborID string) (*api.RoutesResponse, error) 
 	}
 
 	// Query RIB for routes received
-	req, err := src.ShowNeighborRIBRequest(context.Background(), neighborID)
+	req, err := src.ShowNeighborRIBRequest(ctx, neighborID)
 	if err != nil {
 		return nil, err
 	}
@@ -306,7 +314,10 @@ func (src *BgplgdSource) Routes(neighborID string) (*api.RoutesResponse, error) 
 }
 
 // RoutesReceived returns the routes exported by the neighbor.
-func (src *BgplgdSource) RoutesReceived(neighborID string) (*api.RoutesResponse, error) {
+func (src *BgplgdSource) RoutesReceived(
+	ctx context.Context,
+	neighborID string,
+) (*api.RoutesResponse, error) {
 	response := src.routesReceivedCache.Get(neighborID)
 	if response != nil {
 		response.Meta.ResultFromCache = true
@@ -314,7 +325,7 @@ func (src *BgplgdSource) RoutesReceived(neighborID string) (*api.RoutesResponse,
 	}
 
 	// Query RIB for routes received
-	req, err := src.ShowNeighborRIBRequest(context.Background(), neighborID)
+	req, err := src.ShowNeighborRIBRequest(ctx, neighborID)
 	if err != nil {
 		return nil, err
 	}
@@ -352,7 +363,10 @@ func (src *BgplgdSource) RoutesReceived(neighborID string) (*api.RoutesResponse,
 }
 
 // RoutesFiltered retrieves the routes filtered / not valid
-func (src *BgplgdSource) RoutesFiltered(neighborID string) (*api.RoutesResponse, error) {
+func (src *BgplgdSource) RoutesFiltered(
+	ctx context.Context,
+	neighborID string,
+) (*api.RoutesResponse, error) {
 	response := src.routesFilteredCache.Get(neighborID)
 	if response != nil {
 		response.Meta.ResultFromCache = true
@@ -360,7 +374,7 @@ func (src *BgplgdSource) RoutesFiltered(neighborID string) (*api.RoutesResponse,
 	}
 
 	// Query RIB for routes received
-	req, err := src.ShowNeighborRIBRequest(context.Background(), neighborID)
+	req, err := src.ShowNeighborRIBRequest(ctx, neighborID)
 	if err != nil {
 		return nil, err
 	}
@@ -399,7 +413,10 @@ func (src *BgplgdSource) RoutesFiltered(neighborID string) (*api.RoutesResponse,
 
 // RoutesNotExported retrievs the routes not exported
 // from the rs for a neighbor.
-func (src *BgplgdSource) RoutesNotExported(neighborID string) (*api.RoutesResponse, error) {
+func (src *BgplgdSource) RoutesNotExported(
+	ctx context.Context,
+	neighborID string,
+) (*api.RoutesResponse, error) {
 	response := &api.RoutesResponse{
 		Response: api.Response{
 			Meta: src.makeResponseMeta(),
@@ -413,8 +430,10 @@ func (src *BgplgdSource) RoutesNotExported(neighborID string) (*api.RoutesRespon
 
 // AllRoutes retrievs the entire RIB from the source. This is never
 // cached as it is processed by the store.
-func (src *BgplgdSource) AllRoutes() (*api.RoutesResponse, error) {
-	req, err := src.ShowRIBRequest(context.Background())
+func (src *BgplgdSource) AllRoutes(
+	ctx context.Context,
+) (*api.RoutesResponse, error) {
+	req, err := src.ShowRIBRequest(ctx)
 	if err != nil {
 		return nil, err
 	}
