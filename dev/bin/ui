@@ -4,7 +4,7 @@ COMPOSE=${COMPOSE:-docker-compose}
 
 CMD=$@
 if [ -z "$CMD" ]; then
-    CMD="help"
+    CMD="yarn help"
 fi
 
 cd $(dirname $0)/../

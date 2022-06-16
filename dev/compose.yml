@@ -14,9 +14,13 @@ services:
       - 5432:5432
 
   ui:
-    build: containers/ui
+    build:
+      dockerfile: Containerfile
+      context: containers/ui/
     volumes:
       - ../pkg/ui:/ui
+    environment:
+      DANGEROUSLY_DISABLE_HOST_CHECK: "true"
     ports:
       - 3000:3000
     command:
