@@ -5,11 +5,11 @@ import reportWebVitals from './reportWebVitals';
 import 'bootstrap/dist/css/bootstrap.css';
 import './scss/main.scss';
 
-import App from './app/App';
+import Alice from './app/Alice';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <Alice />
   </React.StrictMode>,
   document.getElementById('root')
 );
