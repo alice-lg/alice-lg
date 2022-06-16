@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -11,16 +12,17 @@ import (
 // Handle Status Endpoint, this is intended for
 // monitoring and service health checks
 func (s *Server) apiStatusShow(
+	ctx context.Context,
 	req *http.Request,
 	_params httprouter.Params,
 ) (response, error) {
-	ctx := req.Context()
 	status, err := CollectAppStatus(ctx, s.pool, s.routesStore, s.neighborsStore)
 	return status, err
 }
 
 // Handle status
 func (s *Server) apiStatus(
+	ctx context.Context,
 	_req *http.Request,
 	params httprouter.Params,
 ) (response, error) {
@@ -34,7 +36,7 @@ func (s *Server) apiStatus(
 		return nil, ErrSourceNotFound
 	}
 
-	result, err := source.Status()
+	result, err := source.Status(ctx)
 	if err != nil {
 		s.logSourceError("status", rsID, err)
 	}
@@ -44,6 +46,7 @@ func (s *Server) apiStatus(
 
 // Handle Config Endpoint
 func (s *Server) apiConfigShow(
+	_ctx context.Context,
 	_req *http.Request,
 	_params httprouter.Params,
 ) (response, error) {

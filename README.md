@@ -27,7 +27,6 @@ And checkout the API at:
 The spelling of "neighbors" is now harmonized. Please update your config and
 replace e.g. neighbour.asn with neighbor.asn (in case of java script errors).
 
-
 ## Explanations
 Alice-LG is a BGP looking glass which gets its data from external APIs.
 

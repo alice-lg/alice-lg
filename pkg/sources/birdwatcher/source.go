@@ -1,6 +1,7 @@
 package birdwatcher
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"time"
@@ -168,17 +169,21 @@ func (b *GenericBirdwatcher) filterRoutesByDuplicates(
 	return routes
 }
 
-func (b *GenericBirdwatcher) fetchProtocolsShort() (
+func (b *GenericBirdwatcher) fetchProtocolsShort(ctx context.Context) (
 	*api.Meta,
 	map[string]interface{},
 	error,
 ) {
-	// Query birdwatcher
-	timeout := 2 * time.Second
+	// Query birdwatcher with forced timeout
+	timeout := 20 * time.Second
 	if b.config.NeighborsRefreshTimeout > 0 {
 		timeout = time.Duration(b.config.NeighborsRefreshTimeout) * time.Second
 	}
-	bird, err := b.client.GetJSONTimeout(timeout, "/protocols/short?uncached=true")
+
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	bird, err := b.client.GetJSON(ctx, "/protocols/short?uncached=true")
 	if err != nil {
 		return nil, nil, err
 	}
@@ -204,8 +209,8 @@ func (b *GenericBirdwatcher) ExpireCaches() int {
 }
 
 // Status retrievs the current backend status
-func (b *GenericBirdwatcher) Status() (*api.StatusResponse, error) {
-	bird, err := b.client.GetJSON("/status")
+func (b *GenericBirdwatcher) Status(ctx context.Context) (*api.StatusResponse, error) {
+	bird, err := b.client.GetJSON(ctx, "/status")
 	if err != nil {
 		return nil, err
 	}
@@ -233,12 +238,12 @@ func (b *GenericBirdwatcher) Status() (*api.StatusResponse, error) {
 }
 
 // NeighborsStatus retrieves neighbor status infos
-func (b *GenericBirdwatcher) NeighborsStatus() (
+func (b *GenericBirdwatcher) NeighborsStatus(ctx context.Context) (
 	*api.NeighborsStatusResponse,
 	error,
 ) {
 	// Query birdwatcher
-	apiStatus, birdProtocols, err := b.fetchProtocolsShort()
+	apiStatus, birdProtocols, err := b.fetchProtocolsShort(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -260,6 +265,7 @@ func (b *GenericBirdwatcher) NeighborsStatus() (
 
 // LookupPrefix makes a routes lookup
 func (b *GenericBirdwatcher) LookupPrefix(
+	ctx context.Context,
 	prefix string,
 ) (*api.RoutesLookupResponse, error) {
 	// Get RS info
@@ -269,7 +275,7 @@ func (b *GenericBirdwatcher) LookupPrefix(
 	}
 
 	// Query prefix on RS
-	bird, err := b.client.GetJSON("/routes/prefix?prefix=" + prefix)
+	bird, err := b.client.GetJSON(ctx, "/routes/prefix?prefix="+prefix)
 	if err != nil {
 		return nil, err
 	}

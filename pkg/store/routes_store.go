@@ -85,12 +85,15 @@ func NewRoutesStore(
 }
 
 // Start starts the routes store
-func (s *RoutesStore) Start() {
+func (s *RoutesStore) Start(ctx context.Context) {
 	log.Println("Starting local routes store")
 
 	// Periodically trigger updates
 	for {
-		s.update()
+		if err := ctx.Err(); err != nil {
+			return // context is done
+		}
+		s.update(ctx)
 		time.Sleep(time.Second)
 	}
 }
@@ -99,9 +102,9 @@ func (s *RoutesStore) Start() {
 // sources last refresh is longer ago than the configured
 // refresh period. This is totally the same as the
 // NeighborsStore.update and maybe these functions can be merged (TODO)
-func (s *RoutesStore) update() {
+func (s *RoutesStore) update(ctx context.Context) {
 	for _, id := range s.sources.GetSourceIDsForRefresh() {
-		go s.safeUpdateSource(id)
+		go s.safeUpdateSource(ctx, id)
 	}
 }
 
@@ -109,9 +112,7 @@ func (s *RoutesStore) update() {
 // will recover from a panic if something goes wrong.
 // In that case, the LastError and State will be updated.
 // Again. The similarity to the NeighborsStore is really sus.
-func (s *RoutesStore) safeUpdateSource(id string) {
-	ctx := context.TODO()
-
+func (s *RoutesStore) safeUpdateSource(ctx context.Context, id string) {
 	if !s.sources.ShouldRefresh(id) {
 		return // Nothing to do here
 	}
@@ -159,42 +160,42 @@ func (s *RoutesStore) updateSource(
 	ctx context.Context,
 	src *config.SourceConfig,
 ) error {
-
-	log.Println("[routes store] start retrive routes dump from RS", src.Name)
+	if err := s.awaitNeighborStore(ctx, src.ID); err != nil {
+		return err
+	}
 
 	rs := src.GetInstance()
-	res, err := rs.AllRoutes()
+	res, err := rs.AllRoutes(ctx)
 	if err != nil {
 		return err
 	}
 
 	log.Println("[routes store] finished fetching routes dump from RS", src.Name)
 
-	log.Println("[routes store] awaiting neighbor store HAS DATA for", src.Name)
-	if err := s.awaitNeighborStore(ctx, src.ID); err != nil {
-		return err
-	}
-	log.Println("[routes store] neighbor store HAS DATA for", src.Name)
-
 	neighbors, err := s.neighbors.GetNeighborsMapAt(ctx, src.ID)
 	if err != nil {
 		return err
 	}
 
-	log.Println("[routes store] retrieved neighbors for:", src.Name)
+	log.Println(
+		"[routes store] retrieved", len(res.Imported),
+		"accepted and", len(res.Filtered), "filtered routes for:", src.Name)
 
-	log.Println("[routes store] preparing routes for import of", src.Name)
 	// Prepare imported routes for lookup
-	imported := s.routesToLookupRoutes(ctx, "imported", src, neighbors, res.Imported)
-	filtered := s.routesToLookupRoutes(ctx, "filtered", src, neighbors, res.Filtered)
+	srcRS := &api.RouteServer{
+		ID:   src.ID,
+		Name: src.Name,
+	}
+	imported := res.Imported.ToLookupRoutes("imported", srcRS, neighbors)
+	filtered := res.Filtered.ToLookupRoutes("filtered", srcRS, neighbors)
 	lookupRoutes := append(imported, filtered...)
 
 	log.Println("[routes store] importing", len(lookupRoutes), "into store from", src.Name)
 	if err = s.backend.SetRoutes(ctx, src.ID, lookupRoutes); err != nil {
 		return err
 	}
+	log.Println("[routes store] import success")
 
-	log.Println("[routes store] import success.")
 	return s.sources.RefreshSuccess(src.ID)
 }
 
@@ -205,50 +206,20 @@ func (s *RoutesStore) awaitNeighborStore(
 	srcID string,
 ) error {
 	for {
-		err := ctx.Err()
-		if err != nil {
+		if err := ctx.Err(); err != nil {
 			return err
 		}
+
 		if s.neighbors.IsInitialized(srcID) {
 			return nil
 		}
+
 		time.Sleep(100 * time.Millisecond)
 	}
 }
 
-func (s *RoutesStore) routesToLookupRoutes(
-	ctx context.Context,
-	state string,
-	src *config.SourceConfig,
-	neighbors map[string]*api.Neighbor,
-	routes api.Routes,
-) api.LookupRoutes {
-	lookupRoutes := make(api.LookupRoutes, 0, len(routes))
-	for _, route := range routes {
-		neighbor, ok := neighbors[route.NeighborID]
-		if !ok {
-			log.Println("prepare route, neighbor not found:", route.NeighborID)
-			continue
-		}
-		lr := &api.LookupRoute{
-			Route:    route,
-			State:    state,
-			Neighbor: neighbor,
-			RouteServer: &api.RouteServer{
-				ID:   src.ID,
-				Name: src.Name,
-			},
-		}
-		lr.Route.Details = nil
-		lookupRoutes = append(lookupRoutes, lr)
-	}
-	return lookupRoutes
-}
-
 // Stats calculates some store insights
-func (s *RoutesStore) Stats() *api.RoutesStoreStats {
-	ctx := context.TODO()
-
+func (s *RoutesStore) Stats(ctx context.Context) *api.RoutesStoreStats {
 	totalImported := uint(0)
 	totalFiltered := uint(0)
 
@@ -262,7 +233,6 @@ func (s *RoutesStore) Stats() *api.RoutesStoreStats {
 		}
 
 		src := s.sources.Get(sourceID)
-
 		nImported, nFiltered, err := s.backend.CountRoutesAt(ctx, sourceID)
 		if err != nil {
 			if !errors.Is(err, sources.ErrSourceNotFound) {

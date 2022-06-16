@@ -41,9 +41,8 @@ func NewServer(
 
 // Start starts a HTTP server and begins to listen
 // on the configured port.
-func (s *Server) Start() {
+func (s *Server) Start(ctx context.Context) {
 	router := httprouter.New()
-	ctx := context.Background()
 
 	// Register routes
 	if err := s.webRegisterAssets(ctx, router); err != nil {
@@ -52,6 +51,7 @@ func (s *Server) Start() {
 	if err := s.apiRegisterEndpoints(router); err != nil {
 		log.Fatal(err)
 	}
+
 	httpTimeout := time.Duration(s.cfg.Server.HTTPTimeout) * time.Second
 	log.Println("Web server HTTP timeout set to:", httpTimeout)
 

@@ -3,35 +3,14 @@ package store
 import (
 	"context"
 	"log"
-	"os"
 	"strings"
 	"testing"
-
-	"encoding/json"
-	"io/ioutil"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
 	"github.com/alice-lg/alice-lg/pkg/config"
 	"github.com/alice-lg/alice-lg/pkg/store/backends/memory"
+	"github.com/alice-lg/alice-lg/pkg/store/testdata"
 )
-
-func loadTestRoutesResponse() *api.RoutesResponse {
-	file, err := os.Open("testdata/routes_response.json")
-	if err != nil {
-		log.Panic("could not load test data:", err)
-	}
-	defer file.Close()
-	data, err := ioutil.ReadAll(file)
-	if err != nil {
-		log.Panic("could not read test data:", err)
-	}
-	response := &api.RoutesResponse{}
-	err = json.Unmarshal(data, &response)
-	if err != nil {
-		log.Panic("could not unmarshal response test data:", err)
-	}
-	return response
-}
 
 func importRoutes(
 	s *RoutesStore,
@@ -49,8 +28,12 @@ func importRoutes(
 			ID: "ID7254_AS31334",
 		},
 	}
-	imported := s.routesToLookupRoutes(ctx, "imported", src, neighbors, res.Imported)
-	filtered := s.routesToLookupRoutes(ctx, "filtered", src, neighbors, res.Filtered)
+	srcRS := &api.RouteServer{
+		ID:   src.ID,
+		Name: src.Name,
+	}
+	imported := res.Imported.ToLookupRoutes("imported", srcRS, neighbors)
+	filtered := res.Filtered.ToLookupRoutes("filtered", srcRS, neighbors)
 	lookupRoutes := append(imported, filtered...)
 
 	if err := s.backend.SetRoutes(ctx, src.ID, lookupRoutes); err != nil {
@@ -82,7 +65,7 @@ func makeTestRoutesStore() *RoutesStore {
 			},
 		},
 	}
-	rs1 := loadTestRoutesResponse()
+	rs1 := testdata.RoutesResponse()
 	s := NewRoutesStore(neighborsStore, cfg, be)
 	if err := importRoutes(s, cfg.Sources[0], rs1); err != nil {
 		log.Panic(err)
@@ -117,7 +100,7 @@ func testCheckPrefixesPresence(prefixes, resultset []string, t *testing.T) {
 func TestRoutesStoreStats(t *testing.T) {
 
 	store := makeTestRoutesStore()
-	stats := store.Stats()
+	stats := store.Stats(context.Background())
 
 	// Check total routes
 	// There should be 8 imported, and 1 filtered route

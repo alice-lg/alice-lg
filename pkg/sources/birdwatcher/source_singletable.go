@@ -1,6 +1,7 @@
 package birdwatcher
 
 import (
+	"context"
 	"log"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
@@ -12,10 +13,11 @@ type SingleTableBirdwatcher struct {
 }
 
 func (src *SingleTableBirdwatcher) fetchReceivedRoutes(
+	ctx context.Context,
 	neighborID string,
 ) (*api.Meta, api.Routes, error) {
 	// Query birdwatcher
-	bird, err := src.client.GetJSON("/routes/protocol/" + neighborID)
+	bird, err := src.client.GetJSON(ctx, "/routes/protocol/"+neighborID)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -38,10 +40,11 @@ func (src *SingleTableBirdwatcher) fetchReceivedRoutes(
 }
 
 func (src *SingleTableBirdwatcher) fetchFilteredRoutes(
+	ctx context.Context,
 	neighborID string,
 ) (*api.Meta, api.Routes, error) {
 	// Query birdwatcher
-	bird, err := src.client.GetJSON("/routes/filtered/" + neighborID)
+	bird, err := src.client.GetJSON(ctx, "/routes/filtered/"+neighborID)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -64,10 +67,11 @@ func (src *SingleTableBirdwatcher) fetchFilteredRoutes(
 }
 
 func (src *SingleTableBirdwatcher) fetchNotExportedRoutes(
+	ctx context.Context,
 	neighborID string,
 ) (*api.Meta, api.Routes, error) {
 	// Query birdwatcher
-	bird, _ := src.client.GetJSON("/routes/noexport/" + neighborID)
+	bird, _ := src.client.GetJSON(ctx, "/routes/noexport/"+neighborID)
 
 	// Use api status from first request
 	apiStatus, err := parseAPIStatus(bird, src.config)
@@ -96,6 +100,7 @@ func (src *SingleTableBirdwatcher) fetchNotExportedRoutes(
 //
 // A route deduplication is applied.
 func (src *SingleTableBirdwatcher) fetchRequiredRoutes(
+	ctx context.Context,
 	neighborID string,
 ) (*api.RoutesResponse, error) {
 	// Allow only one concurrent request for this neighbor
@@ -110,13 +115,13 @@ func (src *SingleTableBirdwatcher) fetchRequiredRoutes(
 	}
 
 	// First: get routes received
-	apiStatus, receivedRoutes, err := src.fetchReceivedRoutes(neighborID)
+	apiStatus, receivedRoutes, err := src.fetchReceivedRoutes(ctx, neighborID)
 	if err != nil {
 		return nil, err
 	}
 
 	// Second: get routes filtered
-	_, filteredRoutes, err := src.fetchFilteredRoutes(neighborID)
+	_, filteredRoutes, err := src.fetchFilteredRoutes(ctx, neighborID)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +151,9 @@ func (src *SingleTableBirdwatcher) fetchRequiredRoutes(
 }
 
 // Neighbors get neighbors from protocols
-func (src *SingleTableBirdwatcher) Neighbors() (*api.NeighborsResponse, error) {
+func (src *SingleTableBirdwatcher) Neighbors(
+	ctx context.Context,
+) (*api.NeighborsResponse, error) {
 	// Check if we hit the cache
 	response := src.neighborsCache.Get()
 	if response != nil {
@@ -154,7 +161,7 @@ func (src *SingleTableBirdwatcher) Neighbors() (*api.NeighborsResponse, error) {
 	}
 
 	// Query birdwatcher
-	bird, err := src.client.GetJSON("/protocols/bgp")
+	bird, err := src.client.GetJSON(ctx, "/protocols/bgp")
 	if err != nil {
 		return nil, err
 	}
@@ -184,24 +191,27 @@ func (src *SingleTableBirdwatcher) Neighbors() (*api.NeighborsResponse, error) {
 }
 
 // NeighborsSummary is for now an alias of Neighbors
-func (src *SingleTableBirdwatcher) NeighborsSummary() (*api.NeighborsResponse, error) {
-	return src.Neighbors()
+func (src *SingleTableBirdwatcher) NeighborsSummary(
+	ctx context.Context,
+) (*api.NeighborsResponse, error) {
+	return src.Neighbors(ctx)
 }
 
 // Routes gets filtered and exported routes
 func (src *SingleTableBirdwatcher) Routes(
+	ctx context.Context,
 	neighborID string,
 ) (*api.RoutesResponse, error) {
 	response := &api.RoutesResponse{}
 
 	// Fetch required routes first (received and filtered)
-	required, err := src.fetchRequiredRoutes(neighborID)
+	required, err := src.fetchRequiredRoutes(ctx, neighborID)
 	if err != nil {
 		return nil, err
 	}
 
 	// Optional: NoExport
-	_, notExported, err := src.fetchNotExportedRoutes(neighborID)
+	_, notExported, err := src.fetchNotExportedRoutes(ctx, neighborID)
 	if err != nil {
 		return nil, err
 	}
@@ -216,6 +226,7 @@ func (src *SingleTableBirdwatcher) Routes(
 
 // RoutesReceived gets all received routes
 func (src *SingleTableBirdwatcher) RoutesReceived(
+	ctx context.Context,
 	neighborID string,
 ) (*api.RoutesResponse, error) {
 	response := &api.RoutesResponse{}
@@ -230,7 +241,7 @@ func (src *SingleTableBirdwatcher) RoutesReceived(
 
 	// Fetch required routes first (received and filtered)
 	// However: Store in separate cache for faster access
-	routes, err := src.fetchRequiredRoutes(neighborID)
+	routes, err := src.fetchRequiredRoutes(ctx, neighborID)
 	if err != nil {
 		return nil, err
 	}
@@ -243,6 +254,7 @@ func (src *SingleTableBirdwatcher) RoutesReceived(
 
 // RoutesFiltered gets all filtered routes
 func (src *SingleTableBirdwatcher) RoutesFiltered(
+	ctx context.Context,
 	neighborID string,
 ) (*api.RoutesResponse, error) {
 	response := &api.RoutesResponse{}
@@ -257,7 +269,7 @@ func (src *SingleTableBirdwatcher) RoutesFiltered(
 
 	// Fetch required routes first (received and filtered)
 	// However: Store in separate cache for faster access
-	routes, err := src.fetchRequiredRoutes(neighborID)
+	routes, err := src.fetchRequiredRoutes(ctx, neighborID)
 	if err != nil {
 		return nil, err
 	}
@@ -270,6 +282,7 @@ func (src *SingleTableBirdwatcher) RoutesFiltered(
 
 // RoutesNotExported get all not exported routes
 func (src *SingleTableBirdwatcher) RoutesNotExported(
+	ctx context.Context,
 	neighborID string,
 ) (*api.RoutesResponse, error) {
 	// Check if we hit the cache
@@ -279,7 +292,7 @@ func (src *SingleTableBirdwatcher) RoutesNotExported(
 	}
 
 	// Fetch not exported routes
-	apiStatus, routes, err := src.fetchNotExportedRoutes(neighborID)
+	apiStatus, routes, err := src.fetchNotExportedRoutes(ctx, neighborID)
 	if err != nil {
 		return nil, err
 	}
@@ -298,16 +311,18 @@ func (src *SingleTableBirdwatcher) RoutesNotExported(
 }
 
 // AllRoutes retrieves a route dump
-func (src *SingleTableBirdwatcher) AllRoutes() (*api.RoutesResponse, error) {
+func (src *SingleTableBirdwatcher) AllRoutes(
+	ctx context.Context,
+) (*api.RoutesResponse, error) {
 	// First fetch all routes from the master table
 	mainTable := src.GenericBirdwatcher.config.MainTable
-	birdImported, err := src.client.GetJSON("/routes/table/" + mainTable)
+	birdImported, err := src.client.GetJSON(ctx, "/routes/table/"+mainTable)
 	if err != nil {
 		return nil, err
 	}
 
 	// Then fetch all filtered routes from the master table
-	birdFiltered, err := src.client.GetJSON("/routes/table/" + mainTable + "/filtered")
+	birdFiltered, err := src.client.GetJSON(ctx, "/routes/table/"+mainTable+"/filtered")
 	if err != nil {
 		return nil, err
 	}

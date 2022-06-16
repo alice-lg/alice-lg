@@ -6,7 +6,16 @@ import (
 	"time"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
+	"github.com/alice-lg/alice-lg/pkg/config"
 )
+
+func TestRoutesTable(t *testing.T) {
+	b := &RoutesBackend{}
+	tbl := b.routesTable("rs0-example!/;")
+	if tbl != "routes_rs0_example___" {
+		t.Error("unexpected table:", tbl)
+	}
+}
 
 func TestCountRoutesAt(t *testing.T) {
 	ctx := context.Background()
@@ -29,6 +38,7 @@ func TestCountRoutesAt(t *testing.T) {
 			Network: "1.2.3.0/24",
 		},
 	}
+	b.initTable(ctx, tx, "rs1")
 	b.persist(ctx, tx, "rs1", r, now)
 
 	r.Route.ID = "r4242"
@@ -63,7 +73,13 @@ func TestFindByNeighbors(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer tx.Rollback(ctx)
-	b := &RoutesBackend{pool: pool}
+	b := &RoutesBackend{
+		pool: pool,
+		sources: []*config.SourceConfig{
+			{ID: "rs1"},
+			{ID: "rs2"},
+		},
+	}
 	r := &api.LookupRoute{
 		State: "filtered",
 		Neighbor: &api.Neighbor{
@@ -74,6 +90,8 @@ func TestFindByNeighbors(t *testing.T) {
 			Network: "1.2.3.0/24",
 		},
 	}
+	b.initTable(ctx, tx, "rs1")
+	b.initTable(ctx, tx, "rs2")
 	b.persist(ctx, tx, "rs1", r, now)
 
 	r.Route.ID = "r4242"
@@ -85,7 +103,7 @@ func TestFindByNeighbors(t *testing.T) {
 
 	r.Route.ID = "r4244"
 	r.Neighbor.ID = "n25"
-	b.persist(ctx, tx, "rs1", r, now)
+	b.persist(ctx, tx, "rs2", r, now)
 
 	if err := tx.Commit(ctx); err != nil {
 		t.Fatal(err)
@@ -113,7 +131,13 @@ func TestFindByPrefix(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer tx.Rollback(ctx)
-	b := &RoutesBackend{pool: pool}
+	b := &RoutesBackend{
+		pool: pool,
+		sources: []*config.SourceConfig{
+			{ID: "rs1"},
+			{ID: "rs2"},
+		},
+	}
 	r := &api.LookupRoute{
 		State: "filtered",
 		Neighbor: &api.Neighbor{
@@ -124,6 +148,9 @@ func TestFindByPrefix(t *testing.T) {
 			Network: "1.2.3.0/24",
 		},
 	}
+
+	b.initTable(ctx, tx, "rs1")
+	b.initTable(ctx, tx, "rs2")
 	b.persist(ctx, tx, "rs1", r, now)
 
 	r.Route.ID = "r4242"
@@ -133,7 +160,7 @@ func TestFindByPrefix(t *testing.T) {
 	r.Route.ID = "r4243"
 	r.Route.Network = "1.2.5.0/24"
 	r.Neighbor.ID = "n24"
-	b.persist(ctx, tx, "rs1", r, now)
+	b.persist(ctx, tx, "rs2", r, now)
 
 	r.Route.ID = "r4244"
 	r.Route.Network = "5.5.5.0/24"

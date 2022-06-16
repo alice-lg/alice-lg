@@ -1,7 +1,7 @@
 
 # Changelog
 
-## 5.1.0
+## 5.1.0 (2022-06-02)
 
  * **BREAKING CHANGE** The spelling of "neighbors" is now harmonized.
    Please update your config and replace e.g. `neighbour.asn` 

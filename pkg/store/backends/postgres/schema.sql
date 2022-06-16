@@ -51,7 +51,7 @@ CREATE TABLE routes (
     updated_at  TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     -- Constraints
-    PRIMARY KEY(id, rs_id)
+    PRIMARY KEY(id, rs_id, neighbor_id)
 );
 
 CREATE INDEX idx_routes_network    ON routes ( network );

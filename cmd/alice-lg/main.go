@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"runtime/debug"
 	"runtime/pprof"
 	"time"
 
@@ -83,6 +84,9 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Tune garbage collection
+	debug.SetGCPercent(10)
+
 	// Setup local routes store and use backend from configuration
 	var (
 		neighborsBackend store.NeighborsStoreBackend = memory.NewNeighborsBackend()
@@ -109,7 +113,11 @@ func main() {
 		go m.Start(ctx)
 
 		neighborsBackend = postgres.NewNeighborsBackend(pool)
-		routesBackend = postgres.NewRoutesBackend(pool)
+		routesBackend = postgres.NewRoutesBackend(
+			pool, cfg.Sources)
+		if err := routesBackend.(*postgres.RoutesBackend).Init(ctx); err != nil {
+			log.Println("error while initializing routes backend:", err)
+		}
 	}
 
 	neighborsStore := store.NewNeighborsStore(cfg, neighborsBackend)
@@ -121,8 +129,8 @@ func main() {
 
 	// Start stores
 	if cfg.Server.EnablePrefixLookup {
-		go neighborsStore.Start()
-		go routesStore.Start()
+		go neighborsStore.Start(ctx)
+		go routesStore.Start(ctx)
 	}
 
 	// Start the Housekeeping
@@ -130,7 +138,7 @@ func main() {
 
 	// Start HTTP API
 	server := http.NewServer(cfg, pool, routesStore, neighborsStore)
-	go server.Start()
+	go server.Start(ctx)
 
 	<-ctx.Done()
 }

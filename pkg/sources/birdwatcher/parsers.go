@@ -302,6 +302,47 @@ func parseExtBgpCommunities(data interface{}) []api.ExtCommunity {
 	return communities
 }
 
+// Parse partial route
+func parseRouteData(
+	rdata map[string]interface{},
+	config Config,
+	keepDetails bool,
+) *api.Route {
+	age := parseRelativeServerTime(rdata["age"], config)
+	rtype := decoders.StringList(rdata["type"])
+	bgpInfo := parseRouteBgpInfo(rdata["bgp"])
+
+	// Precompute details as raw json message
+	var details json.RawMessage = nil
+	if keepDetails {
+		detailsJSON, err := json.Marshal(rdata)
+		if err != nil {
+			log.Println("error while encoding details:", err)
+		}
+		details = json.RawMessage(detailsJSON)
+	}
+
+	gateway := decoders.String(rdata["gateway"], "unknown gateway")
+
+	route := &api.Route{
+		ID:         decoders.String(rdata["network"], "unknown"),
+		NeighborID: decoders.String(rdata["from_protocol"], "unknown neighbor"),
+
+		Network:    decoders.String(rdata["network"], "unknown net"),
+		Interface:  decoders.String(rdata["interface"], "unknown interface"),
+		Metric:     decoders.Int(rdata["metric"], -1),
+		Primary:    decoders.Bool(rdata["primary"], false),
+		LearntFrom: decoders.String(rdata["learnt_from"], gateway),
+		Gateway:    gateway,
+		Age:        age,
+		Type:       rtype,
+		BGP:        bgpInfo,
+
+		Details: &details,
+	}
+	return route
+}
+
 // Parse partial routes response
 func parseRoutesData(
 	birdRoutes []interface{},
@@ -312,40 +353,7 @@ func parseRoutesData(
 
 	for _, data := range birdRoutes {
 		rdata := data.(map[string]interface{})
-
-		age := parseRelativeServerTime(rdata["age"], config)
-		rtype := decoders.StringList(rdata["type"])
-		bgpInfo := parseRouteBgpInfo(rdata["bgp"])
-
-		// Precompute details as raw json message
-		var details json.RawMessage = nil
-		if keepDetails {
-			detailsJSON, err := json.Marshal(rdata)
-			if err != nil {
-				log.Println("error while encoding details:", err)
-			}
-			details = json.RawMessage(detailsJSON)
-		}
-
-		gateway := decoders.String(rdata["gateway"], "unknown gateway")
-
-		route := &api.Route{
-			ID:         decoders.String(rdata["network"], "unknown"),
-			NeighborID: decoders.String(rdata["from_protocol"], "unknown neighbor"),
-
-			Network:    decoders.String(rdata["network"], "unknown net"),
-			Interface:  decoders.String(rdata["interface"], "unknown interface"),
-			Metric:     decoders.Int(rdata["metric"], -1),
-			Primary:    decoders.Bool(rdata["primary"], false),
-			LearntFrom: decoders.String(rdata["learnt_from"], gateway),
-			Gateway:    gateway,
-			Age:        age,
-			Type:       rtype,
-			BGP:        bgpInfo,
-
-			Details: &details,
-		}
-
+		route := parseRouteData(rdata, config, keepDetails)
 		routes = append(routes, route)
 	}
 	return routes
