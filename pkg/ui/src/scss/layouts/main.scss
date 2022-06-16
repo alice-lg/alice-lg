@@ -1,0 +1,127 @@
+/**
+ * Main Layout Scss File 
+ */
+
+
+body, html {
+  font-family: "Source Sans Pro";
+  margin: 0px;
+  padding: 0px;
+}
+
+body,
+.page {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: row;
+
+}
+
+#app {
+  width: 100%;
+}
+
+.page header {
+  margin-top: 50px;
+}
+
+.page-body {
+  display: flex;
+  flex: 1;
+}
+
+.page-content {
+  display: flex;
+  flex: 1 0;
+  flex-direction: column;
+  background: #f4f5f7;
+  background-image: url('../../img/alicebg.png');
+  background-position: 90% 100%;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  padding: 0px;
+  margin: 0px;
+}
+
+.main-content-wrapper {
+  flex: 1;
+}
+
+.page-footer {
+  flex: 0 1;
+  padding: 3px;
+
+  a {
+    font-size: 12px;
+    text-decoration: none;
+  }
+}
+
+.page-nav {
+  flex: 0 0 250px;
+  order: -1;
+  background: #f8f8f8;
+  // border-right: 1px solid #ccc;
+}
+
+.page-sidebar {
+  flex: 0 0 195px;
+  background: #272634;
+  // border-left: 1px solid #ccc;
+}
+
+@media (min-width: 1300px) {
+ .page-sidebar {
+   flex: 0 0 230px;
+   background: #272634;
+ }
+}
+
+header {
+  flex: none;
+}
+
+.navbar {
+  box-shadow: none;
+  border-bottom: none;
+}
+
+
+.page-header {
+  line-height: 59px;
+  background: white;
+  margin: 0px;
+  height: 59px;
+
+  box-shadow: 0px 1px 4px #eee;
+}
+
+.table-protocols {
+    .protocol-state-error {
+        display: block;
+        font-size: 11px;
+        color: orange;
+    }
+}
+
+.loading-indicator {
+  text-align: center;
+  width: 50px;
+  margin: 0px auto;
+}
+
+.details-main {
+	.help-block {
+		margin: 20px;
+		padding: 10px 5px;
+	}
+    
+    margin-right: 0px;
+    margin-top: 20px;
+
+    &.row {
+        margin: 0px;
+    }
+}
+
+

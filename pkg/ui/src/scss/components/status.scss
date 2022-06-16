@@ -1,0 +1,34 @@
+
+
+
+.page-header {
+  padding: 0px 20px;
+
+  .status-name {
+    font-weight: bold;
+  }
+
+  .status-protocol {
+    font-weight: bold;
+  }
+
+  .spacer {
+    font-weight: bold;
+    padding: 0px 8px;
+  }
+}
+
+.routeserver-status {
+  margin: 0px;
+  padding: 0px;
+  td {
+    vertical-align: top;
+    padding: 4px;
+
+    i {
+      width: 15px;
+    }
+  }
+}
+
+
