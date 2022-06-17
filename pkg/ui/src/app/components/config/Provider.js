@@ -14,6 +14,9 @@ import { createContext
        }
   from 'react';
 
+import { useErrors }
+  from 'app/components/errors/Provider';
+
 const initialState = {
   asn: 0, // Our own ASN (might be abstracted in the future)
 
@@ -42,13 +45,15 @@ export const useConfig = () => useContext(ConfigContext);
 
 const ConfigProvider = ({children}) => {
   const [config, setConfig] = useState(initialState);
+  const [handleError] = useErrors();
   
   // OnLoad: once
   useEffect(() => {
     // Fetch config from backend
-    axios.get('/api/v1/config').then(({data}) => {
-      setConfig(data);
-    });
+    axios.get('/api/v1/config').then(
+      ({data}) => setConfig(data),
+      (error) => handleError(error)
+    );
   }, []);
 
   return (

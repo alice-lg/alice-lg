@@ -7,8 +7,8 @@
 import Content
   from 'app/components/content/Content';
 
-// TODO
-const Errors = () => <></>;
+import Errors
+  from 'app/components/errors/Errors';
 
 const Page = ({children}) => {
 
