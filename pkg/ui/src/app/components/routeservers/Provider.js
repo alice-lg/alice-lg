@@ -1,7 +1,7 @@
 /**
  * RouteServers provider
  *
- * This provider fetches all routeservers and makes them
+ * This provider fetches all route servers and makes them
  * available through a context
  */
 
@@ -18,33 +18,33 @@ import { useErrors }
   from 'app/components/errors/Provider';
 
 
-const RouteserversContext = createContext([]);
+const RouteServersContext = createContext([]);
 
-export const useRouteservers = () => useContext(RouteserversContext);
+export const useRouteServers = () => useContext(RouteServersContext);
 
 
 /**
- * RouteserversProvider loads the routeservers from the
+ * RouteServersProvider loads the route servers from the
  * backend and uses these as provider value.
  */
-const RouteserversProvider = ({children}) => {
+const RouteServersProvider = ({children}) => {
   const [handleError] = useErrors();
   const [rs, setRs]   = useState([]);
   
-  // Load routeservers from backend
+  // Load route servers from backend
   useEffect(() => {
     axios.get('/api/v1/routeservers')
       .then(
-        ({data}) => setRs(data),
+        ({data}) => setRs(data.routeservers),
         (error) => handleError(error)
       );
   }, [handleError]);
 
   return (
-    <RouteserversContext.Provider value={rs}>
+    <RouteServersContext.Provider value={rs}>
       {children}
-    </RouteserversContext.Provider>
+    </RouteServersContext.Provider>
   );
 }
 
-export default RouteserversProvider;
+export default RouteServersProvider;

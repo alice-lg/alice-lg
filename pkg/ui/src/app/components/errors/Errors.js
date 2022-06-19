@@ -2,8 +2,12 @@
 /**
  * Errors Component renders a stack of dismissable errors.
  */
+import { FontAwesomeIcon }
+  from '@fortawesome/react-fontawesome';
+import { faCircleXmark, faTriangleExclamation }
+  from '@fortawesome/free-solid-svg-icons';
 
-import { useRouteservers }
+import { useRouteServers }
   from 'app/components/routeservers/Provider';
 
 import { useErrors }
@@ -25,7 +29,7 @@ const infoFromError = (error) => {
  * Error renders a single dismissable error
  */
 const Error = ({error, onDismiss}) => {
-  const routeservers = useRouteservers();   
+  const routeServers = useRouteServers();
 
   let status = 600;
   if (error.response) {
@@ -42,7 +46,7 @@ const Error = ({error, onDismiss}) => {
   if (errorInfo) {
     const rsId = errorInfo.routeserver_id; 
     if (rsId !== null) {
-      rs = routeservers.find(r => r.id === rsId);
+      rs = routeServers.find(r => r.id === rsId);
     }
   }
 
@@ -79,11 +83,11 @@ const Error = ({error, onDismiss}) => {
   return (
     <div className="error-notify">
       <div className="error-dismiss">
-        <i className="fa fa-times-circle" aria-hidden="true"
-           onClick={() => onDismiss(error)}></i>
+        <FontAwesomeIcon icon={faCircleXmark}
+           onClick={() => onDismiss(error)} />
       </div>
       <div className="error-icon">
-        <i className="fa fa-times-circle" aria-hidden="true"></i>
+        <FontAwesomeIcon icon={faTriangleExclamation} size="3x" />
       </div>
       {body}
     </div>

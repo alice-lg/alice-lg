@@ -5,6 +5,7 @@
 import { useState
        , createContext
        , useContext
+       , useCallback
        }
   from 'react';
 
@@ -19,10 +20,11 @@ export const useErrors = () => useContext(ErrorContext);
 const ErrorProvider = ({children}) => {
   const [errors, setErrors] = useState([]);
 
+
   // Handle prepends the error to the state
-  const handle = (err) => {
+  const handle = useCallback((err) => {
     setErrors([err, ...errors]);
-  }
+  }, [errors]);
 
   // Dismiss removes the error from the state
   const dismiss = (err) => {

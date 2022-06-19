@@ -2,8 +2,16 @@
 import { Link }
   from 'react-router-dom';
 
+import { FontAwesomeIcon }
+  from '@fortawesome/react-fontawesome';
+import { faCloud }
+  from '@fortawesome/free-solid-svg-icons';
+
 import Content
   from 'app/components/content/Content';
+import RouteServers
+  from 'app/components/navigation/RouteServers';
+
 
 const Sidebar = () => {
   return (
@@ -11,7 +19,9 @@ const Sidebar = () => {
       <div className="sidebar-header">
         <div className="logo">
           <Link to='/'>
-            <i className="fa fa-cloud"></i>
+            <FontAwesomeIcon 
+              className="logo-icon"
+              icon={faCloud} size="lg" transform="grow-11" />
           </Link>
         </div>
         <div className="title">
@@ -23,9 +33,7 @@ const Sidebar = () => {
           </p>
         </div>
       </div>
-
-
-      RouteServers
+      <RouteServers />
     </aside>
   );  
 }
