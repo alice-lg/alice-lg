@@ -14,7 +14,7 @@ import './scss/main.scss';
 import Alice 
   from './app/Alice';
 
-const root = createRoot(document.getElementById('root'));
+const root = createRoot(document.getElementById('app'));
 
 root.render(
   <StrictMode>

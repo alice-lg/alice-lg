@@ -20,10 +20,12 @@ export const useErrors = () => useContext(ErrorContext);
 const ErrorProvider = ({children}) => {
   const [errors, setErrors] = useState([]);
 
+  // Handle prepends the error to the state
   const handle = (err) => {
     setErrors([err, ...errors]);
   }
 
+  // Dismiss removes the error from the state
   const dismiss = (err) => {
     const filtered = errors.filter((e) => e != err)
     setErrors(filtered);

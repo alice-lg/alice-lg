@@ -6,9 +6,11 @@
 
 import Content
   from 'app/components/content/Content';
-
 import Errors
   from 'app/components/errors/Errors';
+import NavigationSidebar
+  from 'app/components/navigation/Sidebar';
+
 
 const Page = ({children}) => {
 
@@ -16,10 +18,7 @@ const Page = ({children}) => {
   return (
     <div className="page">
       <Errors />
-      <aside className="page-sidebar">
-        SidebarHeader
-        RouteServers
-      </aside>
+      <NavigationSidebar />
       <div className="page-body">
         <main className="page-content">
           <div className="main-content-wrapper">
