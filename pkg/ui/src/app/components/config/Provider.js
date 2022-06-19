@@ -54,7 +54,7 @@ const ConfigProvider = ({children}) => {
       ({data}) => setConfig(data),
       (error) => handleError(error)
     );
-  }, []);
+  }, [handleError]);
 
   return (
     <ConfigContext.Provider value={config}>

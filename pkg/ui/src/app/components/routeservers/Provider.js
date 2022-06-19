@@ -38,7 +38,7 @@ const RouteserversProvider = ({children}) => {
         ({data}) => setRs(data),
         (error) => handleError(error)
       );
-  }, []);
+  }, [handleError]);
 
   return (
     <RouteserversContext.Provider value={rs}>

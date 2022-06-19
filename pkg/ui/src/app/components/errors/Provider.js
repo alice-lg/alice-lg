@@ -2,8 +2,7 @@
  * Provide an error handler and an error state.
  */
 
-import { Component
-       , useState
+import { useState
        , createContext
        , useContext
        }
@@ -27,12 +26,11 @@ const ErrorProvider = ({children}) => {
 
   // Dismiss removes the error from the state
   const dismiss = (err) => {
-    const filtered = errors.filter((e) => e != err)
+    const filtered = errors.filter((e) => e !== err)
     setErrors(filtered);
   }
 
   const ctx = [handle, dismiss, errors];
-
   return (
     <ErrorContext.Provider value={ctx}>
       {children}

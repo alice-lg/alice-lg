@@ -48,7 +48,7 @@ const Error = ({error, onDismiss}) => {
 
   let body = null;
 
-  if (status == 429) {
+  if (status === 429) {
     body = (
       <div className="error-message">
         <p>Alice reached the request limit.</p>
@@ -94,7 +94,7 @@ const Error = ({error, onDismiss}) => {
  * Errors displays a stacked errors list
  */
 const Errors = () => {
-  const [_, dismiss, errors] = useErrors();
+  const [ , dismiss, errors] = useErrors();
   return errors.map((err, i) =>
     <Error
       key={i}
