@@ -63,7 +63,10 @@ func validatePrefixQuery(value string) (string, error) {
 // Helper: Validate neighbors query. A valid query should have
 // at least 4 chars.
 func validateNeighborsQuery(value string) (string, error) {
-	if len(value) < 4 { // Maybe make configurable
+	if len(value) < 3 {
+		// Maybe make configurable,
+		// A length of 3 would be sufficient for "DFN" and
+		// other shorthands.
 		return "", ErrQueryTooShort
 	}
 	return value, nil
