@@ -5,6 +5,7 @@
 import { useState
        , createContext
        , useContext
+       , useRef
        , useCallback
        }
   from 'react';
@@ -13,6 +14,11 @@ import { useState
 const ErrorContext = createContext(null);
 export const useErrors = () => useContext(ErrorContext);
 
+export const useErrorHandler = () => {
+  const [handleRef] = useErrors();
+  return useCallback((err) => handleRef.current(err), [handleRef]);
+};
+
 
 // Unfortunatley this does not really act as an error
 // boundary. But we need to catch http errors from axios.
@@ -20,11 +26,13 @@ export const useErrors = () => useContext(ErrorContext);
 const ErrorProvider = ({children}) => {
   const [errors, setErrors] = useState([]);
 
-
-  // Handle prepends the error to the state
-  const handle = useCallback((err) => {
+  // Handle prepends the error to the state.
+  // Use a ref to the handler function to prevent
+  // a rendering loop.
+  const handle = (err) => {
     setErrors([err, ...errors]);
-  }, [errors]);
+  };
+  const handleRef = useRef(handle);
 
   // Dismiss removes the error from the state
   const dismiss = (err) => {
@@ -32,7 +40,7 @@ const ErrorProvider = ({children}) => {
     setErrors(filtered);
   }
 
-  const ctx = [handle, dismiss, errors];
+  const ctx = [handleRef, dismiss, errors];
   return (
     <ErrorContext.Provider value={ctx}>
       {children}

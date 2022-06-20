@@ -9,7 +9,7 @@ import { useEffect
 import { Link }
   from 'react-router-dom';
 
-import { useErrors }
+import { useErrorHandler }
   from 'app/components/errors/Provider';
 import { useRouteServers }
   from 'app/components/routeservers/Provider';
@@ -21,7 +21,7 @@ const Status = ({routeServerId}) => {
     version: "",
   });
   const [error, setError] = useState(null);
-  const [handleError] = useErrors();
+  const handleError = useErrorHandler();
 
   useEffect(() => {
     axios.get(`/api/v1/routeservers/${routeServerId}/status`)
@@ -31,7 +31,7 @@ const Status = ({routeServerId}) => {
           handleError(error);
           setError(error); // Local error display
         });
-  }, [routeServerId, handleError, setError]);
+  }, [routeServerId, handleError]);
 
 
   if (error && error.code >= 100 && error.code < 200) {

@@ -14,7 +14,7 @@ import { createContext
        }
   from 'react';
 
-import { useErrors }
+import { useErrorHandler }
   from 'app/components/errors/Provider';
 
 const initialState = {
@@ -45,7 +45,7 @@ export const useConfig = () => useContext(ConfigContext);
 
 const ConfigProvider = ({children}) => {
   const [config, setConfig] = useState(initialState);
-  const [handleError] = useErrors();
+  const handleError = useErrorHandler();
   
   // OnLoad: once
   useEffect(() => {

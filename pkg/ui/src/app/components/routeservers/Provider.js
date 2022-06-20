@@ -11,6 +11,7 @@ import { useState
        , useEffect
        , useContext
        , createContext
+       , useRef
        }
   from 'react';
 
@@ -28,16 +29,21 @@ export const useRouteServers = () => useContext(RouteServersContext);
  * backend and uses these as provider value.
  */
 const RouteServersProvider = ({children}) => {
+  const init          = useRef();
   const [handleError] = useErrors();
   const [rs, setRs]   = useState([]);
   
   // Load route servers from backend
   useEffect(() => {
+    if (init.current) {
+      return;
+    }
     axios.get('/api/v1/routeservers')
       .then(
         ({data}) => setRs(data.routeservers),
         (error) => handleError(error)
       );
+      init.current = true;
   }, [handleError]);
 
   return (
