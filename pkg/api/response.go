@@ -141,6 +141,9 @@ type Community []int
 
 func (com Community) String() string {
 	res := ""
+	if len(com) < 1 {
+		return ""
+	}
 	for _, v := range com {
 		res += fmt.Sprintf(":%d", v)
 	}
@@ -172,6 +175,9 @@ type ExtCommunity []interface{}
 
 func (com ExtCommunity) String() string {
 	res := ""
+	if len(com) < 1 {
+		return ""
+	}
 	for _, v := range com {
 		res += fmt.Sprintf(":%v", v)
 	}

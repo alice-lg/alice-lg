@@ -78,6 +78,16 @@ func TestCommunityStringify(t *testing.T) {
 	if extCom.String() != "ro:42:123" {
 		t.Error("Expected ro:42:123, but got:", extCom.String())
 	}
+
+	emptyCom := Community{}
+	if emptyCom.String() != "" {
+		t.Error("Unexpected result:", emptyCom.String())
+	}
+
+	emptyExtCom := ExtCommunity{}
+	if emptyExtCom.String() != "" {
+		t.Error("Unexpected result:", emptyExtCom.String())
+	}
 }
 
 func TestHasCommunity(t *testing.T) {
