@@ -1,6 +1,16 @@
 
 # Changelog
 
+## 5.1.1 (2022-06-21)
+  
+ * Improved search query validation.
+
+ * Fixed http status response when validation fails.
+   Was Internal Server Error (500), now: Bad Request (400).
+
+ * Memory-Store is now using sync.Map to avoid timeouts
+   due to aggressive locking.
+
 ## 5.1.0 (2022-06-02)
 
  * **BREAKING CHANGE** The spelling of "neighbors" is now harmonized.

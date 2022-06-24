@@ -3,7 +3,7 @@
  * Alice (formerly known as Birdseye) v.2.0.0
  * ------------------------------------------
  *
- * @author Matthias Hannig <mha@ecix.net>
+ * @author Annika Hannig
  */
 
 import axios     from 'axios'

@@ -33,6 +33,7 @@ const (
 	TagConnectionRefused = "CONNECTION_REFUSED"
 	TagConnectionTimeout = "CONNECTION_TIMEOUT"
 	TagResourceNotFound  = "NOT_FOUND"
+	TagValidationError   = "VALIDATION_ERROR"
 )
 
 // Error codes
@@ -40,6 +41,7 @@ const (
 	CodeGeneric           = 42
 	CodeConnectionRefused = 100
 	CodeConnectionTimeout = 101
+	CodeValidationError   = 400
 	CodeResourceNotFound  = 404
 )
 
@@ -47,6 +49,7 @@ const (
 const (
 	StatusError            = http.StatusInternalServerError
 	StatusResourceNotFound = http.StatusNotFound
+	StatusValidationError  = http.StatusBadRequest
 )
 
 // Handle an error and create a error API response
@@ -74,6 +77,19 @@ func apiErrorResponse(
 			code = CodeConnectionTimeout
 			message = "Connection timed out when connecting to the backend API"
 		}
+	}
+
+	switch err {
+	case ErrQueryTooShort:
+		tag = TagValidationError
+		code = CodeValidationError
+		status = StatusValidationError
+		message = "the query is too short"
+	case ErrQueryIncomplete:
+		tag = TagValidationError
+		code = CodeValidationError
+		status = StatusValidationError
+		message = "the query is incomplete"
 	}
 
 	return api.ErrorResponse{

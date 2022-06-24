@@ -53,6 +53,11 @@ func (s *Server) apiLookupPrefixGlobal(
 		}
 
 	} else {
+		// Query by neighbors
+		q, err = validateNeighborsQuery(q)
+		if err != nil {
+			return nil, err
+		}
 		neighbors, err := s.neighborsStore.LookupNeighbors(ctx, q)
 		if err != nil {
 			return nil, err
