@@ -4,6 +4,9 @@
  * and a content view in the middle.
  */
 
+import { Outlet }
+  from 'react-router-dom';
+
 import Content
   from 'app/components/content/Content';
 import Errors
@@ -22,7 +25,7 @@ const Page = ({children}) => {
       <div className="page-body">
         <main className="page-content">
           <div className="main-content-wrapper">
-            {children}
+            <Outlet /> 
           </div>
           <footer className="page-footer">
             <Content id="footer"></Content> 

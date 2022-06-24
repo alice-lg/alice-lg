@@ -11,15 +11,13 @@ import reportWebVitals
 import 'bootstrap/dist/css/bootstrap.css';
 import './scss/main.scss';
 
-import Alice 
-  from './app/Alice';
+import Main 
+  from './app/Main';
 
 const root = createRoot(document.getElementById('app'));
 
 root.render(
-  <StrictMode>
-    <Alice />
-  </StrictMode>,
+  <StrictMode><Main /></StrictMode>,
 );
 
 reportWebVitals();

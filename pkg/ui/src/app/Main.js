@@ -12,9 +12,6 @@ import { BrowserRouter
        } 
   from 'react-router-dom';
 
-import StartPage 
-  from 'app/pages/start/Page';
-
 import ErrorsProvider
   from 'app/components/errors/Provider';
 import ConfigProvider
@@ -24,8 +21,17 @@ import ContentProvider
 import RouteserversProvider
   from 'app/components/routeservers/Provider';
 
+import Page
+  from 'app/components/page/Page';
 
-const Alice = () => {
+import StartPage 
+  from 'app/pages/start/Page';
+import NotFoundPage
+  from 'app/pages/errors/NotFound';
+
+
+
+const Main = () => {
   return (
     <ErrorsProvider>
     <ConfigProvider>
@@ -33,7 +39,10 @@ const Alice = () => {
     <ContentProvider>
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<StartPage />} />
+        <Route path="/" element={<Page />}>
+          <Route index element={<StartPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
       </Routes>
     </BrowserRouter>
     </ContentProvider>
@@ -43,5 +52,5 @@ const Alice = () => {
   );
 }
 
-export default Alice;
+export default Main;
 

@@ -1,7 +1,5 @@
 
 
-import Page
-  from 'app/components/page/Page';
 import PageHeader
   from 'app/components/page/Header';
 import Content
@@ -9,7 +7,6 @@ import Content
 
 const StartPage = () => {
   return (
-    <Page>
     <div className="welcome-page">
      <PageHeader></PageHeader>
 
@@ -21,7 +18,6 @@ const StartPage = () => {
      {/*<LookupWidget />*/}
 
     </div>
-    </Page>
   );
 }
 
