@@ -34,3 +34,5 @@ services:
       - ../.:/src/alice-lg
     ports:
       - 7340:7340
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
