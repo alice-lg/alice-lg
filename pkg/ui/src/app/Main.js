@@ -21,15 +21,15 @@ import ContentProvider
 import RouteserversProvider
   from 'app/components/routeservers/Provider';
 
-import Page
-  from 'app/components/page/Page';
+import Layout
+  from 'app/components/page/Layout';
 
 import StartPage 
-  from 'app/pages/start/Page';
+  from 'app/pages/StartPage';
 import NeighborsPage
-  from 'app/pages/neighbors/Page';
+  from 'app/pages/NeighborsPage';
 import NotFoundPage
-  from 'app/pages/errors/NotFound';
+  from 'app/pages/NotFoundPage';
 
 
 
@@ -40,15 +40,19 @@ const Main = () => {
     <RouteserversProvider>
     <ContentProvider>
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Page />}>
+      <Layout>
+        <Routes>
           <Route index element={<StartPage />} />
+
+          {/* RouteServers */}
           <Route path="routeservers/:routeServerId">
             <Route index element={<NeighborsPage />} />
           </Route>
+
+          {/* Fallback */}
           <Route path="*" element={<NotFoundPage />} />
-        </Route>
-      </Routes>
+        </Routes>
+      </Layout>
     </BrowserRouter>
     </ContentProvider>
     </RouteserversProvider>
