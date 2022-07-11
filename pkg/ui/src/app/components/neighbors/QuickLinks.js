@@ -1,4 +1,7 @@
 
+import { Link } 
+  from 'react-router-dom';
+
 import { useNeighbors }
   from 'app/components/neighbors/Provider';
 
@@ -18,10 +21,10 @@ const QuickLinks = () => {
       <span>Go to:</span>
       <ul>
         <li className="established">
-          <a href="#sessions-up">Established</a>
+          <Link to={{hash: "sessions-up"}}>Established</Link>
         </li>
         <li className="down">
-          <a href="#sessions-down">Down</a>
+          <Link to={{hash: "sessions-down"}}>Down</Link>
         </li>
       </ul>
     </div>

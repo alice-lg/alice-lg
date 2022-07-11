@@ -19,8 +19,8 @@ import { useSelectedRouteServer }
 import { useRouteServerStatus }
   from 'app/components/routeservers/StatusProvider';
 
-import { useCacheStatus }
-  from 'app/components/cache/StatusProvider';
+import { useApiStatus }
+  from 'app/components/api/StatusProvider';
 
 import DateTime
   from 'app/components/datetime/DateTime';
@@ -33,20 +33,20 @@ import RelativeTime
  * from the context.
  */
 const CacheStatus = () => {
-  const cacheStatus = useCacheStatus();
-  if (!cacheStatus) {
+  const status = useApiStatus();
+  if (!status) {
     return null;
   }
   return (
    <tr>
      <td><FontAwesomeIcon icon={faArrowsRotate} /></td>
      <td>
-       Generated <b><RelativeTime value={cacheStatus.generatedAt}
+       Generated <b><RelativeTime value={status.generatedAt}
                                   fuzzyNow={5}
                                   pastEvent={true} /></b>.<br />
        Next refresh <b><RelativeTime futureEvent={true}
                                      fuzzyNow={5}
-                                     value={cacheStatus.ttl} /></b>.
+                                     value={status.ttl} /></b>.
      </td>
    </tr>
   );

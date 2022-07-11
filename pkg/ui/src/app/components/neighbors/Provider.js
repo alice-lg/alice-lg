@@ -11,8 +11,8 @@ import { createContext
 import { useErrors }
   from 'app/components/errors/Provider';
 
-import CacheStatusProvider
-  from 'app/components/cache/StatusProvider';
+import ApiStatusProvider 
+  from 'app/components/api/StatusProvider';
 
 const initialState = {
   neighbors: [],
@@ -52,9 +52,9 @@ const NeighborsProvider = ({children, routeServerId}) => {
 
   return (
     <NeighborsContext.Provider value={state}>
-      <CacheStatusProvider api={state.api}>
+      <ApiStatusProvider api={state.api}>
         {children}
-      </CacheStatusProvider>
+      </ApiStatusProvider>
     </NeighborsContext.Provider>
   );
 }

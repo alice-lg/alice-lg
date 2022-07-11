@@ -7,12 +7,16 @@ import { createContext
 import { parseServerTime }
   from 'app/components/datetime/time';
 
-const CacheStatusContext = createContext();
+const ApiStatusContext = createContext();
 
-export const useCacheStatus = () => useContext(CacheStatusContext);
+export const useApiStatus = () => useContext(ApiStatusContext);
 
 
-const CacheStatusProvider = ({children, api}) => {
+/**
+ * Provide API status like cache information
+ * and version to downstream components
+ */
+const ApiStatusProvider = ({children, api}) => {
   let ctx = null;
 
   const cachedAt = api.cache_status?.cached_at;
@@ -35,10 +39,10 @@ const CacheStatusProvider = ({children, api}) => {
   }
 
   return (
-    <CacheStatusContext.Provider value={ctx}>
+    <ApiStatusContext.Provider value={ctx}>
       {children}
-    </CacheStatusContext.Provider>
+    </ApiStatusContext.Provider>
   );
 }
 
-export default CacheStatusProvider;
+export default ApiStatusProvider;
