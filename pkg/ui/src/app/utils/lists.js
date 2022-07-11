@@ -6,7 +6,7 @@ export function intersect(a, b) {
   let res = [];
   for (const e of a) {
     for (const k of b) {
-      if (e==k) {
+      if (e===k) {
         res.push(e);
         break;
       }

@@ -11,7 +11,7 @@ export function humanizedJoin(list, glue="and") {
   // Doing this the other way round in one step would be nice.
   let [last, ...init] = list.reverse();
   init = init.reverse();
-  if (init.length == 0) {
+  if (init.length === 0) {
     return last;
   }
   return init.join(", ") + ` ${glue} ${last}`; 
