@@ -31,8 +31,6 @@ import NeighborsPage
 import NotFoundPage
   from 'app/pages/NotFoundPage';
 
-
-
 const Main = () => {
   return (
     <ErrorsProvider>
