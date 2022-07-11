@@ -26,6 +26,8 @@ import Page
 
 import StartPage 
   from 'app/pages/start/Page';
+import NeighborsPage
+  from 'app/pages/neighbors/Page';
 import NotFoundPage
   from 'app/pages/errors/NotFound';
 
@@ -41,6 +43,9 @@ const Main = () => {
       <Routes>
         <Route path="/" element={<Page />}>
           <Route index element={<StartPage />} />
+          <Route path="routeservers/:routeServerId">
+            <Route index element={<NeighborsPage />} />
+          </Route>
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

@@ -14,6 +14,8 @@ import { useState
        , useRef
        }
   from 'react';
+import { useParams }
+  from 'react-router-dom';
 
 import { useErrors }
   from 'app/components/errors/Provider';
@@ -22,6 +24,17 @@ import { useErrors }
 const RouteServersContext = createContext([]);
 
 export const useRouteServers = () => useContext(RouteServersContext);
+
+/**
+ * Use selected route server uses the route server context
+ * in combination with the navigation to return the current
+ * route server.
+ */
+export const useSelectedRouteServer = () => {
+  const { routeServerId } = useParams();
+  const routeServers      = useRouteServers();
+  return routeServers.find((rs) => rs.id === routeServerId)
+}
 
 
 /**

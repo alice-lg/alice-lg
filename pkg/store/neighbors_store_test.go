@@ -113,7 +113,7 @@ func TestGetNeighbors(t *testing.T) {
 	if err == nil {
 		t.Error("Unknown source should have yielded zero results")
 	}
-  t.Log(neighbors)
+	t.Log(neighbors)
 
 }
 
@@ -162,4 +162,13 @@ func TestNeighborFilter(t *testing.T) {
 		t.Error("Expected empty result set")
 	}
 
+}
+
+func TestReMatchASLookup(t *testing.T) {
+	if !ReMatchASLookup.MatchString("AS2342") {
+		t.Error("should be ASN")
+	}
+	if ReMatchASLookup.MatchString("Goo") {
+		t.Error("should not be ASN")
+	}
 }
