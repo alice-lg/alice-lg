@@ -33,6 +33,7 @@ const SearchInput = ({value, onChange, debounce=0, ...props}) => {
        </span>
        <input 
           type="text" className="form-control"
+          value={state}
           onChange={(e) => setState(e.target.value)}
           {...props} />
     </div>

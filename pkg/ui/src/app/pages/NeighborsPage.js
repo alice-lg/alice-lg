@@ -1,7 +1,14 @@
 
 import { useState 
+       , useCallback
        }
   from 'react';
+
+import { useSearchParams }
+  from 'react-router-dom';
+
+import { useQuery }
+  from 'app/components/search/query';
 
 import { useSelectedRouteServer }
   from 'app/components/routeservers/Provider';
@@ -30,8 +37,12 @@ import SearchInput
  * A search field for quick filtering is provided
  */
 const NeighborsPage = () => {
-  const [filterValue, setFilterValue] = useState("");
-  const routeServer = useSelectedRouteServer();
+  const routeServer   = useSelectedRouteServer();
+  const [query, setQuery] = useQuery({
+    s: "asn", // Sort
+    o: "asc", // Order
+    q: "",    // Search
+  });
 
   if (!routeServer) { return null; } // nothing to do here
 
@@ -47,13 +58,14 @@ const NeighborsPage = () => {
         <div className="col-main col-lg-9 col-md-12">
           <div className="card">
             <SearchInput
-              value={filterValue}
+              value={query.q}
               placeholder="Filter by Neighbor, ASN or Description"
-              onChange={(e) => setFilterValue(e.target.value)}
+              debounce={300}
+              onChange={(v) => setQuery({q: v})}
             />
           </div>
           <QuickLinks />
-          <Neighbors filter={filterValue} />
+          <Neighbors filter={""} />
         </div>
         <div className="col-lg-3 col-md-12 col-aside-details">
           <div className="card">
