@@ -38,11 +38,7 @@ import SearchInput
  */
 const NeighborsPage = () => {
   const routeServer   = useSelectedRouteServer();
-  const [query, setQuery] = useQuery({
-    s: "asn", // Sort
-    o: "asc", // Order
-    q: "",    // Search
-  });
+  const [query, setQuery] = useQuery({q: ""});
 
   if (!routeServer) { return null; } // nothing to do here
 

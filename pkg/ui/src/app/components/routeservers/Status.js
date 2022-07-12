@@ -9,6 +9,7 @@ import { FontAwesomeIcon }
   from '@fortawesome/react-fontawesome';
 import { faClock
        , faThumbsUp
+       , faThumbsDown
        }
   from '@fortawesome/free-regular-svg-icons';
 import { faArrowsRotate }
@@ -84,10 +85,18 @@ const Status = () => {
           <td>Last Reconfig: <b><DateTime value={lastReconfig} /></b></td>
         </tr>}
 
+      {rsStatus.message &&
         <tr>
           <td><FontAwesomeIcon icon={faThumbsUp} /></td>
           <td><b>{rsStatus.message}</b></td>
-        </tr>
+        </tr>}
+
+      {!rsStatus.message &&
+        <tr>
+          <td><FontAwesomeIcon icon={faThumbsDown} /></td>
+          <td>Route server is not reachable.</td>
+        </tr>}
+
         <CacheStatus />
       </tbody>
     </table>

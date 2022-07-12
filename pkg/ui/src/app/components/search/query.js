@@ -13,6 +13,8 @@ import { useSearchParams
  * useQuery is an extension to useLocation to handle
  * query parameters. Internally this uses URLSearchParams
  * for decoding but returns an object merged with the defaults.
+ * To prevent loops, the search parameters are only updated
+ * if they differ.
  */
 export const useQuery = (defaults={}) => {
   const [query, setQuery] = useSearchParams(defaults);
