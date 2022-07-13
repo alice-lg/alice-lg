@@ -18,7 +18,7 @@ services:
       dockerfile: Containerfile
       context: containers/ui/
     volumes:
-      - ../pkg/ui:/ui
+      - ../ui:/ui
     environment:
       DANGEROUSLY_DISABLE_HOST_CHECK: "true"
     ports:
