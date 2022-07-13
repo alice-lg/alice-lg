@@ -1,6 +1,10 @@
 
+import { useLocation }
+  from 'react-router-dom';
+
 import { useRef
        , useMemo
+       , useEffect
        }
   from 'react';
 
@@ -60,6 +64,8 @@ const filterNeighbors = (protocols, filter) => {
 
 
 const Neighbors = ({filter}) => {
+  const { hash } = useLocation();
+
   const refUp                  = useRef();
   const refDown                = useRef();
   const {isLoading, neighbors} = useNeighbors();
@@ -67,6 +73,44 @@ const Neighbors = ({filter}) => {
   const filtered = useMemo(
     () => filterNeighbors(neighbors, filter),
     [neighbors, filter]);
+
+  // Group neighbors
+  const groups = useMemo(() => {
+    let up = [];
+    let down = [];
+    let idle = [];
+
+    for (let n of filtered) {
+      let s = n.state.toLowerCase();
+      if (s.includes("up") || s.includes("established") ) {
+        up.push(n);
+      } else if (s.includes("down")) {
+        down.push(n);
+      } else if (s.includes("start") || s.includes("active")) {
+        idle.push(n);
+      } else {
+        console.error("Couldn't classify neighbor by state:", n);
+        up.push(n);
+      }
+    }
+    return {up, down, idle};
+  }, [filtered]);
+
+  // Scroll to anchor
+  useEffect(() => {
+    if (hash === "#sessions-down") {
+      if (!refDown.current) {
+        return;
+      }
+      refDown.current.scrollIntoView();
+    }
+    if (hash === "#sessions-up") {
+      if (!refUp.current) {
+        return;
+      }
+      refUp.current.scrollIntoView();
+    }
+  }, [hash, refDown, refUp, filtered]);
 
   if (isLoading) {
     return <LoadingIndicator show={true} />;
@@ -83,33 +127,14 @@ const Neighbors = ({filter}) => {
     );
   }
 
-  // Group neighbors
-  let neighborsUp = [];
-  let neighborsDown = [];
-  let neighborsIdle = [];
-
-  for (let n of filtered) {
-    let s = n.state.toLowerCase();
-    if (s.includes("up") || s.includes("established") ) {
-      neighborsUp.push(n);
-    } else if (s.includes("down")) {
-      neighborsDown.push(n);
-    } else if (s.includes("start") || s.includes("active")) {
-      neighborsIdle.push(n);
-    } else {
-      console.error("Couldn't classify neighbor by state:", n);
-      neighborsUp.push(n);
-    }
-  }
-
   return (
     <>
       <div ref={refUp}>
-        <NeighborsTable state="up"   neighbors={neighborsUp} />
+        <NeighborsTable state="up"   neighbors={groups.up} />
       </div>
       <div ref={refDown}>
-        <NeighborsTable state="idle" neighbors={neighborsIdle} />
-        <NeighborsTable state="down" neighbors={neighborsDown} />
+        <NeighborsTable state="idle" neighbors={groups.idle} />
+        <NeighborsTable state="down" neighbors={groups.down} />
       </div>
     </>
   );

@@ -1,5 +1,7 @@
 
-import { Link } 
+import { Link
+       , useLocation
+       } 
   from 'react-router-dom';
 
 import { useNeighbors }
@@ -10,6 +12,7 @@ import { useNeighbors }
  * Render Neighbors QuickLinks
  */
 const QuickLinks = () => {
+  const location = useLocation();
   const {isLoading} = useNeighbors();
 
   if (isLoading) {
@@ -21,10 +24,10 @@ const QuickLinks = () => {
       <span>Go to:</span>
       <ul>
         <li className="established">
-          <Link to={{hash: "sessions-up"}}>Established</Link>
+          <Link to={{...location, hash: "sessions-up"}}>Established</Link>
         </li>
         <li className="down">
-          <Link to={{hash: "sessions-down"}}>Down</Link>
+          <Link to={{...location, hash: "sessions-down"}}>Down</Link>
         </li>
       </ul>
     </div>
