@@ -1,14 +1,8 @@
 
-import bigInt from 'big-integer';
-
-import { useRef }
+import { useRef
+       , useMemo
+       }
   from 'react';
-
-import { useLocation }
-  from 'react-router-dom';
-
-import { ipToNumeric }
-  from 'app/utils/ip'
 
 import { useNeighbors }
   from 'app/components/neighbors/Provider';
@@ -32,73 +26,6 @@ const getFilterAsn = (filter) => {
     return false;
   }
   return asn;
-}
-
-/**
- * Sort alphanumeric
- */
-const sortAnum = (sort) => {
-  return (a, b) => {
-    const va = a[sort];
-    const vb = b[sort];
-    if (va < vb ) { return -1; }
-    if (va > vb ) { return 1;  }
-    return 0;
-  }
-}
-
-/**
- * Sort by IPAddress
- */
-const sortIpAddr = (sort) => {
-  return (a, b) => {
-    const va = ipToNumeric(a[sort]);
-    const vb = ipToNumeric(b[sort]);
-
-    // Handle ipv6 case
-    if (va instanceof bigInt) {
-      return va.compareTo(vb);
-    }
-
-    if (va < vb ) { return -1; }
-    if (va > vb ) { return 1;  }
-    return 0;
-  }
-}
-
-/**
- * Sort with order
- */
-const sortOrder = (cmp, order) => {
-  return (a, b) => {
-    const res = cmp(a, b);
-    if (order === 'desc') {
-      return res * -1;
-    }
-    return res;
-  }
-}
-
-/**
- * Sort neighbors
- */
-const sortNeighbors = (neighbors, sort, order) => {
-  // Make compare function
-  let cmp = sortAnum(sort);
-  if (sort === "address") {
-    cmp = sortIpAddr(sort);
-  }
-  return neighbors.sort(sortOrder(cmp, order));
-}
-
-
-/**
- * Check if state is up or established
- */
-const isUpState = (s) => {
-    if (!s) { return false; }
-    s = s.toLowerCase();
-    return (s.includes("up") || s.includes("established"));
 }
 
 
@@ -137,11 +64,14 @@ const Neighbors = ({filter}) => {
   const refDown                = useRef();
   const {isLoading, neighbors} = useNeighbors();
 
+  const filtered = useMemo(
+    () => filterNeighbors(neighbors, filter),
+    [neighbors, filter]);
+
   if (isLoading) {
     return <LoadingIndicator show={true} />;
   }
 
-  const filtered = filterNeighbors(neighbors, filter);
   if (!filtered || filtered.length === 0) {
     // Empty Neighbors List
     return (

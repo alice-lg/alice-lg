@@ -8,7 +8,7 @@ import { useSearchParams }
   from 'react-router-dom';
 
 import { useQuery }
-  from 'app/components/search/query';
+  from 'app/components/query';
 
 import { useSelectedRouteServer }
   from 'app/components/routeservers/Provider';
@@ -61,7 +61,7 @@ const NeighborsPage = () => {
             />
           </div>
           <QuickLinks />
-          <Neighbors filter={""} />
+          <Neighbors filter={query.q} />
         </div>
         <div className="col-lg-3 col-md-12 col-aside-details">
           <div className="card">
