@@ -4,14 +4,10 @@ import { useQuery }
 
 import { useSelectedRouteServer }
   from 'app/components/routeservers/Provider';
-import RouteServerStatusProvider
-  from 'app/components/routeservers/StatusProvider';
 
 import Status
   from 'app/components/routeservers/Status';
 
-import NeighborsProvider
-  from 'app/components/neighbors/Provider';
 import Neighbors
   from 'app/components/neighbors/Neighbors';
 import QuickLinks
@@ -29,14 +25,12 @@ import SearchInput
  * A search field for quick filtering is provided
  */
 const NeighborsPage = () => {
-  const routeServer   = useSelectedRouteServer();
+  const routeServer = useSelectedRouteServer();
   const [query, setQuery] = useQuery({q: ""});
 
   if (!routeServer) { return null; } // nothing to do here
 
   return (
-    <NeighborsProvider routeServerId={routeServer.id}>
-    <RouteServerStatusProvider routeServerId={routeServer.id}>
     <div className="routeservers-page">
       <PageHeader>
        <span className="status-name">{routeServer.name}</span>
@@ -62,8 +56,6 @@ const NeighborsPage = () => {
         </div>
       </div>
     </div>
-    </RouteServerStatusProvider>
-    </NeighborsProvider>
   );
 }
 

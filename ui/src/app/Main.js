@@ -18,16 +18,20 @@ import ConfigProvider
   from 'app/components/config/Provider';
 import ContentProvider
   from 'app/components/content/Provider';
-import RouteserversProvider
+import RouteServersProvider
   from 'app/components/routeservers/Provider';
 
 import Layout
   from 'app/components/page/Layout';
+import RouteServer
+  from 'app/components/routeservers/RouteServer';
 
 import StartPage 
   from 'app/pages/StartPage';
 import NeighborsPage
   from 'app/pages/NeighborsPage';
+import RoutesPage
+  from 'app/pages/RoutesPage';
 import NotFoundPage
   from 'app/pages/NotFoundPage';
 
@@ -35,7 +39,7 @@ const Main = () => {
   return (
     <ErrorsProvider>
     <ConfigProvider>
-    <RouteserversProvider>
+    <RouteServersProvider>
     <ContentProvider>
     <BrowserRouter>
       <Layout>
@@ -43,8 +47,14 @@ const Main = () => {
           <Route index element={<StartPage />} />
 
           {/* RouteServers */}
-          <Route path="routeservers/:routeServerId">
-            <Route index element={<NeighborsPage />} />
+          <Route path="routeservers/:routeServerId"
+            element={<RouteServer />}>
+
+            <Route index
+              element={<NeighborsPage />} />
+            <Route path="protocols/:neighborId/routes"
+              element={<RoutesPage />} />
+
           </Route>
 
           {/* Fallback */}
@@ -53,11 +63,10 @@ const Main = () => {
       </Layout>
     </BrowserRouter>
     </ContentProvider>
-    </RouteserversProvider>
+    </RouteServersProvider>
     </ConfigProvider>
     </ErrorsProvider>
   );
 }
 
 export default Main;
-

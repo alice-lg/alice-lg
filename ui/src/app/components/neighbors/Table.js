@@ -158,7 +158,6 @@ const RoutesLink = ({neighbor, children}) => {
   );
 }
 
-
 /**
  * Sort indicator indicates the sorting order of the column
  */
@@ -174,12 +173,12 @@ const SortIndicator = ({order, active}) => {
 }
 
 
-const ColumnHeader = ({title, id}) => {
+const ColumnHeader = ({title, column}) => {
   const [query, makeLink] = useQueryLink(querySortDefault);
-  const sort = id.toLowerCase();
+  const sort = column.toLowerCase();
   const active = query.s === sort;
 
-  let cls = `col-neighbor-attr col-neighbor-${id} `;
+  let cls = `col-neighbor-attr col-neighbor-${column} `;
   let link = makeLink({s: sort}); // s: Sort column
 
   if (active) {
@@ -232,7 +231,7 @@ const ColLinked = ({neighbor, column}) => {
 
 const ColPlain = ({neighbor, column}) => {
   // Access neighbor property by path
-  const property = lookupProperty(neighbor, column);
+  const property = useMemo(() => lookupProperty(neighbor, column), [neighbor, column]);
   return (
     <td>{property}</td>
   );
@@ -266,6 +265,18 @@ const NeighborColumn = ({neighbor, column}) => {
   );
 }
 
+const NeighborRow = ({neighbor, columns}) => {
+  const cols = useMemo(() => columns.map((c) => 
+    <NeighborColumn 
+      key={c}
+      neighbor={neighbor}
+      column={c} />
+  ), [neighbor, columns]);
+  return (
+    <tr>{cols}</tr>
+  );
+}
+
 /**
  * NeighborsTable renders the table of neighbors
  */
@@ -279,29 +290,26 @@ const NeighborsTable = ({neighbors, state, ref}) => {
   const sortColumn = query.s;
   const sortOrder = query.o;
 
-  const sortedNeighbors = useMemo(
-    () => sortNeighbors(neighbors, sortColumn, sortOrder),
-    [neighbors, sortColumn, sortOrder]);
+  const sortedNeighbors = useMemo(() =>
+      sortNeighbors(neighbors, sortColumn, sortOrder
+    ), [neighbors, sortColumn, sortOrder]);
+
+  const header = useMemo(() => 
+    columnsOrder.map((col) => 
+      <ColumnHeader key={col} column={col} title={columns[col]} />
+    ),
+    [columns, columnsOrder]);
+
 
   if (!neighbors || neighbors.length === 0) {
     return null; // nothing to do here
   }
 
-  const header = columnsOrder.map((col) =>
-    <ColumnHeader
-      key={col}
-      id={col}
-      title={columns[col]} />);
-
-  const rows = sortedNeighbors.map((neighbor) => {
-    const columns = columnsOrder.map(
-      (col) =>
-        <NeighborColumn
-          key={col}
-          column={col}
-          neighbor={neighbor} />);
-    return <tr key={neighbor.id}>{columns}</tr>;
-  });
+  const rows = sortedNeighbors.map((neighbor) => 
+    <NeighborRow
+      key={neighbor.id}
+      columns={columnsOrder}
+      neighbor={neighbor} />);
 
   return (
     <div className="card" ref={ref}>
