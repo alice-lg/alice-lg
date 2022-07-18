@@ -4,16 +4,20 @@ import { Link
        }
   from 'react-router-dom';
 
-import { ROUTES_RECEIVED
-       , ROUTES_FILTERED
-       , ROUTES_NOT_EXPORTED
-       }
-    from 'app/components/routes/Provider';
+import { humanizedJoin }
+  from 'app/utils/text'
 
+import { intersect
+       , resolve
+       }
+  from 'app/utils/lists'
+
+import { useQuery }
+  from 'app/components/query';
+import { useConfig }
+  from 'app/components/config/Provider';
 import { useSelectedRouteServer }
   from 'app/components/routeservers/Provider';
-import RouteServerStatusProvider
-  from 'app/components/routeservers/StatusProvider';
 import { NeighborProvider
        , useNeighbor
        }
@@ -21,6 +25,19 @@ import { NeighborProvider
 
 import PageHeader
   from 'app/components/page/Header';
+import SearchQueryInput
+  from 'app/components/query/SearchQueryInput';
+
+
+const FILTERABLE_COLUMNS = [
+  "gateway", "network"
+];
+
+
+const filterableColumnsText = (columns, order) => {
+  const filterable = resolve(columns, intersect(order, FILTERABLE_COLUMNS));
+  return humanizedJoin(filterable, "or");
+}
 
 
 const RoutesHeader = () => {
@@ -42,12 +59,18 @@ const RoutesHeader = () => {
   );
 }
 
+
 /**
  * RoutesPage renders the page with all routes for a neighbor
  * on a route server
  */
 const RoutesPage = () => {
   const { neighborId } = useParams();
+  const [query, setQuery] = useQuery({q: ""});
+  const config = useConfig();
+
+  const routesColumns = config.routes_columns;
+  const routesColumnsOrder = config.routes_columns_order;
 
   let pageClass = "routeservers-page";
   /*
@@ -56,6 +79,10 @@ const RoutesPage = () => {
     pageClass += " has-related-peers";
   }
   */
+  
+  const filterPlaceholder = "Filter by " +
+    filterableColumnsText(routesColumns, routesColumnsOrder);
+
 
   return (
     <NeighborProvider neighborId={neighborId}>
@@ -63,6 +90,23 @@ const RoutesPage = () => {
       <PageHeader>
         <RoutesHeader />
       </PageHeader>
+      <div className="row details-main">
+        <div className="col-main col-lg-9 col-md-12">
+
+          <div className="card">
+            [Related Peers Tab]
+            <SearchQueryInput
+              placeholder={filterPlaceholder} />
+            { /*
+            <RelatedPeersTabs
+              peers={this.props.localRelatedPeers}
+              protocolId={this.props.params.protocolId}
+              routeserverId={this.props.params.routeserverId} />
+             */}
+          </div>
+
+        </div>
+      </div>
     </div>
     </NeighborProvider>
   );

@@ -8,6 +8,8 @@ import { useRef
        }
   from 'react';
 
+import { useQuery }
+  from 'app/components/query';
 import { useNeighbors }
   from 'app/components/neighbors/Provider';
 import NeighborsTable
@@ -20,7 +22,8 @@ import LoadingIndicator
  * Get AS from filter string
  */
 const getFilterAsn = (filter) => {
-  const tokens = filter.split("AS", 2);
+  filter = filter.toLowerCase();
+  const tokens = filter.split("as", 2);
   if (tokens.length !== 2) {
     return false; // Not an ASN query
   }
@@ -63,11 +66,14 @@ const filterNeighbors = (protocols, filter) => {
 }
 
 
-const Neighbors = ({filter}) => {
-  const { hash } = useLocation();
+const Neighbors = () => {
+  const { hash }  = useLocation();
+  const [ query ] = useQuery();
+  const filter    = query.q;
 
   const refUp                  = useRef();
   const refDown                = useRef();
+
   const {isLoading, neighbors} = useNeighbors();
 
   const filtered = useMemo(

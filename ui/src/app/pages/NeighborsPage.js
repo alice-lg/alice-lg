@@ -15,8 +15,10 @@ import QuickLinks
 
 import PageHeader
   from 'app/components/page/Header';
-import SearchInput
-  from 'app/components/search/Input';
+import SearchQueryInput
+  from 'app/components/query/SearchQueryInput';
+
+
 
 /** 
  * The NeighborsPage renders a list of all peers on
@@ -26,8 +28,6 @@ import SearchInput
  */
 const NeighborsPage = () => {
   const routeServer = useSelectedRouteServer();
-  const [query, setQuery] = useQuery({q: ""});
-
   if (!routeServer) { return null; } // nothing to do here
 
   return (
@@ -39,15 +39,12 @@ const NeighborsPage = () => {
       <div className="row details-main">
         <div className="col-main col-lg-9 col-md-12">
           <div className="card">
-            <SearchInput
-              value={query.q}
-              placeholder="Filter by Neighbor, ASN or Description"
-              debounce={300}
-              onChange={(v) => setQuery({q: v})}
-            />
+        
+            <SearchQueryInput
+              placeholder="Filter by Neighbor, ASN or Description" />
           </div>
           <QuickLinks />
-          <Neighbors filter={query.q} />
+          <Neighbors />
         </div>
         <div className="col-lg-3 col-md-12 col-aside-details">
           <div className="card">
