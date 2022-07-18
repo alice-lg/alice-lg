@@ -15,6 +15,8 @@ import { intersect
        }
   from 'app/utils/lists'
 
+import { useQueryParams }
+  from 'app/context/query';
 import { useConfig }
   from 'app/context/config';
 import { useRouteServer }
@@ -25,6 +27,16 @@ import { NeighborProvider
        , useLocalRelatedPeers
        }
   from 'app/context/neighbors';
+import { RoutesReceivedProvider
+       , RoutesFilteredProvider
+       , RoutesNotExportedProvider
+
+       , useRoutesReceived
+       , useRoutesFiltered
+       , useRoutesNotExported
+
+       }
+  from 'app/context/routes';
 
 import PageHeader
   from 'app/components/page/Header';
@@ -81,6 +93,14 @@ const RoutesPageSearch = () => {
 const RoutesPageContent = () => {
   const localRelatedPeers = useLocalRelatedPeers();
 
+  const received = useRoutesReceived();
+  const filtered = useRoutesFiltered();
+  const notExported = useRoutesNotExported();
+
+  console.log("recv:", received);
+  console.log("filt:", filtered);
+  console.log("nexp:", notExported);
+
   let pageClass = "routeservers-page";
   if (localRelatedPeers.length > 1) {
     pageClass += " has-related-peers";
@@ -124,11 +144,43 @@ const RoutesPageContent = () => {
  * on a route server
  */
 const RoutesPage = () => {
-  const { neighborId } = useParams();
+  const { neighborId, routeServerId } = useParams();
+  const query = useQueryParams({
+    pr: 0,
+    pf: 0,
+    ne: 0,
+    q: "",
+  });
+  const notExportedEnabled = query.ne === 1;
+
   return (
     <NeighborProvider neighborId={neighborId}>
     <RelatedNeighborsProvider>
+    <RoutesNotExportedProvider
+      routeServerId={routeServerId}
+      neighborId={neighborId}
+      page={query.pn}
+      query={query.q}
+      enabled={notExportedEnabled}>
+    <RoutesFilteredProvider
+      routeServerId={routeServerId}
+      neighborId={neighborId}
+      query={query.q}
+      page={query.pf}>
+
+    {/* innermost used for api status */}
+    <RoutesReceivedProvider 
+      routeServerId={routeServerId}
+      neighborId={neighborId}
+      query={query.q}
+      page={query.pr}>
+
       <RoutesPageContent />
+
+    </RoutesReceivedProvider>
+    </RoutesFilteredProvider>
+    </RoutesNotExportedProvider>
+
     </RelatedNeighborsProvider>
     </NeighborProvider>
   );

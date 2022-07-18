@@ -45,6 +45,15 @@ export const useQuery = (defaults={}) => {
 }
 
 /**
+ * useQueryParams returns the parameters only
+ */
+export const useQueryParams = (defaults={}) => {
+  const [params] = useSearchParams(defaults);
+  const query = useMemo(() => paramsToQuery(params), [params]);
+  return query;
+}
+
+/**
  * useQueryLink is an alternative to useQuery where
  * instead of a navigation function a location object
  * is created, which can be passed to a Link

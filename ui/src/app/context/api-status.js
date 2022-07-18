@@ -19,7 +19,7 @@ export const useApiStatus = () => useContext(ApiStatusContext);
 export const ApiStatusProvider = ({children, api}) => {
   let ctx = null;
 
-  const cachedAt = api.cache_status?.cached_at;
+  const cachedAt = api?.cache_status?.cached_at;
   if (cachedAt) {
     const ttl = parseServerTime(api.ttl);
     const generatedAt = parseServerTime(cachedAt);
