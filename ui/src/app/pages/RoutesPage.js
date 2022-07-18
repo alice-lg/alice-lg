@@ -20,6 +20,7 @@ import { useConfig }
 import { useRouteServer }
   from 'app/context/route-servers';
 import { NeighborProvider
+       , RelatedNeighborsProvider
        , useNeighbor
        , useLocalRelatedPeers
        }
@@ -31,6 +32,8 @@ import Status
   from 'app/components/status/Status';
 import LocalRelatedPeersTabs
   from 'app/components/neighbors/LocalRelatedPeersTabs';
+import RelatedPeersCard
+  from 'app/components/neighbors/RelatedPeersCard';
 import SearchQueryInput
   from 'app/components/search/SearchQueryInput';
 
@@ -49,11 +52,9 @@ const filterableColumnsText = (columns, order) => {
 const RoutesPageHeader = () => {
   const routeServer = useRouteServer();
   const neighbor = useNeighbor();
-
   if (!routeServer || !neighbor) {
     return null;
   }
-
   return (
     <PageHeader>
       <Link to={`/routeservers/${routeServer.id}`}>
@@ -97,6 +98,22 @@ const RoutesPageContent = () => {
           </div>
 
         </div>
+        <div className="col-lg-3 col-md-12 col-aside-details">
+          <div className="card">
+            <Status />
+          </div>
+          <RelatedPeersCard />
+          { /* 
+          <FiltersEditor makeLinkProps={makeLinkProps}
+                         linkProps={this.props.linkProps}
+                         filtersApplied={this.props.filtersApplied}
+                         filtersAvailable={this.props.filtersAvailable} />
+          <RelatedPeersCard
+            neighbors={this.props.allRelatedPeers}
+            rsId={this.props.params.routeserverId} 
+            protocolId={this.props.params.protocolId} />
+            */ }
+        </div>
       </div>
     </div>
   );
@@ -110,7 +127,9 @@ const RoutesPage = () => {
   const { neighborId } = useParams();
   return (
     <NeighborProvider neighborId={neighborId}>
+    <RelatedNeighborsProvider>
       <RoutesPageContent />
+    </RelatedNeighborsProvider>
     </NeighborProvider>
   );
 }
@@ -120,17 +139,6 @@ const RoutesPage = () => {
       <BgpAttributesModal />
       <div className="row details-main">
         <div className="col-main col-lg-9 col-md-12">
-
-          <div className="card">
-            <RelatedPeersTabs
-              peers={this.props.localRelatedPeers}
-              protocolId={this.props.params.protocolId}
-              routeserverId={this.props.params.routeserverId} />
-            <SearchInput
-              value={this.props.filterValue}
-              placeholder={filterPlaceholder}
-              onChange={(e) => this.setFilter(e.target.value)}  />
-          </div>
 
           <QuickLinks routes={this.props.routes} />
 
@@ -157,20 +165,6 @@ const RoutesPage = () => {
               protocolId={this.props.params.protocolId} />
 
 
-        </div>
-        <div className="col-lg-3 col-md-12 col-aside-details">
-          <div className="card">
-            <Status routeserverId={this.props.params.routeserverId}
-                    cacheStatus={cacheStatus} />
-          </div>
-          <FiltersEditor makeLinkProps={makeLinkProps}
-                         linkProps={this.props.linkProps}
-                         filtersApplied={this.props.filtersApplied}
-                         filtersAvailable={this.props.filtersAvailable} />
-          <RelatedPeersCard
-            neighbors={this.props.allRelatedPeers}
-            rsId={this.props.params.routeserverId} 
-            protocolId={this.props.params.protocolId} />
         </div>
       </div>
     </div>

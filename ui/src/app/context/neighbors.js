@@ -24,11 +24,14 @@ const initialState = {
 };
 
 // Contexts
-const NeighborsContext = createContext();
-const NeighborContext  = createContext();
+const NeighborsContext        = createContext();
+const NeighborContext         = createContext();
+const RelatedNeighborsContext = createContext();
 
-export const useNeighbors = () => useContext(NeighborsContext);
-export const useNeighbor  = () => useContext(NeighborContext);
+
+export const useNeighbors        = () => useContext(NeighborsContext);
+export const useNeighbor         = () => useContext(NeighborContext);
+export const useRelatedNeighbors = () => useContext(RelatedNeighborsContext);
 
 
 /**
@@ -96,3 +99,41 @@ export const NeighborProvider = ({neighborId, children}) => {
     </NeighborContext.Provider>
   );
 };
+
+/**
+ * RelatedNeighborsProvider fetches all related neighbors
+ * from the backend identified the neighbor's ASN.
+ */
+export const RelatedNeighborsProvider = ({children}) => {
+  const neighbor          = useNeighbor();
+  const [handleError]     = useErrors();
+  const [state, setState] = useState(initialState);
+
+  useEffect(() => {
+    if (!neighbor) {
+      return;
+    }
+    setState((s) => ({...s, isLoading: true}));
+    // Load related neighbors
+    const queryUrl = `/api/v1/lookup/neighbors?asn=${neighbor.asn}`;
+    axios.get(queryUrl).then(
+      ({data}) => {
+        setState({
+          isLoading: false,
+          neighbors: data.neighbors,
+        });
+      },
+      (error) => {
+        handleError(error);
+        setState((s) => ({...s, isLoading: false}));
+      }
+    );
+  }, [neighbor, handleError]);
+
+  return (
+    <RelatedNeighborsContext.Provider value={state}>
+      {children}
+    </RelatedNeighborsContext.Provider>
+  );
+}
+

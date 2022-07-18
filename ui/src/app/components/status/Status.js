@@ -57,6 +57,10 @@ const Status = () => {
   const routeServer = useRouteServer();
   const rsStatus    = useRouteServerStatus();
 
+  if (!routeServer) {
+    return null;
+  }
+
   let lastReboot = rsStatus.last_reboot;
   if (lastReboot === "0001-01-01T00:00:00Z") {
       lastReboot = null;

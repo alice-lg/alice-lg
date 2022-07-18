@@ -10,8 +10,9 @@ import axios from 'axios';
 import { useState
        , useEffect
        , useContext
-       , createContext
        , useRef
+       , useMemo
+       , createContext
        }
   from 'react';
 import { useParams }
@@ -37,6 +38,22 @@ export const useRouteServer = () => {
   const { routeServerId } = useParams();
   const routeServers      = useRouteServers();
   return routeServers.find((rs) => rs.id === routeServerId)
+}
+
+/**
+ * Sometimes having route servers as a mapping is helpful
+ */
+export const useRouteServersMap = () => {
+  const routeServers = useRouteServers();
+  let mapping = useMemo(() => {
+    let m = {};
+    for (const rs of routeServers) {
+      m[rs.id] = rs;
+    }
+    return m;
+  }, [routeServers]);
+
+  return mapping;
 }
 
 /**
