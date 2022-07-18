@@ -15,7 +15,7 @@ import { createContext
   from 'react';
 
 import { useErrorHandler }
-  from 'app/components/errors/Provider';
+  from 'app/context/errors';
 
 const initialState = {
   asn: 0, // Our own ASN (might be abstracted in the future)
@@ -43,7 +43,7 @@ const initialState = {
 const ConfigContext = createContext(null);
 export const useConfig = () => useContext(ConfigContext);
 
-const ConfigProvider = ({children}) => {
+export const ConfigProvider = ({children}) => {
   const [config, setConfig] = useState(initialState);
   const handleError = useErrorHandler();
   
@@ -63,4 +63,3 @@ const ConfigProvider = ({children}) => {
   );
 }
 
-export default ConfigProvider;

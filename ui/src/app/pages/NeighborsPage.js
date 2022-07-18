@@ -1,9 +1,6 @@
 
-import { useQuery }
-  from 'app/components/query';
-
-import { useSelectedRouteServer }
-  from 'app/components/routeservers/Provider';
+import { useRouteServer }
+  from 'app/context/route-servers';
 
 import Status
   from 'app/components/routeservers/Status';
@@ -16,7 +13,7 @@ import QuickLinks
 import PageHeader
   from 'app/components/page/Header';
 import SearchQueryInput
-  from 'app/components/query/SearchQueryInput';
+  from 'app/components/search/SearchQueryInput';
 
 
 
@@ -27,7 +24,7 @@ import SearchQueryInput
  * A search field for quick filtering is provided
  */
 const NeighborsPage = () => {
-  const routeServer = useSelectedRouteServer();
+  const routeServer = useRouteServer();
   if (!routeServer) { return null; } // nothing to do here
 
   return (

@@ -16,7 +16,7 @@ export const useApiStatus = () => useContext(ApiStatusContext);
  * Provide API status like cache information
  * and version to downstream components
  */
-const ApiStatusProvider = ({children, api}) => {
+export const ApiStatusProvider = ({children, api}) => {
   let ctx = null;
 
   const cachedAt = api.cache_status?.cached_at;
@@ -45,4 +45,3 @@ const ApiStatusProvider = ({children, api}) => {
   );
 }
 
-export default ApiStatusProvider;

@@ -9,14 +9,14 @@ import { useRef
   from 'react';
 
 import { useQuery }
-  from 'app/components/query';
+  from 'app/context/query';
 import { useNeighbors }
-  from 'app/components/neighbors/Provider';
-import NeighborsTable
-  from 'app/components/neighbors/Table';
+  from 'app/context/neighbors';
 
+import NeighborsTable
+  from 'app/components/neighbors/NeighborsTable';
 import LoadingIndicator
-  from 'app/components/api/LoadingIndicator';
+  from 'app/components/spinners/LoadingIndicator';
 
 /**
  * Get AS from filter string

@@ -15,13 +15,13 @@ import { faClock
 import { faArrowsRotate }
   from '@fortawesome/free-solid-svg-icons';
 
-import { useSelectedRouteServer }
-  from 'app/components/routeservers/Provider';
-import { useRouteServerStatus }
-  from 'app/components/routeservers/StatusProvider';
+import { useRouteServer
+       , useRouteServerStatus
+       }
+  from 'app/context/route-servers';
 
 import { useApiStatus }
-  from 'app/components/api/StatusProvider';
+  from 'app/context/api-status';
 
 import DateTime
   from 'app/components/datetime/DateTime';
@@ -54,7 +54,7 @@ const CacheStatus = () => {
 }
 
 const Status = () => {
-  const routeServer = useSelectedRouteServer();
+  const routeServer = useRouteServer();
   const rsStatus    = useRouteServerStatus();
 
   let lastReboot = rsStatus.last_reboot;

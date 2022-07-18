@@ -12,22 +12,22 @@ import { BrowserRouter
        } 
   from 'react-router-dom';
 
-import ErrorsProvider
-  from 'app/components/errors/Provider';
-import ConfigProvider
-  from 'app/components/config/Provider';
-import ContentProvider
-  from 'app/components/content/Provider';
-import RouteServersProvider
-  from 'app/components/routeservers/Provider';
+import { ErrorsProvider }
+  from 'app/context/errors';
+import { ConfigProvider }
+  from 'app/context/config';
+import { ContentProvider }
+  from 'app/context/content';
+import { RouteServersProvider }
+  from 'app/context/route-servers';
 
 import Layout
   from 'app/components/page/Layout';
-import RouteServer
-  from 'app/components/routeservers/RouteServer';
 
 import StartPage 
   from 'app/pages/StartPage';
+import RouteServerPage
+  from 'app/pages/RouteServerPage';
 import NeighborsPage
   from 'app/pages/NeighborsPage';
 import RoutesPage
@@ -48,7 +48,7 @@ const Main = () => {
 
           {/* RouteServers */}
           <Route path="routeservers/:routeServerId"
-            element={<RouteServer />}>
+            element={<RouteServerPage />}>
 
             <Route index
               element={<NeighborsPage />} />

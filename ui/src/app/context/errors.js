@@ -23,7 +23,7 @@ export const useErrorHandler = () => {
 // Unfortunatley this does not really act as an error
 // boundary. But we need to catch http errors from axios.
 // Those are not cought using the ErrorBoundary approach.
-const ErrorProvider = ({children}) => {
+export const ErrorsProvider = ({children}) => {
   const [errors, setErrors] = useState([]);
 
   // Handle prepends the error to the state.
@@ -48,4 +48,3 @@ const ErrorProvider = ({children}) => {
   );
 }
 
-export default ErrorProvider;

@@ -9,14 +9,11 @@ import { faCircleArrowUp
   from '@fortawesome/free-solid-svg-icons';
 
 
-import { useMemo
-       }
+import { useMemo }
   from 'react';
 
-import { useParams }
-  from 'react-router-dom';
-
-import { Link
+import { useParams
+       , Link
        }
   from 'react-router-dom';
 
@@ -24,13 +21,13 @@ import { ipToNumeric }
   from 'app/utils/ip'
 
 import { useConfig }
-  from 'app/components/config/Provider';
-import { useSelectedRouteServer }
-  from 'app/components/routeservers/Provider';
+  from 'app/context/config';
+import { useRouteServer }
+  from 'app/context/route-servers';
 import { useQuery
        , useQueryLink
        }
-  from 'app/components/query';
+  from 'app/context/query';
 
 import RelativeTimestamp
   from 'app/components/datetime/RelativeTimestamp';
@@ -243,7 +240,7 @@ const ColNotAvailable = () => {
 
 
 const NeighborColumn = ({neighbor, column}) => {
-  const rs = useSelectedRouteServer();
+  const rs = useRouteServer();
   const widgets = {
     // Special cases
     "asn": ColPlain,

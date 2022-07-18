@@ -1,12 +1,10 @@
-import { useContext }
-  from 'react';
 
-import { ContentContext }
-  from './Provider';
+import { useContent }
+  from 'app/context/content';
 
 const Content = ({id, children}) => {
   let defaultValue = children;
-  let content = useContext(ContentContext);
+  let content = useContent();
 
   if (!id) {
     return defaultValue;

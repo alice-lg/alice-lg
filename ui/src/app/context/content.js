@@ -1,12 +1,15 @@
 import { useState
        , createContext
        , useEffect
+       , useContext
        }
   from 'react';
 
 export const ContentContext = createContext({});
 
-const ContentProvider = ({children}) => {
+export const useContent = () => useContext(ContentContext);
+
+export const ContentProvider = ({children}) => {
   const [content, setContent] = useState({});
 
   // Expose setContent as API??
@@ -24,4 +27,3 @@ const ContentProvider = ({children}) => {
   );
 };
 
-export default ContentProvider;

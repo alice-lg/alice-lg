@@ -12,21 +12,19 @@ import { intersect
        }
   from 'app/utils/lists'
 
-import { useQuery }
-  from 'app/components/query';
 import { useConfig }
-  from 'app/components/config/Provider';
-import { useSelectedRouteServer }
-  from 'app/components/routeservers/Provider';
+  from 'app/context/config';
+import { useRouteServer }
+  from 'app/context/route-servers';
 import { NeighborProvider
        , useNeighbor
        }
-  from 'app/components/neighbors/NeighborProvider';
+  from 'app/context/neighbors';
 
 import PageHeader
   from 'app/components/page/Header';
 import SearchQueryInput
-  from 'app/components/query/SearchQueryInput';
+  from 'app/components/search/SearchQueryInput';
 
 
 const FILTERABLE_COLUMNS = [
@@ -41,7 +39,7 @@ const filterableColumnsText = (columns, order) => {
 
 
 const RoutesHeader = () => {
-  const routeServer = useSelectedRouteServer();
+  const routeServer = useRouteServer();
   const neighbor = useNeighbor();
 
   if (!routeServer || !neighbor) {
@@ -66,7 +64,6 @@ const RoutesHeader = () => {
  */
 const RoutesPage = () => {
   const { neighborId } = useParams();
-  const [query, setQuery] = useQuery({q: ""});
   const config = useConfig();
 
   const routesColumns = config.routes_columns;
@@ -95,14 +92,14 @@ const RoutesPage = () => {
 
           <div className="card">
             [Related Peers Tab]
-            <SearchQueryInput
-              placeholder={filterPlaceholder} />
             { /*
             <RelatedPeersTabs
               peers={this.props.localRelatedPeers}
               protocolId={this.props.params.protocolId}
               routeserverId={this.props.params.routeserverId} />
              */}
+            <SearchQueryInput
+              placeholder={filterPlaceholder} />
           </div>
 
         </div>

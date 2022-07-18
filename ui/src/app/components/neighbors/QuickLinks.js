@@ -5,7 +5,7 @@ import { Link
   from 'react-router-dom';
 
 import { useNeighbors }
-  from 'app/components/neighbors/Provider';
+  from 'app/context/neighbors';
 
 
 /**

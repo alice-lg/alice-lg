@@ -3,10 +3,10 @@ import { useCallback }
   from 'react'
 
 import { useQuery }
-  from 'app/components/query';
+  from 'app/context/query';
 
 import SearchInput
-  from 'app/components/search/Input';
+  from 'app/components/search/SearchInput';
 
 /**
  * SearchQueryInput is a SearchInput, updating the query.

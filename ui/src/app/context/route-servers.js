@@ -17,33 +17,35 @@ import { useState
 import { useParams }
   from 'react-router-dom';
 
-import { useErrors }
-  from 'app/components/errors/Provider';
+import { useErrorHandler }
+  from 'app/context/errors';
 
 
-const RouteServersContext = createContext([]);
+// Contexts
+const RouteServersContext      = createContext([]);
+const RouteServerStatusContext = createContext();
 
-export const useRouteServers = () => useContext(RouteServersContext);
+export const useRouteServers      = () => useContext(RouteServersContext);
+export const useRouteServerStatus = () =>  useContext(RouteServerStatusContext);
 
 /**
  * Use selected route server uses the route server context
  * in combination with the navigation to return the current
  * route server.
  */
-export const useSelectedRouteServer = () => {
+export const useRouteServer = () => {
   const { routeServerId } = useParams();
   const routeServers      = useRouteServers();
   return routeServers.find((rs) => rs.id === routeServerId)
 }
 
-
 /**
  * RouteServersProvider loads the route servers from the
  * backend and uses these as provider value.
  */
-const RouteServersProvider = ({children}) => {
+export const RouteServersProvider = ({children}) => {
   const init          = useRef();
-  const [handleError] = useErrors();
+  const handleError   = useErrorHandler();
   const [rs, setRs]   = useState([]);
   
   // Load route servers from backend
@@ -66,4 +68,25 @@ const RouteServersProvider = ({children}) => {
   );
 }
 
-export default RouteServersProvider;
+/**
+ * RouteServerStatusProvider loads the route server status
+ * and provides it through the context
+ */
+export const RouteServerStatusProvider = ({children, routeServerId}) => {
+  const handleError         = useErrorHandler();
+  const [status, setStatus] = useState({});
+
+  useEffect(() => {
+    axios.get(`/api/v1/routeservers/${routeServerId}/status`)
+      .then(
+        ({data}) => setStatus(data.status),
+        (error)  => handleError(error),
+      );
+  }, [routeServerId, handleError]);
+
+  return (
+    <RouteServerStatusContext.Provider value={status}>
+      {children}
+    </RouteServerStatusContext.Provider>
+  );
+}

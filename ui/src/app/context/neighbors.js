@@ -5,14 +5,15 @@ import { createContext
        , useContext
        , useState
        , useEffect
+       , useMemo
        }
   from 'react';
 
 import { useErrors }
-  from 'app/components/errors/Provider';
+  from 'app/context/errors';
 
-import ApiStatusProvider 
-  from 'app/components/api/StatusProvider';
+import { ApiStatusProvider }
+  from 'app/context/api-status';
 
 const initialState = {
   neighbors: [],
@@ -20,15 +21,18 @@ const initialState = {
   isLoading: true,
 };
 
+// Contexts
 const NeighborsContext = createContext();
+const NeighborContext  = createContext();
 
 export const useNeighbors = () => useContext(NeighborsContext);
+export const useNeighbor  = () => useContext(NeighborContext);
 
 /**
  * NeighborsProvider loads the neighbors for a selected
  * route server identified by id
  */
-const NeighborsProvider = ({children, routeServerId}) => {
+export const NeighborsProvider = ({children, routeServerId}) => {
   const [handleError]     = useErrors();
   const [state, setState] = useState(initialState);
 
@@ -59,4 +63,17 @@ const NeighborsProvider = ({children, routeServerId}) => {
   );
 }
 
-export default NeighborsProvider;
+/**
+ * NeighborProvider provides a single neighbor context
+ */
+export const NeighborProvider = ({neighborId, children}) => {
+  const { neighbors } = useNeighbors();
+  const neighbor = useMemo(
+    () => neighbors.find((n) => n.id === neighborId),
+    [neighbors, neighborId]);
+  return (
+    <NeighborContext.Provider value={neighbor}>
+      {children}
+    </NeighborContext.Provider>
+  );
+};
