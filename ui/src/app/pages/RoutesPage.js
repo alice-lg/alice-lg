@@ -1,4 +1,7 @@
 
+import { useMemo }
+  from 'react';
+
 import { Link
        , useParams
        }
@@ -18,11 +21,16 @@ import { useRouteServer }
   from 'app/context/route-servers';
 import { NeighborProvider
        , useNeighbor
+       , useLocalRelatedPeers
        }
   from 'app/context/neighbors';
 
 import PageHeader
   from 'app/components/page/Header';
+import Status
+  from 'app/components/status/Status';
+import LocalRelatedPeersTabs
+  from 'app/components/neighbors/LocalRelatedPeersTabs';
 import SearchQueryInput
   from 'app/components/search/SearchQueryInput';
 
@@ -38,7 +46,7 @@ const filterableColumnsText = (columns, order) => {
 }
 
 
-const RoutesHeader = () => {
+const RoutesPageHeader = () => {
   const routeServer = useRouteServer();
   const neighbor = useNeighbor();
 
@@ -47,16 +55,52 @@ const RoutesHeader = () => {
   }
 
   return (
-    <>
+    <PageHeader>
       <Link to={`/routeservers/${routeServer.id}`}>
         {routeServer.name}
       </Link>
       <span className="spacer">&raquo;</span>
         {neighbor.description}
-    </>
+    </PageHeader>
   );
 }
 
+const RoutesPageSearch = () => {
+  const config = useConfig();
+  const filterPlaceholder = useMemo(() => (
+    "Filter by " + filterableColumnsText(
+      config.routes_columns, config.routes_columns_order)
+  ), [config]);
+
+  return (
+    <SearchQueryInput placeholder={filterPlaceholder} />
+  );
+}
+
+const RoutesPageContent = () => {
+  const localRelatedPeers = useLocalRelatedPeers();
+
+  let pageClass = "routeservers-page";
+  if (localRelatedPeers.length > 1) {
+    pageClass += " has-related-peers";
+  }
+
+  return (
+    <div className={pageClass}>
+      <RoutesPageHeader />
+      <div className="row details-main">
+        <div className="col-main col-lg-9 col-md-12">
+
+          <div className="card">
+            <LocalRelatedPeersTabs />
+            <RoutesPageSearch />
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /**
  * RoutesPage renders the page with all routes for a neighbor
@@ -64,50 +108,11 @@ const RoutesHeader = () => {
  */
 const RoutesPage = () => {
   const { neighborId } = useParams();
-  const config = useConfig();
-
-  const routesColumns = config.routes_columns;
-  const routesColumnsOrder = config.routes_columns_order;
-
-  let pageClass = "routeservers-page";
-  /*
-   * TODO: find better solution.
-  if (this.props.localRelatedPeers.length > 1) {
-    pageClass += " has-related-peers";
-  }
-  */
-  
-  const filterPlaceholder = "Filter by " +
-    filterableColumnsText(routesColumns, routesColumnsOrder);
-
-
   return (
     <NeighborProvider neighborId={neighborId}>
-    <div className={pageClass}>
-      <PageHeader>
-        <RoutesHeader />
-      </PageHeader>
-      <div className="row details-main">
-        <div className="col-main col-lg-9 col-md-12">
-
-          <div className="card">
-            [Related Peers Tab]
-            { /*
-            <RelatedPeersTabs
-              peers={this.props.localRelatedPeers}
-              protocolId={this.props.params.protocolId}
-              routeserverId={this.props.params.routeserverId} />
-             */}
-            <SearchQueryInput
-              placeholder={filterPlaceholder} />
-          </div>
-
-        </div>
-      </div>
-    </div>
+      <RoutesPageContent />
     </NeighborProvider>
   );
-
 }
 
 /*

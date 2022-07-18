@@ -11,9 +11,11 @@ import { createContext
 
 import { useErrors }
   from 'app/context/errors';
-
 import { ApiStatusProvider }
   from 'app/context/api-status';
+
+import { isUpState } 
+  from 'app/components/neighbors/state';
 
 const initialState = {
   neighbors: [],
@@ -27,6 +29,23 @@ const NeighborContext  = createContext();
 
 export const useNeighbors = () => useContext(NeighborsContext);
 export const useNeighbor  = () => useContext(NeighborContext);
+
+
+/**
+ * useLocalRelatedPeers returns all neighbors on an rs
+ * sharing the same ASN and are in state 'up'
+ */
+export const useLocalRelatedPeers = () => {
+  const { neighbors } = useNeighbors();
+  const neighbor  = useNeighbor();
+  return useMemo(() => {
+    if (!neighbor) {
+      return [];
+    }
+    return neighbors.filter((n) =>
+      (n.asn === neighbor.asn && isUpState(n.state)));
+  }, [neighbors, neighbor])
+}
 
 /**
  * NeighborsProvider loads the neighbors for a selected

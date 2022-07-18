@@ -29,6 +29,8 @@ import { useQuery
        }
   from 'app/context/query';
 
+import { isUpState } 
+  from 'app/components/neighbors/state';
 import RelativeTimestamp
   from 'app/components/datetime/RelativeTimestamp';
 
@@ -47,15 +49,6 @@ const lookupProperty = (obj, path) => {
   }
 
   return property;
-}
-
-/**
- * Check if state is up or established
- */
-const isUpState = (s) => {
-    if (!s) { return false; }
-    s = s.toLowerCase();
-    return (s.includes("up") || s.includes("established"));
 }
 
 /**

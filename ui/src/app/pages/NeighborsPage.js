@@ -3,7 +3,7 @@ import { useRouteServer }
   from 'app/context/route-servers';
 
 import Status
-  from 'app/components/routeservers/Status';
+  from 'app/components/status/Status';
 
 import Neighbors
   from 'app/components/neighbors/Neighbors';
