@@ -1,4 +1,14 @@
 
+import { FontAwesomeIcon }
+  from '@fortawesome/react-fontawesome';
+import { faCircleCheck
+       , faCircleMinus
+       , faCircleQuestion
+       }
+  from '@fortawesome/free-solid-svg-icons';
+import { faCircle }
+  from '@fortawesome/free-regular-svg-icons';
+
 import { useConfig }
   from 'app/context/config';
 
@@ -22,7 +32,7 @@ const RpkiIndicator = ({route}) => {
         com[2].toFixed() === rpkiValid[2]) {
       return (
         <span className="route-prefix-flag rpki-route rpki-valid">
-          <i className="fa fa-check-circle" /> 
+          <FontAwesomeIcon icon={faCircleCheck} />
           <div>RPKI Valid</div>
         </span>
       );
@@ -34,7 +44,7 @@ const RpkiIndicator = ({route}) => {
         com[2].toFixed() === rpkiUnknown[2]) {
       return (
         <span className="route-prefix-flag rpki-route rpki-unknown">
-          <i className="fa fa-question-circle" />
+          <FontAwesomeIcon icon={faCircleQuestion} />
           <div>RPKI Unknown</div>
         </span>
       );
@@ -46,7 +56,7 @@ const RpkiIndicator = ({route}) => {
         com[2].toFixed() === rpkiNotChecked[2]) {
       return (
         <span className="route-prefix-flag rpki-route rpki-not-checked">
-          <i className="fa fa-circle-o" />
+          <FontAwesomeIcon icon={faCircle} />
           <div>RPKI not checked</div>
         </span>
       );
@@ -78,7 +88,7 @@ const RpkiIndicator = ({route}) => {
       const cls = `route-prefix-flag rpki-route rpki-invalid rpki-invalid-${rpkiInvalidReason}`
       return (
         <span className={cls}>
-          <i className="fa fa-minus-circle" />
+          <FontAwesomeIcon icon={faCircleMinus} />
           <div>RPKI Invalid</div>
         </span>
       );

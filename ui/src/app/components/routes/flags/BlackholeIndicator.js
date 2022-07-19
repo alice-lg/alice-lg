@@ -1,4 +1,9 @@
 
+import { FontAwesomeIcon }
+  from '@fortawesome/react-fontawesome';
+import { faCircle }
+  from '@fortawesome/free-solid-svg-icons';
+
 import { useRouteServer }
   from 'app/context/route-servers';
 
@@ -23,7 +28,8 @@ const BlackholeIndicator = ({route}) => {
 
   if (isBlackhole) {
     return(
-      <span className="route-prefix-flag blackhole-route is-blackhole-route"><i className="fa fa-circle"></i>
+      <span className="route-prefix-flag blackhole-route is-blackhole-route">
+        <FontAwesomeIcon icon={faCircle} />
         <div>Blackhole</div>
       </span>
     );

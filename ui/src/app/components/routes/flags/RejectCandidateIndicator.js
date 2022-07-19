@@ -1,4 +1,9 @@
 
+import { FontAwesomeIcon }
+  from '@fortawesome/react-fontawesome';
+import { faCircleExclamation }
+  from '@fortawesome/free-solid-svg-icons';
+
 import { useConfig }
   from 'app/context/config';
 
@@ -20,7 +25,7 @@ const RejectCandidateIndicator = ({route}) => {
   const cls = `route-prefix-flag reject-candidate-route`;
   return (
     <span className={cls}>
-      <i className="fa fa-exclamation-circle" />
+      <FontAwesomeIcon icon={faCircleExclamation} />
       <div>Reject Candidate</div>
     </span>
   );
