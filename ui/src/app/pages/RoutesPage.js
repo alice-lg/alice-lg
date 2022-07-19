@@ -30,11 +30,6 @@ import { NeighborProvider
 import { RoutesReceivedProvider
        , RoutesFilteredProvider
        , RoutesNotExportedProvider
-
-       , useRoutesReceived
-       , useRoutesFiltered
-       , useRoutesNotExported
-
        }
   from 'app/context/routes';
 
@@ -46,6 +41,8 @@ import LocalRelatedPeersTabs
   from 'app/components/neighbors/LocalRelatedPeersTabs';
 import RelatedPeersCard
   from 'app/components/neighbors/RelatedPeersCard';
+import Routes 
+  from 'app/components/routes/Routes';
 import SearchQueryInput
   from 'app/components/search/SearchQueryInput';
 
@@ -93,14 +90,6 @@ const RoutesPageSearch = () => {
 const RoutesPageContent = () => {
   const localRelatedPeers = useLocalRelatedPeers();
 
-  const received = useRoutesReceived();
-  const filtered = useRoutesFiltered();
-  const notExported = useRoutesNotExported();
-
-  console.log("recv:", received);
-  console.log("filt:", filtered);
-  console.log("nexp:", notExported);
-
   let pageClass = "routeservers-page";
   if (localRelatedPeers.length > 1) {
     pageClass += " has-related-peers";
@@ -116,6 +105,8 @@ const RoutesPageContent = () => {
             <LocalRelatedPeersTabs />
             <RoutesPageSearch />
           </div>
+
+          <Routes />
 
         </div>
         <div className="col-lg-3 col-md-12 col-aside-details">
@@ -156,6 +147,7 @@ const RoutesPage = () => {
   return (
     <NeighborProvider neighborId={neighborId}>
     <RelatedNeighborsProvider>
+
     <RoutesNotExportedProvider
       routeServerId={routeServerId}
       neighborId={neighborId}
@@ -167,13 +159,11 @@ const RoutesPage = () => {
       neighborId={neighborId}
       query={query.q}
       page={query.pf}>
-
-    {/* innermost used for api status */}
     <RoutesReceivedProvider 
       routeServerId={routeServerId}
       neighborId={neighborId}
       query={query.q}
-      page={query.pr}>
+      page={query.pr}>{/* innermost used for api status */}
 
       <RoutesPageContent />
 
