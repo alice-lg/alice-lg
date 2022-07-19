@@ -10,7 +10,14 @@ import FilterReason
   from 'app/components/routes/FilterReason';
 import NoExportReason 
   from 'app/components/routes/NoExportReason';
-
+import PrimaryIndicator
+  from 'app/components/routes/flags/PrimaryIndicator';
+import RpkiIndicator
+  from 'app/components/routes/flags/RpkiIndicator';
+import BlackholeIndicator
+  from 'app/components/routes/flags/BlackholeIndicator';
+import RejectCandidateIndicator
+  from 'app/components/routes/flags/RejectCandidateIndicator';
 
 // Helper: Lookup value in route path
 export const getAttr = (r, path) => {
@@ -57,29 +64,26 @@ export const ColAsPath = ({route}) => {
     );
 }
 
-/*
 export const ColFlags = ({route}) => {
   return (
     <td className="col-route-flags">
       <span className="route-prefix-flags">
         <RpkiIndicator route={route} />
         <PrimaryIndicator route={route} />
-        <BlackholeIndicator route={route}
-                            blackholes={blackholes} />
+        <BlackholeIndicator route={route} />
         <RejectCandidateIndicator route={route} />
       </span>
     </td>
   );
 }
-*/
 
 const RouteColumn = ({onClick, column, route}) => {
   const widgets = {
     "network": ColNetwork,
-    //"flags": ColFlags,
+    "flags": ColFlags,
     "bgp.as_path": ColAsPath,
 
-   // "Flags": ColFlags,
+    "Flags": ColFlags,
     "ASPath": ColAsPath,
   };
 
