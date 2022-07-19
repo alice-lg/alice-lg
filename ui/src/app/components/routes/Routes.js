@@ -16,6 +16,8 @@ import QuickLinks
   from 'app/components/routes/QuickLinks';
 import EmptyResults
   from 'app/components/routes/EmptyResults';
+import RoutesTable
+  from 'app/components/routes/RoutesTable';
 import Paginator
   from 'app/components/pagination/Paginator';
 import PaginationInfo
@@ -57,7 +59,7 @@ const createRoutesSet = (type, useRoutes) => () => {
           <PaginationInfo results={results} />
         </div>
       </div>
-        [RoutesTable]
+      <RoutesTable results={results} />
       <center>
         <Paginator
           results={results}
@@ -71,6 +73,11 @@ const createRoutesSet = (type, useRoutes) => () => {
 const RoutesReceived = createRoutesSet(
   ROUTES_RECEIVED,
   useRoutesReceived,
+);
+
+const RoutesFiltered = createRoutesSet(
+  ROUTES_FILTERED,
+  useRoutesFiltered,
 );
 
 
@@ -88,12 +95,14 @@ const Routes = () => {
       <QuickLinks />
       <EmptyResults />
 
+      <div ref={refFiltered}>
+        <RoutesFiltered />
+      </div>
+
       <div ref={refReceived}>
         <RoutesReceived />
       </div>
 
-      <div ref={refReceived}>
-      </div>
 
       <div ref={refNotExported}>
       </div>
