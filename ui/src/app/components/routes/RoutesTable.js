@@ -5,8 +5,6 @@ import { useCallback }
 
 import { useConfig }
   from 'app/context/config';
-import { useRouteServer }
-  from 'app/context/route-servers';
 
 import FilterReason
   from 'app/components/routes/FilterReason';
@@ -85,12 +83,14 @@ const RouteColumn = ({onClick, column, route}) => {
     "ASPath": ColAsPath,
   };
 
+  const handleClick = useCallback(() => onClick(route), [route, onClick]);
+
   let Widget = widgets[column] || ColDefault;
   return (
     <Widget
       column={column}
       route={route}
-      onClick={onClick} />
+      onClick={handleClick} />
   );
 };
 
