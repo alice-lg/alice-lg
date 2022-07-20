@@ -137,8 +137,6 @@ const useFetchReceivedState = createFetchRoutesState(ROUTES_RECEIVED);
 const useFetchFilteredState = createFetchRoutesState(ROUTES_FILTERED);
 const useFetchNotExportedState = createFetchRoutesState(ROUTES_NOT_EXPORTED);
 
-
-
 /**
  * Create routes provider makes a new routes provider
  * for a given context.
@@ -193,4 +191,25 @@ export const RoutesNotExportedProvider = createRoutesProvider(
   RoutesNotExportedContext,
   useFetchNotExportedState,
 );
+
+/**
+ * RouteDetails Context
+ */
+const RouteDetailsContext = createContext();
+
+export const useRouteDetails = () => useContext(RouteDetailsContext);
+
+export const useSetRouteDetails = () => useRouteDetails()[1];
+
+export const RouteDetailsProvider = ({children}) => {
+  const state = useState();
+  return (
+    <RouteDetailsContext.Provider value={state}>
+      {children}
+    </RouteDetailsContext.Provider>
+  );
+}
+
+
+
 

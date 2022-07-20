@@ -33,6 +33,8 @@ import EmptyResults
   from 'app/components/routes/EmptyResults';
 import RoutesTable
   from 'app/components/routes/RoutesTable';
+import RouteDetailsModal
+  from 'app/components/routes/RouteDetailsModal';
 import Paginator
   from 'app/components/pagination/Paginator';
 import PaginationInfo
@@ -41,7 +43,6 @@ import LoadingIndicator
   from 'app/components/spinners/LoadingIndicator';
 import WaitingText
   from 'app/components/spinners/WaitingText';
-
 
 const RoutesHeader = ({type}) => {
   const rtype = {
@@ -188,12 +189,13 @@ const Routes = () => {
     "#routes-not-exported": refNotExported,
   });
 
-
   return (
     <div className="routes-view">
 
       <QuickLinks />
       <EmptyResults />
+
+      <RouteDetailsModal />
 
       <div ref={refFiltered}>
         <RoutesFiltered />

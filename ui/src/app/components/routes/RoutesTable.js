@@ -5,6 +5,8 @@ import { useCallback }
 
 import { useConfig }
   from 'app/context/config';
+import { useSetRouteDetails }
+  from 'app/context/routes';
 
 import FilterReason
   from 'app/components/routes/FilterReason';
@@ -102,6 +104,7 @@ const RouteColumn = ({onClick, column, route}) => {
 
 const RoutesTable = ({results}) => {
   const config = useConfig();
+  const setRouteDetails = useSetRouteDetails();
 
   const columns = config.routes_columns;
   const columnsOrder = config.routes_columns_order;
@@ -109,8 +112,8 @@ const RoutesTable = ({results}) => {
   const { routes } = results;
 
   const showAttributesModal = useCallback((route) => {
-    console.log("show attributes:", route);
-  }, []);
+    setRouteDetails(route);
+  }, [setRouteDetails]);
 
   if(!routes.length === 0) {
     return null;

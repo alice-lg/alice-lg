@@ -30,6 +30,7 @@ import { NeighborProvider
 import { RoutesReceivedProvider
        , RoutesFilteredProvider
        , RoutesNotExportedProvider
+       , RouteDetailsProvider
        }
   from 'app/context/routes';
 
@@ -147,6 +148,7 @@ const RoutesPage = () => {
   return (
     <NeighborProvider neighborId={neighborId}>
     <RelatedNeighborsProvider>
+    <RouteDetailsProvider>
 
     <RoutesNotExportedProvider
       routeServerId={routeServerId}
@@ -171,45 +173,10 @@ const RoutesPage = () => {
     </RoutesFilteredProvider>
     </RoutesNotExportedProvider>
 
+    </RouteDetailsProvider>
     </RelatedNeighborsProvider>
     </NeighborProvider>
   );
 }
-
-/*
- 
-      <BgpAttributesModal />
-      <div className="row details-main">
-        <div className="col-main col-lg-9 col-md-12">
-
-          <QuickLinks routes={this.props.routes} />
-
-          <RoutesViewEmpty routes={this.props.routes}
-                           hasQuery={!!this.props.filterValue}
-                           loadNotExported={this.props.loadNotExported} />
-          <RoutesView
-              type={ROUTES_FILTERED}
-              routeserverId={this.props.params.routeserverId}
-              protocolId={this.props.params.protocolId} />
-
-          {this.props.receivedLoading && <RoutesLoadingIndicator />}
-
-          <RoutesView
-              type={ROUTES_RECEIVED}
-              routeserverId={this.props.params.routeserverId}
-              protocolId={this.props.params.protocolId} />
-
-          {this.props.notExportedLoading && <RoutesLoadingIndicator />}
-
-          <RoutesView
-              type={ROUTES_NOT_EXPORTED}
-              routeserverId={this.props.params.routeserverId}
-              protocolId={this.props.params.protocolId} />
-
-
-        </div>
-      </div>
-    </div>
-*/
 
 export default RoutesPage;
