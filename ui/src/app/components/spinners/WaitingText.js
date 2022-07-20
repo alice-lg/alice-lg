@@ -4,10 +4,6 @@ import { useState
        }
   from 'react';
 
-import LoadingIndicator
-  from 'app/components/spinners/LoadingIndicator';
-
-
 const WaitingText = ({resource = "routes"}) => {
   const [time, setTime] = useState(0);
 
@@ -21,9 +17,7 @@ const WaitingText = ({resource = "routes"}) => {
   }, []);
 
   return (
-    <div className="routes-loading card">
-      <LoadingIndicator show={true} />
-
+    <div className="routes-loading">
       {time >= 5 &&
         <p><br />&gt; Still loading routes, please be patient.</p>}
       {time >= 15 &&

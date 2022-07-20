@@ -142,7 +142,7 @@ const RoutesPage = () => {
     ne: 0,
     q: "",
   });
-  const notExportedEnabled = query.ne === 1;
+  const notExportedEnabled = parseInt(query.ne, 10) === 1;
 
   return (
     <NeighborProvider neighborId={neighborId}>

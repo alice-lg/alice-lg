@@ -1,10 +1,6 @@
 
-import { useLocation }
-  from 'react-router-dom';
-
 import { useRef
        , useMemo
-       , useEffect
        }
   from 'react';
 
@@ -12,6 +8,9 @@ import { useQuery }
   from 'app/context/query';
 import { useNeighbors }
   from 'app/context/neighbors';
+
+import { useScrollToAnchor }
+  from 'app/components/navigation/hash';
 
 import NeighborsTable
   from 'app/components/neighbors/NeighborsTable';
@@ -67,7 +66,6 @@ const filterNeighbors = (protocols, filter) => {
 
 
 const Neighbors = () => {
-  const { hash }  = useLocation();
   const [ query ] = useQuery();
   const filter    = query.q;
 
@@ -103,20 +101,10 @@ const Neighbors = () => {
   }, [filtered]);
 
   // Scroll to anchor
-  useEffect(() => {
-    if (hash === "#sessions-down") {
-      if (!refDown.current) {
-        return;
-      }
-      refDown.current.scrollIntoView();
-    }
-    if (hash === "#sessions-up") {
-      if (!refUp.current) {
-        return;
-      }
-      refUp.current.scrollIntoView();
-    }
-  }, [hash, refDown, refUp, filtered]);
+  useScrollToAnchor({
+    "#sessions-down": refDown,
+    "#sessions-up": refUp,
+  })
 
   if (isLoading) {
     return <LoadingIndicator show={true} />;
