@@ -1,23 +1,18 @@
 
 import { useConfig }
   from 'app/context/config';
+import { useResolvedCommunities }
+  from 'app/context/bgp';
 
-import { resolveCommunities }
-  from 'app/components/routes/communities';
 
 const FilterReason = ({route}) => {
-  const config = useConfig();
-  const rejectReasons = config.reject_reasons;
+  const { reject_reasons } = useConfig();
+  const communities = route?.bgp?.large_communities;
+  const reasons = useResolvedCommunities(reject_reasons, communities);
 
-  const routeCommunities = route?.bgp?.large_communities;
-
-  if (!rejectReasons || !routeCommunities) {
+  if (!reasons) {
       return null;
   }
-
-  const reasons = resolveCommunities(
-    rejectReasons, routeCommunities,
-  );
 
   const reasonsView = reasons.map(([community, reason], key) => {
     const cls = `reject-reason reject-reason-${community[1]}-${community[2]}`;

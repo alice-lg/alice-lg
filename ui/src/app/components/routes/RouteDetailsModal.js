@@ -11,12 +11,9 @@ import { Modal
        , ModalFooter
        }
   from 'app/components/modal/Modal';
+import BgpCommunitiyLabel
+  from 'app/components/routes/bgp/BgpCommunityLabel';
 
-
-const BgpCommunitiyLabel = ({community}) => { 
-  console.log("BGP COM LABEL:", community);
-  return (<>Label</>);
-}
 
 const RouteDetailsModal = () => {
   const [ route, setRoute ] = useRouteDetails();

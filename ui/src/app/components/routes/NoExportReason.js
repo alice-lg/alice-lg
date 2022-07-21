@@ -1,23 +1,18 @@
 
 import { useConfig }
   from 'app/context/config';
-
-import { resolveCommunities }
-  from 'app/components/routes/communities'
+import { useResolvedCommunities }
+  from 'app/context/bgp'
 
 
 const NoExportReason = ({route}) => {
-  const config = useConfig();
-  const noexportReasons = config.noexport_reasons;
-  const routeCommunities = route?.bgp?.large_communities;
+  const { noexport_reasons } = useConfig();
+  const communities = route?.bgp?.large_communities;
+  const reasons = useResolvedCommunities(noexport_reasons, communities);
 
-  if (!noexportReasons || !routeCommunities) {
-      return null;
+  if (!reasons) {
+    return null;
   }
-
-  const reasons = resolveCommunities(
-    noexportReasons, routeCommunities 
-  );
 
   const reasonsView = reasons.map(([community, reason], key) => {
     const cls = `noexport-reason noexport-reason-${community[1]}-${community[2]}`;

@@ -4,21 +4,13 @@ import { FontAwesomeIcon }
 import { faCircleExclamation }
   from '@fortawesome/free-solid-svg-icons';
 
-import { useConfig }
-  from 'app/context/config';
-
-import { isRejectCandidate }
-  from 'app/components/routes/communities'; 
+import { useRejectCandidate }
+  from 'app/context/bgp'; 
 
 
 const RejectCandidateIndicator = ({route}) => {
-  const { reject_candidates } = useConfig();
-  const candidateCommunities = reject_candidates.communities;
-
-  if (candidateCommunities) {
-    return null;
-  }
-  if (!isRejectCandidate(candidateCommunities, route)) {
+  const isRejectCandidate = useRejectCandidate(route);
+  if (!isRejectCandidate) {
     return null;
   }
 

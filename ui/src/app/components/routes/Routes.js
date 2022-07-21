@@ -44,6 +44,7 @@ import LoadingIndicator
 import WaitingText
   from 'app/components/spinners/WaitingText';
 
+
 const RoutesHeader = ({type}) => {
   const rtype = {
     [ROUTES_RECEIVED]: "accepted",
@@ -53,6 +54,7 @@ const RoutesHeader = ({type}) => {
   const cls = `card-header card-header-routes ${type}`;
   return (<p className={cls}>Routes {rtype}</p>);
 };
+
 
 const RoutesLoading = () => {
   return (
@@ -171,8 +173,6 @@ const RoutesNotExportedRequest = () => {
     </div>
   );
 }
-
-
 
 /**
  * Show all routes

@@ -210,6 +210,3 @@ export const RouteDetailsProvider = ({children}) => {
   );
 }
 
-
-
-
