@@ -65,6 +65,9 @@ const filtersEqual = (a, b) => {
  * Deep copy of filters
  */
 const cloneFilters = (filters) => {
+  return filters;
+
+  /*
   const nextFilters = [
     {...filters[FILTER_GROUP_SOURCES]},
     {...filters[FILTER_GROUP_ASNS]},
@@ -83,6 +86,7 @@ const cloneFilters = (filters) => {
   nextFilters[FILTER_GROUP_LARGE_COMMUNITIES].filters =
     [...nextFilters[FILTER_GROUP_LARGE_COMMUNITIES].filters];
   return nextFilters;
+  */
 }
 
 
@@ -115,31 +119,6 @@ const cmpFilterCommunity = (set, filter) => {
 }
 
 /*
- * Merge filters
- */
-const _mergeFilters = (a, b) => {
-  let groups = initializeFilterState();
-  let setCmp = [];
-  setCmp[FILTER_GROUP_SOURCES] = cmpFilterValue;
-  setCmp[FILTER_GROUP_ASNS] = cmpFilterValue;
-  setCmp[FILTER_GROUP_COMMUNITIES] = cmpFilterCommunity;
-  setCmp[FILTER_GROUP_EXT_COMMUNITIES] = cmpFilterCommunity;
-  setCmp[FILTER_GROUP_LARGE_COMMUNITIES] = cmpFilterCommunity;
-  for (const i in groups) {
-    groups[i].filters = mergeFilterSet(setCmp[i], a[i].filters, b[i].filters);
-  }
-  return groups;
-}
-
-const mergeFilters = (a, ...other) => {
-  let result = cloneFilters(a);
-  for (const filters of other) {
-    result = _mergeFilters(result, cloneFilters(filters));
-  }
-  return result;
-}
-
-/*
  * Merge list of filters
  */
 const mergeFilterSet = (inSet, a, b) => {
@@ -152,6 +131,43 @@ const mergeFilterSet = (inSet, a, b) => {
       continue;
     }
     result.push(f);
+  }
+  return result;
+}
+
+
+/*
+ * Merge filters
+ */
+const _mergeFilters = (a, b) => {
+  let groups = initializeFilterState();
+  if (!a || !b) {
+    return groups;
+  }
+  let setCmp = [];
+  setCmp[FILTER_GROUP_SOURCES] = cmpFilterValue;
+  setCmp[FILTER_GROUP_ASNS] = cmpFilterValue;
+  setCmp[FILTER_GROUP_COMMUNITIES] = cmpFilterCommunity;
+  setCmp[FILTER_GROUP_EXT_COMMUNITIES] = cmpFilterCommunity;
+  setCmp[FILTER_GROUP_LARGE_COMMUNITIES] = cmpFilterCommunity;
+  for (const i in groups) {
+    if (a[i]?.filters && b[i]?.filters) {
+      groups[i].filters = mergeFilterSet(setCmp[i], a[i].filters, b[i].filters);
+    }
+    else if(a[i]?.filters) {
+      groups[i].filters = a[i].filters;
+    }
+    else if(b[i]?.filters) {
+      groups[i].filters = b[i].filters;
+    }
+  }
+  return groups;
+}
+
+const mergeFilters = (a, ...other) => {
+  let result = a;
+  for (const filters of other) {
+    result = _mergeFilters(result, filters);
   }
   return result;
 }
@@ -280,4 +296,59 @@ const decodeFiltersApplied = (params) => {
 
   return groups;
 }
+
+
+/*
+ * FiltersContext
+ */
+const initialContext = {
+  applied: [],
+  available: [],
+};
+
+const FiltersContext = createContext(initialContext);
+
+export const useFilters = () => useContext(FiltersContext);
+
+const useRoutesFilters = (routes) => {
+  return useMemo(() => {
+    if (!routes.requested || routes.loading) {
+      return { applied: [], available: [] };
+    }
+    return {
+      applied: routes.filtersApplied,
+      available: routes.filtersAvailable,
+    };
+  }, [routes]);
+}
+
+/**
+ * RoutesFiltersProvider merged the filters from the
+ * received, filtered and noexport responses
+ */
+export const RoutesFiltersProvider = ({children}) => {
+  const received = useRoutesFilters(useRoutesReceived());
+  const filtered = useRoutesFilters(useRoutesFiltered());
+  const noexport = useRoutesFilters(useRoutesNotExported());
+
+  const filters = useMemo(() => {
+    const applied = mergeFilters(
+      received.applied,
+      filtered.applied,
+      noexport.applied,
+    );
+    const available = mergeFilters(
+      received.available,
+      filtered.available,
+      noexport.available,
+    );
+    return { applied, available };
+  }, [received, filtered, noexport]);
+
+  return (
+    <FiltersContext.Provider value={filters}>
+      {children}
+    </FiltersContext.Provider>
+  );
+};
 

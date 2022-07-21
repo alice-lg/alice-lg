@@ -34,6 +34,10 @@ import { RoutesReceivedProvider
        , useRoutesLoading
        }
   from 'app/context/routes';
+import { RoutesFiltersProvider
+       , useFilters
+       }
+  from 'app/context/filters';
 
 import PageHeader
   from 'app/components/page/Header';
@@ -94,6 +98,8 @@ const RoutesPageSearch = () => {
 const RoutesPageContent = () => {
   const localRelatedPeers = useLocalRelatedPeers();
   const isLoading = useRoutesLoading();
+  const filters = useFilters();
+  console.log(filters);
 
   let pageClass = "routeservers-page";
   if (localRelatedPeers.length > 1) {
@@ -126,10 +132,6 @@ const RoutesPageContent = () => {
                          linkProps={this.props.linkProps}
                          filtersApplied={this.props.filtersApplied}
                          filtersAvailable={this.props.filtersAvailable} />
-          <RelatedPeersCard
-            neighbors={this.props.allRelatedPeers}
-            rsId={this.props.params.routeserverId} 
-            protocolId={this.props.params.protocolId} />
             */ }
         </div>
       </div>
@@ -173,7 +175,9 @@ const RoutesPage = () => {
       query={query.q}
       page={query.pr}>{/* innermost used for api status */}
 
-      <RoutesPageContent />
+      <RoutesFiltersProvider>
+        <RoutesPageContent />
+      </RoutesFiltersProvider>
 
     </RoutesReceivedProvider>
     </RoutesFilteredProvider>

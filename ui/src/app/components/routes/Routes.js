@@ -62,6 +62,7 @@ const RoutesLoading = () => {
   );
 };
 
+
 const createRoutesSet = (type, useRoutes) => () => {
   const results = useRoutes();
   const pageKey = {
