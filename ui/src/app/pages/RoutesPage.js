@@ -31,6 +31,7 @@ import { RoutesReceivedProvider
        , RoutesFilteredProvider
        , RoutesNotExportedProvider
        , RouteDetailsProvider
+       , useRoutesLoading
        }
   from 'app/context/routes';
 
@@ -46,6 +47,8 @@ import Routes
   from 'app/components/routes/Routes';
 import SearchQueryInput
   from 'app/components/search/SearchQueryInput';
+import WaitingCard
+  from 'app/components/spinners/WaitingCard';
 
 
 const FILTERABLE_COLUMNS = [
@@ -90,6 +93,7 @@ const RoutesPageSearch = () => {
 
 const RoutesPageContent = () => {
   const localRelatedPeers = useLocalRelatedPeers();
+  const isLoading = useRoutesLoading();
 
   let pageClass = "routeservers-page";
   if (localRelatedPeers.length > 1) {
@@ -114,6 +118,8 @@ const RoutesPageContent = () => {
           <div className="card">
             <Status />
           </div>
+          { isLoading && <WaitingCard />}
+
           <RelatedPeersCard />
           { /* 
           <FiltersEditor makeLinkProps={makeLinkProps}

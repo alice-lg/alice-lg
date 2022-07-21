@@ -35,7 +35,6 @@ export const useRoutesReceived    = () => useContext(RoutesReceivedContext);
 export const useRoutesFiltered    = () => useContext(RoutesFilteredContext);
 export const useRoutesNotExported = () => useContext(RoutesNotExportedContext);
 
-
 // Providers
 
 /**
@@ -191,6 +190,20 @@ export const RoutesNotExportedProvider = createRoutesProvider(
   RoutesNotExportedContext,
   useFetchNotExportedState,
 );
+
+/**
+ * useRoutesLoading checks if any routes are loading
+ */
+export const useRoutesLoading = () => {
+  const received = useRoutesReceived();
+  const filtered = useRoutesFiltered();
+  const noexport = useRoutesNotExported();
+
+  return (received.requested && received.loading) ||
+    (filtered.requested && filtered.loading) ||
+    (noexport.requested && noexport.loading);
+}
+
 
 /**
  * RouteDetails Context

@@ -41,8 +41,6 @@ import PaginationInfo
   from 'app/components/pagination/PaginationInfo';
 import LoadingIndicator
   from 'app/components/spinners/LoadingIndicator';
-import WaitingText
-  from 'app/components/spinners/WaitingText';
 
 
 const RoutesHeader = ({type}) => {
@@ -60,7 +58,6 @@ const RoutesLoading = () => {
   return (
     <div className={`card routes-view`}>
       <LoadingIndicator />
-      <WaitingText />
     </div>
   );
 };
