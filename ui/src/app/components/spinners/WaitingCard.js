@@ -5,7 +5,7 @@ import { useState
   from 'react';
 
 
-const WaitingCard = ({resource = "routes"}) => {
+const WaitingText = ({resource}) => {
   const [time, setTime] = useState(0);
 
   useEffect(() => {
@@ -39,6 +39,16 @@ const WaitingCard = ({resource = "routes"}) => {
         <p>&gt; I guess the cake was a lie.</p>}
     </div>
   );
+}
+
+const WaitingCard = ({
+  isLoading,
+  resource = "routes",
+}) => {
+  if (!isLoading) {
+    return null;
+  }
+  return <WaitingText />
 }
 
 export default WaitingCard;

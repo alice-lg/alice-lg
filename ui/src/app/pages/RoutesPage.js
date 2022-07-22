@@ -35,7 +35,7 @@ import { RoutesReceivedProvider
        }
   from 'app/context/routes';
 import { RoutesFiltersProvider
-       , useFilters
+       , useFiltersQuery
        }
   from 'app/context/filters';
 
@@ -53,6 +53,8 @@ import SearchQueryInput
   from 'app/components/search/SearchQueryInput';
 import WaitingCard
   from 'app/components/spinners/WaitingCard';
+import FiltersEditor
+  from 'app/components/filters/FiltersEditor';
 
 
 const FILTERABLE_COLUMNS = [
@@ -98,8 +100,6 @@ const RoutesPageSearch = () => {
 const RoutesPageContent = () => {
   const localRelatedPeers = useLocalRelatedPeers();
   const isLoading = useRoutesLoading();
-  const filters = useFilters();
-  console.log(filters);
 
   let pageClass = "routeservers-page";
   if (localRelatedPeers.length > 1) {
@@ -124,20 +124,16 @@ const RoutesPageContent = () => {
           <div className="card">
             <Status />
           </div>
-          { isLoading && <WaitingCard />}
-
+          <WaitingCard isLoading={isLoading} />
           <RelatedPeersCard />
-          { /* 
-          <FiltersEditor makeLinkProps={makeLinkProps}
-                         linkProps={this.props.linkProps}
-                         filtersApplied={this.props.filtersApplied}
-                         filtersAvailable={this.props.filtersAvailable} />
-            */ }
+          <FiltersEditor />
         </div>
       </div>
     </div>
   );
 }
+
+
 
 /**
  * RoutesPage renders the page with all routes for a neighbor
@@ -151,8 +147,11 @@ const RoutesPage = () => {
     ne: 0,
     q: "",
   });
+  const [filters] = useFiltersQuery();
+
   const notExportedEnabled = parseInt(query.ne, 10) === 1;
 
+  // Setup context and render content
   return (
     <NeighborProvider neighborId={neighborId}>
     <RelatedNeighborsProvider>
@@ -163,16 +162,19 @@ const RoutesPage = () => {
       neighborId={neighborId}
       page={query.pn}
       query={query.q}
+      filters={filters}
       enabled={notExportedEnabled}>
     <RoutesFilteredProvider
       routeServerId={routeServerId}
       neighborId={neighborId}
       query={query.q}
+      filters={filters}
       page={query.pf}>
     <RoutesReceivedProvider 
       routeServerId={routeServerId}
       neighborId={neighborId}
       query={query.q}
+      filters={filters}
       page={query.pr}>{/* innermost used for api status */}
 
       <RoutesFiltersProvider>

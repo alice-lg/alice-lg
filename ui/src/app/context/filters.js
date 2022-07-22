@@ -2,6 +2,7 @@
 import { useMemo
        , useContext
        , createContext
+       , useCallback
        }
   from 'react';
 
@@ -10,6 +11,8 @@ import { useRoutesReceived
        , useRoutesNotExported
        }
   from 'app/context/routes';
+import { useQuery }
+  from 'app/context/query';
 
 
 /**
@@ -21,11 +24,19 @@ const FILTER_KEY_COMMUNITIES = "communities";
 const FILTER_KEY_EXT_COMMUNITIES = "ext_communities";
 const FILTER_KEY_LARGE_COMMUNITIES = "large_communities";
 
-const FILTER_GROUP_SOURCES = 0;
-const FILTER_GROUP_ASNS = 1;
-const FILTER_GROUP_COMMUNITIES = 2;
-const FILTER_GROUP_EXT_COMMUNITIES = 3;
-const FILTER_GROUP_LARGE_COMMUNITIES = 4;
+export const FILTER_GROUP_SOURCES = 0;
+export const FILTER_GROUP_ASNS = 1;
+export const FILTER_GROUP_COMMUNITIES = 2;
+export const FILTER_GROUP_EXT_COMMUNITIES = 3;
+export const FILTER_GROUP_LARGE_COMMUNITIES = 4;
+
+const FILTER_GROUP_KEYS = {
+  [FILTER_GROUP_SOURCES]: FILTER_KEY_SOURCES,
+  [FILTER_GROUP_ASNS]: FILTER_KEY_ASNS,
+  [FILTER_GROUP_COMMUNITIES]: FILTER_KEY_COMMUNITIES,
+  [FILTER_GROUP_EXT_COMMUNITIES]: FILTER_KEY_EXT_COMMUNITIES,
+  [FILTER_GROUP_LARGE_COMMUNITIES]: FILTER_KEY_LARGE_COMMUNITIES,
+};
 
 
 /**
@@ -40,55 +51,23 @@ export const initializeFilterState = () => ([
 ]);
 
 
-/**
- * Check filters for equality
- */
-const filtersEqual = (a, b) => {
-  return (a[FILTER_GROUP_SOURCES].filters.length ===
-          b[FILTER_GROUP_SOURCES].filters.length) &&
 
-         (a[FILTER_GROUP_ASNS].filters.length ===
-          b[FILTER_GROUP_ASNS].filters.length) &&
+// Compare values
+const cmpValue = (a, b) => a === b;
 
-         (a[FILTER_GROUP_COMMUNITIES].filters.length ===
-          b[FILTER_GROUP_COMMUNITIES].filters.length) &&
+// Compare list values
+const cmpList = (a, b) => 
+  a.map((v, i) => v === b[i]).reduce(
+    (part, match) => (match && part), true);
 
-         (a[FILTER_GROUP_EXT_COMMUNITIES].filters.length ===
-          b[FILTER_GROUP_EXT_COMMUNITIES].filters.length) &&
 
-         (a[FILTER_GROUP_LARGE_COMMUNITIES].filters.length ===
-          b[FILTER_GROUP_LARGE_COMMUNITIES].filters.length);
+const FILTER_VALUE_CMP = {
+  [FILTER_GROUP_SOURCES]: cmpValue,
+  [FILTER_GROUP_ASNS]: cmpValue,
+  [FILTER_GROUP_COMMUNITIES]: cmpList,
+  [FILTER_GROUP_EXT_COMMUNITIES]: cmpList,
+  [FILTER_GROUP_LARGE_COMMUNITIES]: cmpList,
 }
-
-
-/**
- * Deep copy of filters
- */
-const cloneFilters = (filters) => {
-  return filters;
-
-  /*
-  const nextFilters = [
-    {...filters[FILTER_GROUP_SOURCES]},
-    {...filters[FILTER_GROUP_ASNS]},
-    {...filters[FILTER_GROUP_COMMUNITIES]},
-    {...filters[FILTER_GROUP_EXT_COMMUNITIES]},
-    {...filters[FILTER_GROUP_LARGE_COMMUNITIES]},
-  ];
-  nextFilters[FILTER_GROUP_SOURCES].filters =
-    [...[FILTER_GROUP_SOURCES].filters];
-  nextFilters[FILTER_GROUP_ASNS].filters =
-    [...nextFilters[FILTER_GROUP_ASNS].filters];
-  nextFilters[FILTER_GROUP_COMMUNITIES].filters =
-    [...nextFilters[FILTER_GROUP_COMMUNITIES].filters];
-  nextFilters[FILTER_GROUP_EXT_COMMUNITIES].filters =
-    [...nextFilters[FILTER_GROUP_EXT_COMMUNITIES].filters];
-  nextFilters[FILTER_GROUP_LARGE_COMMUNITIES].filters =
-    [...nextFilters[FILTER_GROUP_LARGE_COMMUNITIES].filters];
-  return nextFilters;
-  */
-}
-
 
 /*
  * Filters set compare
@@ -117,6 +96,8 @@ const cmpFilterCommunity = (set, filter) => {
   }
   return null;
 }
+
+
 
 /*
  * Merge list of filters
@@ -192,121 +173,105 @@ const hasFilters = (groups) => {
 
 
 /*
- * Filter Query Encoding
+ * Filter Query Decoding
  */
-
-const makeFilter = (value) => {
-  return {
-    name: "",
-    value: value,
-    cardinality: 1,
+const decodeStringList = (value) => {
+  if (value === "") {
+    return [];
   }
+  return value.split(",");
 }
 
-const decodeFiltersSources = ({sources}) => {
-  if (!sources) {
-    return []; // No params available
-  }
-  return sources.split(",").map(
-    (sid) => makeFilter(sid));
-}
+const decodeIntList = (value) =>
+  decodeStringList(value).map((v) =>
+    parseInt(v, 10));
 
-const decodeFiltersAsns = ({asns}) => {
-  if (!asns) {
-    return []; // No params available
-  }
-  return asns.split(",").map(
-    (asn) => makeFilter(parseInt(asn, 10)));
-}
-
-const decodeCommunity = (community) => {
-  const parts = community.split(":");
-  return parts.map((p) => parseInt(p, 10));
-}
+const decodeCommunity = (community) =>
+  community.split(":").map((p) =>
+    parseInt(p, 10));
 
 const decodeExtCommunity = (community) =>
   community.split(":");
 
-const decodeFiltersCommunities = ({communities}) => {
-  if (!communities) {
-    return []; // No params available
-  }
-  return communities.split(",").map(
-    (c) => makeFilter(decodeCommunity(c)));
-}
+const decodeCommunities = (value) =>
+  decodeStringList(value).map((v) =>
+    decodeCommunity(v));
 
-const decodeFiltersExtCommunities = ({ext_communities}) => {
-  if (!ext_communities) {
-    return []; // No params available
-  }
-  const communities = ext_communities.split(",");
-  return communities.map(
-    (c) => makeFilter(decodeExtCommunity(c)));
-}
+const decodeExtCommunities = (value) =>
+  decodeStringList(value).map((v) =>
+    decodeExtCommunity(v));
 
-const decodeFiltersLargeCommunities = ({large_communities}) => {
-  if (!large_communities) {
-    return []; // No params available
-  }
-  const communities = large_communities.split(",");
-  return communities.map(
-    (c) => makeFilter(decodeCommunity(c)));
-}
 
-const encodeGroupInt = (group) => {
-  if (!group.filters.length) {
-    return "";
-  }
-  const values = group.filters.map((f) => f.value).join(",");
-  return `&${group.key}=${values}`;
-}
-
-const encodeGroupCommunities = (group) => {
-  if (!group.filters.length) {
-    return "";
-  }
-  const values = group.filters.map((f) => f.value.join(":")).join(",");
-  return `&${group.key}=${values}`;
-}
-
-/**
- * Encode filters as URL params
- */
-const filtersUrlEncode = (filters) => {
-  let encoded = "";
-  encoded += encodeGroupInt(filters[FILTER_GROUP_SOURCES]);
-  encoded += encodeGroupInt(filters[FILTER_GROUP_ASNS]);
-  encoded += encodeGroupCommunities(filters[FILTER_GROUP_COMMUNITIES]);
-  encoded += encodeGroupCommunities(filters[FILTER_GROUP_EXT_COMMUNITIES]);
-  encoded += encodeGroupCommunities(filters[FILTER_GROUP_LARGE_COMMUNITIES]);
-  return encoded;
+const decodeQuery = (query) => {
+  const sources = decodeStringList(query[FILTER_KEY_SOURCES]);
+  const asns = decodeIntList(query[FILTER_KEY_ASNS]);
+  const communities = decodeCommunities(query[FILTER_KEY_COMMUNITIES]);
+  const extCommunities = decodeExtCommunities(query[FILTER_KEY_EXT_COMMUNITIES]);
+  const largeCommunities = decodeCommunities(query[FILTER_KEY_LARGE_COMMUNITIES]);
+  let filters = {};
+  filters[FILTER_KEY_SOURCES] = sources;
+  filters[FILTER_KEY_ASNS] = asns;
+  filters[FILTER_KEY_COMMUNITIES] = communities;
+  filters[FILTER_KEY_EXT_COMMUNITIES] = extCommunities;
+  filters[FILTER_KEY_LARGE_COMMUNITIES] = largeCommunities;
+  return filters;
 }
 
 /*
- * Decode filters applied from params
+ * Filter Query Encoding
  */
-const decodeFiltersApplied = (params) => {
-  const groups = initializeFilterState();
+const encodeList = (value) =>
+  value.join(",");
 
-  groups[FILTER_GROUP_SOURCES].filters =           decodeFiltersSources(params);
-  groups[FILTER_GROUP_ASNS].filters =              decodeFiltersAsns(params);
-  groups[FILTER_GROUP_COMMUNITIES].filters =       decodeFiltersCommunities(params);
-  groups[FILTER_GROUP_EXT_COMMUNITIES].filters =   decodeFiltersExtCommunities(params);
-  groups[FILTER_GROUP_LARGE_COMMUNITIES].filters = decodeFiltersLargeCommunities(params);
+const encodeCommunity = (community) =>
+  community.join(":");
 
-  return groups;
+const encodeCommunities = (communities) =>
+  encodeList(communities.map((c) => encodeCommunity(c)));
+
+export const encodeFilters = (filters) => {
+  let query = {};
+  const sources = filters[FILTER_KEY_SOURCES];
+  const asns = filters[FILTER_KEY_ASNS];
+  const communities = filters[FILTER_KEY_COMMUNITIES];
+  const extCommunities = filters[FILTER_KEY_EXT_COMMUNITIES];
+  const largeCommunities = filters[FILTER_KEY_LARGE_COMMUNITIES];
+  query[FILTER_KEY_SOURCES] = encodeList(sources);
+  query[FILTER_KEY_ASNS] = encodeList(asns);
+  query[FILTER_KEY_COMMUNITIES] = encodeCommunities(communities);
+  query[FILTER_KEY_EXT_COMMUNITIES] = encodeCommunities(extCommunities);
+  query[FILTER_KEY_LARGE_COMMUNITIES] = encodeCommunities(largeCommunities);
+  return query;
 }
+
+
+/**
+ * FiltersQuery Context
+ */
+export const useFiltersQuery = () => {
+  const [, setQuery] = useQuery();
+  const [query] = useQuery({
+    [FILTER_KEY_SOURCES]: "",
+    [FILTER_KEY_ASNS]: "",
+    [FILTER_KEY_COMMUNITIES]: "",
+    [FILTER_KEY_EXT_COMMUNITIES]: "",
+    [FILTER_KEY_LARGE_COMMUNITIES]: "",
+  });
+
+  const filterQuery = useMemo(() => decodeQuery(query), [query]);
+  const setFilterQuery = useCallback((key, value) => {
+    const next = {...filterQuery, [key]: value};
+    setQuery(encodeFilters(next));
+  }, [filterQuery, setQuery]);
+
+  return [filterQuery, setFilterQuery];
+};
 
 
 /*
  * FiltersContext
  */
-const initialContext = {
-  applied: [],
-  available: [],
-};
-
-const FiltersContext = createContext(initialContext);
+const FiltersContext = createContext();
 
 export const useFilters = () => useContext(FiltersContext);
 
@@ -322,6 +287,49 @@ const useRoutesFilters = (routes) => {
   }, [routes]);
 }
 
+export const useTotalFilters = () => {
+  const {filters} = useFilters();
+  const {applied, available} = filters;
+  return useMemo(() => 
+    applied.reduce(
+      (total, group) => total + group.filters.length,
+      0,
+    ) + available.reduce(
+      (total, group) => total + group.filters.length,
+      0
+    ), [applied, available]);
+}
+
+
+const createGroupFilters = (group) => () => {
+  const {filters, applyFilter, removeFilter} = useFilters();
+  const applyGroupFilter = useCallback((filters) => {
+    applyFilter(group, filters);
+  }, [applyFilter]);
+  const removeGroupFilter = useCallback((filters) => {
+    removeFilter(group, filters);
+  }, [removeFilter]);
+  return useMemo(() => ({
+    filters: {
+      applied:   filters.applied[group].filters,
+      available: filters.available[group].filters,
+    },
+    applyFilter: applyGroupFilter,
+    removeFilter: removeGroupFilter,
+  }), [filters, applyGroupFilter, removeGroupFilter]);
+}
+
+export const useSourceFilters = createGroupFilters(
+  FILTER_GROUP_SOURCES);
+export const useAsnFilters = createGroupFilters(
+  FILTER_GROUP_ASNS);
+export const useCommunitiesFilters = createGroupFilters(
+  FILTER_GROUP_COMMUNITIES);
+export const useExtCommunitiesFilters = createGroupFilters(
+  FILTER_GROUP_EXT_COMMUNITIES);
+export const useLargeCommunitiesFilters = createGroupFilters(
+  FILTER_GROUP_LARGE_COMMUNITIES);
+
 /**
  * RoutesFiltersProvider merged the filters from the
  * received, filtered and noexport responses
@@ -330,6 +338,21 @@ export const RoutesFiltersProvider = ({children}) => {
   const received = useRoutesFilters(useRoutesReceived());
   const filtered = useRoutesFilters(useRoutesFiltered());
   const noexport = useRoutesFilters(useRoutesNotExported());
+
+  const [queryFilters, setFilterQuery] = useFiltersQuery();
+
+  const applyFilter = useCallback((group, value) => {
+    const key = FILTER_GROUP_KEYS[group];
+    const values = [...queryFilters[key], value];
+    setFilterQuery(key, values);
+  }, [queryFilters, setFilterQuery]);
+
+  const removeFilter = useCallback((group, value) => {
+    const cmp = FILTER_VALUE_CMP[group];
+    const key = FILTER_GROUP_KEYS[group];
+    const values = queryFilters[key].filter((f) => !cmp(f, value));
+    setFilterQuery(key, values);
+  }, [queryFilters, setFilterQuery]);
 
   const filters = useMemo(() => {
     const applied = mergeFilters(
@@ -345,8 +368,9 @@ export const RoutesFiltersProvider = ({children}) => {
     return { applied, available };
   }, [received, filtered, noexport]);
 
+  const context = {filters, applyFilter, removeFilter};
   return (
-    <FiltersContext.Provider value={filters}>
+    <FiltersContext.Provider value={context}>
       {children}
     </FiltersContext.Provider>
   );

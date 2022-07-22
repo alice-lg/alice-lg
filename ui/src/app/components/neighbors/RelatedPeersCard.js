@@ -16,7 +16,6 @@ const RoutesStats = ({peer}) => {
   if (!isUpState(peer.state)) {
     return null; // Nothing to render 
   }
-
   return (
     <div className="related-peers-routes-stats">
       <span className="atooltip routes-received">
@@ -59,6 +58,10 @@ const PeerLink = ({to, children}) => {
     <a href={peerUrl}>{children}</a>
   );
 }
+
+const normalizePeerState = (state) =>
+  isUpState(state) ? 'up' : state;
+
 
 /*
  * Render a card with related peers for the sidebar.
@@ -112,9 +115,10 @@ const RelatedPeersCard = () => {
                     <RoutesStats peer={peer} />
                   </td>
                   <td className="uptime">
-                    {peer.state} for <RelativeTimestamp 
-                      value={peer.uptime}
-                      suffix={true} />
+                    {normalizePeerState(peer.state)} {peer.uptime > 0 && <>
+                        for <RelativeTimestamp value={peer.uptime} suffix={true} />
+                      </>
+                    }
                   </td>
                 </tr>
               ))}

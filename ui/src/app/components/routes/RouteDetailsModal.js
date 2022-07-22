@@ -12,7 +12,7 @@ import { Modal
        }
   from 'app/components/modal/Modal';
 import BgpCommunitiyLabel
-  from 'app/components/routes/bgp/BgpCommunityLabel';
+  from 'app/components/routes/BgpCommunityLabel';
 
 
 const RouteDetailsModal = () => {

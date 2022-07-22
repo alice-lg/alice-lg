@@ -9,7 +9,10 @@ import { useState
        }
   from 'react';
 
-
+import { encodeQuery }
+  from 'app/context/query';
+import { encodeFilters }
+  from 'app/context/filters';
 import { useErrorHandler }
   from 'app/context/errors';
 import { ApiStatusProvider }
@@ -41,11 +44,33 @@ export const useRoutesNotExported = () => useContext(RoutesNotExportedContext);
  * Encode routes query url params for a given 
  * request type (filtered, received, not-exported)
  */
-const routesQueryUrl = (type) => ({routeServerId, neighborId}) => (params) => {
-  const q = new URLSearchParams(params);
-  return `/api/v1/routeservers/${routeServerId}` +
-    `/neighbors/${neighborId}/routes/${type}?${q.toString()}`;
-}
+
+const useRoutesQueryUrl = ({
+  type,
+  neighborId,
+  routeServerId,
+  query,
+  filters,
+  page,
+}) => useMemo(() => {
+  const qry = encodeQuery({
+    ...encodeFilters(filters),
+    q: query,
+    page: page,
+  }).toString();
+  const url = `/api/v1/routeservers/${routeServerId}` +
+    `/neighbors/${neighborId}/routes/${type}` +
+    `?${qry}`;
+  return url;
+}, [
+  type,
+  query,
+  filters,
+  page,
+  neighborId,
+  routeServerId,
+]);
+
 
 
 // State: routes, isLoading
@@ -100,25 +125,26 @@ const createFetchRoutesState = (type) => ({
   neighborId,
   page,
   query,
+  filters,
   enabled = true,
 }) => {
   const [state, setState] = useState(initialState);
   const handleError = useErrorHandler();
-
-  const url = useMemo(() =>
-    routesQueryUrl(type)({routeServerId, neighborId})({
-      page: page,
-      q: query,
-    }),
-    [query, page, neighborId, routeServerId]);
+  const routesQueryUrl = useRoutesQueryUrl({
+    type,
+    neighborId,
+    routeServerId,
+    query,
+    filters,
+    page,
+  });
 
   useEffect(() => {
     if (!enabled) {
       return;
     };
-
     setState((s) => ({...s, requested: true, loading: true}));
-    axios.get(url).then(({data}) => {
+    axios.get(routesQueryUrl).then(({data}) => {
         setState({
           ...routesState(type)(data), 
           loading: false,
@@ -127,7 +153,7 @@ const createFetchRoutesState = (type) => ({
       },
       (error) => handleError(error)
     );
-  }, [url, handleError, enabled]);
+  }, [routesQueryUrl, handleError, enabled]);
 
   return state;
 }
@@ -144,8 +170,9 @@ const createRoutesProvider = (Context, useFetchRoutesState) => ({
   routeServerId,
   neighborId,
   children,
+  filters,
+  query,
   page = 0,
-  query = "",
   enabled = true,
 }) => {
   const state = useFetchRoutesState({
@@ -153,6 +180,7 @@ const createRoutesProvider = (Context, useFetchRoutesState) => ({
     neighborId,
     page,
     query,
+    filters,
     enabled,
   });
   return (

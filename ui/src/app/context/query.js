@@ -23,6 +23,17 @@ const paramsToQuery = (params) => {
 }
 
 
+export const encodeQuery = (params) => {
+  let filtered = {};
+  for (const k in params) {
+    if (params[k] === "") {
+      continue;
+    }
+    filtered[k] = params[k];
+  }
+  return new URLSearchParams(filtered);
+}
+
 /**
  * useQuery is an extension to useLocation to handle
  * query parameters. Internally this uses URLSearchParams
@@ -33,12 +44,11 @@ const paramsToQuery = (params) => {
 export const useQuery = (defaults={}) => {
   const [params, setParams] = useSearchParams(defaults);
   const query = useMemo(() => paramsToQuery(params), [params]);
-
   const setQuery = useCallback((q) => {
-    // Only update if query differs
-    const next = new URLSearchParams({...query, ...q});
-    if (next.toString() !== params.toString()) {
-      setParams(next);
+    let next = {...query, ...q};
+    const nextParams = encodeQuery(next);
+    if (nextParams.toString() !== params.toString()) {
+      setParams(nextParams);
     }
   }, [params, query, setParams]);
   return [query, setQuery];

@@ -1,5 +1,7 @@
 
-import { useMemo }
+import { useMemo
+       , useCallback
+       }
   from 'react';
 
 import { useConfig }
@@ -90,13 +92,22 @@ export const useRejectCandidate = (route) => {
   return (resolved.length > 0);
 };
 
-
-export const useReadableCommunity = (community) => {
-  const { bgp_communities } = useConfig();
-  return useMemo(() => {
-    const label = resolveCommunity(bgp_communities, community);
-    return expandVars(label, community);
-  }, [bgp_communities, community]);
+const makeReadableCommunity = (communities, community) => {
+  const label = resolveCommunity(communities, community);
+  return expandVars(label, community);
 }
 
+export const useReadableCommunities = () => {
+  const { bgp_communities } = useConfig();
+  return useCallback((community) => makeReadableCommunity(
+    bgp_communities,
+    community,
+  ), [bgp_communities]);
+}
 
+export const useReadableCommunity = (community) => {
+  const getLabel = useReadableCommunities();
+  return useMemo(() => getLabel(community), [
+    community, getLabel,
+  ]);
+}
