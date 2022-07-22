@@ -1,5 +1,7 @@
 
-import { useCallback }
+import { useCallback
+       , forwardRef
+       }
   from 'react'
 
 import { useQuery }
@@ -11,24 +13,32 @@ import SearchInput
 /**
  * SearchQueryInput is a SearchInput, updating the query.
  */
-const SearchQueryInput = ({
+const SearchQueryInput = forwardRef(({
   queryKey = "q",
   queryDefault = "",
   debounce=300,
   ...props
-}) => {
-  const [query, setQuery] = useQuery({[queryKey]: queryDefault});
+}, ref) => {
+  const [query, setQuery] = useQuery({
+    [queryKey]: queryDefault,
+  });
   const updateQuery = useCallback(
-    (v) => setQuery({[queryKey]: v}),
+    (v) => setQuery({
+      [queryKey]: v,
+      "pr": "",
+      "pf": "",
+      "pn": "",
+    }),
     [setQuery, queryKey]);
   return (
     <SearchInput
       value={query[queryKey]}
       debounce={300}
       onChange={updateQuery}
+      ref={ref}
       {...props}
     />
   );
-}
+});
 
 export default SearchQueryInput;

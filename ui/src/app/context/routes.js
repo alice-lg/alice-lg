@@ -30,9 +30,9 @@ const ROUTES_PROPERTIES = {
 };
 
 // Contexts
-const RoutesReceivedContext    = createContext();
-const RoutesFilteredContext    = createContext();
-const RoutesNotExportedContext = createContext();
+export const RoutesReceivedContext    = createContext();
+export const RoutesFilteredContext    = createContext();
+export const RoutesNotExportedContext = createContext();
 
 export const useRoutesReceived    = () => useContext(RoutesReceivedContext);
 export const useRoutesFiltered    = () => useContext(RoutesFilteredContext);
@@ -88,19 +88,24 @@ const initialState = {
 /**
  * Decode routes state
  */
-const paginationState = ({pagination}) => ({
+export const paginationState = ({pagination}) => ({
   page: pagination.page,
   pageSize: pagination.page_size,
   totalPages: pagination.total_pages,
   totalResults: pagination.total_results,
 })
 
-const filtersState = ({filters_applied, filters_available}) => ({
+export const filtersState = ({filters_applied, filters_available}) => ({
   filtersApplied: filters_applied,
   filtersAvailable: filters_available,
 });
 
-const apiStatusState = ({api}) => ({apiStatus: api});
+export const apiStatusState = ({api, request_duration_ms}) => ({
+  apiStatus: {
+    ...api,
+    request_duration_ms,
+  }
+});
 
 const routesPayloadState = (type) => (data) => {
   const key = ROUTES_PROPERTIES[type];

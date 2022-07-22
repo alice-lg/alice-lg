@@ -6,6 +6,7 @@ import { faSearch }
 
 import { useEffect
        , useState
+       , forwardRef
        }
   from 'react';
 
@@ -14,7 +15,12 @@ import { useEffect
  * The input is debounced and the onChange handler is called
  * with a delay.
  */
-const SearchInput = ({value, onChange, debounce=0, ...props}) => {
+const SearchInput = forwardRef(({
+  value,
+  onChange,
+  debounce=0,
+  ...props
+}, ref) => {
   const [state, setState] = useState(value);
 
   useEffect(() => {
@@ -35,9 +41,10 @@ const SearchInput = ({value, onChange, debounce=0, ...props}) => {
           type="text" className="form-control"
           value={state}
           onChange={(e) => setState(e.target.value)}
+          ref={ref}
           {...props} />
     </div>
   );
-};
+});
 
 export default SearchInput;

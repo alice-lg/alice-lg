@@ -18,6 +18,8 @@ const EmptyResults = () => {
   const filtered = useRoutesFiltered();
   const notExported = useRoutesNotExported();
 
+  console.log('r', received, 'f', filtered, 'n', notExported);
+
   // Conditions
   const hasContent = received.totalResults > 0 ||
                      filtered.totalResults > 0 ||

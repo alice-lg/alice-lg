@@ -32,6 +32,8 @@ import NeighborsPage
   from 'app/pages/NeighborsPage';
 import RoutesPage
   from 'app/pages/RoutesPage';
+import SearchGlobalPage 
+  from 'app/pages/SearchGlobalPage';
 import NotFoundPage
   from 'app/pages/NotFoundPage';
 
@@ -56,6 +58,10 @@ const Main = () => {
               element={<RoutesPage />} />
 
           </Route>
+        
+          {/* Search */}
+          <Route path="search"
+            element={<SearchGlobalPage />} />
 
           {/* Fallback */}
           <Route path="*" element={<NotFoundPage />} />
