@@ -1,28 +1,71 @@
 package http
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
 	"net/http"
 )
 
+// ErrValidationFailed indicates that a parameter validation
+// failed and the response should be a BadRequest.
+type ErrValidationFailed struct {
+	Param  string `json:"param"`
+	Reason string `json:"reason"`
+}
+
+// Error implements the error interface
+func (err *ErrValidationFailed) Error() string {
+	return err.Reason
+}
+
+// NewErrMissingParam returns a new error idicating
+// a missing query parameter.
+func NewErrMissingParam(key string) *ErrValidationFailed {
+	return &ErrValidationFailed{
+		Param:  key,
+		Reason: fmt.Sprintf("query parameter %s is missing", key),
+	}
+}
+
+// NewErrAmbigousParam returns an ErrValidationFailed,
+// indicating that the parameter was ambigous.
+func NewErrAmbigousParam(key string) *ErrValidationFailed {
+	return &ErrValidationFailed{
+		Param:  key,
+		Reason: fmt.Sprintf("query parameter %s is ambigous", key),
+	}
+}
+
+// NewErrEmptyParam return an ErrValidationFailed if the
+// provided paramter value is empty.
+func NewErrEmptyParam(key string) *ErrValidationFailed {
+	return &ErrValidationFailed{
+		Param:  key,
+		Reason: fmt.Sprintf("query parameter %s is empty", key),
+	}
+}
+
 var (
 	// ErrQueryTooShort will be returned when the query
 	// is less than 2 characters.
-	ErrQueryTooShort = errors.New("query too short")
+	ErrQueryTooShort = &ErrValidationFailed{
+		"q", "the query is too short",
+	}
 
 	// ErrQueryIncomplete will be returned when the
 	// prefix query lacks a : or .
-	ErrQueryIncomplete = errors.New(
-		"prefix query must contain at least on '.' or ':'")
+	ErrQueryIncomplete = &ErrValidationFailed{
+		"q", "a prefix query must contain at least a '.' or ':'",
+	}
 )
 
 // Helper: Validate source Id
 func validateSourceID(id string) (string, error) {
 	if len(id) > 42 {
-		return "unknown", fmt.Errorf("source ID too long with length: %d", len(id))
+		return "unknown", &ErrValidationFailed{
+			Reason: fmt.Sprintf("source ID too long with length: %d", len(id)),
+		}
 	}
 	return id, nil
 }
@@ -32,16 +75,16 @@ func validateQueryString(req *http.Request, key string) (string, error) {
 	query := req.URL.Query()
 	values, ok := query[key]
 	if !ok {
-		return "", fmt.Errorf("query param %s is missing", key)
+		return "", NewErrMissingParam(key)
 	}
 
 	if len(values) != 1 {
-		return "", fmt.Errorf("query param %s is ambigous", key)
+		return "", NewErrAmbigousParam(key)
 	}
 
 	value := values[0]
 	if value == "" {
-		return "", fmt.Errorf("query param %s may not be empty", key)
+		return "", NewErrEmptyParam(key)
 	}
 
 	return value, nil
