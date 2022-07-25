@@ -4,8 +4,8 @@ import { useRef
        }
   from 'react';
 
-import { useQuery }
-  from 'app/context/query';
+import { useSearchQuery }
+  from 'app/context/search';
 import { useNeighbors }
   from 'app/context/neighbors';
 
@@ -66,11 +66,10 @@ const filterNeighbors = (protocols, filter) => {
 
 
 const Neighbors = () => {
-  const [ query ] = useQuery();
-  const filter    = query.q;
+  const refUp = useRef();
+  const refDown = useRef();
 
-  const refUp                  = useRef();
-  const refDown                = useRef();
+  const filter = useSearchQuery();
 
   const {isLoading, neighbors} = useNeighbors();
 
@@ -107,7 +106,7 @@ const Neighbors = () => {
   })
 
   if (isLoading) {
-    return <LoadingIndicator show={true} />;
+    return <LoadingIndicator />;
   }
 
   if (!filtered || filtered.length === 0) {
