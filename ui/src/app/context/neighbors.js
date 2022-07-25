@@ -59,7 +59,7 @@ export const NeighborsProvider = ({children, routeServerId}) => {
   const [state, setState] = useState(initialState);
 
   useEffect(() => {
-    setState((s) => ({...s, isLoading: true}));
+    setState(initialState);
     // Load RouteServer's neighbors
     axios.get(`/api/v1/routeservers/${routeServerId}/neighbors`).then(
       ({data}) => {
@@ -70,7 +70,6 @@ export const NeighborsProvider = ({children, routeServerId}) => {
         });
       },
       (error) => {
-        handleError(error);
         setState((s) => ({...s, isLoading: false}));
       }
     );
@@ -113,7 +112,7 @@ export const RelatedNeighborsProvider = ({children}) => {
     if (!neighbor) {
       return;
     }
-    setState((s) => ({...s, isLoading: true}));
+    setState(initialState);
     // Load related neighbors
     const queryUrl = `/api/v1/lookup/neighbors?asn=${neighbor.asn}`;
     axios.get(queryUrl).then(
@@ -124,7 +123,7 @@ export const RelatedNeighborsProvider = ({children}) => {
         });
       },
       (error) => {
-        handleError(error);
+        // Ignore the error for now.
         setState((s) => ({...s, isLoading: false}));
       }
     );
