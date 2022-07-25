@@ -19,6 +19,7 @@ import ButtonRemoveFilter
 import BgpCommunityLabel
   from 'app/components/routes/BgpCommunityLabel';
 
+
 const AppliedCommunity = ({group, filter, onRemove}) => {
   const removeFilter = useCallback(() => {
     onRemove([group, filter.value]);
@@ -38,6 +39,10 @@ const AppliedCommunity = ({group, filter, onRemove}) => {
 
 const createCommunityOption = (group) => ({filter}) => {
   const name = useReadableCommunity(filter.value);
+
+  if (filter.value.length === 0) {
+    return null;
+  }
 
   const cls = `select-bgp-community-0-${filter.value[0]} ` +
     `select-bgp-community-1-${filter.value[1]} ` +
