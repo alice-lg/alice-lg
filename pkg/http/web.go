@@ -9,7 +9,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 
-	"github.com/alice-lg/alice-lg/client"
+	"github.com/alice-lg/alice-lg/ui"
 )
 
 // Web Client
@@ -26,11 +26,11 @@ func (s *Server) webPrepareClientHTML(
 	// Replace paths and tags
 	rewriter := strings.NewReplacer(
 		// Paths
-		"js/", "/static/js/",
-		"css/", "/static/css/",
+		// "js/", "/static/js/",
+		// "css/", "/static/css/",
 
 		// Tags
-		"APP_VERSION", status.Version,
+		"###APP_VERSION###", status.Version,
 	)
 	html = rewriter.Replace(html)
 	return html
@@ -45,11 +45,11 @@ func (s *Server) webRegisterAssets(
 	log.Println("Preparing and installing assets")
 
 	// Prepare client html: Rewrite paths
-	indexHTMLData, err := client.Assets.ReadFile("build/index.html")
+	indexHTMLData, err := ui.Assets.ReadFile("build/index.html")
 	if err != nil {
 		return err
 	}
-	indexHTML := string(indexHTMLData) // TODO: migrate to []byte
+	indexHTML := string(indexHTMLData)
 
 	theme := NewTheme(s.cfg.UI.Theme)
 	err = theme.RegisterThemeAssets(router)
@@ -61,7 +61,9 @@ func (s *Server) webRegisterAssets(
 	indexHTML = s.webPrepareClientHTML(ctx, indexHTML)
 
 	// Register static assets
-	router.Handler("GET", "/static/*path", client.AssetsHTTPHandler("/static"))
+	router.Handler("GET", "/manifest.json", ui.AssetsHTTPHandler("/"))
+	router.Handler("GET", "/static/*path", ui.AssetsHTTPHandler("/static"))
+	router.Handler("GET", "/assets/*path", ui.AssetsHTTPHandler("/assets"))
 
 	// Rewrite paths
 	// Serve index html as root...

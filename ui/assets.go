@@ -4,6 +4,7 @@ import (
 	"embed"
 	"net/http"
 	"net/url"
+	"path"
 	"strings"
 )
 
@@ -17,17 +18,17 @@ func AssetsHTTPHandler(prefix string) http.Handler {
 	handler := http.FileServer(http.FS(Assets))
 
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-		path := req.URL.Path
+		reqPath := req.URL.Path
 		rawPath := req.URL.RawPath
 
-		if !strings.HasPrefix(path, prefix) {
+		if !strings.HasPrefix(reqPath, prefix) {
 			handler.ServeHTTP(res, req)
 			return
 		}
 
 		// Rewrite path
-		path = "build/" + strings.TrimPrefix(path, prefix)
-		rawPath = "build/" + strings.TrimPrefix(rawPath, prefix)
+		reqPath = path.Join("build/", reqPath)
+		rawPath = path.Join("build/", rawPath)
 
 		// This is pretty much like the StripPrefix middleware,
 		// from net/http, however we replace the prefix with `build/`.
@@ -36,7 +37,7 @@ func AssetsHTTPHandler(prefix string) http.Handler {
 		req1.URL = new(url.URL)
 		*req1.URL = *req.URL
 
-		req1.URL.Path = path
+		req1.URL.Path = reqPath
 		req1.URL.RawPath = rawPath
 
 		handler.ServeHTTP(res, req1)
