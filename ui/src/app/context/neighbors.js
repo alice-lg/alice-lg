@@ -9,7 +9,7 @@ import { createContext
        }
   from 'react';
 
-import { useErrors }
+import { useErrorHandler }
   from 'app/context/errors';
 import { ApiStatusProvider }
   from 'app/context/api-status';
@@ -55,7 +55,7 @@ export const useLocalRelatedPeers = () => {
  * route server identified by id
  */
 export const NeighborsProvider = ({children, routeServerId}) => {
-  const [handleError]     = useErrors();
+  const handleError = useErrorHandler();
   const [state, setState] = useState(initialState);
 
   useEffect(() => {
@@ -105,8 +105,8 @@ export const NeighborProvider = ({neighborId, children}) => {
  * from the backend identified the neighbor's ASN.
  */
 export const RelatedNeighborsProvider = ({children}) => {
-  const neighbor          = useNeighbor();
-  const [handleError]     = useErrors();
+  const neighbor = useNeighbor();
+  const handleError = useErrorHandler();
   const [state, setState] = useState(initialState);
 
   useEffect(() => {
