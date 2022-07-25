@@ -5,7 +5,6 @@
 import { useState
        , createContext
        , useContext
-       , useRef
        , useCallback
        }
   from 'react';
@@ -15,8 +14,8 @@ const ErrorContext = createContext(null);
 export const useErrors = () => useContext(ErrorContext);
 
 export const useErrorHandler = () => {
-  const [handleRef] = useErrors();
-  return useCallback((err) => handleRef.current(err), [handleRef]);
+  const [handle] = useErrors();
+  return handle;
 };
 
 
@@ -27,20 +26,13 @@ export const ErrorsProvider = ({children}) => {
   const [errors, setErrors] = useState([]);
 
   // Handle prepends the error to the state.
-  // Use a ref to the handler function to prevent
-  // a rendering loop.
-  const handle = (err) => {
-    setErrors([err, ...errors]);
-  };
-  const handleRef = useRef(handle);
+  const handle = useCallback((err) => setErrors(
+    (errors) => ([err, ...errors])), []);
 
-  // Dismiss removes the error from the state
-  const dismiss = (err) => {
-    const filtered = errors.filter((e) => e !== err)
-    setErrors(filtered);
-  }
+  const dismiss = useCallback((err) => setErrors(
+    (errors) => errors.filter((e) => e !== err)), []);
 
-  const ctx = [handleRef, dismiss, errors];
+  const ctx = [handle, dismiss, errors];
   return (
     <ErrorContext.Provider value={ctx}>
       {children}
