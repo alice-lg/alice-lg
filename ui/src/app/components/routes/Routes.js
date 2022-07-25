@@ -12,6 +12,9 @@ import { useConfig }
 import { useQuery
        , useQueryLocation
        , PARAM_LOAD_NOT_EXPORTED
+       , PARAM_PAGE_RECEIVED
+       , PARAM_PAGE_FILTERED
+       , PARAM_PAGE_NOT_EXPORTED
        }
   from 'app/context/query';
 import { ROUTES_RECEIVED
@@ -66,9 +69,9 @@ const RoutesLoading = () => {
 const createRoutesSet = (type, useRoutes) => () => {
   const results = useRoutes();
   const pageKey = {
-    [ROUTES_RECEIVED]: 'pr',
-    [ROUTES_FILTERED]: 'pf',
-    [ROUTES_NOT_EXPORTED]: 'pn',
+    [ROUTES_RECEIVED]: PARAM_PAGE_RECEIVED,
+    [ROUTES_FILTERED]: PARAM_PAGE_FILTERED,
+    [ROUTES_NOT_EXPORTED]: PARAM_PAGE_NOT_EXPORTED,
   }[type];
   const anchor = {
     [ROUTES_RECEIVED]: 'routes-received',
@@ -134,7 +137,7 @@ const RoutesNotExportedRequest = () => {
   const [query, setQuery] = useQuery();
   const requestNotExported = useQueryLocation({
     ...query,
-    [PARAM_LOAD_NOT_EXPORTED]: 1,
+    [PARAM_LOAD_NOT_EXPORTED]: "1",
   });
 
   const onDemand = noexport?.load_on_demand;
@@ -143,7 +146,7 @@ const RoutesNotExportedRequest = () => {
     if (onDemand === false) {
       setQuery((q) => ({
         ...q,
-        [PARAM_LOAD_NOT_EXPORTED]: 1,
+        [PARAM_LOAD_NOT_EXPORTED]: "1",
       }));
     }
   }, [onDemand, setQuery]);

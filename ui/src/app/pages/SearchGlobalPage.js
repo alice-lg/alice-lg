@@ -1,4 +1,8 @@
 
+import { useConfig 
+       , RoutesTableConfigProvider
+       }
+  from 'app/context/config';
 import { usePageQuery }
   from 'app/context/pagination';
 import { useFiltersQuery }
@@ -6,7 +10,9 @@ import { useFiltersQuery }
 import { useSearchQuery
        , RoutesSearchProvider }
   from 'app/context/search';
-import { RouteDetailsProvider }
+import { RouteDetailsProvider
+       , useRoutesLoading
+       }
   from 'app/context/routes';
 import { RoutesFiltersProvider }
   from 'app/context/filters';
@@ -21,15 +27,23 @@ import FiltersEditor
   from 'app/components/filters/FiltersEditor';
 import Routes 
   from 'app/components/routes/Routes';
+import { CacheStatus }
+  from 'app/components/status/Status';
 
 const SearchStatus = () => {
   return (
-    <>Implement status</>
+    <table className="routeserver-status">
+      <tbody>
+        <CacheStatus />
+      </tbody>
+    </table>
   );  
 }
 
 const SearchGlobalContent = () => {
-  const isLoading = false;
+  const isLoading = useRoutesLoading();
+  const search = useSearchQuery();
+  const hasQuery = search !== "";
 
   return (
     <div className="lookup-container">
@@ -39,16 +53,17 @@ const SearchGlobalContent = () => {
 
         <SearchGlobalInput />
 
-        <Routes />
+        { hasQuery && <Routes /> }
 
         </div>
-        <div className="col-lg-3 col-md-12 col-aside-details">
-          <div className="card">
-            <SearchStatus />
-          </div>
-          <WaitingCard isLoading={isLoading} />
-    {/* <FiltersEditor /> */}
-        </div>
+        { hasQuery &&
+          <div className="col-lg-3 col-md-12 col-aside-details">
+            <div className="card">
+              <SearchStatus />
+            </div>
+            <WaitingCard isLoading={isLoading} />
+            <FiltersEditor />
+          </div> }
       </div>
     </div>
   );
@@ -60,11 +75,17 @@ const SearchGlobalContent = () => {
  * routes are loaded by the SearchGlobalProvider
  */
 const SearchGlobalPage = () => {
+  const config = useConfig();
+
   const page = usePageQuery();
   const search = useSearchQuery();
   const [filters] = useFiltersQuery();
 
   return (
+    <RoutesTableConfigProvider
+      columns={config.lookup_columns}
+      columnsOrder={config.lookup_columns_order}>
+
     <RoutesSearchProvider
       filters={filters}
       query={search}
@@ -78,6 +99,7 @@ const SearchGlobalPage = () => {
       </RoutesFiltersProvider>
 
     </RoutesSearchProvider>
+    </RoutesTableConfigProvider>
   );
 }
 

@@ -1,4 +1,3 @@
-
 import { useMemo
        , useCallback
        }
@@ -15,6 +14,8 @@ import { FILTER_GROUP_COMMUNITIES
        }
   from 'app/context/filters';
 
+import ButtonRemoveFilter
+  from 'app/components/filters/ButtonRemoveFilter';
 import BgpCommunityLabel
   from 'app/components/routes/BgpCommunityLabel';
 
@@ -29,10 +30,7 @@ const AppliedCommunity = ({group, filter, onRemove}) => {
         <BgpCommunityLabel community={filter.value} />
       </td>
       <td>
-        <button className="btn btn-remove"
-                onClick={removeFilter}> x
-          <i className="fa fa-times" />
-        </button>
+        <ButtonRemoveFilter onClick={removeFilter} />
       </td>
     </tr>
   );

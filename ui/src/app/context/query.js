@@ -73,7 +73,6 @@ export const useQuery = (defaults={}) => {
     } else {
       next = q;
     }
-    console.log("set params:", next, encodeQuery(next));
     setParams(encodeQuery(next));
   }, [query, setParams]);
 

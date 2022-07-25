@@ -3,10 +3,12 @@ import { useCallback }
   from 'react';
 
 
-import { useConfig }
+import { useRoutesTableConfig
+       }
   from 'app/context/config';
 import { useSetRouteDetails }
   from 'app/context/routes';
+
 
 import FilterReason
   from 'app/components/routes/FilterReason';
@@ -103,11 +105,8 @@ const RouteColumn = ({onClick, column, route}) => {
 
 
 const RoutesTable = ({results}) => {
-  const config = useConfig();
   const setRouteDetails = useSetRouteDetails();
-
-  const columns = config.routes_columns;
-  const columnsOrder = config.routes_columns_order;
+  const { columns, columnsOrder } = useRoutesTableConfig();
 
   const { routes } = results;
 

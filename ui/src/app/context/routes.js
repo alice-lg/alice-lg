@@ -9,7 +9,10 @@ import { useState
        }
   from 'react';
 
-import { encodeQuery }
+import { encodeQuery
+       , useQuery
+       , PARAM_LOAD_NOT_EXPORTED
+       }
   from 'app/context/query';
 import { encodeFilters }
   from 'app/context/filters';
@@ -237,6 +240,13 @@ export const useRoutesLoading = () => {
     (noexport.requested && noexport.loading);
 }
 
+export const useNotExportedEnabled = () => {
+  const [query] = useQuery();
+  const notExportedEnabled = parseInt(
+    query[PARAM_LOAD_NOT_EXPORTED], 10) === 1;
+  return notExportedEnabled;
+}
+
 
 /**
  * RouteDetails Context
@@ -255,4 +265,5 @@ export const RouteDetailsProvider = ({children}) => {
     </RouteDetailsContext.Provider>
   );
 }
+
 

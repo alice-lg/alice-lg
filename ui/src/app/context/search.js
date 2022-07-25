@@ -36,6 +36,8 @@ const initialRoutesState = {
   totalResults: 0,
 
   routes: [],
+  filtersApplied: [],
+  filtersAvailable: [],
 
   apiStatus: {},
 };
@@ -114,10 +116,13 @@ const decodeSearchResult = (result) => {
   return state;
 }
 
-export const RoutesSearchProvider = ({
-  children,
-  filters,
+
+/**
+ * useSearchResult retrievs the url and returns the state
+ */
+const useSearchResults = ({
   query,
+  filters,
   pageFiltered,
   pageReceived,
 }) => {
@@ -133,7 +138,12 @@ export const RoutesSearchProvider = ({
   // Search routes on backend
   useEffect(() => {
     setState((s) => ({
-      ...s, received: {...s.received, loading: true},
+      ...s, 
+      received: {
+        ...initialRoutesState,
+        loading: true,
+      },
+      filtered: initialRoutesState,
     }));
     axios.get(searchUrl).then(({data}) => {
         setState(decodeSearchResult(data));
@@ -155,13 +165,34 @@ export const RoutesSearchProvider = ({
       });
   }, [searchUrl, setState, handleError]);
 
+  return state;
+}
+
+
+/**
+ * RoutesSearchProvider provides routes received, filtered
+ * and not exportet.
+ */
+export const RoutesSearchProvider = ({
+  children,
+  filters,
+  query,
+  pageFiltered,
+  pageReceived,
+}) => {
+  const result = useSearchResults({
+    query,
+    filters,
+    pageFiltered,
+    pageReceived,
+  });
 
   // RoutesContexts
   return (
-    <RoutesFilteredContext.Provider value={state.filtered}>
-    <RoutesReceivedContext.Provider value={state.received}>
+    <RoutesFilteredContext.Provider value={result.filtered}>
+    <RoutesReceivedContext.Provider value={result.received}>
     <RoutesNotExportedContext.Provider value={initialRoutesState}>
-      <ApiStatusProvider api={state.apiStatus}>
+      <ApiStatusProvider api={result.apiStatus}>
         {children}
       </ApiStatusProvider>
     </RoutesNotExportedContext.Provider>

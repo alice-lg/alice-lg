@@ -35,6 +35,7 @@ export const ApiStatusProvider = ({children, api}) => {
       origTtl: api.cache_status?.orig_ttl,
       generatedAt: generatedAt,
       age: age,
+      requestDurationMs: api.request_duration_ms,
     };
   }
 

@@ -22,14 +22,11 @@ const SearchInput = forwardRef(({
   debounce=0,
   ...props
 }, ref) => {
-  const valueRef = useRef();
+  const valueRef = useRef(value);
   const [state, setState] = useState(value);
 
   useEffect(() => {
     // Prevent update loops and unwanted calls
-    if (valueRef.current === undefined && state === "") {
-      return;
-    }
     if (valueRef.current === state) {
       return;
     }

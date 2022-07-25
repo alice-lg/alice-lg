@@ -33,8 +33,9 @@ import RelativeTime
  * CacheStatus renders the current api cache status
  * from the context.
  */
-const CacheStatus = () => {
+export const CacheStatus = () => {
   const status = useApiStatus();
+  console.log(status);
   if (!status) {
     return null;
   }

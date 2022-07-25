@@ -63,3 +63,31 @@ export const ConfigProvider = ({children}) => {
   );
 }
 
+
+/**
+ * RoutesTableConfigProvider
+ */
+const RoutesTableConfigContext = createContext();
+
+export const useRoutesTableConfig = () => useContext(RoutesTableConfigContext);
+
+/**
+ * Configure routes columns and columns oder
+ */
+export const RoutesTableConfigProvider = ({
+  children,
+  columns,
+  columnsOrder
+}) => {
+  const context = {
+    columns,
+    columnsOrder,
+  };
+  return (
+    <RoutesTableConfigContext.Provider value={context}>
+      {children}
+    </RoutesTableConfigContext.Provider>
+  );
+}
+
+

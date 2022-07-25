@@ -7,9 +7,12 @@ import { useMemo
 import { useSourceFilters }
   from 'app/context/filters';
 
+import ButtonRemoveFilter
+  from 'app/components/filters/ButtonRemoveFilter';
+
 
 const RouteServersSelect = () => {
-  const {filters, applyFilter} = useSourceFilters();
+  const {filters, applyFilter, removeFilter} = useSourceFilters();
   const {applied, available} = filters;
   const active = applied[0];
 
@@ -21,12 +24,12 @@ const RouteServersSelect = () => {
     applyFilter(e.target.value);
   }, [applyFilter]);
 
-  const removeFilter = useCallback((filter) => {
-    console.log("removing filter:", filter);
-  }, []);
+  const removeActiveFilter = useCallback(() => {
+    removeFilter(active.value);
+  }, [removeFilter, active]);
     
   // Nothing to do if we don't have filters
-  if (available.length === 0) {
+  if (available.length === 0 && applied.length === 0) {
     return null;
   }
 
@@ -40,10 +43,7 @@ const RouteServersSelect = () => {
               {active.name}
             </td>
             <td>
-              <button className="btn btn-remove"
-                      onClick={removeFilter}>
-                <i className="fa fa-times" />
-              </button>
+              <ButtonRemoveFilter onClick={removeActiveFilter} />
             </td>
           </tr>
         </tbody>
@@ -67,7 +67,7 @@ const RouteServersSelect = () => {
           <td className="select-container">
             <select className="form-control"
                     onChange={selectFilter}
-                    value={active.value}>
+                    value={active?.value}>
               <option value="none" className="options-title">Show results from RS...</option>
               {optionsAvailable}
             </select>

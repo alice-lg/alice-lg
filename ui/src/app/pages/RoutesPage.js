@@ -15,9 +15,9 @@ import { intersect
        }
   from 'app/utils/lists'
 
-import { useQuery }
-  from 'app/context/query';
-import { useConfig }
+import { useConfig 
+       , RoutesTableConfigProvider
+       }
   from 'app/context/config';
 import { useRouteServer }
   from 'app/context/route-servers';
@@ -32,8 +32,13 @@ import { RoutesReceivedProvider
        , RoutesNotExportedProvider
        , RouteDetailsProvider
        , useRoutesLoading
+       , useNotExportedEnabled
        }
   from 'app/context/routes';
+import { useSearchQuery }
+  from 'app/context/search';
+import { usePageQuery }
+  from 'app/context/pagination';
 import { RoutesFiltersProvider
        , useFiltersQuery
        }
@@ -140,42 +145,44 @@ const RoutesPageContent = () => {
  * on a route server
  */
 const RoutesPage = () => {
+  const config = useConfig();
+
   const { neighborId, routeServerId } = useParams();
-  const [query] = useQuery({
-    pr: "0",
-    pf: "0",
-    ne: "0",
-    q: "",
-  });
+
+  const page = usePageQuery();
+  const search = useSearchQuery();
   const [filters] = useFiltersQuery();
 
-  const notExportedEnabled = parseInt(query.ne, 10) === 1;
+  const notExportedEnabled = useNotExportedEnabled();
 
   // Setup context and render content
   return (
     <NeighborProvider neighborId={neighborId}>
     <RelatedNeighborsProvider>
     <RouteDetailsProvider>
+    <RoutesTableConfigProvider
+      columns={config.routes_columns}
+      columnsOrder={config.routes_columns_order}>
 
     <RoutesNotExportedProvider
       routeServerId={routeServerId}
       neighborId={neighborId}
-      page={query.pn}
-      query={query.q}
+      page={page.notExported}
+      query={search}
       filters={filters}
       enabled={notExportedEnabled}>
     <RoutesFilteredProvider
       routeServerId={routeServerId}
       neighborId={neighborId}
-      query={query.q}
+      query={search}
       filters={filters}
-      page={query.pf}>
+      page={page.filtered}>
     <RoutesReceivedProvider 
       routeServerId={routeServerId}
       neighborId={neighborId}
-      query={query.q}
+      query={search}
       filters={filters}
-      page={query.pr}>{/* innermost used for api status */}
+      page={page.received}>{/* innermost used for api status */}
 
       <RoutesFiltersProvider>
         <RoutesPageContent />
@@ -185,6 +192,7 @@ const RoutesPage = () => {
     </RoutesFilteredProvider>
     </RoutesNotExportedProvider>
 
+    </RoutesTableConfigProvider>
     </RouteDetailsProvider>
     </RelatedNeighborsProvider>
     </NeighborProvider>
