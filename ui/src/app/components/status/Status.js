@@ -35,7 +35,6 @@ import RelativeTime
  */
 export const CacheStatus = () => {
   const status = useApiStatus();
-  console.log(status);
   if (!status) {
     return null;
   }

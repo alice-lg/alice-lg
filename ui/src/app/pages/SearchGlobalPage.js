@@ -21,25 +21,19 @@ import PageHeader
   from 'app/components/page/Header';
 import SearchGlobalInput
   from 'app/components/search/SearchGlobalInput';
+import SearchStatus
+  from 'app/components/search/SearchStatus';
 import WaitingCard
   from 'app/components/spinners/WaitingCard';
 import FiltersEditor
   from 'app/components/filters/FiltersEditor';
 import Routes 
   from 'app/components/routes/Routes';
-import { CacheStatus }
-  from 'app/components/status/Status';
 
-const SearchStatus = () => {
-  return (
-    <table className="routeserver-status">
-      <tbody>
-        <CacheStatus />
-      </tbody>
-    </table>
-  );  
-}
 
+/**
+ * Show global search input and results
+ */
 const SearchGlobalContent = () => {
   const isLoading = useRoutesLoading();
   const search = useSearchQuery();
@@ -58,9 +52,7 @@ const SearchGlobalContent = () => {
         </div>
         { hasQuery &&
           <div className="col-lg-3 col-md-12 col-aside-details">
-            <div className="card">
-              <SearchStatus />
-            </div>
+            <SearchStatus />
             <WaitingCard isLoading={isLoading} />
             <FiltersEditor />
           </div> }

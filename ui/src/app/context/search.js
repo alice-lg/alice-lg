@@ -4,6 +4,8 @@ import axios from 'axios';
 import { useState
        , useEffect
        , useMemo
+       , useContext
+       , createContext
        }
   from 'react';
 
@@ -13,6 +15,8 @@ import { RoutesReceivedContext
        , paginationState
        , filtersState
        , apiStatusState 
+       , useRoutesReceived
+       , useRoutesFiltered
        }
   from 'app/context/routes';
 import { ApiStatusProvider }
@@ -25,6 +29,7 @@ import { useQuery
   from 'app/context/query';
 import { encodeFilters }
   from 'app/context/filters';
+
 
 const initialRoutesState = {
   requested: true,
@@ -169,6 +174,30 @@ const useSearchResults = ({
 }
 
 
+const SearchStatusContext = createContext();
+
+export const useSearchStatus = () => useContext(SearchStatusContext);
+
+export const SearchStatusProvider = ({children, api}) => {
+  const received = useRoutesReceived();
+  const filtered = useRoutesFiltered();
+  
+  const context = {
+    totalReceived: received.totalResults,
+    totalFiltered: filtered.totalResults,
+    queryDurationMs: api.request_duration_ms,
+  };
+
+  return (
+    <SearchStatusContext.Provider value={context}>
+      <ApiStatusProvider api={api}>
+        {children}
+      </ApiStatusProvider>
+    </SearchStatusContext.Provider>
+  );
+}
+
+
 /**
  * RoutesSearchProvider provides routes received, filtered
  * and not exportet.
@@ -192,9 +221,9 @@ export const RoutesSearchProvider = ({
     <RoutesFilteredContext.Provider value={result.filtered}>
     <RoutesReceivedContext.Provider value={result.received}>
     <RoutesNotExportedContext.Provider value={initialRoutesState}>
-      <ApiStatusProvider api={result.apiStatus}>
+      <SearchStatusProvider api={result.apiStatus}>
         {children}
-      </ApiStatusProvider>
+      </SearchStatusProvider>
     </RoutesNotExportedContext.Provider>
     </RoutesReceivedContext.Provider>
     </RoutesFilteredContext.Provider>

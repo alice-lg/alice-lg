@@ -17,8 +17,7 @@ export const useApiStatus = () => useContext(ApiStatusContext);
  * and version to downstream components
  */
 export const ApiStatusProvider = ({children, api}) => {
-  let ctx = null;
-
+  let ctx = {};
   const cachedAt = api?.cache_status?.cached_at;
   if (cachedAt) {
     const ttl = parseServerTime(api.ttl);
