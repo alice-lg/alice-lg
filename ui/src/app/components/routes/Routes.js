@@ -57,14 +57,6 @@ const RoutesHeader = ({type}) => {
 };
 
 
-const RoutesLoading = () => {
-  return (
-    <div className={`card routes-view`}>
-      <LoadingIndicator />
-    </div>
-  );
-};
-
 
 const createRoutesSet = (type, useRoutes) => () => {
   const results = useRoutes();
@@ -79,11 +71,8 @@ const createRoutesSet = (type, useRoutes) => () => {
     [ROUTES_NOT_EXPORTED]: 'routes-not-exported',
   }[type];
 
-  if (!results.requested) {
+  if (!results.requested || results.loading) {
     return null;
-  }
-  if (results.loading) {
-    return <RoutesLoading />;
   }
   if (results.totalResults === 0) {
     return null; // Nothing to show here.
@@ -182,6 +171,10 @@ const Routes = () => {
   const refFiltered = useRef();
   const refNotExported = useRef();
 
+  const received = useRoutesReceived();
+  const filtered = useRoutesFiltered();
+  const notExported = useRoutesNotExported();
+
   // Scroll to anchor
   useScrollToAnchor({
     "#routes-received": refReceived,
@@ -193,19 +186,26 @@ const Routes = () => {
     <div className="routes-view">
 
       <QuickLinks />
+
       <EmptyResults />
 
       <RouteDetailsModal />
 
       <div ref={refFiltered}>
+        { !received.loading && filtered.loading &&
+            <LoadingIndicator /> }
         <RoutesFiltered />
       </div>
 
       <div ref={refReceived}>
+        { received.loading &&
+            <LoadingIndicator /> }
         <RoutesReceived />
       </div>
 
       <div ref={refNotExported}>
+        { !received.loading && !filtered.loading && notExported.loading &&
+            <LoadingIndicator /> }
         <RoutesNotExportedRequest />
         <RoutesNotExported />
       </div>
