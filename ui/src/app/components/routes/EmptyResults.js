@@ -9,6 +9,21 @@ import { useRoutesReceived
 
 
 /**
+ * Show an error if present
+ */
+const ErrorResult = ({error}) => {
+  const info = error.response?.data;
+  if (!info) {
+    return null;
+  }
+  
+  return (
+    <p className="text-danger">Reason: {info.message}</p>
+  );
+}
+
+
+/**
  * Show a notice if no routes could be found
  */
 const EmptyResults = () => {
@@ -18,8 +33,6 @@ const EmptyResults = () => {
   const filtered = useRoutesFiltered();
   const notExported = useRoutesNotExported();
 
-  console.log('r', received, 'f', filtered, 'n', notExported);
-
   // Conditions
   const hasContent = received.totalResults > 0 ||
                      filtered.totalResults > 0 ||
@@ -27,6 +40,9 @@ const EmptyResults = () => {
   const isLoading = received.loading ||
                     filtered.loading ||
                     notExported.loading;
+  const isRequested = received.requested ||
+                      filtered.requested ||
+                      notExported.requested;
   const hasQuery = query.q !== "";
 
   if (isLoading) {
@@ -34,11 +50,12 @@ const EmptyResults = () => {
   }
  
   // Maybe this has something to do with a filter
-  if (!hasContent && hasQuery) {
+  if (!hasContent && hasQuery && isRequested) {
       return (
         <div className="card info-result-empty">
           <h4>No routes  matching your query.</h4>
           <p>Please check if your query is too restrictive.</p>
+          {received?.error && <ErrorResult error={received.error} />}
         </div>
       );
   }
