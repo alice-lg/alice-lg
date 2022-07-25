@@ -119,7 +119,7 @@ func (t *Theme) ScriptIncludes() string {
 	for _, script := range t.Scripts() {
 		hash := t.HashInclude(script)
 		include := fmt.Sprintf(
-			"<script type=\"text/javascript\" src=\"%s/%s?%s\"></script>",
+			"<script type=\"text/javascript\" src=\"%s/%s?%s\" defer></script>",
 			t.Config.BasePath, script, hash,
 		)
 		includes = append(includes, include)

@@ -4,6 +4,12 @@
  * and a content view in the middle.
  */
 
+import { useEffect, useRef }
+  from 'react';
+
+import { onLayoutReadyApi }
+  from 'api';
+
 import Content
   from 'app/components/content/Content';
 import Errors
@@ -11,12 +17,16 @@ import Errors
 import NavigationSidebar
   from 'app/components/navigation/Sidebar';
 
-
 const Layout = ({children}) => {
+  const pageRef = useRef();
+
+  useEffect(() => {
+    onLayoutReadyApi(pageRef.current);
+  }, [pageRef]);
 
   // Main Layout
   return (
-    <div className="page">
+    <div className="page" ref={pageRef}>
       <Errors />
       <NavigationSidebar />
       <div className="page-body">

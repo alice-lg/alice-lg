@@ -5,6 +5,8 @@ import { useState
        }
   from 'react';
 
+import { updateContentApi } from 'api';
+
 export const ContentContext = createContext({});
 
 export const useContent = () => useContext(ContentContext);
@@ -12,12 +14,9 @@ export const useContent = () => useContext(ContentContext);
 export const ContentProvider = ({children}) => {
   const [content, setContent] = useState({});
 
-  // Expose setContent as API??
   useEffect(() => {
-    if (!window.API) {
-      window.API = {};
-    }
-    window.API.setContent = setContent;
+    // Expose setContent in API
+    updateContentApi(setContent);
   }, [setContent]);
 
   return (
