@@ -4,13 +4,15 @@ import { useMemo
        }
   from 'react';
 
-import { Link }
+import { Link
+       , useNavigate 
+       }
   from 'react-router-dom';
 
-import { useQueryLink
-       , useQuery
+import { useMakePageLocation 
+       , usePageQuery
        }
-  from 'app/context/query';
+  from 'app/context/pagination';
 
 
 const makePages = (total, max) => {
@@ -77,35 +79,25 @@ const Paginator = ({
   maxItems=12,
   anchor="",
 }) => {
-  const initialQuery = {[pageKey]: 0};
-  const [, setQuery] = useQuery(initialQuery);
-  const [query, makeLocation] = useQueryLink(initialQuery);
+  const navigate = useNavigate();
+  const query = usePageQuery();
+  const makePageLocation = useMakePageLocation(pageKey, anchor);
+  const current = query[pageKey];
 
-  const page = parseInt(query[pageKey], 10);
   const pages = useMemo(() => makePages(results.totalPages, maxItems), [
     results, maxItems,
   ]);
 
-  const pageLocation = useCallback((p) => ({
-    ...makeLocation({[pageKey]: p}),
-    hash: anchor,
-  }), [
-    makeLocation,
-    pageKey,
-    anchor,
-  ]);
-
   // Callback: Page Selected
   const selectPage = useCallback((p) => {
-    setQuery({[pageKey]: p});  
-  }, [setQuery, pageKey]);
-
+    navigate(makePageLocation(p));
+  }, [navigate, makePageLocation]);
 
   // Render list of page items
   const pageLinks = pages.items.map((p) => {
-    const to = pageLocation(p);
+    const to = makePageLocation(p);
     let className = "";
-    if (p === page) {
+    if (current === p) {
       className = "active";
     }
     return (
@@ -117,22 +109,21 @@ const Paginator = ({
 
   // Links classes
   let prevLinkClass = "";
-  if (page === 0) {
+  if (current === 0) {
     prevLinkClass = "disabled";
   }
 
   let nextLinkClass = "";
-  if (page + 1 === results.totalPages) {
+  if (current + 1 === results.totalPages) {
     nextLinkClass = "disabled";
   }
 
-  const toPrevious = pageLocation(page - 1);
-  const toNext = pageLocation(page + 1);
+  const toPrevious = makePageLocation(current - 1);
+  const toNext = makePageLocation(current + 1);
 
   if (results.totalPages <= 1) {
     return null; // Nothing to paginate
   }
-
 
   return (
     <nav aria-label="Routes Pagination">
@@ -140,23 +131,23 @@ const Paginator = ({
         <li className={prevLinkClass}>
           <PageLink
             to={toPrevious}
-            page={page - 1}
+            page={current - 1}
             label="&laquo;"
-            disabled={page === 0} />
+            disabled={current === 0} />
         </li>
 
         {pageLinks}
 
         <PageSelect pages={pages.select}
-                    page={page}
+                    page={current}
                     onSelect={selectPage} />
 
         {pages.select.length === 0 &&
           <li className={nextLinkClass}>
             <PageLink 
               to={toNext}
-              page={page + 1}
-              disabled={(page + 1) === results.totalPages}
+              page={current + 1}
+              disabled={(current + 1) === results.totalPages}
               label="&raquo;" />
           </li>}
       </ul>

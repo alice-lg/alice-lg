@@ -1,5 +1,5 @@
 
-import { useQueryParams }
+import { useQuery }
   from 'app/context/query';
 import { useRoutesReceived
        , useRoutesFiltered 
@@ -27,7 +27,7 @@ const ErrorResult = ({error}) => {
  * Show a notice if no routes could be found
  */
 const EmptyResults = () => {
-  const query = useQueryParams({q: ""});
+  const [query] = useQuery({q: ""});
 
   const received = useRoutesReceived();
   const filtered = useRoutesFiltered();

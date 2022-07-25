@@ -4,7 +4,9 @@ import { useCallback
        }
   from 'react'
 
-import { useQuery }
+import { useQuery
+       , PARAM_LOAD_NOT_EXPORTED
+       }
   from 'app/context/query';
 
 import SearchInput
@@ -23,12 +25,10 @@ const SearchQueryInput = forwardRef(({
     [queryKey]: queryDefault,
   });
   const updateQuery = useCallback(
-    (v) => setQuery({
+    (v) => setQuery((q) => ({
       [queryKey]: v,
-      "pr": "",
-      "pf": "",
-      "pn": "",
-    }),
+      [PARAM_LOAD_NOT_EXPORTED]: q[PARAM_LOAD_NOT_EXPORTED], // Keep state
+    })),
     [setQuery, queryKey]);
   return (
     <SearchInput

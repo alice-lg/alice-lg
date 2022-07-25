@@ -11,7 +11,11 @@ import { useRoutesReceived
        , useRoutesNotExported
        }
   from 'app/context/routes';
-import { useQuery }
+import { useQuery
+       , cleanParams
+       , PARAM_QUERY
+       , PARAM_LOAD_NOT_EXPORTED
+       }
   from 'app/context/query';
 
 
@@ -154,25 +158,6 @@ const mergeFilters = (a, ...other) => {
 }
 
 /*
- * Does a single group have any filters?
- */
-const groupHasFilters = (group) =>
-  group.filters.length > 0;
-
-/*
- * Do we have filters in general?
- */
-const hasFilters = (groups) => {
-  for (const g of groups) {
-    if (groupHasFilters(g)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-
-/*
  * Filter Query Decoding
  */
 const decodeStringList = (value) => {
@@ -230,18 +215,18 @@ const encodeCommunities = (communities) =>
   encodeList(communities.map((c) => encodeCommunity(c)));
 
 export const encodeFilters = (filters) => {
-  let query = {};
   const sources = filters[FILTER_KEY_SOURCES];
   const asns = filters[FILTER_KEY_ASNS];
   const communities = filters[FILTER_KEY_COMMUNITIES];
   const extCommunities = filters[FILTER_KEY_EXT_COMMUNITIES];
   const largeCommunities = filters[FILTER_KEY_LARGE_COMMUNITIES];
-  query[FILTER_KEY_SOURCES] = encodeList(sources);
-  query[FILTER_KEY_ASNS] = encodeList(asns);
-  query[FILTER_KEY_COMMUNITIES] = encodeCommunities(communities);
-  query[FILTER_KEY_EXT_COMMUNITIES] = encodeCommunities(extCommunities);
-  query[FILTER_KEY_LARGE_COMMUNITIES] = encodeCommunities(largeCommunities);
-  return query;
+  return cleanParams({
+    [FILTER_KEY_SOURCES]: encodeList(sources),
+    [FILTER_KEY_ASNS]: encodeList(asns),
+    [FILTER_KEY_COMMUNITIES]: encodeCommunities(communities),
+    [FILTER_KEY_EXT_COMMUNITIES]: encodeCommunities(extCommunities),
+    [FILTER_KEY_LARGE_COMMUNITIES]: encodeCommunities(largeCommunities),
+  });
 }
 
 
@@ -249,8 +234,7 @@ export const encodeFilters = (filters) => {
  * FiltersQuery Context
  */
 export const useFiltersQuery = () => {
-  const [, setQuery] = useQuery();
-  const [query] = useQuery({
+  const [query, setQuery] = useQuery({
     [FILTER_KEY_SOURCES]: "",
     [FILTER_KEY_ASNS]: "",
     [FILTER_KEY_COMMUNITIES]: "",
@@ -261,7 +245,13 @@ export const useFiltersQuery = () => {
   const filterQuery = useMemo(() => decodeQuery(query), [query]);
   const setFilterQuery = useCallback((key, value) => {
     const next = {...filterQuery, [key]: value};
-    setQuery(encodeFilters(next));
+    setQuery((q) => ({
+      // Keep state
+      [PARAM_QUERY]: q[PARAM_QUERY],
+      [PARAM_LOAD_NOT_EXPORTED]: q[PARAM_LOAD_NOT_EXPORTED],
+      // Add Filters
+      ...encodeFilters(next),
+    }));
   }, [filterQuery, setQuery]);
 
   return [filterQuery, setFilterQuery];

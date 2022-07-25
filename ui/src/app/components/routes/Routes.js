@@ -1,7 +1,6 @@
 
 import { useRef
        , useEffect
-       , useMemo
        }
   from 'react';
 import { Link
@@ -11,7 +10,8 @@ import { Link
 import { useConfig }
   from 'app/context/config';
 import { useQuery
-       , useQueryLink
+       , useQueryLocation
+       , PARAM_LOAD_NOT_EXPORTED
        }
   from 'app/context/query';
 import { ROUTES_RECEIVED
@@ -130,21 +130,21 @@ const RoutesNotExported = createRoutesSet(
  */
 const RoutesNotExportedRequest = () => {
   const { noexport } = useConfig();
-  const [, setQuery] = useQuery();
-  const [, makeLocation ] = useQueryLink();
   const { requested } = useRoutesNotExported();
-  const onDemand = noexport?.load_on_demand;
+  const [query, setQuery] = useQuery();
+  const requestNotExported = useQueryLocation({
+    ...query,
+    [PARAM_LOAD_NOT_EXPORTED]: 1,
+  });
 
-  const request = useMemo(() =>
-    ({
-      ...makeLocation({ne: 1}),
-      hash: "#routes-not-exported"
-    }),
-    [makeLocation]);
+  const onDemand = noexport?.load_on_demand;
   
   useEffect(() => {
     if (onDemand === false) {
-      setQuery({ne: 1});
+      setQuery((q) => ({
+        ...q,
+        [PARAM_LOAD_NOT_EXPORTED]: 1,
+      }));
     }
   }, [onDemand, setQuery]);
 
@@ -163,7 +163,7 @@ const RoutesNotExportedRequest = () => {
         they are only fetched on demand.
       </p>
 
-      <Link to={request}
+      <Link to={requestNotExported}
         className="btn btn-block btn-danger">
          Load Routes Not Exported
       </Link>

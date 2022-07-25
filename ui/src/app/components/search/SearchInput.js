@@ -6,6 +6,7 @@ import { faSearch }
 
 import { useEffect
        , useState
+       , useRef
        , forwardRef
        }
   from 'react';
@@ -21,12 +22,22 @@ const SearchInput = forwardRef(({
   debounce=0,
   ...props
 }, ref) => {
+  const valueRef = useRef();
   const [state, setState] = useState(value);
 
   useEffect(() => {
+    // Prevent update loops and unwanted calls
+    if (valueRef.current === undefined && state === "") {
+      return;
+    }
+    if (valueRef.current === state) {
+      return;
+    }
     const tRef = setTimeout(() => {
       onChange(state);
     }, debounce);
+
+    valueRef.current = state;
     return () => {
       clearTimeout(tRef); 
     };

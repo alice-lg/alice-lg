@@ -15,7 +15,7 @@ import { intersect
        }
   from 'app/utils/lists'
 
-import { useQueryParams }
+import { useQuery }
   from 'app/context/query';
 import { useConfig }
   from 'app/context/config';
@@ -141,10 +141,10 @@ const RoutesPageContent = () => {
  */
 const RoutesPage = () => {
   const { neighborId, routeServerId } = useParams();
-  const query = useQueryParams({
-    pr: 0,
-    pf: 0,
-    ne: 0,
+  const [query] = useQuery({
+    pr: "0",
+    pf: "0",
+    ne: "0",
     q: "",
   });
   const [filters] = useFiltersQuery();

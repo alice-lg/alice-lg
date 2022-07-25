@@ -36,7 +36,6 @@ const NeighborsPage = () => {
       <div className="row details-main">
         <div className="col-main col-lg-9 col-md-12">
           <div className="card">
-        
             <SearchQueryInput
               placeholder="Filter by Neighbor, ASN or Description" />
           </div>

@@ -19,7 +19,9 @@ import { ApiStatusProvider }
   from 'app/context/api-status';
 import { useErrorHandler }
   from 'app/context/errors';
-import { encodeQuery }
+import { useQuery
+       , PARAM_QUERY
+       }
   from 'app/context/query';
 import { encodeFilters }
   from 'app/context/filters';
@@ -42,20 +44,35 @@ const initialState = {
   requested: false,
   loading: false,
 
+  error: null,
+
   received: initialRoutesState,
   filtered: initialRoutesState,
 
   apiStatus: {},
 }
 
+/**
+ * useSearchParam retrievs the query parameter
+ */
+export const useSearchQuery = () => {
+  const [query] = useQuery({
+    [PARAM_QUERY]: "",
+  });
+  return query[PARAM_QUERY];
+}
 
+/**
+ * useRoutesSearchUrl creates a memoized URL for
+ * a query with filters.
+ */
 const useRoutesSearchUrl = ({
   query,
   filters,
   pageReceived,
   pageFiltered,
 }) => useMemo(() => {
-  const qry = encodeQuery({
+  const qry = new URLSearchParams({
     ...encodeFilters(filters),
     q: query,
     page_filtered: pageFiltered,
@@ -81,7 +98,6 @@ const decodeSearchResult = (result) => {
     filtersApplied: [],
     filtersAvailable: [],
   };
-  console.log(result);
   const received = {
     requested: true,
     loading: false,
@@ -122,10 +138,23 @@ export const RoutesSearchProvider = ({
     axios.get(searchUrl).then(({data}) => {
         setState(decodeSearchResult(data));
       },
-      (error) => handleError(error));
+      (error) => {
+        setState((s) => ({...s,
+          error: error,
+          received: {
+            ...s.received,
+            error: error,
+            loading: false,
+          },
+          filtered: {
+            ...s.filtered,
+            loading: false,
+          },
+        }));
+        handleError(error);
+      });
   }, [searchUrl, setState, handleError]);
 
-  console.log(state);
 
   // RoutesContexts
   return (

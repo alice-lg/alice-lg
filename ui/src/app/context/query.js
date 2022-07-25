@@ -9,6 +9,16 @@ import { useSearchParams
        }
   from 'react-router-dom';
 
+/**
+ * Well-known parameters
+ */
+export const PARAM_QUERY = "q";
+export const PARAM_PAGE_FILTERED = "pf";
+export const PARAM_PAGE_RECEIVED = "pr";
+export const PARAM_PAGE_NOT_EXPORTED = "pn";
+export const PARAM_LOAD_NOT_EXPORTED = "ne";
+export const PARAM_ORDER = "o";
+export const PARAM_SORT = "s";
 
 /**
  * paramsToQuery creates an object with query params
@@ -22,16 +32,27 @@ const paramsToQuery = (params) => {
   return q;
 }
 
-
-export const encodeQuery = (params) => {
+/**
+ * cleanParams removes all parameters without a
+ * value.
+ */
+export const cleanParams = (params) => {
   let filtered = {};
   for (const k in params) {
-    if (params[k] === "") {
+    if (!params[k]) {
       continue;
     }
     filtered[k] = params[k];
   }
-  return new URLSearchParams(filtered);
+  return filtered;
+}
+
+/**
+ * encodeQuery makes URLSearchParams from
+ * cleaned params.
+ */
+export const encodeQuery = (params) => {
+  return new URLSearchParams(cleanParams(params));
 }
 
 /**
@@ -44,23 +65,19 @@ export const encodeQuery = (params) => {
 export const useQuery = (defaults={}) => {
   const [params, setParams] = useSearchParams(defaults);
   const query = useMemo(() => paramsToQuery(params), [params]);
-  const setQuery = useCallback((q) => {
-    let next = {...query, ...q};
-    const nextParams = encodeQuery(next);
-    if (nextParams.toString() !== params.toString()) {
-      setParams(nextParams);
-    }
-  }, [params, query, setParams]);
-  return [query, setQuery];
-}
 
-/**
- * useQueryParams returns the parameters only
- */
-export const useQueryParams = (defaults={}) => {
-  const [params] = useSearchParams(defaults);
-  const query = useMemo(() => paramsToQuery(params), [params]);
-  return query;
+  const setQuery = useCallback((q) => {
+    let next;
+    if (typeof(q) === "function") {
+      next = q(query); // Inject current parameters
+    } else {
+      next = q;
+    }
+    console.log("set params:", next, encodeQuery(next));
+    setParams(encodeQuery(next));
+  }, [query, setParams]);
+
+  return [query, setQuery];
 }
 
 /**
@@ -68,16 +85,23 @@ export const useQueryParams = (defaults={}) => {
  * instead of a navigation function a location object
  * is created, which can be passed to a Link
  */
-export const useQueryLink = (defaults={}) => {
+export const useMakeQueryLocation = () => {
   const location = useLocation();
-  const [params] = useSearchParams(defaults);
-  const query = useMemo(() => paramsToQuery(params), [params]);
-
-  const makeLocation = useCallback((q) => {
-    const next = new URLSearchParams({...query, ...q});
-    return {...location, search: next.toString()};
-  }, [location, query]);
-
-  return [query, makeLocation];
+  const makeLocation = useCallback((q, overrides={}) => {
+    const next = encodeQuery(q);
+    return {
+      ...location,
+      ...overrides,
+      search: next.toString()
+    };
+  }, [location]);
+  return makeLocation;
 }
+
+export const useQueryLocation = (query, overrides={}) => {
+  const makeLocation = useMakeQueryLocation();
+  return useMemo(() => makeLocation(query, overrides), [
+    makeLocation, query, overrides,
+  ]);
+};
 

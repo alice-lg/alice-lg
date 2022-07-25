@@ -25,7 +25,9 @@ import { useConfig }
 import { useRouteServer }
   from 'app/context/route-servers';
 import { useQuery
-       , useQueryLink
+       , useQueryLocation
+       , PARAM_SORT
+       , PARAM_ORDER
        }
   from 'app/context/query';
 
@@ -38,8 +40,8 @@ import RelativeTimestamp
  * Default: Sort by ASN, ascending order.
  */
 const querySortDefault = {
-  s: 'asn',
-  o: 'asc',
+  [PARAM_SORT]: 'asn',
+  [PARAM_ORDER]: 'asc',
 };
 
 const lookupProperty = (obj, path) => {
@@ -163,17 +165,27 @@ const SortIndicator = ({order, active}) => {
 }
 
 
+/**
+ * Column Header with sorting indicator
+ */
 const ColumnHeader = ({title, column}) => {
-  const [query, makeLink] = useQueryLink(querySortDefault);
   const sort = column.toLowerCase();
-  const active = query.s === sort;
-
+  const [query] = useQuery(querySortDefault);
+  const columnSort = useQueryLocation({
+    ...query,
+    [PARAM_SORT]: sort,
+  });
+  const toggleOrder = useQueryLocation({
+    ...query,
+    [PARAM_ORDER]: query[PARAM_ORDER] === 'asc' ? 'desc' : 'asc',
+  });
+  
+  const active = query[PARAM_SORT] === sort;
   let cls = `col-neighbor-attr col-neighbor-${column} `;
-  let link = makeLink({s: sort}); // s: Sort column
-
+  let link = columnSort; 
   if (active) {
     cls += 'col-neighbor-active ';
-    link = makeLink({o: query.o === 'asc' ? 'desc' : 'asc'}); // o: Toggle order
+    link = toggleOrder;
   }
   return (
     <th className={cls}>
@@ -277,11 +289,14 @@ const NeighborsTable = ({neighbors, state, ref}) => {
   const columns = config.neighbors_columns;
   const columnsOrder = config.neighbors_columns_order;
 
-  const sortColumn = query.s;
-  const sortOrder = query.o;
+  const sortColumn = query[PARAM_SORT];
+  const sortOrder = query[PARAM_ORDER];
 
   const sortedNeighbors = useMemo(() =>
-      sortNeighbors(neighbors, sortColumn, sortOrder
+      sortNeighbors(
+        neighbors,
+        sortColumn,
+        sortOrder,
     ), [neighbors, sortColumn, sortOrder]);
 
   const header = useMemo(() => 

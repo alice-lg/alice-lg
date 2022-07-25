@@ -1,9 +1,10 @@
 
-import { useQueryParams }
-  from 'app/context/query';
+import { usePageQuery }
+  from 'app/context/pagination';
 import { useFiltersQuery }
   from 'app/context/filters';
-import { RoutesSearchProvider }
+import { useSearchQuery
+       , RoutesSearchProvider }
   from 'app/context/search';
 import { RouteDetailsProvider }
   from 'app/context/routes';
@@ -59,18 +60,16 @@ const SearchGlobalContent = () => {
  * routes are loaded by the SearchGlobalProvider
  */
 const SearchGlobalPage = () => {
-  const query = useQueryParams({
-    q: "",
-    pf: "0",
-    pr: "0",
-  });
+  const page = usePageQuery();
+  const search = useSearchQuery();
   const [filters] = useFiltersQuery();
+
   return (
     <RoutesSearchProvider
       filters={filters}
-      query={query.q}
-      pageFiltered={query.pf}
-      pageReceived={query.pr}>
+      query={search}
+      pageFiltered={page.filtered}
+      pageReceived={page.received}>
 
       <RoutesFiltersProvider>
       <RouteDetailsProvider>
