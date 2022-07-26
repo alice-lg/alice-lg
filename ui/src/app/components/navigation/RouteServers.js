@@ -29,7 +29,6 @@ const Status = ({routeServerId}) => {
       .then(
         ({data}) => setStatus(data.status),
         (error)  => {
-          handleError(error);
           setError(error); // Local error display
         });
   }, [routeServerId, handleError]);
@@ -38,7 +37,15 @@ const Status = ({routeServerId}) => {
     return (
       <div className="routeserver-status">
         <div className="api-error">
-          Unreachable
+          unreachable 
+        </div>
+      </div>
+    );
+  } else if (error?.response?.data?.tag === "GENERIC_ERROR") {
+    return (
+      <div className="routeserver-status">
+        <div className="api-error">
+          did not respond
         </div>
       </div>
     );
