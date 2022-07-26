@@ -44,6 +44,9 @@ export const apiCallback = () => {
 export const [updateContent, updateContentApi] = apiFunc();
 export const [onLayoutReady, onLayoutReadyApi] = apiCallback();
 
+/**
+ * Alice extension and theming API
+ */
 const Api = {
   updateContent,
   onLayoutReady,
