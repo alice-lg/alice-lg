@@ -75,6 +75,10 @@ const Status = () => {
     lastReconfig = null;
   }
 
+  if (rsStatus.loading) {
+    return null;
+  }
+
   return (
     <table className="routeserver-status">
       <tbody>

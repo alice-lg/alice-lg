@@ -91,13 +91,25 @@ export const RouteServersProvider = ({children}) => {
  */
 export const RouteServerStatusProvider = ({children, routeServerId}) => {
   const handleError         = useErrorHandler();
-  const [status, setStatus] = useState({});
+  const [status, setStatus] = useState({
+    loading: false,
+  });
 
   useEffect(() => {
+    setStatus({loading: true}); // initial state
     axios.get(`/api/v1/routeservers/${routeServerId}/status`)
       .then(
-        ({data}) => setStatus(data.status),
-        (error)  => handleError(error),
+        ({data}) => setStatus({
+          loading: false,
+          ...data.status,
+        }),
+        (error) => {
+          handleError(error);
+          setStatus({
+            loading: false,
+            error: error,
+          });
+        }
       );
   }, [routeServerId, handleError]);
 
