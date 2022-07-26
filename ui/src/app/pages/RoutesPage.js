@@ -1,4 +1,11 @@
 
+import { humanizedJoin }
+  from 'lib/text';
+import { intersect
+       , resolve
+       }
+  from 'lib/lists';
+
 import { useMemo }
   from 'react';
 
@@ -6,13 +13,6 @@ import { Link
        , useParams
        }
   from 'react-router-dom';
-
-import { humanizedJoin }
-  from 'app/lib/text'
-import { intersect
-       , resolve
-       }
-  from 'app/lib/lists'
 
 import { useConfig 
        , RoutesTableConfigProvider

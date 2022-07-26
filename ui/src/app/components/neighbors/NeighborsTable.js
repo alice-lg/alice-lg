@@ -1,5 +1,6 @@
 
 import bigInt from 'big-integer';
+import { ipToNumeric } from 'lib/ip';
 
 import { FontAwesomeIcon }
   from '@fortawesome/react-fontawesome';
@@ -17,8 +18,6 @@ import { useParams
        }
   from 'react-router-dom';
 
-import { ipToNumeric }
-  from 'app/lib/ip'
 
 import { useConfig }
   from 'app/context/config';
