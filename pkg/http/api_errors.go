@@ -77,19 +77,11 @@ func apiErrorResponse(
 			code = CodeConnectionTimeout
 			message = "Connection timed out when connecting to the backend API"
 		}
-	}
-
-	switch err {
-	case ErrQueryTooShort:
+	case *ErrValidationFailed:
 		tag = TagValidationError
 		code = CodeValidationError
 		status = StatusValidationError
-		message = "the query is too short"
-	case ErrQueryIncomplete:
-		tag = TagValidationError
-		code = CodeValidationError
-		status = StatusValidationError
-		message = "the query is incomplete"
+		message = e.Reason
 	}
 
 	return api.ErrorResponse{

@@ -1,0 +1,38 @@
+version: "3.7"
+
+# Composefile for developing with alice. A postgres server
+# and the ui live dev server are started.
+
+services:
+  db:
+    image: postgres:12
+    environment:
+      POSTGRES_USER: alice 
+      POSTGRES_PASSWORD: alice 
+      POSTGRES_DB: alice 
+    ports:
+      - 5432:5432
+
+  ui:
+    build:
+      dockerfile: Containerfile
+      context: containers/ui/
+    volumes:
+      - ../ui:/ui
+    environment:
+      DANGEROUSLY_DISABLE_HOST_CHECK: "true"
+    ports:
+      - 3000:3000
+    command:
+      - start 
+
+  backend:
+    build: 
+      dockerfile: dev/containers/backend/Containerfile
+      context: ../.
+    volumes:
+      - ../.:/src/alice-lg
+    ports:
+      - 7340:7340
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

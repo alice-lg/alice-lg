@@ -1,6 +1,22 @@
 
 # Changelog
 
+
+## 6.0.0 (2022-07-26)
+ 
+ * Pure functional react UI!
+
+   Frontend is now using `create-react-app` for scripts and
+   contexts instead of redux.
+
+   **Theme compatibility**
+
+   - Stylesheets are compatible
+   - Content API is compatible
+   - API now provides `Alice.onLayoutReady((page) => ... )`
+     callback. This should be used to install additional
+     DOM event listeners for extensions.
+
 ## 5.1.1 (2022-06-21)
   
  * Improved search query validation.

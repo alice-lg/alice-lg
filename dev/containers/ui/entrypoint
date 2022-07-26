@@ -1,0 +1,26 @@
+#!/bin/bash
+
+##########################################################
+# Start an arbitrary command or start the dev server
+# and ensure all dependencies are installed.
+###########################################################
+
+cd /ui
+
+CMD=$1
+shift
+ARGS=$@
+
+case "$CMD" in
+    start)
+        yarn install
+        yarn start $ARGS
+        ;;
+    test)
+        yarn install
+        yarn test $ARGS
+        ;;
+    *)
+        exec $CMD $ARGS
+esac
+
