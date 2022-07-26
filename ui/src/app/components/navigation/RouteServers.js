@@ -4,6 +4,7 @@ import axios
 
 import { useEffect
        , useState
+       , useCallback
        }
   from 'react';
 import { Link }
@@ -33,7 +34,6 @@ const Status = ({routeServerId}) => {
         });
   }, [routeServerId, handleError]);
 
-
   if (error && error.code >= 100 && error.code < 200) {
     return (
       <div className="routeserver-status">
@@ -61,31 +61,56 @@ const Status = ({routeServerId}) => {
   );
 };
 
+
+/**
+ * Select a routeserver button
+ */
+const GroupSelectOption = ({group, onSelect}) => {
+  const selectGroup = useCallback(() => onSelect(group), [
+    group, onSelect,
+  ]);
+  return (
+    <li>
+      <button className="btn btn-link btn-option" onClick={selectGroup}>
+        {group}
+      </button>
+    </li>
+  );
+}
+
 /**
  * GroupSelect shows a drop down for selecting a
  * group of routeservers.
  */
-const GroupSelect = ({groups, selected, onChange}) => {
+const GroupSelect = ({groups, selected, onSelect}) => {
+  const [expanded, setExpanded] = useState(false);
+
+  const toggleDropdown = useCallback(() => {
+    setExpanded((state) => !state);
+  }, []);
+
+  const selectGroup = useCallback((group) => {
+    onSelect(group);
+    setExpanded(false);
+  }, [onSelect]);
+
   if (groups.length < 2) {
     return null; // why bother?
   }
 
-  const options = groups.map((group) => (
-    <li key={group}>
-      <button className="btn btn-link btn-option"
-              onClick={() => onChange(group)}>
-        {group}
-      </button>
-    </li>
-  ));
+  const options = groups.map((group) =>
+    <GroupSelectOption key={group} group={group} onSelect={selectGroup} />
+  );
+
+  const dropdownClass = `dropdown ${expanded && 'open'}`;
 
   return (
     <div className="routeservers-groups-select">
-      <div className="dropdown">
+      <div className={dropdownClass}>
         <button className="btn btn-default dropdown-toggle btn-select"
                 type="button"
                 id="select-routeservers-group"
-                data-toggle="dropdown"
+                onClick={toggleDropdown}
                 aria-haspopup="true"
                 aria-expanded="true">
            {selected}
@@ -129,7 +154,7 @@ const RouteServers = () => {
       <h2>route servers</h2>
       <GroupSelect groups={groups}
                    selected={selectedGroup}
-                   onChange={(group) => setSelectedGroup(group)} />
+                   onSelect={setSelectedGroup} />
       <ul>
         {groupRs.map((rs) =>
           <li key={rs.id}>

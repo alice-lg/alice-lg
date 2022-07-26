@@ -24,6 +24,8 @@
     flex-direction: row;
     background: #222;
 
+    height: 58px;
+
     .logo {
       flex: 0 0 50px;
       padding: 10px 15px;
@@ -97,7 +99,14 @@
 
   .routeservers-groups-select {
     display: block;
-    padding: 0px 15px;
+    padding: 0px 3px;
+    
+    .dropdown {
+      .dropdown-menu {
+        width: 100%; // Block
+      }
+    }
+
     .btn-select {
       display: block;
       width: 100%;

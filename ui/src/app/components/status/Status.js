@@ -34,20 +34,20 @@ import RelativeTime
  * from the context.
  */
 export const CacheStatus = () => {
-  const status = useApiStatus();
-  if (!status) {
+  const { generatedAt, ttl } = useApiStatus();
+  if (!generatedAt) {
     return null;
   }
   return (
    <tr>
      <td><FontAwesomeIcon icon={faArrowsRotate} /></td>
      <td>
-       Generated <b><RelativeTime value={status.generatedAt}
+       Generated <b><RelativeTime value={generatedAt}
                                   fuzzyNow={5}
                                   pastEvent={true} /></b>.<br />
        Next refresh <b><RelativeTime futureEvent={true}
                                      fuzzyNow={5}
-                                     value={status.ttl} /></b>.
+                                     value={ttl} /></b>.
      </td>
    </tr>
   );

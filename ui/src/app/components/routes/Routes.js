@@ -206,8 +206,11 @@ const Routes = () => {
       <div ref={refNotExported}>
         { !received.loading && !filtered.loading && notExported.loading &&
             <LoadingIndicator /> }
-        <RoutesNotExportedRequest />
-        <RoutesNotExported />
+        { !received.loading && !filtered.loading &&
+          <>
+            <RoutesNotExportedRequest />
+            <RoutesNotExported />
+          </> }
       </div>
 
     </div>
