@@ -8,12 +8,11 @@ import { Link
   from 'react-router-dom';
 
 import { humanizedJoin }
-  from 'app/utils/text'
-
+  from 'app/lib/text'
 import { intersect
        , resolve
        }
-  from 'app/utils/lists'
+  from 'app/lib/lists'
 
 import { useConfig 
        , RoutesTableConfigProvider

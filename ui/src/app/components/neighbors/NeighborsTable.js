@@ -18,7 +18,7 @@ import { useParams
   from 'react-router-dom';
 
 import { ipToNumeric }
-  from 'app/utils/ip'
+  from 'app/lib/ip'
 
 import { useConfig }
   from 'app/context/config';
