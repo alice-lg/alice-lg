@@ -4,26 +4,23 @@
 #
 
 # Build frontend first
-FROM node:11 AS frontend
+FROM node:latest AS ui
 
 # Install dependencies 
-WORKDIR /src/alice-lg/client
-ADD client/package.json .
-ADD client/yarn.lock .
+WORKDIR /src/alice-lg/ui
+ADD ui/package.json .
+ADD ui/yarn.lock .
 
-RUN npm install -g gulp@4.0.0
-RUN npm install -g gulp-cli
 RUN yarn install
 
 # Add frontend
-WORKDIR /src/alice-lg/client
-ADD client .
+ADD ui/ .
 
 # Build frontend
-RUN DISABLE_LOGGING=1 NODE_ENV=production /usr/local/bin/gulp
+RUN yarn build 
 
 # Build the backend
-FROM golang:1.17 AS backend
+FROM golang:1.18 AS backend
 
 # Install dependencies
 WORKDIR /src/alice-lg
@@ -34,7 +31,7 @@ RUN go mod download
 ADD . .
 
 # Add client
-COPY --from=frontend /src/alice-lg/client/build client/build
+COPY --from=ui /src/alice-lg/ui/build ui/build
 
 WORKDIR /src/alice-lg/cmd/alice-lg
 RUN make alpine

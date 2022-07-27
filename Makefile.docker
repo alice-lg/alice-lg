@@ -3,14 +3,16 @@
 
 DOCKER := docker
 
+DOCKER_CONTAINER := alice-lg-build
+DOCKER_IMAGE := golang:1.18
+
 all: alice
 	cp cmd/alice-lg/alice-lg-* bin/
 
-client:
-	$(MAKE) -C client/ -f Makefile.docker client_prod
+ui:
+	$(MAKE) -C ui/ -f Makefile.docker client_prod
 
 alice: client
 	$(MAKE) -C cmd/alice-lg -f Makefile.docker
 
 .PHONY: client alice
-

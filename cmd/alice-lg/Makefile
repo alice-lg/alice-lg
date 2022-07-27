@@ -1,6 +1,5 @@
 #
-# Alice LG Backend 
-# ----------------
+# Alice LG Backend Makefile
 #
 
 PROG=alice-lg
@@ -28,31 +27,31 @@ all: deps $(TARGET)
 	@echo "Built $(VERSION) @ $(TARGET)"
 
 deps:
-	GO111MODULE=on go get -v .
+	go get -v .
 
 osx-dev:
-	GO111MODULE=on go run $(FILES)
+	go run $(FILES)
 
 osx:
-	GO111MODULE=on GOARCH=$(ARCH) GOOS=darwin go build $(LDFLAGS) -o $(PROG)-osx-$(ARCH)
+	GOARCH=$(ARCH) GOOS=darwin go build $(LDFLAGS) -o $(PROG)-osx-$(ARCH)
 
 linux:
-	GO111MODULE=on GOARCH=$(ARCH) GOOS=linux go build $(LDFLAGS) -o $(PROG)-linux-$(ARCH)
+	GOARCH=$(ARCH) GOOS=linux go build $(LDFLAGS) -o $(PROG)-linux-$(ARCH)
 
 alpine:
-	GO111MODULE=on CGO_ENABLED=0 GOOS=linux go build \
+	CGO_ENABLED=0 GOOS=linux go build \
 		-a -installsuffix cgo \
 		$(LDFLAGS) -o $(PROG)-linux-$(ARCH)
 
 static:
-	GO111MODULE=on CGO_ENABLED=0 GOOS=linux GOARCH=$(ARCH) \
+	CGO_ENABLED=0 GOOS=linux GOARCH=$(ARCH) \
 		go build $(CFLAGS) \
 		-a $(LDFLAGS_STATIC) \
 		-o $(PROG)-linux-$(ARCH)
 
 
 test:
-	GO111MODULE=on go test -v
+	go test -v
 	cd ../../pkg/api/ && GO111MODULE=on go test -v
 	cd ../../pkg/caches/ && GO111MODULE=on go test -v
 	cd ../../pkg/sources/birdwatcher && GO111MODULE=on go test -v
