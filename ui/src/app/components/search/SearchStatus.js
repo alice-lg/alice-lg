@@ -1,6 +1,9 @@
+import { useMemo } from 'react';
+
 import moment from 'moment';
 
-
+import { useRouteServersMap }
+  from 'app/context/route-servers';
 import { useApiStatus }
   from 'app/context/api-status';
 import { useRoutesLoading }
@@ -12,6 +15,37 @@ import RelativeTime
   from 'app/components/datetime/RelativeTime';
 
 
+const RefreshIncomplete = () => {
+  const routeServers = useRouteServersMap();
+  const status = useApiStatus();
+  const sources = status.store?.routes?.sources;
+
+  let notInitialized = useMemo(() => {
+    let missing = [];
+    for (const id in sources) {
+      if (sources[id].initialized) {
+        continue;
+      }
+      missing.push(routeServers[id].name);
+    }
+    return missing;
+  }, [routeServers, sources]);
+
+
+  return (
+    <>
+    <p className="text-danger">
+      Routes refresh was incomplete and results are missing
+      from:
+    </p>
+
+      {notInitialized.map((name) => 
+        <span key={name}>{name}<br /></span>
+      )} 
+      <br />
+    </>
+  );
+}
 
 
 const RefreshState = () => {
@@ -23,7 +57,17 @@ const RefreshState = () => {
   const cachedAt = moment.utc(status.cachedAt);
   const cacheTtl = moment.utc(status.ttlTime);
 
+  const storeInitialized = status.store?.routes?.initialized === true;
+
   if (cacheTtl.isBefore(moment.utc())) {
+    if (!storeInitialized) {
+      return (
+        <li>
+          Routes cache is currently being refreshed. 
+        </li>
+      );
+    }
+    
     // This means cache is currently being rebuilt
     return (
       <li>
@@ -33,6 +77,15 @@ const RefreshState = () => {
             pastEvent={true}
             value={cachedAt} /></b>
         and is currently being refreshed. 
+      </li>
+    );
+  }
+
+  if (!storeInitialized) {
+    return (
+      <li>
+        <RefreshIncomplete />
+        Next refresh in <b><RelativeTime value={cacheTtl} futureEvent={true} /></b>.
       </li>
     );
   }

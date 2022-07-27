@@ -35,6 +35,7 @@ export const ApiStatusProvider = ({children, api}) => {
       generatedAt: generatedAt,
       age: age,
       requestDurationMs: api.request_duration_ms,
+      store: api.store_status,
     };
   }
 
