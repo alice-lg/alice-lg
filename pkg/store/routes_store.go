@@ -218,6 +218,31 @@ func (s *RoutesStore) awaitNeighborStore(
 	}
 }
 
+// Status returns the store status meta
+func (s *RoutesStore) Status(ctx context.Context) *api.StoreStatus {
+	initialized := true
+	sources := s.sources.GetSourcesStatus()
+	status := make(map[string]*api.SourceStatus)
+
+	for _, s := range sources {
+		if !s.Initialized {
+			initialized = false
+		}
+		status[s.SourceID] = &api.SourceStatus{
+			RefreshInterval: s.RefreshInterval,
+			LastRefresh:     s.LastRefresh,
+			State:           s.State.String(),
+			Initialized:     s.Initialized,
+		}
+	}
+
+	meta := &api.StoreStatus{
+		Initialized: initialized,
+		Sources:     status,
+	}
+	return meta
+}
+
 // Stats calculates some store insights
 func (s *RoutesStore) Stats(ctx context.Context) *api.RoutesStoreStats {
 	totalImported := uint(0)

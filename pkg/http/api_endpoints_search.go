@@ -19,6 +19,10 @@ func (s *Server) apiLookupPrefixGlobal(
 	params httprouter.Params,
 ) (response, error) {
 	// TODO: This function is way too long
+	statusMeta := &api.StoreStatusMeta{
+		Neighbors: s.neighborsStore.Status(ctx),
+		Routes:    s.routesStore.Status(ctx),
+	}
 
 	// Get prefix to query
 	q, err := validateQueryString(req, "q")
@@ -127,6 +131,7 @@ func (s *Server) apiLookupPrefixGlobal(
 				CacheStatus: api.CacheStatus{
 					CachedAt: cachedAt,
 				},
+				StoreStatus:     statusMeta,
 				ResultFromCache: true, // Well.
 				TTL:             ttl,
 			},
@@ -156,6 +161,10 @@ func (s *Server) apiLookupNeighborsGlobal(
 	req *http.Request,
 	params httprouter.Params,
 ) (response, error) {
+	statusMeta := &api.StoreStatusMeta{
+		Neighbors: s.neighborsStore.Status(ctx),
+	}
+
 	// Query neighbors store
 	filter := api.NeighborFilterFromQuery(req.URL.Query())
 	neighbors, err := s.neighborsStore.FilterNeighbors(ctx, filter)
@@ -172,6 +181,7 @@ func (s *Server) apiLookupNeighborsGlobal(
 				CacheStatus: api.CacheStatus{
 					CachedAt: s.neighborsStore.CachedAt(ctx),
 				},
+				StoreStatus:     statusMeta,
 				ResultFromCache: true, // You would not have guessed.
 				TTL:             s.neighborsStore.CacheTTL(ctx),
 			},

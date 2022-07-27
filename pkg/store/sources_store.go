@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"errors"
 	"log"
 	"sort"
 	"sync"
@@ -10,6 +11,11 @@ import (
 	"github.com/alice-lg/alice-lg/pkg/config"
 	"github.com/alice-lg/alice-lg/pkg/sources"
 )
+
+// ErrSourceNotInitialized is returned if a source
+// is known but not yet initialized
+var ErrSourceNotInitialized = errors.New(
+	"source is not initialized")
 
 // Store State Constants
 const (
@@ -39,14 +45,14 @@ func (s State) String() string {
 
 // Status defines a status the store can be in.
 type Status struct {
-	RefreshInterval     time.Duration
-	RefreshParallelism  int
-	LastRefresh         time.Time
-	LastRefreshDuration time.Duration
-	LastError           interface{}
-	State               State
-	Initialized         bool
-	SourceID            string
+	RefreshInterval     time.Duration `json:"refresh_interval"`
+	RefreshParallelism  int           `json:"-"`
+	LastRefresh         time.Time     `json:"last_refresh"`
+	LastRefreshDuration time.Duration `json:"-"`
+	LastError           interface{}   `json:"-"`
+	State               State         `json:"state"`
+	Initialized         bool          `json:"initialized"`
+	SourceID            string        `json:"source_id"`
 
 	lastRefreshStart time.Time
 }
@@ -104,6 +110,18 @@ func NewSourcesStore(
 		refreshInterval:    refreshInterval,
 		refreshParallelism: refreshParallelism,
 	}
+}
+
+// GetSourcesStatus will retrieve the status for all sources
+// as a list.
+func (s *SourcesStore) GetSourcesStatus() []*Status {
+	s.Lock()
+	defer s.Unlock()
+	status := []*Status{}
+	for _, s := range s.status {
+		status = append(status, s)
+	}
+	return status
 }
 
 // GetStatus will retrieve the status of a source

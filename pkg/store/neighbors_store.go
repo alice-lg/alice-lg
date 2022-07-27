@@ -214,6 +214,9 @@ func (s *NeighborsStore) GetNeighborsAt(
 	ctx context.Context,
 	sourceID string,
 ) (api.Neighbors, error) {
+	if !s.IsInitialized(sourceID) {
+		return nil, ErrSourceNotInitialized
+	}
 	if s.forceNeighborRefresh {
 		src := s.sources.GetInstance(sourceID)
 		if src == nil {
@@ -231,6 +234,9 @@ func (s *NeighborsStore) GetNeighborsMapAt(
 	ctx context.Context,
 	sourceID string,
 ) (map[string]*api.Neighbor, error) {
+	if !s.IsInitialized(sourceID) {
+		return nil, ErrSourceNotInitialized
+	}
 	return s.backend.GetNeighborsMapAt(ctx, sourceID)
 }
 
@@ -279,7 +285,9 @@ func (s *NeighborsStore) LookupNeighbors(
 	results := make(api.NeighborsLookupResults)
 	for _, sourceID := range s.sources.GetSourceIDs() {
 		neighbors, err := s.lookupNeighborsAt(ctx, sourceID, query)
-		if err != nil {
+		if errors.Is(err, sources.ErrSourceNotFound) {
+			continue // Skip neighbors from this source for now
+		} else if err != nil {
 			return nil, err
 		}
 		results[sourceID] = neighbors
@@ -339,6 +347,31 @@ func (s *NeighborsStore) Stats(
 		RouteServers:   rsStats,
 	}
 	return storeStats
+}
+
+// Status returns the stores current status
+func (s *NeighborsStore) Status(ctx context.Context) *api.StoreStatus {
+	initialized := true
+	sources := s.sources.GetSourcesStatus()
+	status := make(map[string]*api.SourceStatus)
+
+	for _, s := range sources {
+		if !s.Initialized {
+			initialized = false
+		}
+		status[s.SourceID] = &api.SourceStatus{
+			RefreshInterval: s.RefreshInterval,
+			LastRefresh:     s.LastRefresh,
+			State:           s.State.String(),
+			Initialized:     s.Initialized,
+		}
+	}
+
+	meta := &api.StoreStatus{
+		Initialized: initialized,
+		Sources:     status,
+	}
+	return meta
 }
 
 // SourceCachedAt returns the last time the store content

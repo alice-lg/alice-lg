@@ -238,4 +238,6 @@ type PaginatedRoutesLookupResponse struct {
 
 	Imported *RoutesLookup `json:"imported"`
 	Filtered *RoutesLookup `json:"filtered"`
+
+	Status *StoreStatusMeta `json:"status"`
 }

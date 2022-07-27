@@ -75,16 +75,38 @@ type Rpki struct {
 // Meta contains response meta information
 // like cacheing time and cache ttl or the API version
 type Meta struct {
-	Version         string      `json:"version"`
-	CacheStatus     CacheStatus `json:"cache_status"`
-	ResultFromCache bool        `json:"result_from_cache"`
-	TTL             time.Time   `json:"ttl"`
+	Version         string           `json:"version"`
+	CacheStatus     CacheStatus      `json:"cache_status"`
+	ResultFromCache bool             `json:"result_from_cache"`
+	TTL             time.Time        `json:"ttl"`
+	StoreStatus     *StoreStatusMeta `json:"store_status,omitempty"`
 }
 
 // CacheStatus contains cache timing information.
 type CacheStatus struct {
 	CachedAt time.Time `json:"cached_at"`
 	OrigTTL  int       `json:"orig_ttl"`
+}
+
+// SourceStatus is the current status of a source in
+// a store.
+type SourceStatus struct {
+	RefreshInterval time.Duration `json:"refresh_interval"`
+	LastRefresh     time.Time     `json:"last_refresh"`
+	State           string        `json:"state"`
+	Initialized     bool          `json:"initialized"`
+}
+
+// StoreStatus is meta data for a store
+type StoreStatus struct {
+	Initialized bool                     `json:"initialized"`
+	Sources     map[string]*SourceStatus `json:"sources"`
+}
+
+// StoreStatusMeta is the meta response for all stores
+type StoreStatusMeta struct {
+	Routes    *StoreStatus `json:"routes,omitempty"`
+	Neighbors *StoreStatus `json:"neighbors,omitempty"`
 }
 
 // Status ... TODO: ?
