@@ -305,9 +305,12 @@ func (s *NeighborsStore) FilterNeighbors(
 	// Get neighbors from all routeservers
 	for _, sourceID := range s.sources.GetSourceIDs() {
 		neighbors, err := s.backend.GetNeighborsAt(ctx, sourceID)
-		if err != nil {
+		if errors.Is(err, sources.ErrSourceNotFound) {
+			continue // Skip neighbors from this source for now
+		} else if err != nil {
 			return nil, err
 		}
+
 		// Apply filters
 		for _, neighbor := range neighbors {
 			if filter.Match(neighbor) {
