@@ -25,9 +25,9 @@ const RouteDetailsModal = () => {
     return null;
   }
 
-  const communities = attrs.communities;
-  const extCommunities = attrs.ext_communities;
-  const largeCommunities = attrs.large_communities;
+  const communities = attrs.communities || [];
+  const extCommunities = attrs.ext_communities || [];
+  const largeCommunities = attrs.large_communities || [];
 
   // As communities can be repeated, we can not use them
   // directly as keys, but may have to prepend a suffix.

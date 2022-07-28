@@ -26,7 +26,9 @@ const RefreshIncomplete = () => {
       if (sources[id].initialized) {
         continue;
       }
-      missing.push(routeServers[id].name);
+      if (routeServers[id]) {
+        missing.push(routeServers[id].name);
+      }
     }
     return missing;
   }, [routeServers, sources]);
