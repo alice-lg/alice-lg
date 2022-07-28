@@ -31,19 +31,19 @@ const RefreshIncomplete = () => {
     return missing;
   }, [routeServers, sources]);
 
+  const storeInitialized = status.store?.routes?.initialized === true;
+  if (storeInitialized) {
+    return null;
+  }
 
   return (
-    <>
     <p className="text-danger">
-      Routes refresh was incomplete and results are missing
-      from:
-    </p>
+      There are currently <b>no results</b> from:<br />
 
       {notInitialized.map((name) => 
         <span key={name}>{name}<br /></span>
       )} 
-      <br />
-    </>
+    </p>
   );
 }
 
@@ -63,7 +63,8 @@ const RefreshState = () => {
     if (!storeInitialized) {
       return (
         <li>
-          Routes cache is currently being refreshed. 
+          <RefreshIncomplete />
+          Routes cache is being refreshed right now.
         </li>
       );
     }
@@ -71,6 +72,8 @@ const RefreshState = () => {
     // This means cache is currently being rebuilt
     return (
       <li>
+        <RefreshIncomplete />
+
         Routes cache was built
           <b><RelativeTime
             fuzzyNow={5}
@@ -85,6 +88,7 @@ const RefreshState = () => {
     return (
       <li>
         <RefreshIncomplete />
+
         Next refresh in <b><RelativeTime value={cacheTtl} futureEvent={true} /></b>.
       </li>
     );
@@ -92,6 +96,8 @@ const RefreshState = () => {
 
   return (
     <li>
+      <RefreshIncomplete />
+
       Routes cache was built <b><RelativeTime fuzzyNow={5} value={cachedAt} /> </b>
       and will be refreshed <b><RelativeTime value={cacheTtl} futureEvent={true} /></b>.
     </li>
