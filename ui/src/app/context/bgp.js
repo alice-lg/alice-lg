@@ -59,6 +59,9 @@ const resolveCommunity = (base, community) => {
  */
 const resolveCommunities = (base, communities) => {
   let results = [];
+  if (!communities) {
+    return results;
+  }
   for (const c of communities) {
     const description = resolveCommunity(base, c);
     if (description != null) {
@@ -92,14 +95,14 @@ export const useRejectCandidate = (route) => {
   return (resolved.length > 0);
 };
 
-const makeReadableCommunity = (communities, community) => {
+const getReadableCommunity = (communities, community) => {
   const label = resolveCommunity(communities, community);
   return expandVars(label, community);
 }
 
 export const useReadableCommunities = () => {
   const { bgp_communities } = useConfig();
-  return useCallback((community) => makeReadableCommunity(
+  return useCallback((community) => getReadableCommunity(
     bgp_communities,
     community,
   ), [bgp_communities]);

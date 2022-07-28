@@ -12,7 +12,7 @@ const BlackholeIndicator = ({route}) => {
   const routeServer = useRouteServer(); // blackholes are store per RS
 
   const blackholes = routeServer?.blackholes || [];
-  const communities = route?.bgp?.communities;
+  const communities = route?.bgp?.communities || [];
   const nextHop = route?.bgp?.next_hop;
 
   // Check if next hop is a known blackhole

@@ -24,7 +24,7 @@ const RpkiIndicator = ({route}) => {
   const rpkiNotChecked = rpki.not_checked;
   const rpkiInvalid    = rpki.invalid;
 
-  const communities = route?.bgp?.large_communities;
+  const communities = route?.bgp?.large_communities || [];
   for (const com of communities) {
     // RPKI VALID
     if (com[0].toFixed() === rpkiValid[0] &&
