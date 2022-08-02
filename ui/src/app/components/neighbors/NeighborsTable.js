@@ -267,15 +267,16 @@ const NeighborColumn = ({neighbor, column}) => {
 }
 
 const NeighborRow = ({neighbor, columns}) => {
-  const cols = useMemo(() => columns.map((c) => 
-    <NeighborColumn 
-      key={c}
-      neighbor={neighbor}
-      column={c} />
-  ), [neighbor, columns]);
-  return (
-    <tr>{cols}</tr>
-  );
+  return useMemo(() => {
+    const cols = columns.map((c) => 
+      <NeighborColumn 
+        key={c}
+        neighbor={neighbor}
+        column={c} />);
+    return (
+      <tr>{cols}</tr>
+    );
+  }, [neighbor, columns]);
 }
 
 /**

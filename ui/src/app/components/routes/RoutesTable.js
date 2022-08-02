@@ -1,5 +1,7 @@
 
-import { useCallback }
+import { useCallback
+       , useMemo
+       }
   from 'react';
 
 
@@ -91,17 +93,34 @@ const RouteColumn = ({onClick, column, route}) => {
     "ASPath": ColAsPath,
   };
 
-  const handleClick = useCallback(() => onClick(route), [route, onClick]);
-
   let Widget = widgets[column] || ColDefault;
   return (
     <Widget
       column={column}
       route={route}
-      onClick={handleClick} />
+      onClick={onClick} />
   );
 };
 
+
+/**
+ * RoutesRow renders a memoized row
+ */
+const RoutesRow = ({columns, route, onClick}) => {
+  return useMemo(() => {
+    const callback = () => onClick(route);
+    const cols = columns.map((col) => (
+      <RouteColumn
+        key={col}
+        onClick={callback}
+        column={col}
+        route={route} />
+    ));
+    return (
+      <tr>{cols}</tr>
+    );
+  }, [columns, route, onClick]);
+}
 
 
 const RoutesTable = ({results}) => {
@@ -119,15 +138,11 @@ const RoutesTable = ({results}) => {
   }
 
   const rows = routes.map((r, i) => (
-    <tr key={i}>
-      {columnsOrder.map((col) => (
-        <RouteColumn
-          key={col}
-          onClick={showAttributesModal}
-          column={col}
-          route={r} />
-      ))}
-    </tr>
+    <RoutesRow
+      key={i}
+      columns={columnsOrder}
+      onClick={showAttributesModal}
+      route={r} />
   ));
 
   return (
