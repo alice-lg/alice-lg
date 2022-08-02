@@ -219,46 +219,43 @@ Alice.updateContent({
 
 ```
 
+A callback for running custom javascript after the base application
+was initialized can be installed using:
+
+```javascript
+Alice.onLayoutReady(function(page) {
+    // page is the layout HTML root element
+});
+```
+
 For an example check out: https://github.com/alice-lg/alice-theme-example
 
 ## Hacking
 
 The client is a Single Page React Application.
-All sources are available in `client/`.
+All sources are available in `ui/`.
 
-Install build tools as needed:
-
-    npm install -g gulp-cli
-
+`Yarn` is required for building the UI.
 
 Create a fresh UI build with
 ```bash
-cd client/
-make client
+cd ui/
+make
 ```
 
-This will install all dependencies and run `gulp`.
+This will install all dependencies with `yarn install` and run `yarn build`.
 
-While working on the UI you might want to use `make watch`,
-which will keep the `gulp watch` task up and running.
+As this is a `create-react-app` application, react-scripts are present
+and you can just run a development server using `yarn start`.
 
-### Docker
-For convenience we added a `Dockerfile` for building the frontend / client.
+All this available as a containerized environment:
 
-Create a fresh UI build using docker with
-```bash
-cd client/
+Running `docker-compose up` in the `./dev` will build and start the
+backend and run a webpack dev server for the UI.
 
-# Dev build:
-make -f Makefile.docker client
+The UI is then available on http://localhost:3000/ and on http://localhost:7340/
+the backend will serve the API.
 
-# Production build:
-make -f Makefile.docker client_prod
-```
-You can use gulp with docker for watching the files while developing aswell:
-```bash
-make -f Makefile.docker watch
-```
 
 ## Sponsors
 
