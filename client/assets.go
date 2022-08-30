@@ -8,7 +8,7 @@ import (
 )
 
 // Assets hold the alice-lg frontend build
-//go:embed build/*
+// go:embed build/*
 var Assets embed.FS
 
 // AssetsHTTPHandler handles HTTP request at a specific prefix.
