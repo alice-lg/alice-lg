@@ -56,7 +56,7 @@ __These examples include setting up your Go environment, if you already have set
 
 In case you have trouble with `npm` and `gulp` you can try using `yarn`.
 
-### CentOS:
+### CentOS (Debian: replace yum by apt should make the trick...):
 First add the following lines at the end of your `~/.bash_profile`:
 ```bash
 GOPATH=$HOME/go
@@ -70,18 +70,39 @@ source ~/.bash_profile
 
 # Install frontend build dependencies
 sudo yum install golang npm
-sudo npm install --global gulp-cli
-sudo npm install --global yarn
+# To force nodejs version 11.15 ... we live dangerously :) -> should be updated right ?
+curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+source ~/.profile
+# nvm ls-remote
+nvm install 11.15.0
+nvm use 11.15.0
+# node --version
 
-go get github.com/GeertJohan/go.rice
-go get github.com/GeertJohan/go.rice/rice
+npm install -g gulp@4.0.0
+npm install -g gulp-cli
+npm install -g yarn
+
 mkdir -p ~/go/bin ~/go/pkg ~/go/src/github.com/alice-lg/
 
 cd ~/go/src/github.com/alice-lg
 git clone https://github.com/alice-lg/alice-lg.git
-
 cd alice-lg
-make
+
+# Done here and now because we need a go.mod file so a module is recognized
+go get github.com/GeertJohan/go.rice
+go get github.com/GeertJohan/go.rice/rice
+go mod download
+
+make  # should work now if you configured the db alice_test to user postgres (password postgres) on the local db server (the same way we do on the alice.restena.lu server, see below)
+
+# Take out the interesing files
+# SOMEWHERE=/media/shared_folders
+#rm -rf ${SOMEWHERE}/alice-lg
+#mkdir ${SOMEWHERE}/alice-lg
+#cp bin/alice-lg-linux-amd64 ${SOMEWHERE}/alice-lg
+#cp -r etc ${SOMEWHERE}/alice-lg
+#cp -r install ${SOMEWHERE}/alice-lg
+#tar -cvf alice-lg.tar ${SOMEWHERE}/alice-lg # add versionning somehow, with tag git, for sure
 ```
 Your Alice-LG source will now be located at `~/go/src/github.com/alice-lg/alice-lg` and your alice-LG executable should be at `~/go/src/github.com/alice-lg/alice-lg/bin/alice-lg-linux-amd64`
 
