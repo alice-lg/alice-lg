@@ -47,7 +47,7 @@ backend_tests:
 test: backend_tests
 
 
-alice: backend_tests backend_prod
+alice: backend_prod backend_tests
 	cp cmd/alice-lg/alice-lg-* bin/
 
 
