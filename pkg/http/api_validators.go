@@ -38,7 +38,7 @@ func NewErrAmbigousParam(key string) *ErrValidationFailed {
 }
 
 // NewErrEmptyParam return an ErrValidationFailed if the
-// provided paramter value is empty.
+// provided parameter value is empty.
 func NewErrEmptyParam(key string) *ErrValidationFailed {
 	return &ErrValidationFailed{
 		Param:  key,

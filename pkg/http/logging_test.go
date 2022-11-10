@@ -8,7 +8,7 @@ import (
 )
 
 func TestApiLogSourceError(t *testing.T) {
-	err := fmt.Errorf("an unexpected error occured")
+	err := fmt.Errorf("an unexpected error occurred")
 
 	cfg := &config.Config{
 		Sources: []*config.SourceConfig{

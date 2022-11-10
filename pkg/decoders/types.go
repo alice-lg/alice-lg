@@ -36,7 +36,7 @@ func StringList(data interface{}) []string {
 }
 
 // TrimmedCSVStringList makes a trimmed list of CSV strings
-// ommitting empty values.
+// omitting empty values.
 func TrimmedCSVStringList(s string) []string {
 	tokens := strings.Split(s, ",")
 	list := []string{}

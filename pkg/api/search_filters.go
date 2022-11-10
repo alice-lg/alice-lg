@@ -177,7 +177,7 @@ func (g *SearchFilterGroup) rebuildIndex() {
 	g.filtersIdx = idx // replace index
 }
 
-// A SearchFilterComparator comapres route with a filter
+// A SearchFilterComparator compares route with a filter
 type SearchFilterComparator func(route Filterable, value interface{}) bool
 
 func searchFilterMatchSource(route Filterable, value interface{}) bool {
@@ -351,7 +351,7 @@ func (s *SearchFilters) GetGroupByKey(key string) *SearchFilterGroup {
 // and its counters.
 //
 // Update filter struct to include route:
-//   - Extract ASN, source, bgp communites,
+//   - Extract ASN, source, bgp communities,
 //   - Find Filter in group, increment result count if required.
 func (s *SearchFilters) UpdateFromLookupRoute(r *LookupRoute) {
 	// Add source

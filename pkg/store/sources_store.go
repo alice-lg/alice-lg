@@ -141,7 +141,7 @@ func (s *SourcesStore) getStatus(sourceID string) (*Status, error) {
 }
 
 // IsInitialized will retrieve the status of the source
-// and check if a successful refresh happend at least
+// and check if a successful refresh happened at least
 // once.
 func (s *SourcesStore) IsInitialized(sourceID string) (bool, error) {
 	s.Lock()
@@ -190,7 +190,7 @@ func (s *SourcesStore) ShouldRefresh(
 	}
 	if status.State == StateError {
 		// The refresh interval in the config is ok if the
-		// success case. When an error occures it is desireable
+		// success case. When an error occures it is desirable
 		// to retry sooner, without spamming the server.
 		nextRefresh = status.LastRefresh.Add(10 * time.Second)
 	}
@@ -303,7 +303,7 @@ func (s *SourcesStore) LockSource(sourceID string) error {
 	return nil
 }
 
-// RefreshSuccess indicates a successfull update
+// RefreshSuccess indicates a successful update
 // of the store's content.
 func (s *SourcesStore) RefreshSuccess(sourceID string) error {
 	s.Lock()

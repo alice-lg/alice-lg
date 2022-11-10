@@ -31,7 +31,7 @@ type Neighbor struct {
 }
 
 // String encodes a neighbor as json. This is
-// more readable than the golang default represenation.
+// more readable than the golang default representation.
 func (n *Neighbor) String() string {
 	repr, _ := json.Marshal(n)
 	return string(repr)

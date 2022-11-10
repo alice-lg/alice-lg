@@ -39,7 +39,7 @@ type apiEndpoint func(
 	httprouter.Params,
 ) (response, error)
 
-// Wrap handler for access controll, throtteling and compression
+// Wrap handler for access control, throtteling and compression
 func endpoint(wrapped apiEndpoint) httprouter.Handle {
 	return func(res http.ResponseWriter,
 		req *http.Request,

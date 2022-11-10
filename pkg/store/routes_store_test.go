@@ -160,9 +160,9 @@ func TestLookupPrefixForNeighbors(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// We should have retrived 8 prefixes,
+	// We should have retrieved 8 prefixes,
 	if len(results) != 8 {
-		t.Error("Expected result lenght: 8, got:", len(results))
+		t.Error("Expected result length: 8, got:", len(results))
 	}
 
 	presence := []string{

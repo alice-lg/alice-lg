@@ -102,7 +102,7 @@ type RoutesResponse struct {
 	NotExported Routes `json:"not_exported"`
 }
 
-// CacheTTL returns the cache ttl of the reponse
+// CacheTTL returns the cache ttl of the response
 func (res *RoutesResponse) CacheTTL() time.Duration {
 	now := time.Now().UTC()
 	return res.Response.Meta.TTL.Sub(now)
@@ -113,7 +113,7 @@ type TimedResponse struct {
 	RequestDuration float64 `json:"request_duration_ms"`
 }
 
-// Pagination strucutres information about the
+// Pagination information, including the
 // current page, total pages, page size, etc...
 type Pagination struct {
 	Page         int `json:"page"`

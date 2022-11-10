@@ -153,9 +153,6 @@ func (b *GenericBirdwatcher) filterRoutesByDuplicates(
 	// Remove routes from "routes" that are contained within filterRoutes
 	for _, filterRoute := range filterRoutes {
 		delete(routesMap, filterRoute.ID)
-		// in theorey this guard is unneccessary
-		//if _, ok := routesMap[filterRoute.ID]; ok {
-		// }
 	}
 
 	for _, route := range routesMap {

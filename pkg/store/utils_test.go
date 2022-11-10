@@ -6,7 +6,7 @@ import (
 
 func TestContainsCi(t *testing.T) {
 	if ContainsCi("foo bar", "BaR") != true {
-		t.Error("An unexpected error occured.")
+		t.Error("An unexpected error occurred.")
 	}
 	if ContainsCi("Luxembourg Online SA", "Goo") == true {
 		t.Error("Should ne no match")
