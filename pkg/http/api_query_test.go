@@ -19,22 +19,22 @@ func makeQueryRequest(q string) *http.Request {
 func makeQueryRoutes() api.Routes {
 	routes := api.Routes{
 		&api.Route{
-			ID:          "route_01",
+			ID:         "route_01",
 			NeighborID: "n01",
-			Network:     "123.42.43.0/24",
-			Gateway:     "23.42.42.1",
+			Network:    "123.42.43.0/24",
+			Gateway:    "23.42.42.1",
 		},
 		&api.Route{
-			ID:          "route_02",
+			ID:         "route_02",
 			NeighborID: "n01",
-			Network:     "142.23.0.0/16",
-			Gateway:     "42.42.42.1",
+			Network:    "142.23.0.0/16",
+			Gateway:    "42.42.42.1",
 		},
 		&api.Route{
-			ID:          "route_03",
+			ID:         "route_03",
 			NeighborID: "n01",
-			Network:     "123.43.0.0/16",
-			Gateway:     "23.42.43.1",
+			Network:    "123.43.0.0/16",
+			Gateway:    "23.42.43.1",
 		},
 	}
 

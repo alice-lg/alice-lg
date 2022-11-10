@@ -351,9 +351,8 @@ func (s *SearchFilters) GetGroupByKey(key string) *SearchFilterGroup {
 // and its counters.
 //
 // Update filter struct to include route:
-//  - Extract ASN, source, bgp communites,
-//  - Find Filter in group, increment result count if required.
-//
+//   - Extract ASN, source, bgp communites,
+//   - Find Filter in group, increment result count if required.
 func (s *SearchFilters) UpdateFromLookupRoute(r *LookupRoute) {
 	// Add source
 	s.GetGroupByKey(SearchKeySources).AddFilter(&SearchFilter{
@@ -425,16 +424,17 @@ func (s *SearchFilters) UpdateFromRoute(r *Route) {
 // query parameters.
 //
 // For example a query string of:
-//   asns=2342,23123&communities=23:42&large_communities=23:42:42
+//
+//	asns=2342,23123&communities=23:42&large_communities=23:42:42
 //
 // yields a filtering struct of
-//    Groups[
-//        Group{"sources", []},
-//        Group{"asns", [Filter{Value: 2342},
-//                       Filter{Value: 23123}]},
-//        Group{"communities", ...
-//    }
 //
+//	Groups[
+//	    Group{"sources", []},
+//	    Group{"asns", [Filter{Value: 2342},
+//	                   Filter{Value: 23123}]},
+//	    Group{"communities", ...
+//	}
 func FiltersFromQuery(query url.Values) (*SearchFilters, error) {
 	queryFilters := NewSearchFilters()
 	for key := range query {
@@ -567,7 +567,6 @@ type NeighborFilter struct {
 // and ASN.
 //
 // The latter is used to find related peers on all route servers.
-//
 func NeighborFilterFromQuery(q url.Values) *NeighborFilter {
 	asn := 0
 	name := q.Get("name")

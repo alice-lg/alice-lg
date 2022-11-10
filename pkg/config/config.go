@@ -2,7 +2,6 @@
 // for the Alice Looking Glass.
 //
 // This configuration is read from a config file.
-//
 package config
 
 import (
@@ -275,7 +274,6 @@ func getRoutesColumnsDefaults() (map[string]string, []string, error) {
 //
 // In case the configuration is empty, fall back to
 // the defaults as defined in getRoutesColumnsDefault()
-//
 func getRoutesColumns(config *ini.File) (map[string]string, []string, error) {
 	columns := make(map[string]string)
 	order := []string{}

@@ -10,6 +10,7 @@ import (
 )
 
 // Include the schema through embedding
+//
 //go:embed schema.sql
 var schema string
 

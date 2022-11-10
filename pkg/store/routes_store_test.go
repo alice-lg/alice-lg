@@ -43,9 +43,7 @@ func importRoutes(
 	return s.sources.RefreshSuccess(src.ID)
 }
 
-//
 // Route Store Tests
-//
 func makeTestRoutesStore() *RoutesStore {
 	neighborsStore := makeTestNeighborsStore()
 	be := memory.NewRoutesBackend()

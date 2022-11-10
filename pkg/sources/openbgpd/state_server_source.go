@@ -23,9 +23,8 @@ const (
 // It is intendet to consume structured bgpctl output
 // queried over HTTP using the:
 //
-//    openbgpd-state-server
-//    https://github.com/alice-lg/openbgpd-state-server
-//
+//	openbgpd-state-server
+//	https://github.com/alice-lg/openbgpd-state-server
 type StateServerSource struct {
 	// cfg is the source configuration retrieved
 	// from the alice config file.
