@@ -62,11 +62,11 @@ func describeNeighbor(nb interface{}) string {
 	desc := decoders.MapGetString(nb, "description", "")
 	if desc != "" {
 		return desc
-	} else {
-		addr := decoders.MapGetString(nb, "remote_addr", "invalid_address")
-		asn := decoders.MapGetString(nb, "remote_as", "")
-		return fmt.Sprintf("PEER AS%s %s", asn, addr)
 	}
+
+	addr := decoders.MapGetString(nb, "remote_addr", "invalid_address")
+	asn := decoders.MapGetString(nb, "remote_as", "")
+	return fmt.Sprintf("PEER AS%s %s", asn, addr)
 }
 
 // decodeNeighbors retrievs neighbors data from
