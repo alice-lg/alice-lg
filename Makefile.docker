@@ -1,18 +1,11 @@
 
-# Build a local alice binary using docker.
+# Build Docker Image
 
-DOCKER := docker
+APP_VERSION=$(shell cat ./VERSION)
 
-DOCKER_CONTAINER := alice-lg-build
-DOCKER_IMAGE := golang:1.18
+all: image
 
-all: alice
-	cp cmd/alice-lg/alice-lg-* bin/
+image:
+	docker build . -t alice-lg:latest -t alice-lg:$(APP_VERSION)
 
-ui:
-	$(MAKE) -C ui/ -f Makefile.docker client_prod
 
-alice: client
-	$(MAKE) -C cmd/alice-lg -f Makefile.docker
-
-.PHONY: client alice
