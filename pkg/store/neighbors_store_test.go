@@ -75,6 +75,8 @@ func makeTestNeighborsStore() *NeighborsStore {
 
 	// Create store
 	store := NewNeighborsStore(cfg, be)
+	store.sources.RefreshSuccess("rs1")
+	store.sources.RefreshSuccess("rs2")
 	return store
 }
 
