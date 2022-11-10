@@ -15,7 +15,7 @@ func ConnectTest() *pgxpool.Pool {
 	ctx := context.Background()
 	url := os.Getenv("ALICE_TEST_DB_URL")
 	if url == "" {
-		url = "postgres://postgres:postgres@localhost:5432/alice_test"
+		url = "postgres://alice:alice@localhost:5432/alice_test"
 	}
 	p, err := Connect(ctx, &config.PostgresConfig{
 		URL:      url,
