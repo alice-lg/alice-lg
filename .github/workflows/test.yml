@@ -36,6 +36,12 @@ jobs:
         with:
           node-version: 16
 
+      - name: Add UI build stub
+        working-directory: ./ui
+        run: |
+          mkdir -p ./build
+          touch ./build/UI_BUILD_STUB
+
       # Formatting
       - name: Check formatting
         run: |
