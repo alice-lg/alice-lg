@@ -7,7 +7,7 @@ all: deps
 deps:
 	yarn install
 
-test:
+test: deps
 	yarn test --ci --all --watchAll=false
 
 clean:
