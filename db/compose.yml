@@ -8,6 +8,8 @@ services:
     ports:
       - 5432:5432
     environment:
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: alice 
+      POSTGRES_PASSWORD: alice 
+      POSTGRES_DB: alice 
     volumes:
       - ./_data:/var/lib/postgresql/data

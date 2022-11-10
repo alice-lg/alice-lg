@@ -24,11 +24,11 @@ if [ -z $PGDATABASE ]; then
 fi
 
 if [ -z $PGUSER ]; then
-    export PGUSER="postgres"
+    export PGUSER="alice"
 fi
 
 if [ -z $PGPASSWORD ]; then
-    export PGPASSWORD="postgres"
+    export PGPASSWORD="alice"
 fi
 
 ## Commandline opts: 
@@ -61,7 +61,7 @@ fi
 
 if [ $OPT_CLEAR -eq 1 ]; then
     echo "++ clearing database"
-    $PSQL template1 -c "DROP DATABASE $PGDATABASE"
+    $PSQL template1 -c "DROP DATABASE IF EXISTS $PGDATABASE"
     $PSQL template1 -c "CREATE DATABASE $PGDATABASE"
 fi
 ######################################################################
