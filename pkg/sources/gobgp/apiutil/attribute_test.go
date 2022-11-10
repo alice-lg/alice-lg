@@ -176,7 +176,7 @@ func Test_OriginatorIdAttribute(t *testing.T) {
 	n, err := unmarshalAttribute(a)
 	assert.Nil(err)
 
-	output := NewOriginatorIdAttributeFromNative(n.(*bgp.PathAttributeOriginatorId))
+	output := NewOriginatorIDAttributeFromNative(n.(*bgp.PathAttributeOriginatorId))
 	assert.Equal(input.Id, output.Id)
 }
 
