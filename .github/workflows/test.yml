@@ -1,0 +1,71 @@
+
+name: Test
+
+on: [ push, workflow_dispatch ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: alice
+          POSTGRES_USER: alice 
+          POSTGRES_PASSWORD: alice 
+          POSTGRES_DB: alice 
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # Install Go
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.18.x'
+
+      # Formatting
+      - name: Check formatting
+        run: |
+          test -z $(gofmt -l ./pkg)
+          test -z $(gofmt -l ./cmd)
+
+      # Vet
+      - name: Vet
+        run: |
+          go vet ./pkg/...
+          go vet ./cmd/...
+
+      # Lint
+      - name: Lint
+        run: |
+          go install golang.org/x/lint/golint@latest
+          golint -set_exit_status ./pkg/...
+          golint -set_exit_status ./cmd/...
+
+      # Test environment
+      - name: Setup Test Database
+        env:
+          PGHOST: localhost
+          PGPORT: 5432
+          PGUSER: alice 
+          PGPASSWORD: alice
+        working-directory: ./db
+        run: |
+          ./init.sh -c -t
+
+      # Run Tests
+      - name: UI Tests
+        run: make ui_test
+
+      - name: Backend Tests
+        run: make backend_test
+
