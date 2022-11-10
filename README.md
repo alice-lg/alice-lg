@@ -22,6 +22,12 @@ And checkout the API at:
 
 ## Breaking Changes
 
+### 6.0.0
+
+With the new functional react UI, the `DOMContentLoaded` event can no
+longer be used for injecting additional content. Please use
+`Alice.onLayoutReady(function(main) { ... });` instead.
+
 ### 5.1.0
 
 The spelling of "neighbors" is now harmonized. Please update your config and

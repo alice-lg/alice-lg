@@ -2,7 +2,7 @@
 # Changelog
 
 
-## 6.0.0 (2022-07-26)
+## 6.0.0 (2022-11-10)
  
  * Pure functional react UI!
 
@@ -16,6 +16,15 @@
    - API now provides `Alice.onLayoutReady((page) => ... )`
      callback. This should be used to install additional
      DOM event listeners for extensions.
+
+     So, if you want to inject additional dom nodes into
+     the UI and used something like:
+     
+     `document.addEventListener("DOMContentLoaded", function() { ... }`
+
+     you now need to use the `Alice.onLayoutReady(function(main) { ... })`
+     callback.
+
 
 ## 5.1.1 (2022-06-21)
   
