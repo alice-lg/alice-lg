@@ -25,7 +25,9 @@ import (
 	"github.com/osrg/gobgp/pkg/packet/bgp"
 )
 
-// workaround. This for the json format compatibility. Once we update senario tests, we can remove this.
+// Path structure: This is a workaround.
+// This for the json format compatibility.
+// Once we update senario tests, we can remove this.
 type Path struct {
 	Nlri       bgp.AddrPrefixInterface      `json:"nlri"`
 	Age        int64                        `json:"age"`
@@ -37,14 +39,17 @@ type Path struct {
 	NeighborIP net.IP                       `json:"neighbor-ip,omitempty"`
 }
 
+// Destination contains a list of paths
 type Destination struct {
 	Paths []*Path
 }
 
+// MarshalJSON serializes a destination
 func (d *Destination) MarshalJSON() ([]byte, error) {
 	return json.Marshal(d.Paths)
 }
 
+// NewDestination creates a new destination
 func NewDestination(dst *api.Destination) *Destination {
 	l := make([]*Path, 0, len(dst.Paths))
 	for _, p := range dst.Paths {
@@ -65,6 +70,7 @@ func NewDestination(dst *api.Destination) *Destination {
 	return &Destination{Paths: l}
 }
 
+// NewPath creates a new path
 func NewPath(nlri bgp.AddrPrefixInterface, isWithdraw bool, attrs []bgp.PathAttributeInterface, age time.Time) *api.Path {
 	t, _ := ptypes.TimestampProto(age)
 	return &api.Path{
@@ -72,7 +78,7 @@ func NewPath(nlri bgp.AddrPrefixInterface, isWithdraw bool, attrs []bgp.PathAttr
 		Pattrs:     MarshalPathAttributes(attrs),
 		Age:        t,
 		IsWithdraw: isWithdraw,
-		Family:     ToApiFamily(nlri.AFI(), nlri.SAFI()),
+		Family:     ToAPIFamily(nlri.AFI(), nlri.SAFI()),
 		Identifier: nlri.PathIdentifier(),
 	}
 }
@@ -89,6 +95,7 @@ func getNLRI(family bgp.RouteFamily, buf []byte) (bgp.AddrPrefixInterface, error
 	return nlri, nil
 }
 
+// GetNativeNlri creates an address prefix from a path
 func GetNativeNlri(p *api.Path) (bgp.AddrPrefixInterface, error) {
 	if len(p.NlriBinary) > 0 {
 		return getNLRI(ToRouteFamily(p.Family), p.NlriBinary)
@@ -96,6 +103,7 @@ func GetNativeNlri(p *api.Path) (bgp.AddrPrefixInterface, error) {
 	return UnmarshalNLRI(ToRouteFamily(p.Family), p.Nlri)
 }
 
+// GetNativePathAttributes gets the path attributes from a path
 func GetNativePathAttributes(p *api.Path) ([]bgp.PathAttributeInterface, error) {
 	pattrsLen := len(p.PattrsBinary)
 	if pattrsLen > 0 {
@@ -116,11 +124,13 @@ func GetNativePathAttributes(p *api.Path) ([]bgp.PathAttributeInterface, error) 
 	return UnmarshalPathAttributes(p.Pattrs)
 }
 
+// ToRouteFamily makes an route family from an API family
 func ToRouteFamily(f *api.Family) bgp.RouteFamily {
 	return bgp.AfiSafiToRouteFamily(uint16(f.Afi), uint8(f.Safi))
 }
 
-func ToApiFamily(afi uint16, safi uint8) *api.Family {
+// ToAPIFamily makes an API Family from a route family
+func ToAPIFamily(afi uint16, safi uint8) *api.Family {
 	return &api.Family{
 		Afi:  api.Family_Afi(afi),
 		Safi: api.Family_Safi(safi),

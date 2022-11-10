@@ -28,6 +28,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// UnmarshalAttribute unmarshals an attribute
 func UnmarshalAttribute(an *any.Any) (bgp.PathAttributeInterface, error) {
 	var value ptypes.DynamicAny
 	if err := ptypes.UnmarshalAny(an, &value); err != nil {
@@ -77,12 +78,14 @@ func UnmarshalAttribute(an *any.Any) (bgp.PathAttributeInterface, error) {
 	return nil, errors.New("unexpected object")
 }
 
+// NewOriginAttributeFromNative creates a new origin attribute
 func NewOriginAttributeFromNative(a *bgp.PathAttributeOrigin) *api.OriginAttribute {
 	return &api.OriginAttribute{
 		Origin: uint32(a.Value),
 	}
 }
 
+// NewAsPathAttributeFromNative creates a new as path attribute
 func NewAsPathAttributeFromNative(a *bgp.PathAttributeAsPath) *api.AsPathAttribute {
 	segments := make([]*api.AsSegment, 0, len(a.Value))
 	for _, param := range a.Value {
@@ -96,28 +99,33 @@ func NewAsPathAttributeFromNative(a *bgp.PathAttributeAsPath) *api.AsPathAttribu
 	}
 }
 
+// NewNextHopAttributeFromNative creates a new next hop attribute
 func NewNextHopAttributeFromNative(a *bgp.PathAttributeNextHop) *api.NextHopAttribute {
 	return &api.NextHopAttribute{
 		NextHop: a.Value.String(),
 	}
 }
 
+// NewMultiExitDiscAttributeFromNative creates a new multi exit attribute
 func NewMultiExitDiscAttributeFromNative(a *bgp.PathAttributeMultiExitDisc) *api.MultiExitDiscAttribute {
 	return &api.MultiExitDiscAttribute{
 		Med: a.Value,
 	}
 }
 
+// NewLocalPrefAttributeFromNative creates a new local pref attribute
 func NewLocalPrefAttributeFromNative(a *bgp.PathAttributeLocalPref) *api.LocalPrefAttribute {
 	return &api.LocalPrefAttribute{
 		LocalPref: a.Value,
 	}
 }
 
+// NewAtomicAggregateAttributeFromNative creates a new atomic aggregate attribute
 func NewAtomicAggregateAttributeFromNative(a *bgp.PathAttributeAtomicAggregate) *api.AtomicAggregateAttribute {
 	return &api.AtomicAggregateAttribute{}
 }
 
+// NewAggregatorAttributeFromNative creates a new aggregator attribute
 func NewAggregatorAttributeFromNative(a *bgp.PathAttributeAggregator) *api.AggregatorAttribute {
 	return &api.AggregatorAttribute{
 		As:      a.Value.AS,
@@ -125,18 +133,21 @@ func NewAggregatorAttributeFromNative(a *bgp.PathAttributeAggregator) *api.Aggre
 	}
 }
 
+// NewCommunitiesAttributeFromNative creates a new communities attribute
 func NewCommunitiesAttributeFromNative(a *bgp.PathAttributeCommunities) *api.CommunitiesAttribute {
 	return &api.CommunitiesAttribute{
 		Communities: a.Value,
 	}
 }
 
-func NewOriginatorIdAttributeFromNative(a *bgp.PathAttributeOriginatorId) *api.OriginatorIdAttribute {
+// NewOriginatorIDAttributeFromNative creates a new origin ID attribute
+func NewOriginatorIDAttributeFromNative(a *bgp.PathAttributeOriginatorId) *api.OriginatorIdAttribute {
 	return &api.OriginatorIdAttribute{
 		Id: a.Value.String(),
 	}
 }
 
+// NewClusterListAttributeFromNative creates a new cluster list attribute
 func NewClusterListAttributeFromNative(a *bgp.PathAttributeClusterList) *api.ClusterListAttribute {
 	ids := make([]string, 0, len(a.Value))
 	for _, id := range a.Value {
@@ -147,6 +158,7 @@ func NewClusterListAttributeFromNative(a *bgp.PathAttributeClusterList) *api.Clu
 	}
 }
 
+// MarshalRD serializes a route distinguisher interface
 func MarshalRD(rd bgp.RouteDistinguisherInterface) *any.Any {
 	var r proto.Message
 	switch v := rd.(type) {
@@ -176,6 +188,7 @@ func MarshalRD(rd bgp.RouteDistinguisherInterface) *any.Any {
 	return a
 }
 
+// UnmarshalRD deserializes anything into a route distinguisher interface
 func UnmarshalRD(a *any.Any) (bgp.RouteDistinguisherInterface, error) {
 	var value ptypes.DynamicAny
 	if err := ptypes.UnmarshalAny(a, &value); err != nil {
@@ -196,6 +209,7 @@ func UnmarshalRD(a *any.Any) (bgp.RouteDistinguisherInterface, error) {
 	return nil, fmt.Errorf("invalid route distinguisher type: %s", a.TypeUrl)
 }
 
+// NewEthernetSegmentIdentifierFromNative creates a new ethernet segment identifier
 func NewEthernetSegmentIdentifierFromNative(a *bgp.EthernetSegmentIdentifier) *api.EthernetSegmentIdentifier {
 	return &api.EthernetSegmentIdentifier{
 		Type:  uint32(a.Type),
@@ -210,6 +224,7 @@ func unmarshalESI(a *api.EthernetSegmentIdentifier) (*bgp.EthernetSegmentIdentif
 	}, nil
 }
 
+// MarshalFlowSpecRules serializes flow spec rules
 func MarshalFlowSpecRules(values []bgp.FlowSpecComponentInterface) []*any.Any {
 	rules := make([]*any.Any, 0, len(values))
 	for _, value := range values {
@@ -270,6 +285,7 @@ func MarshalFlowSpecRules(values []bgp.FlowSpecComponentInterface) []*any.Any {
 	return rules
 }
 
+// UnmarshalFlowSpecRules deserializes flow spec rules
 func UnmarshalFlowSpecRules(values []*any.Any) ([]bgp.FlowSpecComponentInterface, error) {
 	rules := make([]bgp.FlowSpecComponentInterface, 0, len(values))
 	for _, an := range values {
@@ -319,6 +335,7 @@ func UnmarshalFlowSpecRules(values []*any.Any) ([]bgp.FlowSpecComponentInterface
 	return rules, nil
 }
 
+// MarshalNLRI serializes something
 func MarshalNLRI(value bgp.AddrPrefixInterface) *any.Any {
 	var nlri proto.Message
 
@@ -442,6 +459,7 @@ func MarshalNLRI(value bgp.AddrPrefixInterface) *any.Any {
 	return an
 }
 
+// MarshalNLRIs serializes something
 func MarshalNLRIs(values []bgp.AddrPrefixInterface) []*any.Any {
 	nlris := make([]*any.Any, 0, len(values))
 	for _, value := range values {
@@ -450,6 +468,7 @@ func MarshalNLRIs(values []bgp.AddrPrefixInterface) []*any.Any {
 	return nlris
 }
 
+// UnmarshalNLRI deserializes something
 func UnmarshalNLRI(rf bgp.RouteFamily, an *any.Any) (bgp.AddrPrefixInterface, error) {
 	var nlri bgp.AddrPrefixInterface
 
@@ -590,6 +609,7 @@ func UnmarshalNLRI(rf bgp.RouteFamily, an *any.Any) (bgp.AddrPrefixInterface, er
 	return nlri, nil
 }
 
+// UnmarshalNLRIs deserializes NLRIs (whatever this is)
 func UnmarshalNLRIs(rf bgp.RouteFamily, values []*any.Any) ([]bgp.AddrPrefixInterface, error) {
 	nlris := make([]bgp.AddrPrefixInterface, 0, len(values))
 	for _, an := range values {
@@ -602,6 +622,7 @@ func UnmarshalNLRIs(rf bgp.RouteFamily, values []*any.Any) ([]bgp.AddrPrefixInte
 	return nlris, nil
 }
 
+// NewMpReachNLRIAttributeFromNative creates a new path attribute
 func NewMpReachNLRIAttributeFromNative(a *bgp.PathAttributeMpReachNLRI) *api.MpReachNLRIAttribute {
 	var nexthops []string
 	if a.SAFI == bgp.SAFI_FLOW_SPEC_UNICAST || a.SAFI == bgp.SAFI_FLOW_SPEC_VPN {
@@ -613,19 +634,21 @@ func NewMpReachNLRIAttributeFromNative(a *bgp.PathAttributeMpReachNLRI) *api.MpR
 		}
 	}
 	return &api.MpReachNLRIAttribute{
-		Family:   ToApiFamily(a.AFI, a.SAFI),
+		Family:   ToAPIFamily(a.AFI, a.SAFI),
 		NextHops: nexthops,
 		Nlris:    MarshalNLRIs(a.Value),
 	}
 }
 
+// NewMpUnreachNLRIAttributeFromNative creates a new path attribute
 func NewMpUnreachNLRIAttributeFromNative(a *bgp.PathAttributeMpUnreachNLRI) *api.MpUnreachNLRIAttribute {
 	return &api.MpUnreachNLRIAttribute{
-		Family: ToApiFamily(a.AFI, a.SAFI),
+		Family: ToAPIFamily(a.AFI, a.SAFI),
 		Nlris:  MarshalNLRIs(a.Value),
 	}
 }
 
+// MarshalRT serializes extended communities
 func MarshalRT(rt bgp.ExtendedCommunityInterface) *any.Any {
 	var r proto.Message
 	switch v := rt.(type) {
@@ -661,6 +684,7 @@ func MarshalRT(rt bgp.ExtendedCommunityInterface) *any.Any {
 	return a
 }
 
+// MarshalRTs serializes a list of extended communities
 func MarshalRTs(values []bgp.ExtendedCommunityInterface) []*any.Any {
 	rts := make([]*any.Any, 0, len(values))
 	for _, rt := range values {
@@ -669,6 +693,7 @@ func MarshalRTs(values []bgp.ExtendedCommunityInterface) []*any.Any {
 	return rts
 }
 
+// UnmarshalRT deserializes extended communities
 func UnmarshalRT(a *any.Any) (bgp.ExtendedCommunityInterface, error) {
 	var value ptypes.DynamicAny
 	if err := ptypes.UnmarshalAny(a, &value); err != nil {
@@ -689,6 +714,7 @@ func UnmarshalRT(a *any.Any) (bgp.ExtendedCommunityInterface, error) {
 	return nil, fmt.Errorf("invalid route target type: %s", a.TypeUrl)
 }
 
+// UnmarshalRTs deserializes a list of extended communities
 func UnmarshalRTs(values []*any.Any) ([]bgp.ExtendedCommunityInterface, error) {
 	rts := make([]bgp.ExtendedCommunityInterface, 0, len(values))
 	for _, an := range values {
@@ -701,6 +727,7 @@ func UnmarshalRTs(values []*any.Any) ([]bgp.ExtendedCommunityInterface, error) {
 	return rts, nil
 }
 
+// NewExtendedCommunitiesAttributeFromNative creates an extended communities path attribute
 func NewExtendedCommunitiesAttributeFromNative(a *bgp.PathAttributeExtendedCommunities) *api.ExtendedCommunitiesAttribute {
 	communities := make([]*any.Any, 0, len(a.Value))
 	for _, value := range a.Value {
@@ -869,6 +896,7 @@ func unmarshalExComm(a *api.ExtendedCommunitiesAttribute) (*bgp.PathAttributeExt
 	return bgp.NewPathAttributeExtendedCommunities(communities), nil
 }
 
+// NewAs4PathAttributeFromNative creates a new path attribute
 func NewAs4PathAttributeFromNative(a *bgp.PathAttributeAs4Path) *api.As4PathAttribute {
 	segments := make([]*api.AsSegment, 0, len(a.Value))
 	for _, param := range a.Value {
@@ -882,6 +910,7 @@ func NewAs4PathAttributeFromNative(a *bgp.PathAttributeAs4Path) *api.As4PathAttr
 	}
 }
 
+// NewAs4AggregatorAttributeFromNative creates a new aggregator path attribute
 func NewAs4AggregatorAttributeFromNative(a *bgp.PathAttributeAs4Aggregator) *api.As4AggregatorAttribute {
 	return &api.As4AggregatorAttribute{
 		As:      a.Value.AS,
@@ -889,6 +918,7 @@ func NewAs4AggregatorAttributeFromNative(a *bgp.PathAttributeAs4Aggregator) *api
 	}
 }
 
+// NewPmsiTunnelAttributeFromNative creates a new tunnel path attribute
 func NewPmsiTunnelAttributeFromNative(a *bgp.PathAttributePmsiTunnel) *api.PmsiTunnelAttribute {
 	var flags uint32
 	if a.IsLeafInfoRequired {
@@ -903,6 +933,7 @@ func NewPmsiTunnelAttributeFromNative(a *bgp.PathAttributePmsiTunnel) *api.PmsiT
 	}
 }
 
+// NewTunnelEncapAttributeFromNative creates a new tunnel path attribute
 func NewTunnelEncapAttributeFromNative(a *bgp.PathAttributeTunnelEncap) *api.TunnelEncapAttribute {
 	tlvs := make([]*api.TunnelEncapTLV, 0, len(a.Value))
 	for _, v := range a.Value {
@@ -942,6 +973,7 @@ func NewTunnelEncapAttributeFromNative(a *bgp.PathAttributeTunnelEncap) *api.Tun
 	}
 }
 
+// NewIP6ExtendedCommunitiesAttributeFromNative creates a new IPv6 extended communities attribute
 func NewIP6ExtendedCommunitiesAttributeFromNative(a *bgp.PathAttributeIP6ExtendedCommunities) *api.IP6ExtendedCommunitiesAttribute {
 	communities := make([]*any.Any, 0, len(a.Value))
 	for _, value := range a.Value {
@@ -974,6 +1006,7 @@ func NewIP6ExtendedCommunitiesAttributeFromNative(a *bgp.PathAttributeIP6Extende
 	}
 }
 
+// NewAigpAttributeFromNative creates a new aigp path attribute
 func NewAigpAttributeFromNative(a *bgp.PathAttributeAigp) *api.AigpAttribute {
 	tlvs := make([]*any.Any, 0, len(a.Values))
 	for _, value := range a.Values {
@@ -997,6 +1030,7 @@ func NewAigpAttributeFromNative(a *bgp.PathAttributeAigp) *api.AigpAttribute {
 	}
 }
 
+// NewLargeCommunitiesAttributeFromNative creates a new large communities attribute
 func NewLargeCommunitiesAttributeFromNative(a *bgp.PathAttributeLargeCommunities) *api.LargeCommunitiesAttribute {
 	communities := make([]*api.LargeCommunity, 0, len(a.Values))
 	for _, v := range a.Values {
@@ -1011,6 +1045,7 @@ func NewLargeCommunitiesAttributeFromNative(a *bgp.PathAttributeLargeCommunities
 	}
 }
 
+// NewUnknownAttributeFromNative creates a new unknown path attribute
 func NewUnknownAttributeFromNative(a *bgp.PathAttributeUnknown) *api.UnknownAttribute {
 	return &api.UnknownAttribute{
 		Flags: uint32(a.Flags),
@@ -1019,6 +1054,7 @@ func NewUnknownAttributeFromNative(a *bgp.PathAttributeUnknown) *api.UnknownAttr
 	}
 }
 
+// MarshalPathAttributes serializes a path attribute
 func MarshalPathAttributes(attrList []bgp.PathAttributeInterface) []*any.Any {
 	anyList := make([]*any.Any, 0, len(attrList))
 	for _, attr := range attrList {
@@ -1048,7 +1084,7 @@ func MarshalPathAttributes(attrList []bgp.PathAttributeInterface) []*any.Any {
 			n, _ := ptypes.MarshalAny(NewCommunitiesAttributeFromNative(a))
 			anyList = append(anyList, n)
 		case *bgp.PathAttributeOriginatorId:
-			n, _ := ptypes.MarshalAny(NewOriginatorIdAttributeFromNative(a))
+			n, _ := ptypes.MarshalAny(NewOriginatorIDAttributeFromNative(a))
 			anyList = append(anyList, n)
 		case *bgp.PathAttributeClusterList:
 			n, _ := ptypes.MarshalAny(NewClusterListAttributeFromNative(a))
@@ -1091,6 +1127,7 @@ func MarshalPathAttributes(attrList []bgp.PathAttributeInterface) []*any.Any {
 	return anyList
 }
 
+// UnmarshalPathAttributes deserializes a path attribute
 func UnmarshalPathAttributes(values []*any.Any) ([]bgp.PathAttributeInterface, error) {
 	attrList := make([]bgp.PathAttributeInterface, 0, len(values))
 	typeMap := make(map[bgp.BGPAttrType]struct{})

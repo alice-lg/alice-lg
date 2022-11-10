@@ -25,27 +25,31 @@ import (
 	"github.com/osrg/gobgp/pkg/packet/bgp"
 )
 
+// NewMultiProtocolCapability creates a new multi protocol capability
 func NewMultiProtocolCapability(a *bgp.CapMultiProtocol) *api.MultiProtocolCapability {
 	afi, safi := bgp.RouteFamilyToAfiSafi(a.CapValue)
 	return &api.MultiProtocolCapability{
-		Family: ToApiFamily(afi, safi),
+		Family: ToAPIFamily(afi, safi),
 	}
 }
 
+// NewRouteRefreshCapability creates a new capability
 func NewRouteRefreshCapability(a *bgp.CapRouteRefresh) *api.RouteRefreshCapability {
 	return &api.RouteRefreshCapability{}
 }
 
+// NewCarryingLabelInfoCapability creates a new capability
 func NewCarryingLabelInfoCapability(a *bgp.CapCarryingLabelInfo) *api.CarryingLabelInfoCapability {
 	return &api.CarryingLabelInfoCapability{}
 }
 
+// NewExtendedNexthopCapability creates a new extended capability
 func NewExtendedNexthopCapability(a *bgp.CapExtendedNexthop) *api.ExtendedNexthopCapability {
 	tuples := make([]*api.ExtendedNexthopCapabilityTuple, 0, len(a.Tuples))
 	for _, t := range a.Tuples {
 		tuples = append(tuples, &api.ExtendedNexthopCapabilityTuple{
-			NlriFamily:    ToApiFamily(t.NLRIAFI, uint8(t.NLRISAFI)),
-			NexthopFamily: ToApiFamily(t.NexthopAFI, bgp.SAFI_UNICAST),
+			NlriFamily:    ToAPIFamily(t.NLRIAFI, uint8(t.NLRISAFI)),
+			NexthopFamily: ToAPIFamily(t.NexthopAFI, bgp.SAFI_UNICAST),
 		})
 	}
 	return &api.ExtendedNexthopCapability{
@@ -53,11 +57,12 @@ func NewExtendedNexthopCapability(a *bgp.CapExtendedNexthop) *api.ExtendedNextho
 	}
 }
 
+// NewGracefulRestartCapability creates a new graceful resetart capabilty
 func NewGracefulRestartCapability(a *bgp.CapGracefulRestart) *api.GracefulRestartCapability {
 	tuples := make([]*api.GracefulRestartCapabilityTuple, 0, len(a.Tuples))
 	for _, t := range a.Tuples {
 		tuples = append(tuples, &api.GracefulRestartCapabilityTuple{
-			Family: ToApiFamily(t.AFI, t.SAFI),
+			Family: ToAPIFamily(t.AFI, t.SAFI),
 			Flags:  uint32(t.Flags),
 		})
 	}
@@ -68,18 +73,20 @@ func NewGracefulRestartCapability(a *bgp.CapGracefulRestart) *api.GracefulRestar
 	}
 }
 
+// NewFourOctetASNumberCapability creates new 32bit ASN capabiliy
 func NewFourOctetASNumberCapability(a *bgp.CapFourOctetASNumber) *api.FourOctetASNumberCapability {
 	return &api.FourOctetASNumberCapability{
 		As: a.CapValue,
 	}
 }
 
+// NewAddPathCapability creates a add path capability
 func NewAddPathCapability(a *bgp.CapAddPath) *api.AddPathCapability {
 	tuples := make([]*api.AddPathCapabilityTuple, 0, len(a.Tuples))
 	for _, t := range a.Tuples {
 		afi, safi := bgp.RouteFamilyToAfiSafi(t.RouteFamily)
 		tuples = append(tuples, &api.AddPathCapabilityTuple{
-			Family: ToApiFamily(afi, safi),
+			Family: ToAPIFamily(afi, safi),
 			Mode:   api.AddPathMode(t.Mode),
 		})
 	}
@@ -88,15 +95,17 @@ func NewAddPathCapability(a *bgp.CapAddPath) *api.AddPathCapability {
 	}
 }
 
+// NewEnhancedRouteRefreshCapability creates a new capability
 func NewEnhancedRouteRefreshCapability(a *bgp.CapEnhancedRouteRefresh) *api.EnhancedRouteRefreshCapability {
 	return &api.EnhancedRouteRefreshCapability{}
 }
 
+// NewLongLivedGracefulRestartCapability creates a new capability
 func NewLongLivedGracefulRestartCapability(a *bgp.CapLongLivedGracefulRestart) *api.LongLivedGracefulRestartCapability {
 	tuples := make([]*api.LongLivedGracefulRestartCapabilityTuple, 0, len(a.Tuples))
 	for _, t := range a.Tuples {
 		tuples = append(tuples, &api.LongLivedGracefulRestartCapabilityTuple{
-			Family: ToApiFamily(t.AFI, uint8(t.SAFI)),
+			Family: ToAPIFamily(t.AFI, uint8(t.SAFI)),
 			Flags:  uint32(t.Flags),
 			Time:   t.RestartTime,
 		})
@@ -106,10 +115,12 @@ func NewLongLivedGracefulRestartCapability(a *bgp.CapLongLivedGracefulRestart) *
 	}
 }
 
+// NewRouteRefreshCiscoCapability creates a new capability
 func NewRouteRefreshCiscoCapability(a *bgp.CapRouteRefreshCisco) *api.RouteRefreshCiscoCapability {
 	return &api.RouteRefreshCiscoCapability{}
 }
 
+// NewUnknownCapability creates a new unknown capability
 func NewUnknownCapability(a *bgp.CapUnknown) *api.UnknownCapability {
 	return &api.UnknownCapability{
 		Code:  uint32(a.CapCode),
@@ -117,6 +128,7 @@ func NewUnknownCapability(a *bgp.CapUnknown) *api.UnknownCapability {
 	}
 }
 
+// MarshalCapability serializes a capability interface
 func MarshalCapability(value bgp.ParameterCapabilityInterface) (*any.Any, error) {
 	var m proto.Message
 	switch n := value.(type) {
@@ -148,6 +160,7 @@ func MarshalCapability(value bgp.ParameterCapabilityInterface) (*any.Any, error)
 	return ptypes.MarshalAny(m)
 }
 
+// MarshalCapabilities serializes a list of capability interfaces
 func MarshalCapabilities(values []bgp.ParameterCapabilityInterface) ([]*any.Any, error) {
 	caps := make([]*any.Any, 0, len(values))
 	for _, value := range values {
@@ -233,6 +246,7 @@ func unmarshalCapability(a *any.Any) (bgp.ParameterCapabilityInterface, error) {
 	return nil, fmt.Errorf("invalid capability type to unmarshal: %s", a.TypeUrl)
 }
 
+// UnmarshalCapabilities deserializes a list of capabilities
 func UnmarshalCapabilities(values []*any.Any) ([]bgp.ParameterCapabilityInterface, error) {
 	caps := make([]bgp.ParameterCapabilityInterface, 0, len(values))
 	for _, value := range values {
