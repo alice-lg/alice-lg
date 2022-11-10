@@ -11,5 +11,5 @@ test:
 	yarn test --ci --all --watchAll=false
 
 clean:
-	rm -f ./build
+	rm -rf ./build
 

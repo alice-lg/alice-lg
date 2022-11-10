@@ -33,3 +33,5 @@ var/
 .DS_Store
 
 *coverage*
+
+dist/

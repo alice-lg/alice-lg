@@ -1,0 +1,37 @@
+# This is an example .goreleaser.yml file with some sensible defaults.
+# Make sure to check the documentation at https://goreleaser.com
+before:
+  hooks:
+    - go mod tidy
+    - make -C ui/
+builds:
+  - main: ./cmd/alice-lg
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - freebsd
+      - netbsd
+      - openbsd
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -X "github.com/alice-lg/alice-lg/pkg/config.Version={{ .Version }}"
+archives:
+  - name_template: 'alice-lg_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+    replacements:
+      386: i386
+      amd64: x86_64
+
+checksum:
+  name_template: 'checksums.txt'
+  algorithm: sha256
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+changelog:
+  skip: true
+release:
+  extra_files:
+    - glob: ./CHANGELOG.md
+
