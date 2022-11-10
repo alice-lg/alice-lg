@@ -9,14 +9,14 @@ func makeTestRoute() *Route {
 	route := &Route{
 		BGP: &BGPInfo{
 			Communities: []Community{
-				Community{23, 42},
-				Community{111, 11},
+				{23, 42},
+				{111, 11},
 			},
 			ExtCommunities: []ExtCommunity{
-				ExtCommunity{"ro", "23", "123"},
+				{"ro", "23", "123"},
 			},
 			LargeCommunities: []Community{
-				Community{1000, 23, 42},
+				{1000, 23, 42},
 			},
 		},
 	}
@@ -29,14 +29,14 @@ func makeTestLookupRoute() *LookupRoute {
 		Route: &Route{
 			BGP: &BGPInfo{
 				Communities: []Community{
-					Community{23, 42},
-					Community{111, 11},
+					{23, 42},
+					{111, 11},
 				},
 				ExtCommunities: []ExtCommunity{
-					ExtCommunity{"ro", "23", "123"},
+					{"ro", "23", "123"},
 				},
 				LargeCommunities: []Community{
-					Community{1000, 23, 42},
+					{1000, 23, 42},
 				},
 			},
 		},
@@ -155,8 +155,8 @@ func TestSearchFilterEqual(t *testing.T) {
 func TestSearchFilterGroupContains(t *testing.T) {
 	group := SearchFilterGroup{
 		Filters: []*SearchFilter{
-			&SearchFilter{Value: Community{1000, 23, 42}},
-			&SearchFilter{Value: Community{1001, 24, 43}},
+			{Value: Community{1000, 23, 42}},
+			{Value: Community{1001, 24, 43}},
 		},
 	}
 

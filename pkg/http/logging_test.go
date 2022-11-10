@@ -12,7 +12,7 @@ func TestApiLogSourceError(t *testing.T) {
 
 	cfg := &config.Config{
 		Sources: []*config.SourceConfig{
-			&config.SourceConfig{
+			{
 				ID:   "rs1v4",
 				Name: "rs1.example.net (IPv4)",
 			},

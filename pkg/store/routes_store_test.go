@@ -21,10 +21,10 @@ func importRoutes(
 
 	// Prepare imported routes for lookup
 	neighbors := map[string]*api.Neighbor{
-		"ID163_AS31078": &api.Neighbor{
+		"ID163_AS31078": {
 			ID: "ID163_AS31078",
 		},
-		"ID7254_AS31334": &api.Neighbor{
+		"ID7254_AS31334": {
 			ID: "ID7254_AS31334",
 		},
 	}

@@ -14,10 +14,10 @@ import (
 	"github.com/alice-lg/alice-lg/pkg/sources/gobgp/apiutil"
 )
 
-var families []gobgpapi.Family = []gobgpapi.Family{gobgpapi.Family{
+var families []gobgpapi.Family = []gobgpapi.Family{{
 	Afi:  gobgpapi.Family_AFI_IP,
 	Safi: gobgpapi.Family_SAFI_UNICAST,
-}, gobgpapi.Family{
+}, {
 	Afi:  gobgpapi.Family_AFI_IP6,
 	Safi: gobgpapi.Family_SAFI_UNICAST,
 },

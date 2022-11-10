@@ -95,17 +95,17 @@ func TestHasCommunity(t *testing.T) {
 
 	bgp := &BGPInfo{
 		Communities: []Community{
-			Community{42, 123},
-			Community{23, 42},
-			Community{42, 23},
+			{42, 123},
+			{23, 42},
+			{42, 23},
 		},
 		ExtCommunities: []ExtCommunity{
-			ExtCommunity{"rt", "23", "42"},
-			ExtCommunity{"ro", "123", "456"},
+			{"rt", "23", "42"},
+			{"ro", "123", "456"},
 		},
 		LargeCommunities: []Community{
-			Community{1000, 23, 42},
-			Community{2000, 123, 456},
+			{1000, 23, 42},
+			{2000, 123, 456},
 		},
 	}
 
