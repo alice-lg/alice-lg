@@ -17,6 +17,7 @@ const WaitingText = ({resource}) => {
     }
   }, []);
 
+
   if (time < 5) {
     return null;
   }
@@ -28,8 +29,10 @@ const WaitingText = ({resource}) => {
       {time >= 15 &&
         <p>&gt; This seems to take a while...</p>}
       {time >= 20 &&
-        <p>&gt; This usually only happens when there are really many routes!<br />
-           &nbsp; Please stand by a bit longer.</p>}
+        <>
+          <p>&gt; This usually only happens when there are really many routes!</p>
+          <p>&gt; Please stand by a bit longer.</p>
+        </>}
       {time >= 30 &&
         <p>&gt; This is taking really long...</p>}
       {time >= 40 &&
