@@ -60,8 +60,6 @@ and [`openbgpd-state-server`](https://github.com/alice-lg/openbgpd-state-server)
 ## Building Alice-LG from scratch
 __These examples include setting up your Go environment, if you already have set that up then you can obviously skip that__
 
-In case you have trouble with `npm` and `gulp` you can try using `yarn`.
-
 ### CentOS:
 First add the following lines at the end of your `~/.bash_profile`:
 ```bash
@@ -76,11 +74,8 @@ source ~/.bash_profile
 
 # Install frontend build dependencies
 sudo yum install golang npm
-sudo npm install --global gulp-cli
 sudo npm install --global yarn
 
-go get github.com/GeertJohan/go.rice
-go get github.com/GeertJohan/go.rice/rice
 mkdir -p ~/go/bin ~/go/pkg ~/go/src/github.com/alice-lg/
 
 cd ~/go/src/github.com/alice-lg
@@ -170,27 +165,6 @@ cache_ttl = 100
 Launch the server by running
 
     ./bin/alice-lg-linux-amd64
-
-
-## Deployment
-
-We added a `Makefile` for packaging Alice as an RPM using [fpm](https://github.com/jordansissel/fpm).
-
-If you have all tools available locally, you can just type:
-
-    make rpm
-
-If you want to build the package on a remote machine, just use
-
-    make remote_rpm BUILD_SERVER=my-rpm-building-server.example.com
-
-which will copy the dist to the remote server and executes fpm via ssh.
-
-You can specify which system integration to use:
-Set the `SYSTEM_INIT` variable to `upstart` or `systemd` (default)
-prior to building the RPM.
-
-    make remote_rpm BUILD_SERVER=rpmbuild.example.com SYSTEM_INIT=upstart
 
 
 ## Customization
