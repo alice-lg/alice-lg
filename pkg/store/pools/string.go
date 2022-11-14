@@ -3,10 +3,12 @@ package pools
 import "sync"
 
 // String is a pool for strings.
+// This will most likely be a pool for IP addresses.
 type String struct {
 	values map[string]*string
+
 	counter map[string]uint
-	top uint
+	top     uint
 
 	sync.Mutex
 }
@@ -14,7 +16,8 @@ type String struct {
 // NewString creates a new string pool
 func NewString() *String {
 	return &String{
-		values: map[string]*string{},
+		values:  map[string]*string{},
+		counter: map[string]uint{},
 	}
 }
 
@@ -28,24 +31,12 @@ func (p *String) Acquire(s string) *string {
 		p.values[s] = &s
 		ptr = &s
 	}
-	// Increment counter and top value
-	cnt, ok := p.counter[s]
-	if !ok {
-		cnt = p.top + 1
-	} else {
-		cnt = cnt + 1
-	}
-	p.counter[s] = cnt
-	if p.top < cnt {
-		p.top = cnt
-	}
+	p.counter[s] = p.top
 	return ptr
 }
 
-
-
 // GarbageCollect releases all values, which have not been seen
-// again. 
+// again.
 func (p *String) GarbageCollect() uint {
 	p.Lock()
 	defer p.Unlock()
@@ -57,5 +48,6 @@ func (p *String) GarbageCollect() uint {
 			released++
 		}
 	}
+	p.top++ // Next generation
 	return released
 }
