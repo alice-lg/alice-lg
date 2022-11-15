@@ -43,3 +43,16 @@ func TestPtrIntList(t *testing.T) {
 
 	t.Log(fmt.Sprintf("P: %x %x %v", int(uintptr(ra)), rb, ra == rb))
 }
+
+func TestAcquireStringList(t *testing.T) {
+	q := []string{"foo", "bar", "bgp"}
+	w := []string{"foo", "bar", "bgp"}
+	e := []string{"foo", "bpf"}
+
+	p2 := NewStringList()
+	x1 := p2.Acquire(q)
+	x2 := p2.Acquire(w)
+	x3 := p2.Acquire(e)
+	fmt.Printf("Ptr: %p %p => %p %p\n", q, w, x1, x2)
+	fmt.Printf("Ptr: %p => %p\n", e, x3)
+}
