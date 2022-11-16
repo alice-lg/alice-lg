@@ -13,7 +13,7 @@ func makeTestRoute() *Route {
 				{111, 11},
 			},
 			ExtCommunities: []ExtCommunity{
-				{"ro", "23", "123"},
+				{"ro", 23, 123},
 			},
 			LargeCommunities: []Community{
 				{1000, 23, 42},
@@ -33,7 +33,7 @@ func makeTestLookupRoute() *LookupRoute {
 					{111, 11},
 				},
 				ExtCommunities: []ExtCommunity{
-					{"ro", "23", "123"},
+					{"ro", 23, 123},
 				},
 				LargeCommunities: []Community{
 					{1000, 23, 42},
@@ -295,10 +295,10 @@ func TestSearchFilterCompareRoute(t *testing.T) {
 	}
 
 	// Ext. Communities
-	if searchFilterMatchExtCommunity(route, ExtCommunity{"ro", "23", "123"}) != true {
+	if searchFilterMatchExtCommunity(route, ExtCommunity{"ro", 23, 123}) != true {
 		t.Error("Route should have community ro:23:123")
 	}
-	if searchFilterMatchExtCommunity(route, ExtCommunity{"rt", "42", "111"}) == true {
+	if searchFilterMatchExtCommunity(route, ExtCommunity{"rt", 42, 111}) == true {
 		t.Error("Route should not have community rt:42:111")
 	}
 
