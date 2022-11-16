@@ -42,3 +42,38 @@ func TestAcquireCommunities(t *testing.T) {
 	fmt.Printf("pc1: %p, pc2: %p, pc3: %p\n", pc1, pc2, pc3)
 
 }
+
+func TestAcquireExtCommunities(t *testing.T) {
+	c1 := []api.ExtCommunity{
+		{"ro", 5, 1},
+		{"ro", 5, 2},
+		{"rt", 51, 1},
+	}
+	c2 := []api.ExtCommunity{
+		{"ro", 5, 1},
+		{"ro", 5, 2},
+		{"rt", 51, 1},
+	}
+	c3 := []api.ExtCommunity{
+		{"ro", 6, 1},
+		{"rt", 6, 2},
+		{"rt", 1, 1},
+	}
+
+	p := NewExtCommunitiesPool()
+
+	pc1 := p.AcquireExt(c1)
+	pc2 := p.AcquireExt(c2)
+	pc3 := p.AcquireExt(c3)
+
+	if fmt.Sprintf("%p", c1) == fmt.Sprintf("%p", c2) {
+		t.Error("expected c1 !== c2")
+	}
+
+	if fmt.Sprintf("%p", pc1) != fmt.Sprintf("%p", pc2) {
+		t.Error("expected pc1 == pc2")
+	}
+
+	fmt.Printf("c1:  %p, c2:  %p, c3:  %p\n", c1, c2, c3)
+	fmt.Printf("pc1: %p, pc2: %p, pc3: %p\n", pc1, pc2, pc3)
+}
