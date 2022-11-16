@@ -62,7 +62,7 @@ func (routes Routes) Len() int {
 }
 
 func (routes Routes) Less(i, j int) bool {
-	return routes[i].Network < routes[j].Network
+	return *(routes[i].Network) < *(routes[j].Network)
 }
 
 func (routes Routes) Swap(i, j int) {
@@ -77,7 +77,7 @@ func (routes Routes) ToLookupRoutes(
 ) LookupRoutes {
 	lookupRoutes := make(LookupRoutes, 0, len(routes))
 	for _, route := range routes {
-		neighbor, ok := neighbors[route.NeighborID]
+		neighbor, ok := neighbors[*route.NeighborID]
 		if !ok {
 			log.Println("prepare route, neighbor not found:", route.NeighborID)
 			continue
@@ -186,7 +186,7 @@ func (r LookupRoutes) Len() int {
 }
 
 func (r LookupRoutes) Less(i, j int) bool {
-	return r[i].Route.Network < r[j].Route.Network
+	return (*r[i].Route.Network) < (*r[j].Route.Network)
 }
 
 func (r LookupRoutes) Swap(i, j int) {

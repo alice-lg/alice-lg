@@ -322,7 +322,12 @@ func parseRouteData(
 		details = json.RawMessage(detailsJSON)
 	}
 
+	// Pool: Gateways
 	gateway := decoders.String(rdata["gateway"], "unknown gateway")
+	learntFrom := decoders.String(rdata["learnt_from"], "")
+	if learntFrom == "" {
+		learntFrom = gateway
+	}
 
 	route := &api.Route{
 		ID:         decoders.String(rdata["network"], "unknown"),
@@ -332,7 +337,7 @@ func parseRouteData(
 		Interface:  decoders.String(rdata["interface"], "unknown interface"),
 		Metric:     decoders.Int(rdata["metric"], -1),
 		Primary:    decoders.Bool(rdata["primary"], false),
-		LearntFrom: decoders.String(rdata["learnt_from"], gateway),
+		LearntFrom: learntFrom,
 		Gateway:    gateway,
 		Age:        age,
 		Type:       rtype,
