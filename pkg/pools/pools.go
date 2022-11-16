@@ -10,8 +10,11 @@ import "log"
 // Neighbors stores neighbor IDs
 var Neighbors *String
 
-// Networks stores network ip addresses
-var Networks *String
+// Networks4 stores network ip v4 addresses
+var Networks4 *String
+
+// Networks6 stores network ip v6 addresses
+var Networks6 *String
 
 // Interfaces stores interfaces like: eth0, bond0 etc...
 var Interfaces *String
@@ -36,7 +39,8 @@ func init() {
 	log.Println("initializing memory pools")
 
 	Neighbors = NewString()
-	Networks = NewString()
+	Networks4 = NewString()
+	Networks6 = NewString()
 	Interfaces = NewString()
 	Gateways4 = NewString()
 	Gateways6 = NewString()

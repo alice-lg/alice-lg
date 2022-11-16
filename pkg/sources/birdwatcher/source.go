@@ -118,16 +118,16 @@ func (b *GenericBirdwatcher) filterProtocolsPipe(
 
 func (b *GenericBirdwatcher) filterRoutesByPeerOrLearntFrom(
 	routes api.Routes,
-	peer string,
-	learntFrom string,
+	peerPtr *string,
+	learntFromPtr *string,
 ) api.Routes {
 	resultRoutes := make(api.Routes, 0, len(routes))
 
 	// Choose routes with next_hop == gateway of this neighbor
 	for _, route := range routes {
-		if (route.Gateway == peer) ||
-			(route.Gateway == learntFrom) ||
-			(route.LearntFrom == peer) {
+		if (route.Gateway == peerPtr) ||
+			(route.Gateway == learntFromPtr) ||
+			(route.LearntFrom == peerPtr) {
 			resultRoutes = append(resultRoutes, route)
 		}
 	}

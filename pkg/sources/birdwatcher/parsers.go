@@ -13,6 +13,7 @@ import (
 
 	"github.com/alice-lg/alice-lg/pkg/api"
 	"github.com/alice-lg/alice-lg/pkg/decoders"
+	"github.com/alice-lg/alice-lg/pkg/pools"
 )
 
 // Convert server time string to time
@@ -230,6 +231,8 @@ func parseNeighborsShort(bird ClientResponse, config Config) (api.NeighborsStatu
 
 // Parse route bgp info
 func parseRouteBgpInfo(data interface{}) *api.BGPInfo {
+	gwpool := pools.Gateways4 // Let's see
+
 	bgpData, ok := data.(map[string]interface{})
 	if !ok {
 		// Info is missing
@@ -245,9 +248,11 @@ func parseRouteBgpInfo(data interface{}) *api.BGPInfo {
 	med, _ := strconv.Atoi(decoders.String(bgpData["med"], "0"))
 
 	bgp := &api.BGPInfo{
-		Origin:           decoders.String(bgpData["origin"], "unknown"),
-		AsPath:           asPath,
-		NextHop:          decoders.String(bgpData["next_hop"], "unknown"),
+		Origin: pools.Origins.Acquire(
+			decoders.String(bgpData["origin"], "unknown")),
+		AsPath: pools.ASPaths.Acquire(asPath),
+		NextHop: gwpool.Acquire(
+			decoders.String(bgpData["next_hop"], "unknown")),
 		LocalPref:        localPref,
 		Med:              med,
 		Communities:      communities,
@@ -308,6 +313,9 @@ func parseRouteData(
 	config Config,
 	keepDetails bool,
 ) *api.Route {
+	gwpool := pools.Gateways4  // Let's see
+	netpool := pools.Networks4 // same...
+
 	age := parseRelativeServerTime(rdata["age"], config)
 	rtype := decoders.StringList(rdata["type"])
 	bgpInfo := parseRouteBgpInfo(rdata["bgp"])
@@ -322,7 +330,6 @@ func parseRouteData(
 		details = json.RawMessage(detailsJSON)
 	}
 
-	// Pool: Gateways
 	gateway := decoders.String(rdata["gateway"], "unknown gateway")
 	learntFrom := decoders.String(rdata["learnt_from"], "")
 	if learntFrom == "" {
@@ -330,17 +337,20 @@ func parseRouteData(
 	}
 
 	route := &api.Route{
-		ID:         decoders.String(rdata["network"], "unknown"),
-		NeighborID: decoders.String(rdata["from_protocol"], "unknown neighbor"),
+		ID: decoders.String(rdata["network"], "unknown"),
 
-		Network:    decoders.String(rdata["network"], "unknown net"),
-		Interface:  decoders.String(rdata["interface"], "unknown interface"),
+		NeighborID: pools.Neighbors.Acquire(
+			decoders.String(rdata["from_protocol"], "unknown neighbor")),
+		Network: netpool.Acquire(
+			decoders.String(rdata["network"], "unknown net")),
+		Interface: pools.Interfaces.Acquire(
+			decoders.String(rdata["interface"], "unknown interface")),
 		Metric:     decoders.Int(rdata["metric"], -1),
 		Primary:    decoders.Bool(rdata["primary"], false),
-		LearntFrom: learntFrom,
-		Gateway:    gateway,
+		LearntFrom: gwpool.Acquire(learntFrom),
+		Gateway:    gwpool.Acquire(gateway),
 		Age:        age,
-		Type:       rtype,
+		Type:       pools.Types.Acquire(rtype),
 		BGP:        bgpInfo,
 
 		Details: &details,

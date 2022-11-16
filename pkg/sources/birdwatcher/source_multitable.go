@@ -10,6 +10,7 @@ import (
 
 	"github.com/alice-lg/alice-lg/pkg/api"
 	"github.com/alice-lg/alice-lg/pkg/decoders"
+	"github.com/alice-lg/alice-lg/pkg/pools"
 )
 
 // MultiTableBirdwatcher implements a birdwatcher with
@@ -365,6 +366,7 @@ func (src *MultiTableBirdwatcher) fetchRequiredRoutes(
 	// Perform route deduplication
 	importedRoutes := api.Routes{}
 	if len(receivedRoutes) > 0 {
+		// TODO: maybe we can utilize the ptr here
 		peer := receivedRoutes[0].Gateway
 		learntFrom := receivedRoutes[0].LearntFrom
 
@@ -682,8 +684,8 @@ func (src *MultiTableBirdwatcher) AllRoutes(
 	// We load the filtered routes asynchronously with workers.
 	type fetchFilteredReq struct {
 		protocolID string
-		peer       string
-		learntFrom string
+		peer       *string
+		learntFrom *string
 	}
 	reqQ := make(chan fetchFilteredReq, 1000)
 	resQ := make(chan api.Routes, 1000)
@@ -710,11 +712,16 @@ func (src *MultiTableBirdwatcher) AllRoutes(
 		}()
 	}
 
+	gwpool := pools.Gateways4
+
 	// Fill request queue
 	go func() {
 		for protocolID, protocolsData := range protocolsBgp["protocols"].(map[string]interface{}) {
-			peer := protocolsData.(map[string]interface{})["neighbor_address"].(string)
-			learntFrom := decoders.String(protocolsData.(map[string]interface{})["learnt_from"], peer)
+			peer := gwpool.Acquire(
+				protocolsData.(map[string]interface{})["neighbor_address"].(string))
+			learntFrom := gwpool.Acquire(
+				decoders.String(protocolsData.(map[string]interface{})["learnt_from"], *peer))
+
 			reqQ <- fetchFilteredReq{
 				protocolID: protocolID,
 				peer:       peer,

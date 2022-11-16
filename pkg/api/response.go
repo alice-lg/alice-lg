@@ -228,9 +228,9 @@ func (communities ExtCommunities) Unique() ExtCommunities {
 
 // BGPInfo is a set of BGP attributes
 type BGPInfo struct {
-	Origin           string         `json:"origin"`
+	Origin           *string        `json:"origin"`
 	AsPath           []int          `json:"as_path"`
-	NextHop          string         `json:"next_hop"`
+	NextHop          *string        `json:"next_hop"`
 	Communities      Communities    `json:"communities"`
 	LargeCommunities Communities    `json:"large_communities"`
 	ExtCommunities   ExtCommunities `json:"ext_communities"`
