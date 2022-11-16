@@ -1,6 +1,16 @@
 
 # Changelog
 
+## 6.1.0
+
+ * Added memory pools for deduplicating route information.
+   This drastically reduces the memory consumption.
+
+ * The BGP info modal can now be dismissed by pressing `esc`.
+
+ * Bugfixes: 
+   - Fixed parsing and handling of ext community filters.
+
 
 ## 6.0.0 (2022-11-10)
  
