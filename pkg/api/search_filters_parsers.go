@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -62,9 +63,14 @@ func parseExtCommunityValue(value string) (*SearchFilter, error) {
 	components := strings.Split(value, ":")
 	community := make(ExtCommunity, len(components))
 
-	for i, c := range components {
-		community[i] = c
+	if len(community) != 3 {
+		return nil, fmt.Errorf("malformed ext. community: %s", value)
 	}
+
+	// Communities are not stringly typed, but a mix of string and int
+	community[0] = components[0]
+	community[1], _ = strconv.Atoi(components[1])
+	community[2], _ = strconv.Atoi(components[2])
 
 	return &SearchFilter{
 		Name:  community.String(),
