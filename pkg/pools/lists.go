@@ -6,33 +6,30 @@ import (
 
 // Node is a node in the tree.
 type Node struct {
-	children []*Node
-	value    int
+	children map[int]*Node
 	counter  int
 	ptr      interface{}
+}
+
+// NewNode creates a new tree node
+func NewNode(ptr interface{}) *Node {
+	return &Node{
+		children: map[int]*Node{},
+		ptr:      ptr,
+	}
 }
 
 // Internally acquire list by traversing the tree and
 // creating nodes if required.
 func (n *Node) traverse(list interface{}, tail []int) interface{} {
-	head := tail[0]
+	value := tail[0]
 	tail = tail[1:]
 
 	// Seek for value in children
-	var child *Node
-	for _, c := range n.children {
-		if c.value == head {
-			child = c
-		}
-	}
-	if child == nil {
-		// Insert child
-		child = &Node{
-			children: []*Node{},
-			value:    head,
-			ptr:      nil,
-		}
-		n.children = append(n.children, child)
+	child, ok := n.children[value]
+	if !ok {
+		child = NewNode(nil)
+		n.children[value] = child
 	}
 
 	// Set list ptr if required
@@ -58,9 +55,7 @@ type IntListPool struct {
 // NewIntListPool creates a new int list pool
 func NewIntListPool() *IntListPool {
 	return &IntListPool{
-		root: &Node{
-			ptr: []int{},
-		},
+		root: NewNode([]int{}),
 	}
 }
 
@@ -90,9 +85,7 @@ func NewStringListPool() *StringListPool {
 	return &StringListPool{
 		head:   1,
 		values: map[string]int{},
-		root: &Node{
-			ptr: []string{},
-		},
+		root:   NewNode([]string{}),
 	}
 }
 

@@ -20,12 +20,8 @@ type CommunitiesPool struct {
 // of BGP communities.
 func NewCommunitiesPool() *CommunitiesPool {
 	return &CommunitiesPool{
-		communitiesRoot: &Node{
-			ptr: []int{},
-		},
-		root: &Node{
-			ptr: []api.Community{},
-		},
+		communitiesRoot: NewNode([]int{}),
+		root:            NewNode([]api.Community{}),
 	}
 }
 
