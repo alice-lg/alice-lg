@@ -24,7 +24,7 @@ func TestAcquireCommunities(t *testing.T) {
 		{2341, 1, 1},
 	}
 
-	p := NewCommunities()
+	p := NewCommunitiesPool()
 
 	pc1 := p.Acquire(c1)
 	pc2 := p.Acquire(c2)

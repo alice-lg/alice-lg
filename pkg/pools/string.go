@@ -2,9 +2,9 @@ package pools
 
 import "sync"
 
-// String is a pool for strings.
+// StringPool is a pool for strings.
 // This will most likely be a pool for IP addresses.
-type String struct {
+type StringPool struct {
 	values map[string]*string
 
 	counter map[string]uint
@@ -13,16 +13,16 @@ type String struct {
 	sync.Mutex
 }
 
-// NewString creates a new string pool
-func NewString() *String {
-	return &String{
+// NewStringPool creates a new string pool
+func NewStringPool() *StringPool {
+	return &StringPool{
 		values:  map[string]*string{},
 		counter: map[string]uint{},
 	}
 }
 
 // Acquire a pointer to a string value
-func (p *String) Acquire(s string) *string {
+func (p *StringPool) Acquire(s string) *string {
 	p.Lock()
 	defer p.Unlock()
 	// Deduplicate value
@@ -37,7 +37,7 @@ func (p *String) Acquire(s string) *string {
 
 // GarbageCollect releases all values, which have not been seen
 // again.
-func (p *String) GarbageCollect() uint {
+func (p *StringPool) GarbageCollect() uint {
 	p.Lock()
 	defer p.Unlock()
 	var released uint = 0

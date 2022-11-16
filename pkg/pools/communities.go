@@ -7,20 +7,22 @@ import (
 	"github.com/alice-lg/alice-lg/pkg/api"
 )
 
-// Communities is a pool for deduplicating a list of BGP communities
+// CommunitiesPool is for deduplicating a list of BGP communities
 // (Large and default. The ext communities representation right now
 // makes problems and need to be fixed. TODO.)
-type Communities struct {
-	communities *IntList
-	root        *Node
+type CommunitiesPool struct {
+	communitiesRoot *Node
+	root            *Node
 	sync.Mutex
 }
 
-// NewCommunities creates a new pool for lists
+// NewCommunitiesPool creates a new pool for lists
 // of BGP communities.
-func NewCommunities() *Communities {
-	return &Communities{
-		communities: NewIntList(),
+func NewCommunitiesPool() *CommunitiesPool {
+	return &CommunitiesPool{
+		communitiesRoot: &Node{
+			ptr: []int{},
+		},
 		root: &Node{
 			ptr: []api.Community{},
 		},
@@ -28,18 +30,19 @@ func NewCommunities() *Communities {
 }
 
 // Acquire a list of bgp communities
-func (p *Communities) Acquire(communities []api.Community) []api.Community {
+func (p *CommunitiesPool) Acquire(communities []api.Community) []api.Community {
+	p.Lock()
+	defer p.Unlock()
+	// Make identification list by using the pointer address
+	// of the deduplicated community as ID
 	ids := make([]int, len(communities))
 	for i, comm := range communities {
-		commPtr := p.communities.Acquire(comm)
+		commPtr := p.communitiesRoot.traverse(comm, comm)
 		addr := reflect.ValueOf(commPtr).UnsafePointer()
 		ids[i] = int(uintptr(addr))
 	}
-	p.Lock()
-	defer p.Unlock()
 	if len(ids) == 0 {
 		return p.root.ptr.([]api.Community)
 	}
-
 	return p.root.traverse(communities, ids).([]api.Community)
 }

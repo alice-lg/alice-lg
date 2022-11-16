@@ -247,6 +247,13 @@ func parseRouteBgpInfo(data interface{}) *api.BGPInfo {
 	localPref, _ := strconv.Atoi(decoders.String(bgpData["local_pref"], "0"))
 	med, _ := strconv.Atoi(decoders.String(bgpData["med"], "0"))
 
+	// Testing and benchmarks show: Deduplicating communities has
+	// quite a performance impact:
+	// Without using pools, parsing 600000 routes
+	// takes roughly 16 seconds, with pools for strings
+	// and AS paths: 18 seconds.
+	// With communities: 46 seconds. This is quite long.
+
 	bgp := &api.BGPInfo{
 		Origin: pools.Origins.Acquire(
 			decoders.String(bgpData["origin"], "unknown")),
@@ -255,9 +262,9 @@ func parseRouteBgpInfo(data interface{}) *api.BGPInfo {
 			decoders.String(bgpData["next_hop"], "unknown")),
 		LocalPref:        localPref,
 		Med:              med,
-		Communities:      communities,
+		Communities:      pools.Communities.Acquire(communities),
 		ExtCommunities:   extCommunities,
-		LargeCommunities: largeCommunities,
+		LargeCommunities: pools.LargeCommunities.Acquire(largeCommunities),
 	}
 	return bgp
 }

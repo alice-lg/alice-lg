@@ -12,7 +12,7 @@ func TestAcquireIntList(t *testing.T) {
 	b := []int{23, 42, 1337, 65535, 1}
 	c := []int{23, 42, 1338, 65535, 2}
 
-	p := NewIntList()
+	p := NewIntListPool()
 
 	r1 := p.Acquire(a)
 	p.Acquire(c)
@@ -49,7 +49,7 @@ func TestAcquireStringList(t *testing.T) {
 	w := []string{"foo", "bar", "bgp"}
 	e := []string{"foo", "bpf"}
 
-	p2 := NewStringList()
+	p2 := NewStringListPool()
 	x1 := p2.Acquire(q)
 	x2 := p2.Acquire(w)
 	x3 := p2.Acquire(e)

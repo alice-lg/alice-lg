@@ -6,7 +6,7 @@ import (
 )
 
 func TestAcquireString(t *testing.T) {
-	p := NewString()
+	p := NewStringPool()
 	s1 := p.Acquire("hello")
 	s2 := p.Acquire("hello")
 	s3 := p.Acquire("world")
@@ -24,7 +24,7 @@ func TestAcquireString(t *testing.T) {
 }
 
 func TestGarbageCollectString(t *testing.T) {
-	p := NewString()
+	p := NewStringPool()
 
 	// Gen 1
 	p.Acquire("hello")

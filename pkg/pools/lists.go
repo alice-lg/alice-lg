@@ -46,18 +46,18 @@ func (n *Node) traverse(list interface{}, tail []int) interface{} {
 	return child.traverse(list, tail)
 }
 
-// A IntList pool can be used to deduplicate
-// lists of integers. Like an AS path.
+// A IntListPool can be used to deduplicate
+// lists of integers. Like an AS path or BGP communities.
 //
 // A Tree datastructure is used.
-type IntList struct {
+type IntListPool struct {
 	root *Node
 	sync.Mutex
 }
 
-// NewIntList creates a new int list pool
-func NewIntList() *IntList {
-	return &IntList{
+// NewIntListPool creates a new int list pool
+func NewIntListPool() *IntListPool {
+	return &IntListPool{
 		root: &Node{
 			ptr: []int{},
 		},
@@ -65,7 +65,7 @@ func NewIntList() *IntList {
 }
 
 // Acquire int list from pool
-func (p *IntList) Acquire(list []int) []int {
+func (p *IntListPool) Acquire(list []int) []int {
 	p.Lock()
 	defer p.Unlock()
 
@@ -75,19 +75,19 @@ func (p *IntList) Acquire(list []int) []int {
 	return p.root.traverse(list, list).([]int)
 }
 
-// A StringList pool can be used for deduplicating lists
+// A StringListPool can be used for deduplicating lists
 // of strings. (This is a variant of an int list, as string
 // values are converted to int.
-type StringList struct {
+type StringListPool struct {
 	root   *Node
 	values map[string]int
 	head   int
 	sync.Mutex
 }
 
-// NewStringList creates a new string list.
-func NewStringList() *StringList {
-	return &StringList{
+// NewStringListPool creates a new string list.
+func NewStringListPool() *StringListPool {
+	return &StringListPool{
 		head:   1,
 		values: map[string]int{},
 		root: &Node{
@@ -97,7 +97,7 @@ func NewStringList() *StringList {
 }
 
 // Acquire the string list pointer from the pool
-func (p *StringList) Acquire(list []string) []string {
+func (p *StringListPool) Acquire(list []string) []string {
 	if len(list) == 0 {
 		return p.root.ptr.([]string) // root
 	}
