@@ -1,4 +1,5 @@
 
+import { useEffect } from 'react';
 
 export const ModalHeader = ({children, onDismiss}) => {
   return (
@@ -37,6 +38,19 @@ export const Modal = ({
   onDismiss,
   className="",
 }) => {
+  // When escape is pressed, the modal is dismissed
+  useEffect(() => {
+    let handler = (e) => {
+      if (e.key === "Escape" || e.key === "Esc") {
+        onDismiss();
+      }
+    };
+    document.addEventListener("keyup", handler);
+    return () => {
+      document.removeEventListener("keyup", handler);
+    };
+  });
+
   return (
     <div className={className}>
       <div className="modal modal-open modal-show fade in" role="dialog">
