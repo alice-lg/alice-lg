@@ -1,7 +1,6 @@
 package pools
 
 import (
-	"log"
 	"reflect"
 	"sync"
 
@@ -60,10 +59,6 @@ func (p *CommunitiesPool) AcquireExt(communities []api.ExtCommunity) []api.ExtCo
 	// Make identification list
 	ids := make([]int, len(communities))
 	for i, comm := range communities {
-		if len(comm) != 3 {
-			log.Println("ERROR: malformed ext. bgp community:", comm)
-			continue
-		}
 		r := 0 // RO
 		if comm[0].(string) == "rt" {
 			r = 1

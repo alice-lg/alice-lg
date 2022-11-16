@@ -259,7 +259,7 @@ func parseRouteBgpInfo(data interface{}) *api.BGPInfo {
 		LocalPref:        localPref,
 		Med:              med,
 		Communities:      pools.Communities.Acquire(communities),
-		ExtCommunities:   extCommunities,
+		ExtCommunities:   pools.ExtCommunities.AcquireExt(extCommunities),
 		LargeCommunities: pools.LargeCommunities.Acquire(largeCommunities),
 	}
 	return bgp
@@ -300,10 +300,12 @@ func parseExtBgpCommunities(data interface{}) []api.ExtCommunity {
 			log.Println("Ignoring malformed ext community:", cdata)
 			continue
 		}
+		val1, _ := strconv.Atoi(cdata[1].(string))
+		val2, _ := strconv.Atoi(cdata[2].(string))
 		communities = append(communities, api.ExtCommunity{
 			cdata[0],
-			cdata[1],
-			cdata[2],
+			val1,
+			val2,
 		})
 	}
 
