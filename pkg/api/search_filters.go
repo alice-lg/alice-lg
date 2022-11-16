@@ -374,7 +374,7 @@ func (s *SearchFilters) UpdateFromLookupRoute(r *LookupRoute) {
 			Value: c,
 		})
 	}
-	extCommunities := s.GetGroupByKey(SearchKeyCommunities)
+	extCommunities := s.GetGroupByKey(SearchKeyExtCommunities)
 	for _, c := range r.Route.BGP.ExtCommunities.Unique() {
 		extCommunities.AddFilter(&SearchFilter{
 			Name:  c.String(),
