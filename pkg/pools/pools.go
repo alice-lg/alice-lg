@@ -7,6 +7,9 @@ import "log"
 // Default pools: These pools are defined globally
 // and are defined per intended usage
 
+// Neighbors stores neighbor IDs
+var Neighbors *String
+
 // Networks stores network ip addresses
 var Networks *String
 
@@ -32,6 +35,7 @@ var Types *StringList
 func init() {
 	log.Println("initializing memory pools")
 
+	Neighbors = NewString()
 	Networks = NewString()
 	Interfaces = NewString()
 	Gateways4 = NewString()
