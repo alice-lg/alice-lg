@@ -72,7 +72,7 @@ func (r *RoutesBackend) FindByNeighbors(
 
 	r.routes.Range(func(k, rs interface{}) bool {
 		for _, route := range rs.(api.LookupRoutes) {
-			if isMemberOf(neighborIDs, route.NeighborID) {
+			if isMemberOf(neighborIDs, *route.NeighborID) {
 				result = append(result, route)
 			}
 		}
@@ -93,7 +93,7 @@ func (r *RoutesBackend) FindByPrefix(
 	r.routes.Range(func(k, rs interface{}) bool {
 		for _, route := range rs.(api.LookupRoutes) {
 			// Naiive string filtering:
-			if strings.HasPrefix(strings.ToLower(route.Network), prefix) {
+			if strings.HasPrefix(strings.ToLower(*route.Network), prefix) {
 				result = append(result, route)
 			}
 		}

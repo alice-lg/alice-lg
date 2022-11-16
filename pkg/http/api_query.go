@@ -49,8 +49,8 @@ func apiQueryFilterNextHopGateway(
 
 	results := make(api.Routes, 0, len(routes))
 	for _, r := range routes {
-		if strings.HasPrefix(strings.ToLower(r.Network), queryString) ||
-			strings.HasPrefix(strings.ToLower(r.Gateway), queryString) {
+		if strings.HasPrefix(strings.ToLower(*r.Network), queryString) ||
+			strings.HasPrefix(strings.ToLower(*r.Gateway), queryString) {
 			results = append(results, r)
 		}
 	}

@@ -9,6 +9,7 @@ import (
 
 	"github.com/alice-lg/alice-lg/pkg/api"
 	"github.com/alice-lg/alice-lg/pkg/decoders"
+	"github.com/alice-lg/alice-lg/pkg/pools"
 )
 
 // Decode the api status response from the openbgpd
@@ -179,12 +180,12 @@ func decodeRoute(details map[string]interface{}) (*api.Route, error) {
 
 	// Make bgp info
 	bgpInfo := &api.BGPInfo{
-		Origin:           origin,
-		AsPath:           asPath,
-		NextHop:          trueNextHop,
-		Communities:      communities,
+		Origin:           pools.Origins.Acquire(origin),
+		AsPath:           pools.ASPaths.Acquire(asPath),
+		NextHop:          pools.Gateways4.Acquire(trueNextHop),
+		Communities:      pools.Communities.Acquire(communities),
 		ExtCommunities:   extendedCommunities,
-		LargeCommunities: largeCommunities,
+		LargeCommunities: pools.LargeCommunities.Acquire(largeCommunities),
 		LocalPref:        localPref,
 	}
 
@@ -196,12 +197,12 @@ func decodeRoute(details map[string]interface{}) (*api.Route, error) {
 
 	r := &api.Route{
 		ID:         prefix,
-		NeighborID: neighborID,
-		Network:    prefix,
-		Gateway:    trueNextHop,
+		NeighborID: pools.Neighbors.Acquire(neighborID),
+		Network:    pools.Networks4.Acquire(prefix),
+		Gateway:    pools.Gateways4.Acquire(trueNextHop),
 		BGP:        bgpInfo,
 		Age:        lastUpdate,
-		Type:       []string{origin},
+		Type:       pools.Types.Acquire([]string{origin}),
 		Primary:    isPrimary,
 		Details:    &rawDetails,
 	}

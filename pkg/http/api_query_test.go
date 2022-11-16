@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
+	"github.com/alice-lg/alice-lg/pkg/pools"
 )
 
 func makeQueryRequest(q string) *http.Request {
@@ -20,21 +21,21 @@ func makeQueryRoutes() api.Routes {
 	routes := api.Routes{
 		&api.Route{
 			ID:         "route_01",
-			NeighborID: "n01",
-			Network:    "123.42.43.0/24",
-			Gateway:    "23.42.42.1",
+			NeighborID: pools.Neighbors.Acquire("n01"),
+			Network:    pools.Networks4.Acquire("123.42.43.0/24"),
+			Gateway:    pools.Gateways4.Acquire("23.42.42.1"),
 		},
 		&api.Route{
 			ID:         "route_02",
-			NeighborID: "n01",
-			Network:    "142.23.0.0/16",
-			Gateway:    "42.42.42.1",
+			NeighborID: pools.Neighbors.Acquire("n01"),
+			Network:    pools.Networks4.Acquire("142.23.0.0/16"),
+			Gateway:    pools.Gateways4.Acquire("42.42.42.1"),
 		},
 		&api.Route{
 			ID:         "route_03",
-			NeighborID: "n01",
-			Network:    "123.43.0.0/16",
-			Gateway:    "23.42.43.1",
+			NeighborID: pools.Neighbors.Acquire("n01"),
+			Network:    pools.Networks4.Acquire("123.43.0.0/16"),
+			Gateway:    pools.Gateways4.Acquire("23.42.43.1"),
 		},
 	}
 

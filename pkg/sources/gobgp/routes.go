@@ -11,6 +11,7 @@ import (
 	"github.com/osrg/gobgp/pkg/packet/bgp"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
+	"github.com/alice-lg/alice-lg/pkg/pools"
 	"github.com/alice-lg/alice-lg/pkg/sources/gobgp/apiutil"
 )
 
@@ -85,9 +86,10 @@ func (gobgp *GoBGP) parsePathIntoRoute(
 
 	route := api.Route{}
 	route.ID = fmt.Sprintf("%s_%s", path.SourceId, prefix)
-	route.NeighborID = PeerHashWithASAndAddress(path.SourceAsn, path.NeighborIp)
-	route.Network = prefix
-	route.Interface = "Unknown"
+	route.NeighborID = pools.Neighbors.Acquire(
+		PeerHashWithASAndAddress(path.SourceAsn, path.NeighborIp))
+	route.Network = pools.Networks4.Acquire(prefix)
+	route.Interface = pools.Interfaces.Acquire("unknown")
 	route.Age = time.Since(time.Unix(path.Age.GetSeconds(), int64(path.Age.GetNanos())))
 	route.Primary = path.Best
 
@@ -106,18 +108,18 @@ func (gobgp *GoBGP) parsePathIntoRoute(
 		case *bgp.PathAttributeMultiExitDisc:
 			route.BGP.Med = int(attr.Value)
 		case *bgp.PathAttributeNextHop:
-			route.Gateway = attr.Value.String()
-			route.BGP.NextHop = attr.Value.String()
+			route.Gateway = pools.Gateways4.Acquire(attr.Value.String())
+			route.BGP.NextHop = pools.Gateways4.Acquire(attr.Value.String())
 		case *bgp.PathAttributeLocalPref:
 			route.BGP.LocalPref = int(attr.Value)
 		case *bgp.PathAttributeOrigin:
 			switch attr.Value {
 			case bgp.BGP_ORIGIN_ATTR_TYPE_IGP:
-				route.BGP.Origin = "IGP"
+				route.BGP.Origin = pools.Origins.Acquire("IGP")
 			case bgp.BGP_ORIGIN_ATTR_TYPE_EGP:
-				route.BGP.Origin = "EGP"
+				route.BGP.Origin = pools.Origins.Acquire("EGP")
 			case bgp.BGP_ORIGIN_ATTR_TYPE_INCOMPLETE:
-				route.BGP.Origin = "Incomplete"
+				route.BGP.Origin = pools.Origins.Acquire("Incomplete")
 			}
 		case *bgp.PathAttributeAsPath:
 			for _, aspth := range attr.Value {
@@ -154,6 +156,10 @@ func (gobgp *GoBGP) parsePathIntoRoute(
 			}
 		}
 	}
+
+	route.BGP.AsPath = pools.ASPaths.Acquire(route.BGP.AsPath)
+	route.BGP.Communities = pools.Communities.Acquire(route.BGP.Communities)
+	route.BGP.LargeCommunities = pools.LargeCommunities.Acquire(route.BGP.LargeCommunities)
 
 	route.Metric = (route.BGP.LocalPref + route.BGP.Med)
 

@@ -7,6 +7,7 @@ import (
 
 	"github.com/alice-lg/alice-lg/pkg/api"
 	"github.com/alice-lg/alice-lg/pkg/config"
+	"github.com/alice-lg/alice-lg/pkg/pools"
 )
 
 func TestRoutesTable(t *testing.T) {
@@ -35,7 +36,7 @@ func TestCountRoutesAt(t *testing.T) {
 		},
 		Route: &api.Route{
 			ID:      "r1.2.3.4",
-			Network: "1.2.3.0/24",
+			Network: pools.Networks4.Acquire("1.2.3.0/24"),
 		},
 	}
 	b.initTable(ctx, tx, "rs1")
@@ -87,7 +88,7 @@ func TestFindByNeighbors(t *testing.T) {
 		},
 		Route: &api.Route{
 			ID:      "r1.2.3.4",
-			Network: "1.2.3.0/24",
+			Network: pools.Networks4.Acquire("1.2.3.0/24"),
 		},
 	}
 	b.initTable(ctx, tx, "rs1")
@@ -145,7 +146,7 @@ func TestFindByPrefix(t *testing.T) {
 		},
 		Route: &api.Route{
 			ID:      "r1.2.3.4",
-			Network: "1.2.3.0/24",
+			Network: pools.Networks4.Acquire("1.2.3.0/24"),
 		},
 	}
 
@@ -154,16 +155,16 @@ func TestFindByPrefix(t *testing.T) {
 	b.persist(ctx, tx, "rs1", r, now)
 
 	r.Route.ID = "r4242"
-	r.Route.Network = "1.2.4.0/24"
+	r.Route.Network = pools.Networks4.Acquire("1.2.4.0/24")
 	b.persist(ctx, tx, "rs1", r, now)
 
 	r.Route.ID = "r4243"
-	r.Route.Network = "1.2.5.0/24"
+	r.Route.Network = pools.Networks4.Acquire("1.2.5.0/24")
 	r.Neighbor.ID = "n24"
 	b.persist(ctx, tx, "rs2", r, now)
 
 	r.Route.ID = "r4244"
-	r.Route.Network = "5.5.5.0/24"
+	r.Route.Network = pools.Networks4.Acquire("5.5.5.0/24")
 	r.Neighbor.ID = "n25"
 	b.persist(ctx, tx, "rs1", r, now)
 

@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"testing"
+
+	"github.com/alice-lg/alice-lg/pkg/pools"
 )
 
 func readTestData(filename string) map[string]interface{} {
@@ -54,7 +56,8 @@ func TestDecodeRoutes(t *testing.T) {
 
 	// Check first route
 	r := routes[0]
-	if r.Network != "23.42.1.0/24" {
+	ipPtr := pools.Networks4.Acquire("23.42.1.0/24")
+	if r.Network != ipPtr {
 		t.Error("unexpected network:", r.Network)
 	}
 	// Community decoding

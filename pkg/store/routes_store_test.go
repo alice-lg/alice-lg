@@ -133,7 +133,7 @@ func TestLookupPrefix(t *testing.T) {
 
 	// Check results
 	for _, prefix := range results {
-		if strings.HasPrefix(prefix.Network, query) == false {
+		if strings.HasPrefix(*prefix.Network, query) == false {
 			t.Error(
 				"All network addresses should start with the",
 				"queried prefix",
@@ -171,7 +171,7 @@ func TestLookupPrefixForNeighbors(t *testing.T) {
 
 	resultset := []string{}
 	for _, prefix := range results {
-		resultset = append(resultset, prefix.Network)
+		resultset = append(resultset, *prefix.Network)
 	}
 
 	testCheckPrefixesPresence(presence, resultset, t)
