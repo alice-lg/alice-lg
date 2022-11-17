@@ -76,6 +76,7 @@ func TestDecodeRoutes(t *testing.T) {
 	if r.BGP.ExtCommunities[1][2] != 11000 {
 		t.Error("unexpected community:", r.BGP.ExtCommunities[0])
 	}
+	t.Log(r.BGP.ExtCommunities)
 
 	if r.BGP.AsPath[0] != 1111 {
 		t.Error("unexpected as_path:", r.BGP.AsPath)
@@ -91,5 +92,28 @@ func TestDecodeExtendedCommunities(t *testing.T) {
 	}
 	if comms[0][0] != "rt" && comms[0][1] != 123 && comms[0][2] != 456 {
 		t.Fatal("unexpected result:", comms[0])
+	}
+}
+
+func TestDecodeMalformedExtendedCommunities(t *testing.T) {
+	data := []interface{}{
+		"0x8000000000000000",
+		"8000000000000000",
+		"rt 1239", "generic :123", "generic ro-23:123",
+		"generic 123123192399281398193489:asd",
+		"[0] 0x8000000000000000",
+		"[0] 0x800000000:0000000",
+		"foo bar:23:42",
+		"foo 2342:bar",
+		"foo 23:bar:42",
+		"foo",
+		"b 9223372036854775808",
+		922337203685477580,
+		"ro  2::42",
+		"generic rt a:b"}
+	comms := decodeExtendedCommunities(data)
+	t.Log(comms)
+	if len(comms) > 0 {
+		t.Error("expected empty communities")
 	}
 }

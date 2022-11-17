@@ -243,11 +243,13 @@ func decodeExtendedCommunities(c interface{}) api.ExtCommunities {
 	for _, com := range details {
 		tokens := strings.SplitN(com, " ", 2)
 		if len(tokens) != 2 {
+			log.Println("can not decode ext. community:", com)
 			continue
 		}
 		nums := decoders.IntListFromStrings(
 			strings.SplitN(tokens[1], ":", 2))
 		if len(nums) != 2 {
+			log.Println("can not decode ext. community:", com)
 			continue
 		}
 		comms = append(comms, []interface{}{tokens[0], nums[0], nums[1]})
