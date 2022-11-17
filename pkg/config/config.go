@@ -146,8 +146,9 @@ type UIConfig struct {
 	RoutesNoexports        NoexportsConfig
 	RoutesRejectCandidates RejectCandidatesConfig
 
-	BGPCommunities api.BGPCommunityMap
-	Rpki           RpkiConfig
+	BGPCommunities          api.BGPCommunityMap
+	BGPBlackholeCommunities api.BGPCommunitiesSet
+	Rpki                    RpkiConfig
 
 	Theme ThemeConfig
 
