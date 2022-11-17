@@ -39,6 +39,7 @@ Alice-LG is a BGP looking glass which gets its data from external APIs.
 Currently Alice-LG supports the following APIs:
 - [birdwatcher API](https://github.com/alice-lg/birdwatcher) for [BIRD](http://bird.network.cz/)
 - [GoBGP](https://osrg.github.io/gobgp/)
+- [OpenBGPD](https://www.openbgpd.org/)
 
 ### Birdwatcher
 Normally you would first install the [birdwatcher API](https://github.com/alice-lg/birdwatcher) directly on the machine(s) where you run [BIRD](http://bird.network.cz/) on
@@ -50,7 +51,8 @@ just prior to [RIPE73](https://ripe73.ripe.net/) in Madrid, Spain.
 Major thanks to Barry O'Donovan who built the original [INEX Bird's Eye](https://github.com/inex/birdseye) BIRD API of which Alice-LG is a spinnoff
 
 ### GoBGP
-Alice-LG supports direct integration with GoBGP instances using gRPC.  See the configuration section for more detail.
+Alice-LG supports direct integration with GoBGP instances using gRPC.
+See the configuration section for more detail.
 
 ### OpenBGPD
 
@@ -133,6 +135,13 @@ host = rs2.example.com:50051
 # ProcessingTimeout is a timeout in seconds configured per gRPC call to a given GoBGP daemon
 processing_timeout = 300
 ```
+Configure TLS with:
+```ini
+tls_crt = /path/to/cert
+tls_common_name = "common name"
+```
+
+You can disable TLS with `insecure = true`.
 
 [OpenBGPD](https://www.openbgpd.org/) via `openbgpd-state-server`:
 ```ini
