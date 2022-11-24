@@ -114,3 +114,34 @@ export const useReadableCommunity = (community) => {
     community, getLabel,
   ]);
 }
+
+/**
+ * Get blackhole communities from config
+ */
+export const useBlackholeCommunities = () => {
+  let config = useConfig();
+  return config.bgp_blackhole_communities;
+}
+
+/**
+ * Match community ranges. When doing so, make sure
+ * you compare the right communities. e.g. comparing
+ * a large and an extended community will lead to unexpected
+ * results.
+ */
+export const matchCommunityRange = (community, range) => {
+  if (community.length !== range.length) {
+    return false; 
+  }
+  
+  for (let i in community) {
+    let c = community[i];
+    let rs = range[i][0];
+    let re = range[i][1];
+    if ((c < rs) || (c > re)) {
+      return false;
+    }
+  }
+  return true;
+}
+
