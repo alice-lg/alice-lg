@@ -6,26 +6,53 @@ import { faCircle }
 
 import { useRouteServer }
   from 'app/context/route-servers';
+import { matchCommunityRange
+       , useBlackholeCommunities 
+       }
+  from 'app/context/bgp';
 
 
 const BlackholeIndicator = ({route}) => {
   const routeServer = useRouteServer(); // blackholes are store per RS
+  const blackholeCommunities = useBlackholeCommunities();
 
   const blackholes = routeServer?.blackholes || [];
-  const communities = route?.bgp?.communities || [];
   const nextHop = route?.bgp?.next_hop;
+  const routeStandard = route?.bgp?.communities || [];
+  const routeExtended = route?.bgp?.ext_communities || [];
+  const routeLarge    = route?.bgp?.large_communities || [];
 
   // Check if next hop is a known blackhole
   let isBlackhole = blackholes.includes(nextHop);
 
-  // Check if BGP community 65535:666 is set
-  for (const c of communities) {
-    if (c[0] === 65535 && c[1] === 666) {
-      isBlackhole = true;
-      break;
+  // Check standard communities
+  for (const c of blackholeCommunities.standard) {
+    for (const r of routeStandard) {
+      if (matchCommunityRange(r, c)) {
+        isBlackhole = true;
+        break;
+      }
     }
   }
-
+  // Check large communities
+  for (const c of blackholeCommunities.large) {
+    for (const r of routeLarge) {
+      if (matchCommunityRange(r, c)) {
+        isBlackhole = true;
+        break;
+      }
+    }
+  }
+  // Check extended
+  for (const c of blackholeCommunities.extended) {
+    for (const r of routeExtended) {
+      if (matchCommunityRange(r, c)) {
+        isBlackhole = true;
+        break;
+      }
+    }
+  }
+  
   if (isBlackhole) {
     return(
       <span className="route-prefix-flag blackhole-route is-blackhole-route">
