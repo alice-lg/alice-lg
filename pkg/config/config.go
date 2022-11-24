@@ -146,8 +146,9 @@ type UIConfig struct {
 	RoutesNoexports        NoexportsConfig
 	RoutesRejectCandidates RejectCandidatesConfig
 
-	BGPCommunities api.BGPCommunityMap
-	Rpki           RpkiConfig
+	BGPCommunities          api.BGPCommunityMap
+	BGPBlackholeCommunities api.BGPCommunitiesSet
+	Rpki                    RpkiConfig
 
 	Theme ThemeConfig
 
@@ -387,28 +388,6 @@ func getLookupColumns(config *ini.File) (
 	return columns, order, nil
 }
 
-// Helper parse communities from a section body
-func parseAndMergeCommunities(
-	communities api.BGPCommunityMap, body string,
-) api.BGPCommunityMap {
-
-	// Parse and merge communities
-	lines := strings.Split(body, "\n")
-	for _, line := range lines {
-		kv := strings.SplitN(line, "=", 2)
-		if len(kv) != 2 {
-			log.Println("Skipping malformed BGP community:", line)
-			continue
-		}
-
-		community := strings.TrimSpace(kv[0])
-		label := strings.TrimSpace(kv[1])
-		communities.Set(community, label)
-	}
-
-	return communities
-}
-
 // Get UI config: BGP Communities
 func getBGPCommunityMap(config *ini.File) api.BGPCommunityMap {
 	// Load defaults
@@ -457,6 +436,25 @@ func getRoutesNoexports(config *ini.File) (NoexportsConfig, error) {
 	noexportsConfig.Reasons = reasons
 
 	return noexportsConfig, nil
+}
+
+// Get UI config: blackhole communities
+func getBlackholeCommunities(config *ini.File) (api.BGPCommunitiesSet, error) {
+	section := config.Section("blackhole_communities")
+	defaultBlackholes := api.BGPCommunitiesSet{
+		Standard: []api.BGPCommunityRange{
+			{[]interface{}{65535, 65535}, []interface{}{666, 666}},
+		},
+	}
+	if section == nil {
+		return defaultBlackholes, nil
+	}
+	set, err := parseRangeCommunitiesSet(section.Body())
+	if err != nil {
+		return defaultBlackholes, err
+	}
+	set.Standard = append(set.Standard, defaultBlackholes.Standard...)
+	return *set, nil
 }
 
 // Get UI config: Reject candidates
@@ -618,6 +616,12 @@ func getUIConfig(config *ini.File) (UIConfig, error) {
 		return uiConfig, err
 	}
 
+	// Blackhole communities
+	blackholeCommunities, err := getBlackholeCommunities(config)
+	if err != nil {
+		return uiConfig, err
+	}
+
 	// Theme configuration: Theming is optional, if no settings
 	// are found, it will be ignored
 	themeConfig := getThemeConfig(config)
@@ -640,8 +644,9 @@ func getUIConfig(config *ini.File) (UIConfig, error) {
 		RoutesNoexports:        noexports,
 		RoutesRejectCandidates: rejectCandidates,
 
-		BGPCommunities: getBGPCommunityMap(config),
-		Rpki:           rpki,
+		BGPBlackholeCommunities: blackholeCommunities,
+		BGPCommunities:          getBGPCommunityMap(config),
+		Rpki:                    rpki,
 
 		Theme: themeConfig,
 
@@ -830,6 +835,7 @@ func LoadConfig(file string) (*Config, error) {
 	parsedConfig, err := ini.LoadSources(ini.LoadOptions{
 		UnparseableSections: []string{
 			"bgp_communities",
+			"blackhole_communities",
 			"rejection_reasons",
 			"noexport_reasons",
 		},

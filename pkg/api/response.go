@@ -38,7 +38,8 @@ type ConfigResponse struct {
 
 	Rpki Rpki `json:"rpki"`
 
-	BGPCommunities map[string]interface{} `json:"bgp_communities"`
+	BGPCommunities          map[string]interface{} `json:"bgp_communities"`
+	BGPBlackholeCommunities BGPCommunitiesSet      `json:"bgp_blackhole_communities"`
 
 	NeighborsColumns      map[string]string `json:"neighbors_columns"`
 	NeighborsColumnsOrder []string          `json:"neighbors_columns_order"`

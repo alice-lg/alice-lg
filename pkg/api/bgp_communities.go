@@ -173,3 +173,33 @@ func (c BGPCommunityMap) Communities() Communities {
 	}
 	return communities
 }
+
+// BGPCommunity types: Standard, Extended and Large
+const (
+	BGPCommunityTypeStd = iota
+	BGPCommunityTypeExt
+	BGPCommunityTypeLarge
+)
+
+// BGPCommunityRange is a list of tuples with the start and end
+// of the range defining a community.
+type BGPCommunityRange []interface{}
+
+// Type classifies the BGP Ranged BGP Community into: std, large, ext
+func (c BGPCommunityRange) Type() int {
+	if len(c) == 2 {
+		return BGPCommunityTypeStd
+	}
+	if _, ok := c[0].([]string); ok {
+		return BGPCommunityTypeExt
+	}
+	return BGPCommunityTypeLarge
+}
+
+// A BGPCommunitiesSet is a set of communities, large and extended.
+// The communities are described as ranges.
+type BGPCommunitiesSet struct {
+	Standard []BGPCommunityRange `json:"standard"`
+	Extended []BGPCommunityRange `json:"extended"`
+	Large    []BGPCommunityRange `json:"large"`
+}

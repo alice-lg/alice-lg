@@ -227,7 +227,7 @@ func TestRejectCandidatesConfig(t *testing.T) {
 func TestDefaultHTTPTimeout(t *testing.T) {
 	config, err := LoadConfig("testdata/alice.conf")
 	if err != nil {
-		t.Error("Could not load test config:", err)
+		t.Fatal("Could not load test config:", err)
 	}
 
 	if config.Server.HTTPTimeout != DefaultHTTPTimeout {
@@ -248,4 +248,20 @@ func TestPostgresStoreConfig(t *testing.T) {
 		t.Error("unexpected MaxConns:", config.Postgres.MaxConns)
 	}
 	t.Log(config.Postgres)
+}
+
+func TestGetBlackholeCommunities(t *testing.T) {
+	config, _ := LoadConfig("testdata/alice.conf")
+	comms := config.UI.BGPBlackholeCommunities
+
+	if comms.Standard[0][0].([]int)[0] != 1337 {
+		t.Error("unexpected community:", comms.Standard[0])
+	}
+	if len(comms.Extended) != 1 {
+		t.Error("unexpected communities:", comms.Extended)
+	}
+	if len(comms.Large) != 1 {
+		t.Error("unexpected communities:", comms.Large)
+	}
+	t.Log(comms)
 }
