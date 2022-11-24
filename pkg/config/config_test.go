@@ -254,14 +254,14 @@ func TestGetBlackholeCommunities(t *testing.T) {
 	config, _ := LoadConfig("testdata/alice.conf")
 	comms := config.UI.BGPBlackholeCommunities
 
-	if comms.Communities[0][0].([]int)[0] != 1337 {
-		t.Error("unexpected community:", comms.Communities[0])
+	if comms.Standard[0][0].([]int)[0] != 1337 {
+		t.Error("unexpected community:", comms.Standard[0])
 	}
-	if len(comms.ExtCommunities) != 1 {
-		t.Error("unexpected communities:", comms.ExtCommunities)
+	if len(comms.Extended) != 1 {
+		t.Error("unexpected communities:", comms.Extended)
 	}
-	if len(comms.LargeCommunities) != 1 {
-		t.Error("unexpected communities:", comms.LargeCommunities)
+	if len(comms.Large) != 1 {
+		t.Error("unexpected communities:", comms.Large)
 	}
 	t.Log(comms)
 }

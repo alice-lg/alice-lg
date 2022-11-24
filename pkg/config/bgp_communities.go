@@ -39,9 +39,9 @@ func parseAndMergeCommunities(
 
 // Parse a communities set with ranged communities
 func parseRangeCommunitiesSet(body string) (*api.BGPCommunitiesSet, error) {
-	comms := []api.RangedBGPCommunity{}
-	large := []api.RangedBGPCommunity{}
-	ext := []api.RangedBGPCommunity{}
+	comms := []api.BGPCommunityRange{}
+	large := []api.BGPCommunityRange{}
+	ext := []api.BGPCommunityRange{}
 
 	lines := strings.Split(body, "\n")
 	for _, line := range lines {
@@ -67,14 +67,14 @@ func parseRangeCommunitiesSet(body string) (*api.BGPCommunitiesSet, error) {
 	}
 
 	set := &api.BGPCommunitiesSet{
-		Communities:      comms,
-		LargeCommunities: large,
-		ExtCommunities:   ext,
+		Standard: comms,
+		Large:    large,
+		Extended: ext,
 	}
 	return set, nil
 }
 
-func parseRangeCommunity(s string) (api.RangedBGPCommunity, error) {
+func parseRangeCommunity(s string) (api.BGPCommunityRange, error) {
 	tokens := strings.Split(s, ":")
 	if len(tokens) < 2 {
 		return nil, ErrInvalidCommunity(s)
@@ -107,13 +107,13 @@ func parseRangeCommunity(s string) (api.RangedBGPCommunity, error) {
 		return nil, ErrInvalidCommunity(s)
 	}
 	if isExt {
-		return api.RangedBGPCommunity{
+		return api.BGPCommunityRange{
 			[]string{parts[0][0], parts[0][0]},
 			decoders.IntListFromStrings(parts[1]),
 			decoders.IntListFromStrings(parts[2]),
 		}, nil
 	}
-	comm := api.RangedBGPCommunity{}
+	comm := api.BGPCommunityRange{}
 	for _, p := range parts {
 		comm = append(comm, decoders.IntListFromStrings(p))
 	}

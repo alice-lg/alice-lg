@@ -441,13 +441,19 @@ func getRoutesNoexports(config *ini.File) (NoexportsConfig, error) {
 // Get UI config: blackhole communities
 func getBlackholeCommunities(config *ini.File) (api.BGPCommunitiesSet, error) {
 	section := config.Section("blackhole_communities")
+	defaultBlackholes := api.BGPCommunitiesSet{
+		Standard: []api.BGPCommunityRange{
+			{[]interface{}{65535, 65535}, []interface{}{666, 666}},
+		},
+	}
 	if section == nil {
-		return api.BGPCommunitiesSet{}, nil
+		return defaultBlackholes, nil
 	}
 	set, err := parseRangeCommunitiesSet(section.Body())
 	if err != nil {
-		return api.BGPCommunitiesSet{}, err
+		return defaultBlackholes, err
 	}
+	set.Standard = append(set.Standard, defaultBlackholes.Standard...)
 	return *set, nil
 }
 
