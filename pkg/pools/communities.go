@@ -1,6 +1,7 @@
 package pools
 
 import (
+	"math"
 	"reflect"
 	"sync"
 
@@ -51,6 +52,14 @@ func NewExtCommunitiesPool() *CommunitiesPool {
 	}
 }
 
+func extPrefixToInt(s string) int {
+	v := 0
+	for i, c := range s {
+		v += int(math.Pow(1000.0, float64(i))) * int(c)
+	}
+	return v
+}
+
 // AcquireExt a list of ext bgp communities
 func (p *CommunitiesPool) AcquireExt(communities []api.ExtCommunity) []api.ExtCommunity {
 	p.Lock()
@@ -59,10 +68,7 @@ func (p *CommunitiesPool) AcquireExt(communities []api.ExtCommunity) []api.ExtCo
 	// Make identification list
 	ids := make([]int, len(communities))
 	for i, comm := range communities {
-		r := 0 // RO
-		if comm[0].(string) == "rt" {
-			r = 1
-		}
+		r := extPrefixToInt(comm[0].(string))
 		icomm := []int{r, comm[1].(int), comm[2].(int)}
 
 		// get community identifier
