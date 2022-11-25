@@ -318,8 +318,7 @@ func parseRouteData(
 	config Config,
 	keepDetails bool,
 ) *api.Route {
-	gwpool := pools.Gateways4  // Let's see
-	netpool := pools.Networks4 // same...
+	gwpool := pools.Gateways4 // Let's see
 
 	age := parseRelativeServerTime(rdata["age"], config)
 	rtype := decoders.StringList(rdata["type"])
@@ -346,8 +345,7 @@ func parseRouteData(
 
 		NeighborID: pools.Neighbors.Acquire(
 			decoders.String(rdata["from_protocol"], "unknown neighbor")),
-		Network: netpool.Acquire(
-			decoders.String(rdata["network"], "unknown net")),
+		Network: decoders.String(rdata["network"], "unknown net"),
 		Interface: pools.Interfaces.Acquire(
 			decoders.String(rdata["interface"], "unknown interface")),
 		Metric:     decoders.Int(rdata["metric"], -1),

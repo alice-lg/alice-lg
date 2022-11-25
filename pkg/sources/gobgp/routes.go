@@ -88,7 +88,7 @@ func (gobgp *GoBGP) parsePathIntoRoute(
 	route.ID = fmt.Sprintf("%s_%s", path.SourceId, prefix)
 	route.NeighborID = pools.Neighbors.Acquire(
 		PeerHashWithASAndAddress(path.SourceAsn, path.NeighborIp))
-	route.Network = pools.Networks4.Acquire(prefix)
+	route.Network = prefix
 	route.Interface = pools.Interfaces.Acquire("unknown")
 	route.Age = time.Since(time.Unix(path.Age.GetSeconds(), int64(path.Age.GetNanos())))
 	route.Primary = path.Best

@@ -11,7 +11,7 @@ type Route struct {
 	ID         string  `json:"id"`
 	NeighborID *string `json:"neighbor_id"`
 
-	Network    *string       `json:"network"`
+	Network    string        `json:"network"`
 	Interface  *string       `json:"interface"`
 	Gateway    *string       `json:"gateway"`
 	Metric     int           `json:"metric"`
@@ -62,7 +62,7 @@ func (routes Routes) Len() int {
 }
 
 func (routes Routes) Less(i, j int) bool {
-	return *(routes[i].Network) < *(routes[j].Network)
+	return routes[i].Network < routes[j].Network
 }
 
 func (routes Routes) Swap(i, j int) {
@@ -186,7 +186,7 @@ func (r LookupRoutes) Len() int {
 }
 
 func (r LookupRoutes) Less(i, j int) bool {
-	return (*r[i].Route.Network) < (*r[j].Route.Network)
+	return r[i].Route.Network < r[j].Route.Network
 }
 
 func (r LookupRoutes) Swap(i, j int) {
