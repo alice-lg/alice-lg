@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
+	"github.com/alice-lg/alice-lg/pkg/pools"
 )
 
 //go:embed routes_response.json
@@ -17,6 +18,12 @@ func RoutesResponse() *api.RoutesResponse {
 	err := json.Unmarshal(testRoutesResponse, &response)
 	if err != nil {
 		log.Panic("could not unmarshal response test data:", err)
+	}
+	for _, route := range response.Imported {
+		route.NeighborID = pools.Neighbors.Acquire(*route.NeighborID)
+	}
+	for _, route := range response.Filtered {
+		route.NeighborID = pools.Neighbors.Acquire(*route.NeighborID)
 	}
 	return response
 }
