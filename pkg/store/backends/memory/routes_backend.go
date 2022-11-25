@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
+	"github.com/alice-lg/alice-lg/pkg/pools"
 	"github.com/alice-lg/alice-lg/pkg/sources"
 )
 
@@ -70,9 +71,18 @@ func (r *RoutesBackend) FindByNeighbors(
 ) (api.LookupRoutes, error) {
 	result := api.LookupRoutes{}
 
+	// Use neighbor ID pointers from pool
+	neighborPtrs := make([]*string, 0, len(neighborIDs))
+	for _, id := range neighborIDs {
+		ptr := pools.Neighbors.Get(id)
+		if ptr != nil {
+			neighborPtrs = append(neighborPtrs, ptr)
+		}
+	}
+
 	r.routes.Range(func(k, rs interface{}) bool {
 		for _, route := range rs.(api.LookupRoutes) {
-			if isMemberOf(neighborIDs, *route.NeighborID) {
+			if isMemberOf(neighborPtrs, route.NeighborID) {
 				result = append(result, route)
 			}
 		}
@@ -104,7 +114,7 @@ func (r *RoutesBackend) FindByPrefix(
 
 // isMemberOf checks if a key is present in
 // a list of strings.
-func isMemberOf(list []string, key string) bool {
+func isMemberOf(list []*string, key *string) bool {
 	for _, v := range list {
 		if v == key {
 			return true
