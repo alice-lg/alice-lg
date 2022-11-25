@@ -85,7 +85,7 @@ func (gobgp *GoBGP) parsePathIntoRoute(
 ) (*api.Route, error) {
 
 	route := api.Route{}
-	route.ID = fmt.Sprintf("%s_%s", path.SourceId, prefix)
+	// route.ID = fmt.Sprintf("%s_%s", path.SourceId, prefix)
 	route.NeighborID = pools.Neighbors.Acquire(
 		PeerHashWithASAndAddress(path.SourceAsn, path.NeighborIp))
 	route.Network = prefix

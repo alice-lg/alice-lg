@@ -341,7 +341,7 @@ func parseRouteData(
 	}
 
 	route := &api.Route{
-		ID: decoders.String(rdata["network"], "unknown"),
+		// ID: decoders.String(rdata["network"], "unknown"),
 
 		NeighborID: pools.Neighbors.Acquire(
 			decoders.String(rdata["from_protocol"], "unknown neighbor")),

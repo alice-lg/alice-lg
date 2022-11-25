@@ -147,12 +147,12 @@ func (b *GenericBirdwatcher) filterRoutesByDuplicates(
 
 	routesMap := make(map[string]*api.Route) // for O(1) access
 	for _, route := range routes {
-		routesMap[route.ID] = route
+		routesMap[route.Network] = route
 	}
 
 	// Remove routes from "routes" that are contained within filterRoutes
 	for _, filterRoute := range filterRoutes {
-		delete(routesMap, filterRoute.ID)
+		delete(routesMap, filterRoute.Network)
 	}
 
 	for _, route := range routesMap {

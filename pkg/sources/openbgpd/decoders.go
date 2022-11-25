@@ -196,7 +196,6 @@ func decodeRoute(details map[string]interface{}) (*api.Route, error) {
 	rawDetails := json.RawMessage(detailsJSON)
 
 	r := &api.Route{
-		ID:         prefix,
 		NeighborID: pools.Neighbors.Acquire(neighborID),
 		Network:    prefix,
 		Gateway:    pools.Gateways4.Acquire(trueNextHop),

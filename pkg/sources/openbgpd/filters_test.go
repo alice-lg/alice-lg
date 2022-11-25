@@ -9,7 +9,7 @@ import (
 func TestFilterReceivedRoutes(t *testing.T) {
 	routes := api.Routes{
 		&api.Route{
-			ID: "1.2.3.4",
+			Network: "1.2.3.4",
 			BGP: &api.BGPInfo{
 				LargeCommunities: api.Communities{
 					api.Community{9999, 23, 23},
@@ -18,7 +18,7 @@ func TestFilterReceivedRoutes(t *testing.T) {
 			},
 		},
 		&api.Route{
-			ID: "5.6.6.6",
+			Network: "5.6.6.6",
 			BGP: &api.BGPInfo{
 				LargeCommunities: api.Communities{
 					api.Community{9999, 23, 23},
@@ -28,7 +28,7 @@ func TestFilterReceivedRoutes(t *testing.T) {
 			},
 		},
 		&api.Route{
-			ID: "5.6.7.8",
+			Network: "5.6.7.8",
 			BGP: &api.BGPInfo{
 				LargeCommunities: api.Communities{
 					api.Community{9999, 23, 23},
@@ -43,7 +43,7 @@ func TestFilterReceivedRoutes(t *testing.T) {
 	}
 	filtered := filterReceivedRoutes(c, routes)
 
-	if filtered[0].ID != "5.6.7.8" {
+	if filtered[0].Network != "5.6.7.8" {
 		t.Error("unexpected route:", filtered[0])
 	}
 }
@@ -51,7 +51,7 @@ func TestFilterReceivedRoutes(t *testing.T) {
 func TestFilterRejectedRoutes(t *testing.T) {
 	routes := api.Routes{
 		&api.Route{
-			ID: "5.6.7.8",
+			Network: "5.6.7.8",
 			BGP: &api.BGPInfo{
 				LargeCommunities: api.Communities{
 					api.Community{9999, 23, 23},
@@ -60,7 +60,7 @@ func TestFilterRejectedRoutes(t *testing.T) {
 			},
 		},
 		&api.Route{
-			ID: "1.2.3.4",
+			Network: "1.2.3.4",
 			BGP: &api.BGPInfo{
 				LargeCommunities: api.Communities{
 					api.Community{9999, 23, 23},
@@ -69,7 +69,7 @@ func TestFilterRejectedRoutes(t *testing.T) {
 			},
 		},
 		&api.Route{
-			ID: "5.6.6.6",
+			Network: "5.6.6.6",
 			BGP: &api.BGPInfo{
 				LargeCommunities: api.Communities{
 					api.Community{9999, 23, 23},
@@ -89,7 +89,7 @@ func TestFilterRejectedRoutes(t *testing.T) {
 		t.Error("expected two filtered routes")
 	}
 
-	if filtered[0].ID != "1.2.3.4" {
+	if filtered[0].Network != "1.2.3.4" {
 		t.Error("unexpected route:", filtered[0])
 	}
 }
