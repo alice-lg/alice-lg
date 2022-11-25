@@ -1,7 +1,7 @@
 package api
 
 import (
-	"fmt"
+	"strconv"
 	"time"
 )
 
@@ -163,20 +163,26 @@ type RouteServersResponse struct {
 type Community []int
 
 func (com Community) String() string {
-	res := ""
 	if len(com) < 1 {
 		return ""
 	}
-	for _, v := range com {
-		res += fmt.Sprintf(":%d", v)
+	s := ""
+	for i, v := range com {
+		if i > 0 {
+			s += ":"
+		}
+		s += strconv.Itoa(v)
 	}
-	return res[1:]
+	return s
 }
 
 // Communities is a collection of bgp communities
 type Communities []Community
 
-// Unique deduplicates communities
+// Unique deduplicates communities.
+/*
+We can skip this. Worst case is, that the
+cardinality is off.
 func (communities Communities) Unique() Communities {
 	seen := map[string]bool{}
 	result := make(Communities, 0, len(communities))
@@ -192,25 +198,34 @@ func (communities Communities) Unique() Communities {
 
 	return result
 }
+*/
 
 // ExtCommunity is a BGP extended community
 type ExtCommunity []interface{}
 
 func (com ExtCommunity) String() string {
-	res := ""
 	if len(com) < 1 {
 		return ""
 	}
-	for _, v := range com {
-		res += fmt.Sprintf(":%v", v)
+	res := ""
+	for i, v := range com {
+		if i == 0 {
+			res += v.(string)
+			continue
+		}
+		if i > 0 {
+			res += ":"
+		}
+		res += strconv.Itoa(v.(int))
 	}
-	return res[1:]
+	return res
 }
 
 // ExtCommunities is a collection of extended bgp communities.
 type ExtCommunities []ExtCommunity
 
 // Unique deduplicates extended communities.
+/*
 func (communities ExtCommunities) Unique() ExtCommunities {
 	seen := map[string]bool{}
 	result := make(ExtCommunities, 0, len(communities))
@@ -226,6 +241,7 @@ func (communities ExtCommunities) Unique() ExtCommunities {
 
 	return result
 }
+*/
 
 // BGPInfo is a set of BGP attributes
 type BGPInfo struct {

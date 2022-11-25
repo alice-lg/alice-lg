@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"log"
 	"net/url"
 	"strconv"
@@ -131,14 +130,27 @@ func (g *SearchFilterGroup) Contains(filter *SearchFilter) bool {
 	return g.FindFilter(filter) != nil
 }
 
+// filterValueAsString gets the string representation
+// from a filter value
+func filterValueAsString(value interface{}) string {
+	switch v := value.(type) {
+	case int:
+		return strconv.Itoa(v)
+	case string:
+		return v
+	case Community:
+		return v.String()
+	case ExtCommunity:
+		return v.String()
+	}
+	panic("unexpected filter value")
+}
+
 // GetFilterByValue retrieves a filter by matching
 // a string representation of it's filter value.
 func (g *SearchFilterGroup) GetFilterByValue(value interface{}) *SearchFilter {
-	// I've tried it with .(fmt.Stringer), but int does not implement this...
-	// So whatever. I'm using the trick of letting Sprintf choose the right
-	// conversion. If this is too expensive, we need to refactor this.
-	// TODO: profile this.
-	idx, ok := g.filtersIdx[fmt.Sprintf("%v", value)]
+	ref := filterValueAsString(value)
+	idx, ok := g.filtersIdx[ref]
 	if !ok {
 		return nil // We don't have this particular filter
 	}
@@ -158,7 +170,8 @@ func (g *SearchFilterGroup) AddFilter(filter *SearchFilter) {
 	idx := len(g.Filters)
 	filter.Cardinality = 1
 	g.Filters = append(g.Filters, filter)
-	g.filtersIdx[fmt.Sprintf("%v", filter.Value)] = idx
+	ref := filterValueAsString(filter.Value)
+	g.filtersIdx[ref] = idx
 }
 
 // AddFilters adds a list of filters to a group.
@@ -172,7 +185,8 @@ func (g *SearchFilterGroup) AddFilters(filters []*SearchFilter) {
 func (g *SearchFilterGroup) rebuildIndex() {
 	idx := make(map[string]int)
 	for i, filter := range g.Filters {
-		idx[fmt.Sprintf("%v", filter.Value)] = i
+		ref := filterValueAsString(filter.Value)
+		idx[ref] = i
 	}
 	g.filtersIdx = idx // replace index
 }
@@ -368,21 +382,21 @@ func (s *SearchFilters) UpdateFromLookupRoute(r *LookupRoute) {
 
 	// Add communities
 	communities := s.GetGroupByKey(SearchKeyCommunities)
-	for _, c := range r.Route.BGP.Communities.Unique() {
+	for _, c := range r.Route.BGP.Communities {
 		communities.AddFilter(&SearchFilter{
 			Name:  c.String(),
 			Value: c,
 		})
 	}
 	extCommunities := s.GetGroupByKey(SearchKeyExtCommunities)
-	for _, c := range r.Route.BGP.ExtCommunities.Unique() {
+	for _, c := range r.Route.BGP.ExtCommunities {
 		extCommunities.AddFilter(&SearchFilter{
 			Name:  c.String(),
 			Value: c,
 		})
 	}
 	largeCommunities := s.GetGroupByKey(SearchKeyLargeCommunities)
-	for _, c := range r.Route.BGP.LargeCommunities.Unique() {
+	for _, c := range r.Route.BGP.LargeCommunities {
 		largeCommunities.AddFilter(&SearchFilter{
 			Name:  c.String(),
 			Value: c,
@@ -398,21 +412,21 @@ func (s *SearchFilters) UpdateFromRoute(r *Route) {
 
 	// Add communities
 	communities := s.GetGroupByKey(SearchKeyCommunities)
-	for _, c := range r.BGP.Communities.Unique() {
+	for _, c := range r.BGP.Communities {
 		communities.AddFilter(&SearchFilter{
 			Name:  c.String(),
 			Value: c,
 		})
 	}
 	extCommunities := s.GetGroupByKey(SearchKeyExtCommunities)
-	for _, c := range r.BGP.ExtCommunities.Unique() {
+	for _, c := range r.BGP.ExtCommunities {
 		extCommunities.AddFilter(&SearchFilter{
 			Name:  c.String(),
 			Value: c,
 		})
 	}
 	largeCommunities := s.GetGroupByKey(SearchKeyLargeCommunities)
-	for _, c := range r.BGP.LargeCommunities.Unique() {
+	for _, c := range r.BGP.LargeCommunities {
 		largeCommunities.AddFilter(&SearchFilter{
 			Name:  c.String(),
 			Value: c,
