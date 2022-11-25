@@ -139,7 +139,7 @@ func (b *RoutesBackend) persist(
 	_, err := tx.Exec(
 		ctx,
 		qry,
-		route.Route.ID,
+		route.Route.Network,
 		sourceID,
 		route.Neighbor.ID,
 		route.Route.Network,
