@@ -10,7 +10,7 @@ type StringPool struct {
 	counter map[string]uint
 	top     uint
 
-	sync.Mutex
+	sync.RWMutex
 }
 
 // NewStringPool creates a new string pool
@@ -32,6 +32,20 @@ func (p *StringPool) Acquire(s string) *string {
 		ptr = &s
 	}
 	p.counter[s] = p.top
+	return ptr
+}
+
+// Get retrieves a pointer to a string, if present.
+// Otherwise returns nil.
+func (p *StringPool) Get(s string) *string {
+	p.RLock()
+	defer p.RUnlock()
+
+	// Get value
+	ptr, ok := p.values[s]
+	if !ok {
+		return nil
+	}
 	return ptr
 }
 
