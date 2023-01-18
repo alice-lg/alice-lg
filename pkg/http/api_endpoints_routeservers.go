@@ -8,6 +8,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
+	"github.com/alice-lg/alice-lg/pkg/config"
 )
 
 // Handle RouteServers List
@@ -40,4 +41,31 @@ func (s *Server) apiRouteServersList(
 	}
 
 	return response, nil
+}
+
+// Handle route server status
+func (s *Server) apiRouteServerStatusShow(
+	ctx context.Context,
+	_req *http.Request,
+	params httprouter.Params,
+) (response, error) {
+	rsID, err := validateSourceID(params.ByName("id"))
+	if err != nil {
+		return nil, err
+	}
+
+	source := s.cfg.SourceInstanceByID(rsID)
+	if source == nil {
+		return nil, ErrSourceNotFound
+	}
+
+	result, err := source.Status(ctx)
+	if err != nil {
+		s.logSourceError("status", rsID, err)
+	}
+	if result != nil {
+		result.Meta.Version = config.Version
+	}
+
+	return result, nil
 }

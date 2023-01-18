@@ -101,7 +101,7 @@ func (s *Server) apiRegisterEndpoints(
 	router.GET("/api/v1/routeservers",
 		endpoint(s.apiRouteServersList))
 	router.GET("/api/v1/routeservers/:id/status",
-		endpoint(s.apiStatus))
+		endpoint(s.apiRouteServerStatusShow))
 	router.GET("/api/v1/routeservers/:id/neighbors",
 		endpoint(s.apiNeighborsList))
 	router.GET("/api/v1/routeservers/:id/neighbors/:neighborId/routes",

@@ -20,30 +20,6 @@ func (s *Server) apiStatusShow(
 	return status, err
 }
 
-// Handle status
-func (s *Server) apiStatus(
-	ctx context.Context,
-	_req *http.Request,
-	params httprouter.Params,
-) (response, error) {
-	rsID, err := validateSourceID(params.ByName("id"))
-	if err != nil {
-		return nil, err
-	}
-
-	source := s.cfg.SourceInstanceByID(rsID)
-	if source == nil {
-		return nil, ErrSourceNotFound
-	}
-
-	result, err := source.Status(ctx)
-	if err != nil {
-		s.logSourceError("status", rsID, err)
-	}
-
-	return result, err
-}
-
 // Handle Config Endpoint
 func (s *Server) apiConfigShow(
 	_ctx context.Context,
