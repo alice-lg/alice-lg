@@ -6,6 +6,8 @@
  * Added memory pools for deduplicating route information.
    This drastically reduces the memory consumption.
 
+ * Improved search performance.
+
  * The BGP info modal can now be dismissed by pressing `esc`.
 
  * Bugfixes: 
