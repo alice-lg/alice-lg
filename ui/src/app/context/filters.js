@@ -175,8 +175,13 @@ const decodeCommunity = (community) =>
   community.split(":").map((p) =>
     parseInt(p, 10));
 
-const decodeExtCommunity = (community) =>
-  community.split(":");
+const decodeExtCommunity = (community) => {
+  const comm = community.split(":");
+  if (comm.length !== 3) {
+    return comm; 
+  }
+  return [comm[0], ...comm.slice(1).map((c) => parseInt(c, 10))];
+}
 
 const decodeCommunities = (value) =>
   decodeStringList(value).map((v) =>
@@ -193,6 +198,7 @@ const decodeQuery = (query) => {
   const communities = decodeCommunities(query[FILTER_KEY_COMMUNITIES]);
   const extCommunities = decodeExtCommunities(query[FILTER_KEY_EXT_COMMUNITIES]);
   const largeCommunities = decodeCommunities(query[FILTER_KEY_LARGE_COMMUNITIES]);
+
   let filters = {};
   filters[FILTER_KEY_SOURCES] = sources;
   filters[FILTER_KEY_ASNS] = asns;
