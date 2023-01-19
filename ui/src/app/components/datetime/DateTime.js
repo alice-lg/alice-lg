@@ -9,8 +9,11 @@ import { parseServerTime }
 /**
  * DateTime formats the provided datetime
  */
-const DateTime = ({value, format="LLLL"}) => {
-  const time = parseServerTime(value);
+const DateTime = ({value, format="LLLL", utc=false}) => {
+  let time = parseServerTime(value);
+  if (utc) {
+    time = time.utc();
+  }
   return (<>{time.format(format)}</>);
 }
 
