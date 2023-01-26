@@ -1,5 +1,4 @@
 import {render, screen} from '@testing-library/react';
-import moment from 'moment';
 
 import DateTime from 'app/components/datetime/DateTime';
 
