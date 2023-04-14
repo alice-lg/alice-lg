@@ -1,6 +1,4 @@
 
-import { FontAwesomeIcon }
-  from '@fortawesome/react-fontawesome';
 import { faCircle }
   from '@fortawesome/free-solid-svg-icons';
 
@@ -11,7 +9,13 @@ import { matchCommunityRange
        }
   from 'app/context/bgp';
 
+import FlagIcon
+  from 'app/components/routes/FlagIcon';
 
+/**
+ * BlackholeIndicator 
+ * Displays a blackhole indicator if the route is a blackhole.
+ */
 const BlackholeIndicator = ({route}) => {
   const routeServer = useRouteServer(); // blackholes are store per RS
   const blackholeCommunities = useBlackholeCommunities();
@@ -56,8 +60,7 @@ const BlackholeIndicator = ({route}) => {
   if (isBlackhole) {
     return(
       <span className="route-prefix-flag blackhole-route is-blackhole-route">
-        <FontAwesomeIcon icon={faCircle} />
-        <div>Blackhole</div>
+        <FlagIcon icon={faCircle} tooltip="Blackhole" />
       </span>
     );
   }

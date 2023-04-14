@@ -40,7 +40,7 @@ const initialState = {
   asns: {}, // Map ASNs to routeservers (for future use)
 };
 
-const ConfigContext = createContext(null);
+export const ConfigContext = createContext(null);
 export const useConfig = () => useContext(ConfigContext);
 
 export const ConfigProvider = ({children}) => {

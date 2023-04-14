@@ -1,6 +1,4 @@
 
-import { FontAwesomeIcon }
-  from '@fortawesome/react-fontawesome';
 import { faCircleCheck
        , faCircleMinus
        , faCircleQuestion
@@ -12,6 +10,9 @@ import { faCircle }
 import { useConfig }
   from 'app/context/config';
 
+import FlagIcon
+  from 'app/components/routes/FlagIcon';
+
 const RpkiIndicator = ({route}) => {
   const { rpki } = useConfig();
 
@@ -19,6 +20,7 @@ const RpkiIndicator = ({route}) => {
   if (rpki.enabled === false) { return null; }
 
   // Check for BGP large communities as configured in the alice.conf
+  // FIXME: why are we using strings here?! ['1234', '123', '1'].
   const rpkiValid      = rpki.valid;
   const rpkiUnknown    = rpki.unknown;
   const rpkiNotChecked = rpki.not_checked;
@@ -32,8 +34,7 @@ const RpkiIndicator = ({route}) => {
         com[2].toFixed() === rpkiValid[2]) {
       return (
         <span className="route-prefix-flag rpki-route rpki-valid">
-          <FontAwesomeIcon icon={faCircleCheck} />
-          <div>RPKI Valid</div>
+          <FlagIcon icon={faCircleCheck} tooltip="RPKI Valid" />
         </span>
       );
     }
@@ -44,8 +45,7 @@ const RpkiIndicator = ({route}) => {
         com[2].toFixed() === rpkiUnknown[2]) {
       return (
         <span className="route-prefix-flag rpki-route rpki-unknown">
-          <FontAwesomeIcon icon={faCircleQuestion} />
-          <div>RPKI Unknown</div>
+          <FlagIcon icon={faCircleQuestion} tooltip="RPKI Unknown" />
         </span>
       );
     }
@@ -56,8 +56,7 @@ const RpkiIndicator = ({route}) => {
         com[2].toFixed() === rpkiNotChecked[2]) {
       return (
         <span className="route-prefix-flag rpki-route rpki-not-checked">
-          <FontAwesomeIcon icon={faCircle} />
-          <div>RPKI not checked</div>
+          <FlagIcon icon={faCircle} tooltip="RPKI Not Checked" />
         </span>
       );
     }
@@ -88,8 +87,7 @@ const RpkiIndicator = ({route}) => {
       const cls = `route-prefix-flag rpki-route rpki-invalid rpki-invalid-${rpkiInvalidReason}`
       return (
         <span className={cls}>
-          <FontAwesomeIcon icon={faCircleMinus} />
-          <div>RPKI Invalid</div>
+          <FlagIcon icon={faCircleMinus} tooltip="RPKI Invalid" />
         </span>
       );
     }

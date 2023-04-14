@@ -1,15 +1,20 @@
 
-import { FontAwesomeIcon }
-  from '@fortawesome/react-fontawesome';
 import { faStar }
   from '@fortawesome/free-solid-svg-icons';
 
+import FlagIcon 
+  from 'app/components/routes/FlagIcon';
+
+/**
+ * Show a primary route indicator icon
+ *
+ * @param route - The route object
+ */
 const PrimaryIndicator = ({route}) => {
   if (route.primary) {
     return(
       <span className="route-prefix-flag primary-route is-primary-route">
-        <FontAwesomeIcon icon={faStar} />
-        <div>Best Route</div>
+        <FlagIcon icon={faStar} tooltip="Best Route" />
       </span>
     );
   }
