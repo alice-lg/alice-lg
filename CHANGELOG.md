@@ -12,7 +12,8 @@
 
  * Bugfixes: 
    - Fixed parsing and handling of ext community filters.
-
+   - Fixed stylesheet compatibility: For route flags, new SVG icons
+     are now wrapped in an `<i>` tag, to ensure backward compatiblity.
 
 ## 6.0.0 (2022-11-10)
  
