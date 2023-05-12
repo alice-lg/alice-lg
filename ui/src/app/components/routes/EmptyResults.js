@@ -6,6 +6,8 @@ import { useRoutesReceived
        , useRoutesNotExported 
        }
   from 'app/context/routes';
+import { isTimeoutError }
+  from 'app/context/errors';
 
 
 /**
@@ -51,6 +53,18 @@ const EmptyResults = () => {
  
   // Maybe this has something to do with a filter
   if (!hasContent && hasQuery && isRequested) {
+      if (isTimeoutError(received?.error)) {
+        return (
+          <div className="card info-result-empty">
+            <h4 className="text-danger">The query took too long to process.</h4>
+            <p>
+              Unfortunately, it looks like the query matches a lot of routes.<br />
+              Please try to refine your query to be more specific.
+            </p>
+          </div>
+        );
+      }
+
       return (
         <div className="card info-result-empty">
           <h4>No routes  matching your query.</h4>

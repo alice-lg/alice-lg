@@ -6,7 +6,9 @@ import { useRouteServersMap }
   from 'app/context/route-servers';
 import { useApiStatus }
   from 'app/context/api-status';
-import { useRoutesLoading }
+import { useRoutesLoading
+       , useRoutesReceived 
+       }
   from 'app/context/routes';
 import { useSearchStatus }
   from 'app/context/search';
@@ -107,6 +109,7 @@ const RefreshState = () => {
 }
 
 const SearchStatus = () => {
+  const {error} = useRoutesReceived();
   const isLoading = useRoutesLoading();
   const { queryDurationMs
         , totalReceived 
@@ -115,6 +118,9 @@ const SearchStatus = () => {
 
 
   if (isLoading) {
+    return null;
+  }
+  if (error) {
     return null;
   }
 
