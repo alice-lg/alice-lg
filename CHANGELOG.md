@@ -6,7 +6,7 @@
  * Added memory pools for deduplicating route information.
    This drastically reduces the memory consumption.
 
- * Improved search performance.
+ * Improved search performance and timeout handling.
 
  * The BGP info modal can now be dismissed by pressing `esc`.
 
@@ -14,6 +14,8 @@
    - Fixed parsing and handling of ext community filters.
    - Fixed stylesheet compatibility: For route flags, new SVG icons
      are now wrapped in an `<i>` tag, to ensure backward compatiblity.
+   - Fixed trying to decode an 'undefined' value for a query filter.
+
 
 ## 6.0.0 (2022-11-10)
  
