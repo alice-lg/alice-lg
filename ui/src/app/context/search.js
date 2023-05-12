@@ -21,7 +21,7 @@ import { RoutesReceivedContext
   from 'app/context/routes';
 import { ApiStatusProvider }
   from 'app/context/api-status';
-import { useErrorHandler }
+import { useErrorHandler, isTimeoutError }
   from 'app/context/errors';
 import { useQuery
        , PARAM_QUERY
@@ -166,7 +166,12 @@ const useSearchResults = ({
             loading: false,
           },
         }));
-        handleError(error);
+
+        // We handle timeout errors ourself. All other errors
+        // are handled by the global error handler.
+        if(!isTimeoutError(error)) {
+          handleError(error);
+        }
       });
   }, [searchUrl, setState, handleError]);
 
