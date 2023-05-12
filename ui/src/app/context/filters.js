@@ -161,6 +161,9 @@ const mergeFilters = (a, ...other) => {
  * Filter Query Decoding
  */
 const decodeStringList = (value) => {
+  if (!value) {
+    return [];
+  }
   if (value === "") {
     return [];
   }
