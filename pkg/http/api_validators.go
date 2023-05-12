@@ -48,7 +48,7 @@ func NewErrEmptyParam(key string) *ErrValidationFailed {
 
 var (
 	// ErrQueryTooShort will be returned when the query
-	// is less than 2 characters.
+	// is too short.
 	ErrQueryTooShort = &ErrValidationFailed{
 		"q", "the query is too short",
 	}
@@ -106,10 +106,10 @@ func validatePrefixQuery(value string) (string, error) {
 // Helper: Validate neighbors query. A valid query should have
 // at least 4 chars.
 func validateNeighborsQuery(value string) (string, error) {
-	if len(value) < 3 {
-		// Maybe make configurable,
-		// A length of 3 would be sufficient for "DFN" and
-		// other shorthands.
+	if len(value) < 4 {
+		// TODO: Maybe make configurable
+		// Three letters tend to result in queries with too
+		// many results, which then leads to gateway timeouts.
 		return "", ErrQueryTooShort
 	}
 	return value, nil

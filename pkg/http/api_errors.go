@@ -22,6 +22,14 @@ func (err *ErrResourceNotFoundError) Error() string {
 	return "resource not found"
 }
 
+// ErrTimeout will be sent if the request took too long
+type ErrTimeout string
+
+// Implement Error interface
+func (err ErrTimeout) Error() string {
+	return string(err)
+}
+
 // Variables
 var (
 	ErrSourceNotFound = &ErrResourceNotFoundError{}
@@ -50,6 +58,7 @@ const (
 	StatusError            = http.StatusInternalServerError
 	StatusResourceNotFound = http.StatusNotFound
 	StatusValidationError  = http.StatusBadRequest
+	TimeoutError           = http.StatusGatewayTimeout
 )
 
 // Handle an error and create a error API response
@@ -63,6 +72,10 @@ func apiErrorResponse(
 	status := StatusError
 
 	switch e := err.(type) {
+	case ErrTimeout:
+		tag = TagConnectionTimeout
+		code = CodeConnectionTimeout
+		status = TimeoutError
 	case *ErrResourceNotFoundError:
 		tag = TagResourceNotFound
 		code = CodeResourceNotFound
