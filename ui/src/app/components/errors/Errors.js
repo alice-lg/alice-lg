@@ -73,7 +73,7 @@ const Error = ({error, onDismiss}) => {
           {rs && <span> of <b>{rs.name}</b></span>}
           {errorStatus}.
         </p>
-        <p>If this problem persist, we suggest you
+        <p>If this problem persists, we suggest you
         try again later.</p>
       </div>
     );
