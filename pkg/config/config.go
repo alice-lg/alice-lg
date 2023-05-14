@@ -857,7 +857,7 @@ func LoadConfig(file string) (*Config, error) {
 	parsedConfig.Section("postgres").MapTo(&psql)
 	if server.StoreBackend == "postgres" {
 		if psql.URL == "" {
-			psql.URL = 'postgres:///?sslmode=prefer'
+			psql.URL = "postgres:///?sslmode=prefer"
 		}
 	}
 
