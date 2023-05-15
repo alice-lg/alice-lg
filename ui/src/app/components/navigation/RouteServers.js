@@ -33,15 +33,17 @@ const Status = ({routeServerId}) => {
         });
   }, [routeServerId, handleError]);
 
-  if (error && error.code >= 100 && error.code < 200) {
+  const errorInfo = error?.response?.data;
+
+  if (errorInfo && errorInfo.tag === "CONNECTION_REFUSED") {
     return (
       <div className="routeserver-status">
         <div className="api-error">
-          unreachable 
+          route server unreachable
         </div>
       </div>
     );
-  } else if (error?.response?.data?.tag === "GENERIC_ERROR") {
+  } else if (errorInfo && errorInfo.tag === "GENERIC_ERROR") {
     return (
       <div className="routeserver-status">
         <div className="api-error">
@@ -49,11 +51,11 @@ const Status = ({routeServerId}) => {
         </div>
       </div>
     );
-  } else if (error) {
+  } else if (errorInfo) {
     return (
       <div className="routeserver-status">
         <div className="api-error">
-          {error.response?.data?.tag}
+          {errorInfo.tag}
         </div>
       </div>
     );
