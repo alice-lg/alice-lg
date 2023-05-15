@@ -62,6 +62,7 @@ func (s *Server) apiRouteServerStatusShow(
 	result, err := source.Status(ctx)
 	if err != nil {
 		s.logSourceError("status", rsID, err)
+		return nil, err
 	}
 	if result != nil {
 		result.Meta.Version = config.Version
