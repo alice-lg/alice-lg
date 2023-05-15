@@ -16,77 +16,58 @@ func (src *SingleTableBirdwatcher) fetchReceivedRoutes(
 	ctx context.Context,
 	neighborID string,
 ) (*api.Meta, api.Routes, error) {
-	// Query birdwatcher
-	bird, err := src.client.GetJSON(ctx, "/routes/protocol/"+neighborID)
+	res, err := src.client.GetEndpoint(ctx, "/routes/protocol/"+neighborID)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer res.Body.Close()
+
+	meta, routes, err := parseRoutesResponseStream(res.Body, src.config)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	// Use api status from first request
-	apiStatus, err := parseAPIStatus(bird, src.config)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	// Parse the routes
-	received, err := parseRoutes(bird, src.config, true)
-	if err != nil {
-		log.Println("WARNING Could not retrieve received routes:", err)
-		log.Println("Is the 'routes_protocol' module active in birdwatcher?")
-		return apiStatus, nil, err
-	}
-
-	return apiStatus, received, nil
+	return meta, routes, nil
 }
 
 func (src *SingleTableBirdwatcher) fetchFilteredRoutes(
 	ctx context.Context,
 	neighborID string,
 ) (*api.Meta, api.Routes, error) {
-	// Query birdwatcher
-	bird, err := src.client.GetJSON(ctx, "/routes/filtered/"+neighborID)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	// Use api status from first request
-	apiStatus, err := parseAPIStatus(bird, src.config)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	// Parse the routes
-	filtered, err := parseRoutes(bird, src.config, true)
+	res, err := src.client.GetEndpoint(ctx, "/routes/filtered/"+neighborID)
 	if err != nil {
 		log.Println("WARNING Could not retrieve filtered routes:", err)
 		log.Println("Is the 'routes_filtered' module active in birdwatcher?")
-		return apiStatus, nil, err
+		return nil, nil, err
+	}
+	defer res.Body.Close()
+
+	meta, routes, err := parseRoutesResponseStream(res.Body, src.config)
+	if err != nil {
+		return nil, nil, err
 	}
 
-	return apiStatus, filtered, nil
+	return meta, routes, nil
 }
 
 func (src *SingleTableBirdwatcher) fetchNotExportedRoutes(
 	ctx context.Context,
 	neighborID string,
 ) (*api.Meta, api.Routes, error) {
-	// Query birdwatcher
-	bird, _ := src.client.GetJSON(ctx, "/routes/noexport/"+neighborID)
+	res, err := src.client.GetEndpoint(ctx, "/routes/noexport/"+neighborID)
+	if err != nil {
+		log.Println("WARNING Could not retrieve routes not exported:", err)
+		log.Println("Is the 'routes_noexport' module active in birdwatcher?")
+		return nil, nil, err
+	}
+	defer res.Body.Close()
 
-	// Use api status from first request
-	apiStatus, err := parseAPIStatus(bird, src.config)
+	meta, routes, err := parseRoutesResponseStream(res.Body, src.config)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	// Parse the routes
-	notExported, err := parseRoutes(bird, src.config, true)
-	if err != nil {
-		log.Println("WARNING Could not retrieve routes not exported:", err)
-		log.Println("Is the 'routes_noexport' module active in birdwatcher?")
-	}
-
-	return apiStatus, notExported, nil
+	return meta, routes, nil
 }
 
 // RoutesRequired is a specialized request to fetch:
@@ -316,40 +297,38 @@ func (src *SingleTableBirdwatcher) AllRoutes(
 ) (*api.RoutesResponse, error) {
 	// First fetch all routes from the master table
 	mainTable := src.GenericBirdwatcher.config.MainTable
-	birdImported, err := src.client.GetJSON(ctx, "/routes/table/"+mainTable)
+
+	// Routes received
+	res, err := src.client.GetEndpoint(ctx, "/routes/table/"+mainTable)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	meta, birdImported, err := parseRoutesResponseStream(res.Body, src.config)
 	if err != nil {
 		return nil, err
 	}
 
-	// Then fetch all filtered routes from the master table
-	birdFiltered, err := src.client.GetJSON(ctx, "/routes/table/"+mainTable+"/filtered")
+	// Routes filtered
+	res, err = src.client.GetEndpoint(ctx, "/routes/table/"+mainTable+"/filtered")
 	if err != nil {
 		return nil, err
 	}
+	defer res.Body.Close()
 
-	// Use api status from second request
-	apiStatus, err := parseAPIStatus(birdFiltered, src.config)
+	_, birdFiltered, err := parseRoutesResponseStream(res.Body, src.config)
 	if err != nil {
 		return nil, err
 	}
 
 	response := &api.RoutesResponse{
 		Response: api.Response{
-			Meta: apiStatus,
+			Meta: meta,
 		},
+		Imported: birdImported,
+		Filtered: birdFiltered,
 	}
-
-	// Parse the routes
-	imported := parseRoutesData(birdImported["routes"].([]interface{}), src.config, false)
-	// Sort routes for deterministic ordering
-	// sort.Sort(imported)
-	response.Imported = imported
-
-	// Parse the routes
-	filtered := parseRoutesData(birdFiltered["routes"].([]interface{}), src.config, false)
-	// Sort routes for deterministic ordering
-	// sort.Sort(filtered)
-	response.Filtered = filtered
 
 	return response, nil
 }
