@@ -44,5 +44,5 @@ export const ErrorsProvider = ({children}) => {
 // that matches a gateway or a request timeout.
 export const isTimeoutError = (error) => {
   const status = error?.response?.status;
-  return (status === 504 || status === 408);
+  return (status === 504 || status === 408 || status === 502);
 }
