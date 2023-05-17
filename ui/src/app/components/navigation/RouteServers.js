@@ -16,6 +16,11 @@ import { useRouteServers }
   from 'app/context/route-servers';
 
 
+/**
+ * Show the name of the route server and display
+ * the type and version. In case the route server is not
+ * available, show an error message.
+ */
 const Status = ({routeServerId}) => {
   const [status, setStatus] = useState({
     backend: "",
@@ -111,7 +116,20 @@ const GroupSelect = ({groups, selected, onSelect}) => {
     <GroupSelectOption key={group} group={group} onSelect={selectGroup} />
   );
 
-  const dropdownClass = `dropdown ${expanded && 'open'}`;
+  // Partition options into n coulumns with a maximum
+  // of 10 rows per column.
+  const maxRows = 10;
+  const n = Math.ceil(options.length / maxRows);
+  const columns = [];
+  for (let i = 0; i < n; i++) {
+    columns.push(options.slice(i * maxRows, (i + 1) * maxRows));
+  }
+
+  
+  let dropdownClass = "rs-group-dropdown";
+  if (expanded) { 
+    dropdownClass += " open";
+  }
 
   return (
     <div className="routeservers-groups-select">
@@ -125,10 +143,14 @@ const GroupSelect = ({groups, selected, onSelect}) => {
            {selected}
            <span className="caret"></span>
         </button>
-        <ul className="dropdown-menu"
-            aria-labelledby="select-routeservers-group">
-          {options}
-        </ul>
+        <div className="dropdown-options">
+        {columns.map((options, i) => (
+          <ul key={i}> 
+            {options}
+          </ul>
+        ))}
+        </div>
+
       </div>
     </div>
   );
