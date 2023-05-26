@@ -59,7 +59,7 @@ const RouteDetailsModal = () => {
              <th>Next Hop:</th><td>{attrs.next_hop}</td>
             </tr>
             <tr>
-                <th>MED</th>
+                <th>MED:</th>
                 <td>{attrs.med}</td>
             </tr>
             {attrs.as_path &&
