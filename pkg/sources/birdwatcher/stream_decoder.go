@@ -3,6 +3,7 @@ package birdwatcher
 import (
 	"encoding/json"
 	"io"
+	"time"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
 )
@@ -65,6 +66,10 @@ func parseRoutesResponseStream(
 				if err := dec.Decode(&rdata); err != nil {
 					return nil, nil, err
 				}
+
+				// Wait a bit, so our CPUs do not go up in flames.
+				time.Sleep(30000 * time.Nanosecond)
+
 				route := parseRouteData(rdata, config, false)
 				routes = append(routes, route)
 			}
