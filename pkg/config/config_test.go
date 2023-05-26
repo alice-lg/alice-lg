@@ -69,6 +69,9 @@ func TestSourceConfig(t *testing.T) {
 		if rs2.Birdwatcher.AltPipeProtocolSuffix != "_lg" {
 			t.Error("unexpected alt_pipe_suffix:", rs2.Birdwatcher.AltPipeProtocolSuffix)
 		}
+		if rs2.Birdwatcher.StreamParserThrottle != 2342 {
+			t.Error("Unexpected StreamParserThrottle", rs2.Birdwatcher.StreamParserThrottle)
+		}
 	}
 	nilGoBGPConfig := gobgp.Config{}
 	if rs3.GoBGP == nilGoBGPConfig {

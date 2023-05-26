@@ -82,6 +82,7 @@ type ServerConfig struct {
 	StoreBackend                     string `ini:"store_backend"`
 	Asn                              int    `ini:"asn"`
 	EnableNeighborsStatusRefresh     bool   `ini:"enable_neighbors_status_refresh"`
+	StreamParserThrottle             int    `ini:"stream_parser_throttle"`
 }
 
 // PostgresConfig is the configuration for the database
@@ -882,6 +883,13 @@ func LoadConfig(file string) (*Config, error) {
 	ui, err := getUIConfig(parsedConfig)
 	if err != nil {
 		return nil, err
+	}
+
+	// Update stream parser throttle on all birdwatcher sources
+	for _, src := range sources {
+		if src.Backend == SourceBackendBirdwatcher {
+			src.Birdwatcher.StreamParserThrottle = server.StreamParserThrottle
+		}
 	}
 
 	config := &Config{
