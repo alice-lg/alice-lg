@@ -20,4 +20,6 @@ type Config struct {
 	AltPipeProtocolPrefix   string `ini:"alt_pipe_protocol_prefix"`
 	AltPipeProtocolSuffix   string `ini:"alt_pipe_protocol_suffix"`
 	NeighborsRefreshTimeout int    `ini:"neighbors_refresh_timeout"`
+
+	StreamParserThrottle int
 }

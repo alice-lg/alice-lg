@@ -16,6 +16,8 @@ func parseRoutesResponseStream(
 	meta := &api.Meta{}
 	routes := api.Routes{}
 
+	throttle := time.Duration(config.StreamParserThrottle) * time.Nanosecond
+
 	for {
 		t, err := dec.Token()
 		if err == io.EOF {
@@ -68,7 +70,7 @@ func parseRoutesResponseStream(
 				}
 
 				// Wait a bit, so our CPUs do not go up in flames.
-				time.Sleep(30000 * time.Nanosecond)
+				time.Sleep(throttle)
 
 				route := parseRouteData(rdata, config, false)
 				routes = append(routes, route)
