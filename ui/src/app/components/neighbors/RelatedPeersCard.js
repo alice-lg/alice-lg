@@ -49,7 +49,7 @@ const PeerLink = ({to, children}) => {
 
   let peerUrl;
   if (isUpState(neighbor.state)) {
-    peerUrl = `/routeservers/${rid}/protocols/${pid}/routes`;
+    peerUrl = `/routeservers/${rid}/neighbors/${pid}/routes`;
   } else {
     peerUrl = `/routeservers/${rid}#sessions-down`;
   }

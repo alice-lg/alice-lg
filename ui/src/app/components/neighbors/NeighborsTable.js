@@ -143,7 +143,7 @@ const RoutesLink = ({neighbor, children}) => {
   if (!isUpState(neighbor.state)) {
     return <>{children}</>;
   };
-  const url = `/routeservers/${routeServerId}/protocols/${neighbor.id}/routes`;
+  const url = `/routeservers/${routeServerId}/neighbors/${neighbor.id}/routes`;
   return (
     <Link to={url}>{children}</Link>
   );

@@ -19,7 +19,7 @@ const LocalRelatedPeersTabs = () => {
   }
   
   const peerUrl = (n) =>
-    `/routeservers/${routeServerId}/protocols/${n.id}/routes`;
+    `/routeservers/${routeServerId}/neighbors/${n.id}/routes`;
 
   const relatedPeers = peers.map((p) => (
     <li key={p.id} 

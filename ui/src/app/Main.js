@@ -37,6 +37,38 @@ import SearchGlobalPage
 import NotFoundPage
   from 'app/pages/NotFoundPage';
 
+
+const Routing = () => (
+  <Routes>
+    <Route index element={<StartPage />} />
+
+    {/* RouteServers */}
+    <Route
+      path="routeservers/:routeServerId"
+      element={<RouteServerPage />}>
+
+      <Route index element={<NeighborsPage />} />
+
+      {/* Neighbors */}
+      <Route
+        path="neighbors/:neighborId/routes"
+        element={<RoutesPage />} />
+      {/* DEPRECATION NOTICE: The 'protocols' route will be */}
+      {/*   removed and is only here for backwards compatibility */}
+      <Route
+        path="protocols/:neighborId/routes"
+        element={<RoutesPage />} />
+
+    </Route>
+  
+    {/* Search */}
+    <Route path="search" element={<SearchGlobalPage />} />
+
+    {/* Fallback */}
+    <Route path="*" element={<NotFoundPage />} />
+  </Routes>
+);
+
 const Main = () => {
   return (
     <ErrorsProvider>
@@ -45,27 +77,7 @@ const Main = () => {
     <ContentProvider>
     <BrowserRouter>
       <Layout>
-        <Routes>
-          <Route index element={<StartPage />} />
-
-          {/* RouteServers */}
-          <Route path="routeservers/:routeServerId"
-            element={<RouteServerPage />}>
-
-            <Route index
-              element={<NeighborsPage />} />
-            <Route path="protocols/:neighborId/routes"
-              element={<RoutesPage />} />
-
-          </Route>
-        
-          {/* Search */}
-          <Route path="search"
-            element={<SearchGlobalPage />} />
-
-          {/* Fallback */}
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
+        <Routing />
       </Layout>
     </BrowserRouter>
     </ContentProvider>
