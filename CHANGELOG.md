@@ -5,6 +5,12 @@
 
  * Added memory pools for deduplicating route information.
    This drastically reduces the memory consumption.
+ 
+ * Single table birdwatcher source is now using stream 
+   response parsing. This also reduces the memory consumption.
+   However, as there are now waiting times, CPU load can get
+   high. You can introduce a delay while parsing with the
+   `stream_parser_throttle` parameter in the config.
 
  * Improved search performance and timeout handling.
 
