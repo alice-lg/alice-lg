@@ -38,6 +38,10 @@ import NotFoundPage
   from 'app/pages/NotFoundPage';
 
 
+/**
+ * Select the current page to show in the application
+ * using the router.
+ */
 const Routing = () => (
   <Routes>
     <Route index element={<StartPage />} />
@@ -69,6 +73,11 @@ const Routing = () => (
   </Routes>
 );
 
+
+/**
+ * The application main entry point.
+ * Instanciate global providers and the router.
+ */
 const Main = () => {
   return (
     <ErrorsProvider>
