@@ -5,6 +5,7 @@
 package config
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"log"
@@ -822,14 +823,34 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 	return sources, nil
 }
 
+// preprocessConfig parses the variables section of the config
+// and applies it to the rest of the config.
+func preprocessConfig(data []byte) []byte {
+	lines := bytes.Split(data, []byte("\n"))
+	config := make([][]byte, 0, len(lines))
+
+	for _, line := range lines {
+
+		config = append(config, line)
+	}
+
+	return bytes.Join(config, []byte("\n"))
+}
+
 // LoadConfig reads a configuration from a file.
 func LoadConfig(file string) (*Config, error) {
-
 	// Try to get config file, fallback to alternatives
 	file, err := getConfigFile(file)
 	if err != nil {
 		return nil, err
 	}
+
+	// Read the config file and preprocess it
+	configData, err := os.ReadFile(file)
+	if err != nil {
+		return nil, err
+	}
+	configData = preprocessConfig(configData)
 
 	// Load configuration, but handle bgp communities section
 	// with our own parser
@@ -840,7 +861,7 @@ func LoadConfig(file string) (*Config, error) {
 			"rejection_reasons",
 			"noexport_reasons",
 		},
-	}, file)
+	}, configData)
 	if err != nil {
 		return nil, err
 	}

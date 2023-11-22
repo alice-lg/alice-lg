@@ -9,7 +9,7 @@ import (
 // Compile input pattern regex
 var (
 	expandMatchPlaceholder       = regexp.MustCompile(`(?U:{.*}+?)`)
-	expandMatchWildcardShorthard = regexp.MustCompile(`(?U:{{.*}}+?)`)
+	expandMatchWildcardShorthard = regexp.MustCompile(`(?U:{{.*\*}}+?)`)
 )
 
 // Extract all matches from the input string.
