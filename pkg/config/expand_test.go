@@ -99,15 +99,17 @@ func TestExpandAddExpr(t *testing.T) {
 
 func TestExpandBgpCommunities(t *testing.T) {
 	e := ExpandMap{
-		"ASRS01": "6695",
-		"ASRS02": "4617",
-		"SW1001": "edge01.fra2",
-		"SW1002": "edge01.fra6",
-		"SW2038": "edge01.nyc1",
+		"ASRS01":   "6695",
+		"ASRS02":   "4617",
+		"SW1001":   "edge01.fra2",
+		"SW1002":   "edge01.fra6",
+		"SW2038":   "edge01.nyc1",
+		"RDCTL911": "Redistribute",
+		"RDCTL922": "Do not redistribute",
 	}
 
 	// Some large communities:
-	expr := "{{AS*}}:911:{SW*} = Redistribute to {{SW*}}"
+	expr := "{{AS*}}:{RDCTL*}:{SW*} = {{RDCTL*}} to {{SW*}}"
 	exp, err := e.Expand(expr)
 	if err != nil {
 		t.Fatal(err)
