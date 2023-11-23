@@ -81,7 +81,7 @@ type ServerConfig struct {
 	RoutesStoreRefreshInterval       int    `ini:"routes_store_refresh_interval"`
 	RoutesStoreRefreshParallelism    int    `ini:"routes_store_refresh_parallelism"`
 	StoreBackend                     string `ini:"store_backend"`
-	DefaultAsn                       int    `ini:"default_asn"`
+	DefaultAsn                       int    `ini:"asn"`
 	EnableNeighborsStatusRefresh     bool   `ini:"enable_neighbors_status_refresh"`
 	StreamParserThrottle             int    `ini:"stream_parser_throttle"`
 }
@@ -528,7 +528,7 @@ func getRpkiConfig(config *ini.File) (RpkiConfig, error) {
 	// Fill in defaults or postprocess config value
 	if len(rpki.Valid) == 0 && !hasDefaultASN && rpki.Enabled {
 		return rpki, fmt.Errorf(
-			"rpki.valid must be set if no default_asn is configured")
+			"rpki.valid must be set if no server.asn is configured")
 	}
 	if len(rpki.Valid) == 0 && rpki.Enabled {
 		log.Printf("Using default rpki.valid: %s:1000:1\n", asn)
@@ -537,7 +537,7 @@ func getRpkiConfig(config *ini.File) (RpkiConfig, error) {
 
 	if len(rpki.Unknown) == 0 && !hasDefaultASN && rpki.Enabled {
 		return rpki, fmt.Errorf(
-			"rpki.unknown must be set if no default_asn is configured")
+			"rpki.unknown must be set if no server.asn is configured")
 	}
 	if len(rpki.Unknown) == 0 && rpki.Enabled {
 		log.Printf("Using default rpki.unknown: %s:1000:2\n", asn)
@@ -546,7 +546,7 @@ func getRpkiConfig(config *ini.File) (RpkiConfig, error) {
 
 	if len(rpki.NotChecked) == 0 && !hasDefaultASN && rpki.Enabled {
 		return rpki, fmt.Errorf(
-			"rpki.not_checked must be set if no default_asn is set")
+			"rpki.not_checked must be set if no server.asn is set")
 	}
 	if len(rpki.NotChecked) == 0 {
 		log.Printf("Using default rpki.not_checked: %s:1000:3\n", asn)
@@ -563,7 +563,7 @@ func getRpkiConfig(config *ini.File) (RpkiConfig, error) {
 	}
 	if len(rpki.Invalid) == 0 && !hasDefaultASN && rpki.Enabled {
 		return rpki, fmt.Errorf(
-			"rpki.invalid must be set if no default_asn is configured")
+			"rpki.invalid must be set if no server.asn is configured")
 	}
 	if len(rpki.Invalid) == 0 && rpki.Enabled {
 		log.Printf("Using default rpki.invalid: %s:1000:4-*\n", asn)
@@ -578,7 +578,7 @@ func getRpkiConfig(config *ini.File) (RpkiConfig, error) {
 // the [server] section.
 func getDefaultASN(config *ini.File) (string, error) {
 	server := config.Section("server")
-	asn := server.Key("default_asn").MustString("")
+	asn := server.Key("asn").MustString("")
 
 	if asn == "" {
 		return "", fmt.Errorf("could not get default ASN from config")
