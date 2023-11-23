@@ -126,11 +126,11 @@ type RejectCandidatesConfig struct {
 // validation state.
 type RpkiConfig struct {
 	// Define communities
-	Enabled    bool     `ini:"enabled"`
-	Valid      []string `ini:"valid"`
-	Unknown    []string `ini:"unknown"`
-	NotChecked []string `ini:"not_checked"`
-	Invalid    []string `ini:"invalid"`
+	Enabled    bool       `ini:"enabled"`
+	Valid      [][]string `ini:"valid"`
+	Unknown    [][]string `ini:"unknown"`
+	NotChecked [][]string `ini:"not_checked"`
+	Invalid    [][]string `ini:"invalid"`
 }
 
 // UIConfig holds runtime settings for the web client
@@ -486,68 +486,66 @@ func getRpkiConfig(config *ini.File) (RpkiConfig, error) {
 	// Defaults taken from:
 	//   https://www.euro-ix.net/en/forixps/large-bgp-communities/
 	section := config.Section("rpki")
+	lines := strings.Split(section.Body(), "\n")
+
+	for _, line := range lines {
+		l := strings.TrimSpace(line)
+		if !strings.Contains(l, "=") {
+			continue
+		}
+		parts := strings.SplitN(l, "=", 2)
+		if len(parts) != 2 {
+			return rpki, fmt.Errorf("invalid rpki config line: %s", line)
+		}
+		key := strings.TrimSpace(parts[0])
+		value := strings.Split(strings.TrimSpace(parts[1]), ":")
+
+		if key == "enabled" {
+			rpki.Enabled = parts[1] == "true"
+		} else if key == "valid" {
+			rpki.Valid = append(rpki.Valid, value)
+		} else if key == "not_checked" {
+			rpki.NotChecked = append(rpki.NotChecked, value)
+		} else if key == "invalid" {
+			rpki.Invalid = append(rpki.Invalid, value)
+		} else if key == "unknown" {
+			rpki.Unknown = append(rpki.Unknown, value)
+		} else {
+			return rpki, fmt.Errorf("invalid rpki config line: %s", line)
+		}
+
+	}
+
 	if err := section.MapTo(&rpki); err != nil {
 		return rpki, err
 	}
 
-	fallbackAsn, err := getOwnASN(config)
-	if err != nil {
-		log.Println(
-			"Own ASN is not configured.",
-			"This might lead to unexpected behaviour with BGP large communities",
-		)
-	}
-	ownAsn := fmt.Sprintf("%d", fallbackAsn)
-
 	// Fill in defaults or postprocess config value
 	if len(rpki.Valid) == 0 {
-		rpki.Valid = []string{ownAsn, "1000", "1"}
-	} else {
-		rpki.Valid = strings.SplitN(rpki.Valid[0], ":", 3)
+		rpki.Valid = [][]string{{"*", "1000", "1"}}
 	}
 
 	if len(rpki.Unknown) == 0 {
-		rpki.Unknown = []string{ownAsn, "1000", "2"}
-	} else {
-		rpki.Unknown = strings.SplitN(rpki.Unknown[0], ":", 3)
+		rpki.Unknown = [][]string{{"*", "1000", "2"}}
 	}
 
 	if len(rpki.NotChecked) == 0 {
-		rpki.NotChecked = []string{ownAsn, "1000", "3"}
-	} else {
-		rpki.NotChecked = strings.SplitN(rpki.NotChecked[0], ":", 3)
+		rpki.NotChecked = [][]string{{"*", "1000", "3"}}
 	}
 
 	// As the euro-ix document states, this can be a range.
-	if len(rpki.Invalid) == 0 {
-		rpki.Invalid = []string{ownAsn, "1000", "4", "*"}
-	} else {
-		// Preprocess
-		rpki.Invalid = strings.SplitN(rpki.Invalid[0], ":", 3)
-		if len(rpki.Invalid) != 3 {
-			// This is wrong, we should have three parts (RS):1000:[range]
-			return rpki, fmt.Errorf(
-				"unexpected rpki.Invalid configuration: %v", rpki.Invalid)
+	for i, com := range rpki.Invalid {
+		if len(com) != 3 {
+			return rpki, fmt.Errorf("Invalid RPKI invalid config: %v", com)
 		}
-		tokens := strings.Split(rpki.Invalid[2], "-")
-		rpki.Invalid = append([]string{rpki.Invalid[0], rpki.Invalid[1]}, tokens...)
+		tokens := strings.Split(com[2], "-")
+		rpki.Invalid[i] = append([]string{com[0], com[1]}, tokens...)
+	}
+	if len(rpki.Invalid) == 0 {
+		rpki.Invalid = [][]string{{"*", "1000", "4", "*"}}
 	}
 
 	return rpki, nil
-}
-
-// Helper: Get own ASN from ini
-// This is now easy, since we enforce an ASN in
-// the [server] section.
-func getOwnASN(config *ini.File) (int, error) {
-	server := config.Section("server")
-	asn := server.Key("asn").MustInt(-1)
-
-	if asn == -1 {
-		return 0, fmt.Errorf("could not get own ASN from config")
-	}
-
-	return asn, nil
 }
 
 // Get UI config: Theme settings
@@ -823,18 +821,35 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 	return sources, nil
 }
 
-// preprocessConfig parses the variables section of the config
+// preprocessConfig parses the variables in the config
 // and applies it to the rest of the config.
 func preprocessConfig(data []byte) []byte {
 	lines := bytes.Split(data, []byte("\n"))
 	config := make([][]byte, 0, len(lines))
 
+	expMap := ExpandMap{}
 	for _, line := range lines {
-
+		l := strings.TrimSpace(string(line))
+		if strings.HasPrefix(l, "$") {
+			expMap.AddExpr(l[1:])
+			continue
+		}
 		config = append(config, line)
 	}
 
-	return bytes.Join(config, []byte("\n"))
+	// Now apply to config
+	configLines := []string{}
+	for _, line := range config {
+		l := string(line)
+		exp, err := expMap.Expand(l)
+		if err != nil {
+			log.Fatal("Error expanding expression in config:", l, err)
+		}
+		for _, e := range exp {
+			configLines = append(configLines, e)
+		}
+	}
+	return []byte(strings.Join(configLines, "\n"))
 }
 
 // LoadConfig reads a configuration from a file.
@@ -860,6 +875,7 @@ func LoadConfig(file string) (*Config, error) {
 			"blackhole_communities",
 			"rejection_reasons",
 			"noexport_reasons",
+			"rpki",
 		},
 	}, configData)
 	if err != nil {

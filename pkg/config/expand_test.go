@@ -119,5 +119,4 @@ func TestExpandBgpCommunities(t *testing.T) {
 		t.Errorf("Expected %d results, got %d", expected, len(exp))
 	}
 	t.Log(exp)
-
 }

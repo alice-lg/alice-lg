@@ -167,32 +167,21 @@ func TestBlackholeParsing(t *testing.T) {
 	}
 }
 
-func TestOwnASN(t *testing.T) {
-	config, err := LoadConfig("testdata/alice.conf")
-	if err != nil {
-		t.Fatal("Could not load test config:", err)
-	}
-
-	if config.Server.Asn != 9033 {
-		t.Error("Expected a set server asn")
-	}
-}
-
 func TestRpkiConfig(t *testing.T) {
 	config, err := LoadConfig("testdata/alice.conf")
 	if err != nil {
 		t.Fatal("Could not load test config:", err)
 	}
 
-	if len(config.UI.Rpki.Valid) != 3 {
+	if len(config.UI.Rpki.Valid[0]) != 3 {
 		t.Error("Unexpected RPKI:VALID,", config.UI.Rpki.Valid)
 	}
-	if len(config.UI.Rpki.Invalid) != 4 {
+	if len(config.UI.Rpki.Invalid[0]) != 4 {
 		t.Fatal("Unexpected RPKI:INVALID,", config.UI.Rpki.Invalid)
 	}
 
 	// Check fallback
-	if config.UI.Rpki.NotChecked[0] != "9033" {
+	if config.UI.Rpki.NotChecked[0][0] != "*" {
 		t.Error(
 			"Expected NotChecked to fall back to defaults, got:",
 			config.UI.Rpki.NotChecked,
@@ -200,7 +189,7 @@ func TestRpkiConfig(t *testing.T) {
 	}
 
 	// Check range postprocessing
-	if config.UI.Rpki.Invalid[3] != "*" {
+	if config.UI.Rpki.Invalid[0][3] != "*" {
 		t.Error("Missing wildcard from config")
 	}
 
