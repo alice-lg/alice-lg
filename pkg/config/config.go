@@ -81,7 +81,7 @@ type ServerConfig struct {
 	RoutesStoreRefreshInterval       int    `ini:"routes_store_refresh_interval"`
 	RoutesStoreRefreshParallelism    int    `ini:"routes_store_refresh_parallelism"`
 	StoreBackend                     string `ini:"store_backend"`
-	Asn                              int    `ini:"asn"`
+	DefaultAsn                       int    `ini:"default_asn"`
 	EnableNeighborsStatusRefresh     bool   `ini:"enable_neighbors_status_refresh"`
 	StreamParserThrottle             int    `ini:"stream_parser_throttle"`
 }
@@ -519,33 +519,72 @@ func getRpkiConfig(config *ini.File) (RpkiConfig, error) {
 	if err := section.MapTo(&rpki); err != nil {
 		return rpki, err
 	}
+	hasDefaultASN := true
+	asn, err := getDefaultASN(config)
+	if err != nil {
+		hasDefaultASN = false
+	}
 
 	// Fill in defaults or postprocess config value
-	if len(rpki.Valid) == 0 {
-		rpki.Valid = [][]string{{"*", "1000", "1"}}
+	if len(rpki.Valid) == 0 && !hasDefaultASN && rpki.Enabled {
+		return rpki, fmt.Errorf(
+			"rpki.valid must be set if no default_asn is configured")
+	}
+	if len(rpki.Valid) == 0 && rpki.Enabled {
+		log.Printf("Using default rpki.valid: %s:1000:1\n", asn)
+		rpki.Valid = [][]string{{asn, "1000", "1"}}
 	}
 
-	if len(rpki.Unknown) == 0 {
-		rpki.Unknown = [][]string{{"*", "1000", "2"}}
+	if len(rpki.Unknown) == 0 && !hasDefaultASN && rpki.Enabled {
+		return rpki, fmt.Errorf(
+			"rpki.unknown must be set if no default_asn is configured")
+	}
+	if len(rpki.Unknown) == 0 && rpki.Enabled {
+		log.Printf("Using default rpki.unknown: %s:1000:2\n", asn)
+		rpki.Unknown = [][]string{{asn, "1000", "2"}}
 	}
 
+	if len(rpki.NotChecked) == 0 && !hasDefaultASN && rpki.Enabled {
+		return rpki, fmt.Errorf(
+			"rpki.not_checked must be set if no default_asn is set")
+	}
 	if len(rpki.NotChecked) == 0 {
-		rpki.NotChecked = [][]string{{"*", "1000", "3"}}
+		log.Printf("Using default rpki.not_checked: %s:1000:3\n", asn)
+		rpki.NotChecked = [][]string{{asn, "1000", "3"}}
 	}
 
 	// As the euro-ix document states, this can be a range.
 	for i, com := range rpki.Invalid {
 		if len(com) != 3 {
-			return rpki, fmt.Errorf("Invalid RPKI invalid config: %v", com)
+			return rpki, fmt.Errorf("Invalid rpki.invalid config: %v", com)
 		}
 		tokens := strings.Split(com[2], "-")
 		rpki.Invalid[i] = append([]string{com[0], com[1]}, tokens...)
 	}
-	if len(rpki.Invalid) == 0 {
-		rpki.Invalid = [][]string{{"*", "1000", "4", "*"}}
+	if len(rpki.Invalid) == 0 && !hasDefaultASN && rpki.Enabled {
+		return rpki, fmt.Errorf(
+			"rpki.invalid must be set if no default_asn is configured")
+	}
+	if len(rpki.Invalid) == 0 && rpki.Enabled {
+		log.Printf("Using default rpki.invalid: %s:1000:4-*\n", asn)
+		rpki.Invalid = [][]string{{asn, "1000", "4", "*"}}
 	}
 
 	return rpki, nil
+}
+
+// Helper: Get own ASN from ini
+// This is now easy, since we enforce an ASN in
+// the [server] section.
+func getDefaultASN(config *ini.File) (string, error) {
+	server := config.Section("server")
+	asn := server.Key("default_asn").MustString("")
+
+	if asn == "" {
+		return "", fmt.Errorf("could not get default ASN from config")
+	}
+
+	return asn, nil
 }
 
 // Get UI config: Theme settings

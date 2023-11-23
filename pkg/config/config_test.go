@@ -181,7 +181,7 @@ func TestRpkiConfig(t *testing.T) {
 	}
 
 	// Check fallback
-	if config.UI.Rpki.NotChecked[0][0] != "*" {
+	if config.UI.Rpki.NotChecked[0][0] != "9999" {
 		t.Error(
 			"Expected NotChecked to fall back to defaults, got:",
 			config.UI.Rpki.NotChecked,
