@@ -114,6 +114,10 @@ func TestExpandBgpCommunities(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	expected := 2 * 3 * 2
+	if len(exp) != expected {
+		t.Errorf("Expected %d results, got %d", expected, len(exp))
+	}
 	t.Log(exp)
 
 }
