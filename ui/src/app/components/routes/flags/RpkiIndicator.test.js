@@ -10,10 +10,10 @@ import RpkiIndicator
 const config = {
   rpki: {
     enabled: true,
-    valid: ["1234", "1111", "1"],
-    unknown: ["1234", "1111", "0"],
-    not_checked: ["1234", "1111", "10"],
-    invalid: ["1234", "1111", "100"],
+    valid: [["1234", "1111", "1"]],
+    unknown: [["1234", "1111", "0"]],
+    not_checked: [["1234", "1111", "10"]],
+    invalid: [["1234", "1111", "100"]],
   },
 };
 

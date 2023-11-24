@@ -27,11 +27,16 @@ const RpkiIndicator = ({route}) => {
   const rpkiInvalid    = rpki.invalid;
 
   const communities = route?.bgp?.large_communities || [];
+
+  const matchCommunity = (com, coms) =>
+    coms.some((match) =>
+       (com[0].toFixed() === match[0] &&
+        com[1].toFixed() === match[1] &&
+        com[2].toFixed() === match[2]));
+
   for (const com of communities) {
     // RPKI VALID
-    if (com[0].toFixed() === rpkiValid[0] &&
-        com[1].toFixed() === rpkiValid[1] &&
-        com[2].toFixed() === rpkiValid[2]) {
+    if (matchCommunity(com, rpkiValid)) {
       return (
         <span className="route-prefix-flag rpki-route rpki-valid">
           <FlagIcon icon={faCircleCheck} tooltip="RPKI Valid" />
@@ -40,9 +45,7 @@ const RpkiIndicator = ({route}) => {
     }
 
     // RPKI UNKNOWN
-    if (com[0].toFixed() === rpkiUnknown[0] &&
-        com[1].toFixed() === rpkiUnknown[1] &&
-        com[2].toFixed() === rpkiUnknown[2]) {
+    if (matchCommunity(com, rpkiUnknown)) {
       return (
         <span className="route-prefix-flag rpki-route rpki-unknown">
           <FlagIcon icon={faCircleQuestion} tooltip="RPKI Unknown" />
@@ -51,9 +54,7 @@ const RpkiIndicator = ({route}) => {
     }
 
     // RPKI NOT CHECKED
-    if (com[0].toFixed() === rpkiNotChecked[0] &&
-        com[1].toFixed() === rpkiNotChecked[1] &&
-        com[2].toFixed() === rpkiNotChecked[2]) {
+    if (matchCommunity(com, rpkiNotChecked)) {
       return (
         <span className="route-prefix-flag rpki-route rpki-not-checked">
           <FlagIcon icon={faCircle} tooltip="RPKI Not Checked" />
@@ -65,20 +66,23 @@ const RpkiIndicator = ({route}) => {
     // Depending on the configration this can either be a
     // single flag or a range with a given reason.
     let rpkiInvalidReason = 0;
-    if (com[0].toFixed() === rpkiInvalid[0] &&
-        com[1].toFixed() === rpkiInvalid[1]) {
+    for (const invalid of rpkiInvalid) {
+      if (com[0].toFixed() === invalid[0] &&
+          com[1].toFixed() === invalid[1]) {
 
-      // This needs to be considered invalid, now try to detect why
-      if (rpkiInvalid.length > 3 && rpkiInvalid[3] === "*") {
-        // Check if token falls within range
-        const start = parseInt(rpkiInvalid[2], 10);
-        if (com[2] >= start) {
-          rpkiInvalidReason = com[2];
+        // This needs to be considered invalid, now try to detect why
+        if (invalid.length > 3 && invalid[3] === "*") {
+          // Check if token falls within range
+          const start = parseInt(invalid[2], 10);
+          if (com[2] >= start) {
+            rpkiInvalidReason = com[2];
+          }
+        } else {
+          if (com[2].toFixed() === invalid[2]) {
+            rpkiInvalidReason = 1;
+          }
         }
-      } else {
-        if (com[2].toFixed() === rpkiInvalid[2]) {
-          rpkiInvalidReason = 1;
-        }
+        break; // We found a match, stop searching
       }
     }
 
