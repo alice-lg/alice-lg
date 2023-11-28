@@ -56,7 +56,7 @@ func (e ExpandMap) matchWildcard(pattern string) []string {
 	pattern = strings.TrimSuffix(pattern, "*")
 
 	// Iterate variables and add match to result set
-	for k, _ := range e {
+	for k := range e {
 		if strings.HasPrefix(k, pattern) {
 			key := strings.TrimPrefix(k, pattern)
 			matches = append(matches, key)
@@ -164,7 +164,7 @@ func (e ExpandMap) Expand(s string) ([]string, error) {
 	return results, nil
 }
 
-// Add a new variable to the map. Key and value are
+// AddExpr inserts a new variable to the map. Key and value are
 // expanded.
 func (e ExpandMap) AddExpr(expr string) error {
 	// Expand expression
