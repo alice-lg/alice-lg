@@ -498,18 +498,19 @@ func getRpkiConfig(config *ini.File) (RpkiConfig, error) {
 			return rpki, fmt.Errorf("invalid rpki config line: %s", line)
 		}
 		key := strings.TrimSpace(parts[0])
-		value := strings.Split(strings.TrimSpace(parts[1]), ":")
+		value := strings.TrimSpace(parts[1])
+		comm := strings.Split(value, ":")
 
 		if key == "enabled" {
-			rpki.Enabled = parts[1] == "true"
+			rpki.Enabled = value == "true"
 		} else if key == "valid" {
-			rpki.Valid = append(rpki.Valid, value)
+			rpki.Valid = append(rpki.Valid, comm)
 		} else if key == "not_checked" {
-			rpki.NotChecked = append(rpki.NotChecked, value)
+			rpki.NotChecked = append(rpki.NotChecked, comm)
 		} else if key == "invalid" {
-			rpki.Invalid = append(rpki.Invalid, value)
+			rpki.Invalid = append(rpki.Invalid, comm)
 		} else if key == "unknown" {
-			rpki.Unknown = append(rpki.Unknown, value)
+			rpki.Unknown = append(rpki.Unknown, comm)
 		} else {
 			return rpki, fmt.Errorf("invalid rpki config line: %s", line)
 		}
