@@ -18,8 +18,6 @@ import { useErrorHandler }
   from 'app/context/errors';
 
 const initialState = {
-  asn: 0, // Our own ASN (might be abstracted in the future)
-
   routes_columns: {},
   routes_columns_order: [],
   neighbors_columns: {},

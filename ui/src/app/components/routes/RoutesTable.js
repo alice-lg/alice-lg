@@ -30,11 +30,38 @@ export const getAttr = (r, path) => {
   return path.split(".").reduce((acc, elem) => acc[elem], r);
 }
 
+// Linking: Create link targes as a function of the route
+// Link to the route server
+const linkRouteServer = (route) => 
+  `/routeservers/${route?.routeserver?.id}`;
 
+// Create a link to the routes page of a neighbor
+const linkNeighborRoutes = (route) => {
+  const rs = route?.routeserver?.id;
+  const neighbor = route?.neighbor_id;
+  return `/routeservers/${rs}/neighbors/${neighbor}/routes`;
+}
+
+// Default column: Show the attribute and bind the
+// onClick attribute.
 export const ColDefault = ({onClick, route, column}) => {
   return (
     <td>
       <span onClick={onClick}>{getAttr(route, column)}</span>
+    </td>
+  );
+}
+
+// ColLink provides a cell with a linkable target.
+// The attribute `to` is a function of the `route`
+// attribute, returning the url.
+export const ColLink = ({to, route, column}) => {
+  const href = to(route);
+  return (
+    <td>
+      <a href={href} target="_blank" rel="noreferrer">
+       {getAttr(route, column)}
+      </a>
     </td>
   );
 }
@@ -83,19 +110,31 @@ export const ColFlags = ({route}) => {
   );
 }
 
+
+export const ColRouteServer = ({route, column}) =>
+  <ColLink to={linkRouteServer} route={route}  column={column} />;
+
+
+export const ColNeighbor = ({route, column}) =>
+  <ColLink to={linkNeighborRoutes} route={route} column={column} />;
+
+
 const RouteColumn = ({onClick, column, route}) => {
-  const widgets = {
+  const cells = {
     "network": ColNetwork,
     "flags": ColFlags,
     "bgp.as_path": ColAsPath,
 
     "Flags": ColFlags,
     "ASPath": ColAsPath,
+
+    "routeserver.name": ColRouteServer,
+    "neighbor.description": ColNeighbor,
   };
 
-  let Widget = widgets[column] || ColDefault;
+  let Cell = cells[column] || ColDefault;
   return (
-    <Widget
+    <Cell
       column={column}
       route={route}
       onClick={onClick} />
