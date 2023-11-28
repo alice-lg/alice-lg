@@ -27,7 +27,6 @@ func (s *Server) apiConfigShow(
 	_params httprouter.Params,
 ) (response, error) {
 	result := api.ConfigResponse{
-		Asn:                     s.cfg.Server.Asn,
 		BGPCommunities:          s.cfg.UI.BGPCommunities,
 		BGPBlackholeCommunities: s.cfg.UI.BGPBlackholeCommunities,
 		RejectReasons:           s.cfg.UI.RoutesRejections.Reasons,

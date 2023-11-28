@@ -27,8 +27,6 @@ type CacheableResponse interface {
 
 // ConfigResponse is a response with client runtime configuration
 type ConfigResponse struct {
-	Asn int `json:"asn"`
-
 	RejectReasons map[string]interface{} `json:"reject_reasons"`
 
 	Noexport        Noexport               `json:"noexport"`
@@ -66,11 +64,11 @@ type RejectCandidates struct {
 
 // Rpki is the validation status of a prefix
 type Rpki struct {
-	Enabled    bool     `json:"enabled"`
-	Valid      []string `json:"valid"`
-	Unknown    []string `json:"unknown"`
-	NotChecked []string `json:"not_checked"`
-	Invalid    []string `json:"invalid"`
+	Enabled    bool       `json:"enabled"`
+	Valid      [][]string `json:"valid"`
+	Unknown    [][]string `json:"unknown"`
+	NotChecked [][]string `json:"not_checked"`
+	Invalid    [][]string `json:"invalid"`
 }
 
 // Meta contains response meta information
