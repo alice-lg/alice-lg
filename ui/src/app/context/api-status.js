@@ -1,3 +1,4 @@
+import moment from 'moment';
 
 import { createContext
        , useContext
@@ -33,6 +34,7 @@ export const ApiStatusProvider = ({children, api}) => {
       cachedAt: api.cache_status?.cached_at,
       origTtl: api.cache_status?.orig_ttl,
       generatedAt: generatedAt,
+      receivedAt: moment.utc(),
       age: age,
       requestDurationMs: api.request_duration_ms,
       store: api.store_status,

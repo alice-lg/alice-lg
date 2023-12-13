@@ -4,7 +4,8 @@ import { useCallback }
 
 import { useRouteDetails }
   from 'app/context/routes';
-
+import { useApiStatus }
+  from 'app/context/api-status';
 import { Modal
        , ModalHeader
        , ModalBody
@@ -13,10 +14,15 @@ import { Modal
   from 'app/components/modal/Modal';
 import BgpCommunitiyLabel
   from 'app/components/routes/BgpCommunityLabel';
+import RelativeTimestampFormat
+  from 'app/components/datetime/RelativeTimestampFormat';
+import RelativeTimestamp
+  from 'app/components/datetime/RelativeTimestamp';
 
 
 const RouteDetailsModal = () => {
   const [ route, setRoute ] = useRouteDetails();
+  const api = useApiStatus();
 
   const onDismiss = useCallback(() => setRoute(null), [setRoute]);
 
@@ -49,6 +55,19 @@ const RouteDetailsModal = () => {
         <ModalBody>
           <table className="table table-nolines">
            <tbody>
+            <tr>
+              <th>Age:</th><td>
+                <RelativeTimestampFormat
+                  value={route.age}
+                  now={api.receivedAt}
+                  format="YYYY-MM-DD HH:mm:ss"/> UTC
+                <b> (<RelativeTimestamp
+                        value={route.age}
+                        now={api.receivedAt}
+                        suffix={true} />)
+               </b>
+            </td>
+            </tr>
             <tr>
               <th>Origin:</th><td>{attrs.origin}</td>
             </tr>
