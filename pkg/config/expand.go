@@ -48,7 +48,8 @@ type ExpandMap map[string]string
 // Retrieve a set of matching variables, by iterating variables.
 // Whenever a key matches the wildcard, the prefix is removed.
 // Example:
-//   pattern = "AS*", key = "AS2342", value = "2342"
+//
+//	pattern = "AS*", key = "AS2342", value = "2342"
 func (e ExpandMap) matchWildcard(pattern string) []string {
 	matches := []string{}
 
