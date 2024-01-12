@@ -10,7 +10,6 @@ import (
 	"github.com/alice-lg/alice-lg/pkg/sources"
 
 	"context"
-	"fmt"
 	"io"
 	"log"
 	"time"
@@ -317,14 +316,6 @@ func (gobgp *GoBGP) RoutesNotExported(
 	}
 	routes.NotExported = routes.Filtered
 	return &routes, nil
-}
-
-// LookupPrefix searches for a prefix
-func (gobgp *GoBGP) LookupPrefix(
-	ctx context.Context,
-	prefix string,
-) (*api.RoutesLookupResponse, error) {
-	return nil, fmt.Errorf("not implemented: LookupPrefix")
 }
 
 // AllRoutes returns a routes dump (filtered, received),
