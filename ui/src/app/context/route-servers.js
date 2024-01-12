@@ -15,7 +15,7 @@ import { useState
        , createContext
        }
   from 'react';
-import { useParams }
+import { useParams, useLocation }
   from 'react-router-dom';
 
 import { useErrorHandler }
@@ -29,13 +29,42 @@ const RouteServerStatusContext = createContext();
 export const useRouteServers      = () => useContext(RouteServersContext);
 export const useRouteServerStatus = () =>  useContext(RouteServerStatusContext);
 
+
+/**
+ * Use route server id from router params.
+ *
+ * Fallback to id extraction from current location.
+ * This is kind of a hack, as the useParams hook only provides
+ * the id within the route context. Which is after Layout.
+ * 
+ * However, moving the layout inwards creates flickering and
+ * a lot of redraws.
+ */
+export const useRouteServerId = () => {
+  const { routeServerId } = useParams();
+  const { pathname } = useLocation();
+
+  // Prefer the id from the route context
+  if (routeServerId) {
+    return routeServerId;
+  }
+
+  // Fallback to extraction from location pathname
+  const tokens = pathname.split('/');
+  if (tokens[1] !== 'routeservers') {
+    return undefined;
+  }
+
+  return tokens[2];
+}
+
 /**
  * Use selected route server uses the route server context
  * in combination with the navigation to return the current
  * route server.
  */
 export const useRouteServer = () => {
-  const { routeServerId } = useParams();
+  const routeServerId     = useRouteServerId();
   const routeServers      = useRouteServers();
   return routeServers.find((rs) => rs.id === routeServerId)
 }

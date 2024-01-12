@@ -5,6 +5,7 @@ import axios
 import { useEffect
        , useState
        , useCallback
+       , useMemo
        }
   from 'react';
 import { Link }
@@ -12,9 +13,8 @@ import { Link }
 
 import { useErrorHandler }
   from 'app/context/errors';
-import { useRouteServers }
+import { useRouteServers, useRouteServer }
   from 'app/context/route-servers';
-
 
 /**
  * Show the name of the route server and display
@@ -156,30 +156,57 @@ const GroupSelect = ({groups, selected, onSelect}) => {
   );
 }
 
+
+/**
+ * useGroupSelect holds the state of the group selector,
+ * it accepts the list of routes and returns the selected group.
+ */
+const useRouteServerGroup = () => {
+  const routeServers = useRouteServers();
+  const current      = useRouteServer();
+  const [selectedGroup, setSelectedGroup] = useState(null);
+
+  useEffect(() => {
+    let selected = routeServers[0]?.group;
+    if (current) {
+      selected = current.group;
+    }
+    setSelectedGroup(selected);
+  }, [routeServers, current])
+
+  const group = useMemo(() =>
+    routeServers.filter((rs) => rs.group === selectedGroup),
+    [routeServers, selectedGroup]);
+
+  return [group, selectedGroup, setSelectedGroup];
+}
+
+/**
+ * useRouteServerGroups gets all groups
+ */
+const useRouteServerGroups = () => {
+  const routeServers = useRouteServers();
+  const groups = useMemo(() => {
+    let groups = [];
+    for (const rs of routeServers) {
+      if (groups.indexOf(rs.group) === -1) {
+        groups.push(rs.group);
+      }
+    }
+    return groups;
+  }, [routeServers]);
+
+  return groups;
+}
+
+
 /**
  * Routeservers shows a list of routeservers for navigation
  */
 const RouteServers = () => {
-  const routeServers = useRouteServers();
-  const [selectedGroup, setSelectedGroup] = useState(null);
+  const groups = useRouteServerGroups();
+  const [routeServers, selectedGroup, setSelectedGroup] = useRouteServerGroup();
 
-  let groups = [];
-  for (const rs of routeServers) {
-    if (groups.indexOf(rs.group) === -1) {
-      groups.push(rs.group);
-    }
-  }
-
-  useEffect(() => {
-    setSelectedGroup(routeServers[0]?.group);
-  }, [routeServers])
-
-  if (selectedGroup === null) {
-    return null; // nothing to display yet
-  }
-  
-  const groupRs = routeServers.filter((rs) => rs.group === selectedGroup);
-  
   return (
     <div className="routeservers-list">
       <h2>route servers</h2>
@@ -187,7 +214,7 @@ const RouteServers = () => {
                    selected={selectedGroup}
                    onSelect={setSelectedGroup} />
       <ul>
-        {groupRs.map((rs) =>
+        {routeServers.map((rs) =>
           <li key={rs.id}>
             <Link to={`/routeservers/${rs.id}`}
                   className="routeserver-id">{rs.name}</Link>
