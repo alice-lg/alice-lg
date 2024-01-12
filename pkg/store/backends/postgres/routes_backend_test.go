@@ -113,9 +113,16 @@ func TestFindByNeighbors(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	routes, err := b.FindByNeighbors(ctx, []string{
-		"n24", "n25",
-	})
+	nq1 := &api.NeighborQuery{
+		NeighborID: pools.Neighbors.Acquire("n24"),
+		SourceID:   pools.RouteServers.Acquire("rs1"),
+	}
+	nq2 := &api.NeighborQuery{
+		NeighborID: pools.Neighbors.Acquire("n25"),
+		SourceID:   pools.RouteServers.Acquire("rs2"),
+	}
+
+	routes, err := b.FindByNeighbors(ctx, []*api.NeighborQuery{nq1, nq2})
 	if err != nil {
 		t.Fatal(err)
 	}

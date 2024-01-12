@@ -7,6 +7,9 @@ import "log"
 // Default pools: These pools are defined globally
 // and are defined per intended usage
 
+// RouteServers stores route server IDs
+var RouteServers *StringPool
+
 // Neighbors stores neighbor IDs
 var Neighbors *StringPool
 
@@ -47,6 +50,7 @@ var LargeCommunities *CommunitiesPool
 func init() {
 	log.Println("initializing memory pools")
 
+	RouteServers = NewStringPool()
 	Neighbors = NewStringPool()
 	Networks4 = NewStringPool()
 	Networks6 = NewStringPool()

@@ -213,7 +213,7 @@ func (b *RoutesBackend) CountRoutesAt(
 // list of neighbors identified by ID.
 func (b *RoutesBackend) FindByNeighbors(
 	ctx context.Context,
-	neighborIDs []string,
+	neighbors []*api.NeighborQuery,
 ) (api.LookupRoutes, error) {
 	tx, err := b.pool.BeginTx(ctx, pgx.TxOptions{
 		IsoLevel: pgx.ReadCommitted,
@@ -223,23 +223,22 @@ func (b *RoutesBackend) FindByNeighbors(
 	}
 	defer tx.Rollback(ctx)
 
-	vals := make([]interface{}, len(neighborIDs))
-	for i := range neighborIDs {
-		vals[i] = neighborIDs[i]
-	}
-	vars := make([]string, len(neighborIDs))
-	for i := range neighborIDs {
-		vars[i] = fmt.Sprintf("$%d", i+1)
-	}
-	listQry := strings.Join(vars, ",")
+	vals := make([]interface{}, 0, len(neighbors))
+	vars := 0
 
 	qrys := []string{}
-	for _, src := range b.sources {
-		tbl := b.routesTable(src.ID)
+
+	for _, neighborQuery := range neighbors {
+		tbl := b.routesTable(*neighborQuery.SourceID)
+		param := fmt.Sprintf("$%d", vars+1)
+		vals = append(vals, *neighborQuery.NeighborID)
+
 		qry := `
 			SELECT route FROM ` + tbl + `
-			 WHERE neighbor_id IN (` + listQry + `)`
+			 WHERE neighbor_id = ` + param
 		qrys = append(qrys, qry)
+
+		vars++
 	}
 
 	qry := strings.Join(qrys, " UNION ")

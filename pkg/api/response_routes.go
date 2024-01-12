@@ -72,7 +72,7 @@ func (routes Routes) Swap(i, j int) {
 // ToLookupRoutes prepares routes for lookup
 func (routes Routes) ToLookupRoutes(
 	state string,
-	rs *RouteServer,
+	rs *LookupRouteServer,
 	neighbors map[string]*Neighbor,
 ) LookupRoutes {
 	lookupRoutes := make(LookupRoutes, 0, len(routes))
@@ -142,6 +142,13 @@ const (
 	RouteStateImported = "imported"
 )
 
+// NeighborQuery is used in finding routes by neighbors.
+// Source and Neighbor IDs are pointers to string pools.
+type NeighborQuery struct {
+	NeighborID *string
+	SourceID   *string
+}
+
 // LookupRoute is a route with additional
 // neighbor and state information
 type LookupRoute struct {
@@ -149,13 +156,13 @@ type LookupRoute struct {
 
 	State string `json:"state"` // Filtered, Imported, ...
 
-	Neighbor    *Neighbor    `json:"neighbor"`
-	RouteServer *RouteServer `json:"routeserver"`
+	Neighbor    *Neighbor          `json:"neighbor"`
+	RouteServer *LookupRouteServer `json:"routeserver"`
 }
 
 // MatchSourceID implements filterable interface for lookup routes
 func (r *LookupRoute) MatchSourceID(id string) bool {
-	return r.RouteServer.ID == id
+	return *r.RouteServer.ID == id
 }
 
 // MatchASN matches the neighbor's ASN
@@ -176,6 +183,17 @@ func (r *LookupRoute) MatchExtCommunity(community ExtCommunity) bool {
 // MatchLargeCommunity matches large communities.
 func (r *LookupRoute) MatchLargeCommunity(community Community) bool {
 	return r.Route.BGP.HasLargeCommunity(community)
+}
+
+// MatchNeighborQuery matches a neighbor query
+func (r *LookupRoute) MatchNeighborQuery(query *NeighborQuery) bool {
+	if r.RouteServer.ID != query.SourceID {
+		return false
+	}
+	if r.NeighborID != query.NeighborID {
+		return false
+	}
+	return true
 }
 
 // LookupRoutes is a collection of lookup routes.

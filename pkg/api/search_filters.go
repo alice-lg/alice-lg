@@ -48,7 +48,32 @@ func searchFilterCmpInt(a FilterValue, b FilterValue) bool {
 
 // Compare strings
 func searchFilterCmpString(a FilterValue, b FilterValue) bool {
-	return a.(string) == b.(string)
+	var (
+		valA string
+		valB string
+	)
+	_, ptrA := a.(*string)
+	_, ptrB := b.(*string)
+
+	// Compare pointers, this is ok because we can assume
+	// using pool values for both.
+	if ptrA && ptrB {
+		return a == b
+	}
+
+	// Otherwise fall back to string compare
+	if ptrA {
+		valA = *a.(*string)
+	} else {
+		valA = a.(string)
+	}
+	if ptrB {
+		valB = *b.(*string)
+	} else {
+		valB = b.(string)
+	}
+
+	return valA == valB
 }
 
 // Compare communities
@@ -136,6 +161,8 @@ func filterValueAsString(value interface{}) string {
 	switch v := value.(type) {
 	case int:
 		return strconv.Itoa(v)
+	case *string:
+		return *v
 	case string:
 		return v
 	case Community:

@@ -157,6 +157,13 @@ type RouteServersResponse struct {
 	RouteServers RouteServers `json:"routeservers"`
 }
 
+// A LookupRouteServer is a shorter representation of the
+// route server data source.
+type LookupRouteServer struct {
+	ID   *string `json:"id"`
+	Name string  `json:"name"`
+}
+
 // Community is a BGP community
 type Community []int
 

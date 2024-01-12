@@ -42,8 +42,8 @@ func LoadTestLookupRoutes(srcID, srcName string) api.LookupRoutes {
 			ID: "ID7254_AS31334",
 		},
 	}
-	rs := &api.RouteServer{
-		ID:   srcID,
+	rs := &api.LookupRouteServer{
+		ID:   pools.RouteServers.Acquire(srcID),
 		Name: srcName,
 	}
 	imported := res.Imported.ToLookupRoutes("imported", rs, neighbors)

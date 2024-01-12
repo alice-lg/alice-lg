@@ -247,8 +247,6 @@ func (s *NeighborsStore) lookupNeighborsAt(
 	sourceID string,
 	query string,
 ) (api.Neighbors, error) {
-
-	results := api.Neighbors{}
 	neighbors, err := s.backend.GetNeighborsAt(ctx, sourceID)
 	if err != nil {
 		return nil, err
@@ -262,6 +260,7 @@ func (s *NeighborsStore) lookupNeighborsAt(
 		}
 	}
 
+	results := api.Neighbors{}
 	for _, neighbor := range neighbors {
 		if asn >= 0 && neighbor.ASN == asn { // only executed if valid AS query is detected
 			results = append(results, neighbor)

@@ -17,6 +17,7 @@ import (
 
 	"github.com/alice-lg/alice-lg/pkg/api"
 	"github.com/alice-lg/alice-lg/pkg/decoders"
+	"github.com/alice-lg/alice-lg/pkg/pools"
 	"github.com/alice-lg/alice-lg/pkg/sources"
 	"github.com/alice-lg/alice-lg/pkg/sources/birdwatcher"
 	"github.com/alice-lg/alice-lg/pkg/sources/gobgp"
@@ -746,6 +747,9 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 			Backend:    backendType,
 			Type:       sourceType,
 		}
+
+		// Register route server ID with pool
+		pools.RouteServers.Acquire(sourceID)
 
 		// Set backend
 		switch backendType {

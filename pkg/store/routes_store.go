@@ -9,8 +9,26 @@ import (
 
 	"github.com/alice-lg/alice-lg/pkg/api"
 	"github.com/alice-lg/alice-lg/pkg/config"
+	"github.com/alice-lg/alice-lg/pkg/pools"
 	"github.com/alice-lg/alice-lg/pkg/sources"
 )
+
+// newNeighborQuery creates a new NeighborQuery
+func newNeighborQuery(neighborID string, sourceID string) *api.NeighborQuery {
+	ptrNeighborID := pools.Neighbors.Get(neighborID)
+	if ptrNeighborID == nil {
+		return nil
+	}
+	ptrSourceID := pools.RouteServers.Get(sourceID)
+	if ptrSourceID == nil {
+		return nil
+	}
+
+	return &api.NeighborQuery{
+		NeighborID: ptrNeighborID,
+		SourceID:   ptrSourceID,
+	}
+}
 
 // RoutesStoreBackend interface
 type RoutesStoreBackend interface {
@@ -33,7 +51,7 @@ type RoutesStoreBackend interface {
 	// announced by the neighbor at a given source
 	FindByNeighbors(
 		ctx context.Context,
-		neighborIDs []string,
+		neighbors []*api.NeighborQuery,
 	) (api.LookupRoutes, error)
 
 	// FindByPrefix
@@ -182,8 +200,8 @@ func (s *RoutesStore) updateSource(
 		"accepted and", len(res.Filtered), "filtered routes for:", src.Name)
 
 	// Prepare imported routes for lookup
-	srcRS := &api.RouteServer{
-		ID:   src.ID,
+	srcRS := &api.LookupRouteServer{
+		ID:   pools.RouteServers.Acquire(src.ID),
 		Name: src.Name,
 	}
 	imported := res.Imported.ToLookupRoutes("imported", srcRS, neighbors)
@@ -320,11 +338,16 @@ func (s *RoutesStore) LookupPrefixForNeighbors(
 	ctx context.Context,
 	neighbors api.NeighborsLookupResults,
 ) (api.LookupRoutes, error) {
-	neighborIDs := []string{}
-	for _, rs := range neighbors {
-		for _, neighbor := range rs {
-			neighborIDs = append(neighborIDs, neighbor.ID)
+	query := make([]*api.NeighborQuery, 0, len(neighbors))
+
+	for sourceID, sourceNeighbors := range neighbors {
+		for _, neighbor := range sourceNeighbors {
+			q := newNeighborQuery(neighbor.ID, sourceID)
+			if q == nil {
+				continue
+			}
+			query = append(query, q)
 		}
 	}
-	return s.backend.FindByNeighbors(ctx, neighborIDs)
+	return s.backend.FindByNeighbors(ctx, query)
 }

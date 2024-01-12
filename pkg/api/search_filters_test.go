@@ -5,6 +5,10 @@ import (
 	"testing"
 )
 
+var (
+	testRsID string = "3"
+)
+
 func makeTestRoute() *Route {
 	route := &Route{
 		BGP: &BGPInfo{
@@ -44,8 +48,8 @@ func makeTestLookupRoute() *LookupRoute {
 			ASN:         23042,
 			Description: "Security Solutions Ltd.",
 		},
-		RouteServer: &RouteServer{
-			ID:   "3",
+		RouteServer: &LookupRouteServer{
+			ID:   &testRsID,
 			Name: "test.rs.ixp",
 		},
 	}

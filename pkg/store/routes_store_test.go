@@ -29,8 +29,8 @@ func importRoutes(
 			ID: "ID7254_AS31334",
 		},
 	}
-	srcRS := &api.RouteServer{
-		ID:   src.ID,
+	srcRS := &api.LookupRouteServer{
+		ID:   pools.RouteServers.Acquire(src.ID),
 		Name: src.Name,
 	}
 	imported := res.Imported.ToLookupRoutes("imported", srcRS, neighbors)
