@@ -19,6 +19,25 @@ func NewNode(ptr interface{}) *Node {
 	}
 }
 
+// Traverse read only; returns nil if not found
+func (n *Node) read(list interface{}, tail []int) interface{} {
+	value := tail[0]
+	tail = tail[1:]
+
+	// Seek for value in children
+	child, ok := n.children[value]
+	if !ok {
+		return nil
+	}
+
+	// Set list ptr if required
+	if len(tail) == 0 {
+		return child.ptr
+	}
+
+	return child.read(list, tail)
+}
+
 // Internally acquire list by traversing the tree and
 // creating nodes if required.
 func (n *Node) traverse(list interface{}, tail []int) interface{} {

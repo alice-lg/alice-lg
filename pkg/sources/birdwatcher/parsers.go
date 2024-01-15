@@ -258,9 +258,9 @@ func parseRouteBgpInfo(data interface{}) *api.BGPInfo {
 			decoders.String(bgpData["next_hop"], "unknown")),
 		LocalPref:        localPref,
 		Med:              med,
-		Communities:      pools.Communities.Acquire(communities),
-		ExtCommunities:   pools.ExtCommunities.AcquireExt(extCommunities),
-		LargeCommunities: pools.LargeCommunities.Acquire(largeCommunities),
+		Communities:      pools.CommunitiesSets.Acquire(communities),
+		ExtCommunities:   pools.ExtCommunitiesSets.AcquireExt(extCommunities),
+		LargeCommunities: pools.LargeCommunitiesSets.Acquire(largeCommunities),
 	}
 	return bgp
 }

@@ -183,9 +183,9 @@ func decodeRoute(details map[string]interface{}) (*api.Route, error) {
 		Origin:           pools.Origins.Acquire(origin),
 		AsPath:           pools.ASPaths.Acquire(asPath),
 		NextHop:          pools.Gateways4.Acquire(trueNextHop),
-		Communities:      pools.Communities.Acquire(communities),
-		ExtCommunities:   pools.ExtCommunities.AcquireExt(extendedCommunities),
-		LargeCommunities: pools.LargeCommunities.Acquire(largeCommunities),
+		Communities:      pools.CommunitiesSets.Acquire(communities),
+		ExtCommunities:   pools.ExtCommunitiesSets.AcquireExt(extendedCommunities),
+		LargeCommunities: pools.LargeCommunitiesSets.Acquire(largeCommunities),
 		LocalPref:        localPref,
 	}
 

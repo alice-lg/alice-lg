@@ -37,14 +37,20 @@ var ASPaths *IntListPool
 // Types stores a list of types (['BGP', 'univ'])
 var Types *StringListPool
 
-// Communities store a list of BGP communities
+// Communities stores (large and standard) BGP communities
 var Communities *CommunitiesPool
 
-// ExtCommunities stores a list of extended communities
+// ExtCommunities stores extended BGP communities
 var ExtCommunities *CommunitiesPool
 
-// LargeCommunities store a list of large BGP communities
-var LargeCommunities *CommunitiesPool
+// CommunitiesSets store a list of BGP communities
+var CommunitiesSets *CommunitiesSetPool
+
+// ExtCommunitiesSets stores a list of extended communities
+var ExtCommunitiesSets *CommunitiesSetPool
+
+// LargeCommunitiesSets store a list of large BGP communities
+var LargeCommunitiesSets *CommunitiesSetPool
 
 // Initialize global pools
 func init() {
@@ -61,6 +67,8 @@ func init() {
 	ASPaths = NewIntListPool()
 	Types = NewStringListPool()
 	Communities = NewCommunitiesPool()
-	ExtCommunities = NewExtCommunitiesPool()
-	LargeCommunities = NewCommunitiesPool()
+	ExtCommunities = NewCommunitiesPool()
+	CommunitiesSets = NewCommunitiesSetPool()
+	ExtCommunitiesSets = NewExtCommunitiesSetPool()
+	LargeCommunitiesSets = NewCommunitiesSetPool()
 }

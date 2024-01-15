@@ -158,9 +158,9 @@ func (gobgp *GoBGP) parsePathIntoRoute(
 	}
 
 	route.BGP.AsPath = pools.ASPaths.Acquire(route.BGP.AsPath)
-	route.BGP.Communities = pools.Communities.Acquire(route.BGP.Communities)
-	route.BGP.ExtCommunities = pools.ExtCommunities.AcquireExt(route.BGP.ExtCommunities)
-	route.BGP.LargeCommunities = pools.LargeCommunities.Acquire(route.BGP.LargeCommunities)
+	route.BGP.Communities = pools.CommunitiesSets.Acquire(route.BGP.Communities)
+	route.BGP.ExtCommunities = pools.ExtCommunitiesSets.AcquireExt(route.BGP.ExtCommunities)
+	route.BGP.LargeCommunities = pools.LargeCommunitiesSets.Acquire(route.BGP.LargeCommunities)
 
 	route.Metric = (route.BGP.LocalPref + route.BGP.Med)
 
