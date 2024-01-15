@@ -54,8 +54,6 @@ export const initializeFilterState = () => ([
   {"key": "large_communities", "filters": []},
 ]);
 
-
-
 // Compare values
 const cmpValue = (a, b) => a === b;
 
@@ -277,11 +275,12 @@ export const useFilters = () => useContext(FiltersContext);
 const useRoutesFilters = (routes) => {
   return useMemo(() => {
     if (!routes.requested || routes.loading) {
-      return { applied: [], available: [] };
+      return { applied: [], available: [], notAvailable: [] };
     }
     return {
       applied: routes.filtersApplied,
       available: routes.filtersAvailable,
+      notAvailable: routes.filtersNotAvailable,
     };
   }, [routes]);
 }
@@ -364,7 +363,11 @@ export const RoutesFiltersProvider = ({children}) => {
       filtered.available,
       noexport.available,
     );
-    return { applied, available };
+    let notAvailable = [];
+    if (received.notAvailable) {
+      notAvailable = received.notAvailable;
+    }
+    return { applied, available, notAvailable };
   }, [received, filtered, noexport]);
 
   const context = {filters, applyFilter, removeFilter};

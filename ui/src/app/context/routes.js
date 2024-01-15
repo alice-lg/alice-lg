@@ -98,9 +98,14 @@ export const paginationState = ({pagination}) => ({
   totalResults: pagination.total_results,
 })
 
-export const filtersState = ({filters_applied, filters_available}) => ({
+export const filtersState = ({
+    filters_applied,
+    filters_available,
+    filters_not_available,
+  }) => ({
   filtersApplied: filters_applied,
   filtersAvailable: filters_available,
+  filtersNotAvailable: filters_not_available,
 });
 
 export const apiStatusState = ({api, request_duration_ms}) => ({

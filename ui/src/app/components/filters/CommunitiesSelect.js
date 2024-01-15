@@ -8,6 +8,7 @@ import { useReadableCommunity }
 import { FILTER_GROUP_COMMUNITIES
        , FILTER_GROUP_EXT_COMMUNITIES
        , FILTER_GROUP_LARGE_COMMUNITIES
+       , useFilters
        , useCommunitiesFilters
        , useExtCommunitiesFilters
        , useLargeCommunitiesFilters
@@ -86,6 +87,7 @@ const useUpdateFilters = (filter) => {
 
 
 const CommunitiesSelect = () => {
+  const { filters } = useFilters();
   const { apply, remove } = useUpdateFilters();
 
   const communitiesFilters = useCommunitiesFilters();
@@ -101,7 +103,20 @@ const CommunitiesSelect = () => {
     remove[group](value);
   }, [remove]);
 
-  // Nothing to do if we don't have filters
+  // Nothing to do if we don't have filters or if the community
+  // filter is disable because of a large result set.
+  const filtersNotAvailable = filters.notAvailable;
+  const isDisabled = filtersNotAvailable.includes("communities");
+
+  if (isDisabled) {
+    return (
+      <div className="text-muted">
+        Due to a large number of results, filtering by BGP communities
+        becomes availble only after selecting a route server.
+      </div>
+    );
+  }
+
   const hasAvailable =
       communitiesFilters.filters.available.length > 0 ||
       extCommunitiesFilters.filters.available.length > 0 ||

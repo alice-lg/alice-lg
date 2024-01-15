@@ -43,6 +43,7 @@ const initialRoutesState = {
   routes: [],
   filtersApplied: [],
   filtersAvailable: [],
+  filtersNotAvailable: [],
 
   apiStatus: {},
 };
@@ -104,6 +105,7 @@ const decodeSearchResult = (result) => {
     routes: result?.filtered?.routes,
     filtersApplied: [],
     filtersAvailable: [],
+    filtersNotAvailable: [],
   };
   const received = {
     requested: true,
