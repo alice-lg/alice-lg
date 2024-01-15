@@ -69,22 +69,28 @@ const (
 	// DefaultHTTPTimeout is the time in seconds after which the
 	// server will timeout.
 	DefaultHTTPTimeout = 120
+
+	// DefaultPrefixLookupCommunityFilterCutoff is the number of
+	// routes after which the community filter will not be
+	// available.
+	DefaultPrefixLookupCommunityFilterCutoff = 100000
 )
 
 // A ServerConfig holds the runtime configuration
 // for the backend.
 type ServerConfig struct {
-	Listen                           string `ini:"listen_http"`
-	HTTPTimeout                      int    `ini:"http_timeout"`
-	EnablePrefixLookup               bool   `ini:"enable_prefix_lookup"`
-	NeighborsStoreRefreshInterval    int    `ini:"neighbors_store_refresh_interval"`
-	NeighborsStoreRefreshParallelism int    `ini:"neighbors_store_refresh_parallelism"`
-	RoutesStoreRefreshInterval       int    `ini:"routes_store_refresh_interval"`
-	RoutesStoreRefreshParallelism    int    `ini:"routes_store_refresh_parallelism"`
-	StoreBackend                     string `ini:"store_backend"`
-	DefaultAsn                       int    `ini:"asn"`
-	EnableNeighborsStatusRefresh     bool   `ini:"enable_neighbors_status_refresh"`
-	StreamParserThrottle             int    `ini:"stream_parser_throttle"`
+	Listen                            string `ini:"listen_http"`
+	HTTPTimeout                       int    `ini:"http_timeout"`
+	EnablePrefixLookup                bool   `ini:"enable_prefix_lookup"`
+	PrefixLookupCommunityFilterCutoff int    `ini:"prefix_lookup_community_filter_cutoff"`
+	NeighborsStoreRefreshInterval     int    `ini:"neighbors_store_refresh_interval"`
+	NeighborsStoreRefreshParallelism  int    `ini:"neighbors_store_refresh_parallelism"`
+	RoutesStoreRefreshInterval        int    `ini:"routes_store_refresh_interval"`
+	RoutesStoreRefreshParallelism     int    `ini:"routes_store_refresh_parallelism"`
+	StoreBackend                      string `ini:"store_backend"`
+	DefaultAsn                        int    `ini:"asn"`
+	EnableNeighborsStatusRefresh      bool   `ini:"enable_neighbors_status_refresh"`
+	StreamParserThrottle              int    `ini:"stream_parser_throttle"`
 }
 
 // PostgresConfig is the configuration for the database
@@ -928,10 +934,11 @@ func LoadConfig(file string) (*Config, error) {
 
 	// Map sections
 	server := ServerConfig{
-		HTTPTimeout:                      DefaultHTTPTimeout,
-		StoreBackend:                     "memory",
-		RoutesStoreRefreshParallelism:    1,
-		NeighborsStoreRefreshParallelism: 1,
+		HTTPTimeout:                       DefaultHTTPTimeout,
+		PrefixLookupCommunityFilterCutoff: DefaultPrefixLookupCommunityFilterCutoff,
+		StoreBackend:                      "memory",
+		RoutesStoreRefreshParallelism:     1,
+		NeighborsStoreRefreshParallelism:  1,
 	}
 	if err := parsedConfig.Section("server").MapTo(&server); err != nil {
 		return nil, err

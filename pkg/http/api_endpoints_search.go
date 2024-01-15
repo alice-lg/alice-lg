@@ -78,9 +78,10 @@ func (s *Server) apiLookupPrefixGlobal(
 	imported := make(api.LookupRoutes, 0, totalResults)
 	filtered := make(api.LookupRoutes, 0, totalResults)
 
-	// TODO: Make configurable
-	communityFilterCutoff := 100000
-	canFilterCommunities := totalResults <= communityFilterCutoff
+	// Check if we should calculate community filter
+	// cardinalities.
+	filterCutoff := s.cfg.Server.PrefixLookupCommunityFilterCutoff
+	canFilterCommunities := totalResults <= filterCutoff
 
 	// In case there is a source filter applied, we can filter communities
 	if filtersApplied.HasGroup(api.SearchKeySources) {
@@ -89,7 +90,8 @@ func (s *Server) apiLookupPrefixGlobal(
 
 	filtersNotAvailable := []string{}
 	if !canFilterCommunities {
-		filtersNotAvailable = append(filtersNotAvailable, api.SearchKeyCommunities)
+		filtersNotAvailable = append(
+			filtersNotAvailable, api.SearchKeyCommunities)
 	}
 
 	// Now, as we have allocated even more space process routes by, splitting,

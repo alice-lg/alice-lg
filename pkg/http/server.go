@@ -54,6 +54,15 @@ func (s *Server) Start(ctx context.Context) {
 
 	httpTimeout := time.Duration(s.cfg.Server.HTTPTimeout) * time.Second
 	log.Println("Web server HTTP timeout set to:", httpTimeout)
+	log.Println("Listening on:", s.cfg.Server.Listen)
+
+	if s.cfg.Server.EnablePrefixLookup {
+		log.Println("Prefix Lookup (Search): enabled")
+		log.Println("Prefix Lookup Community Filter Cutoff:",
+			s.cfg.Server.PrefixLookupCommunityFilterCutoff)
+	} else {
+		log.Println("Prefix Lookup (Search): disabled")
+	}
 
 	s.Server = &http.Server{
 		Addr:         s.cfg.Server.Listen,

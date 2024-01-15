@@ -38,6 +38,11 @@ func TestLoadConfigs(t *testing.T) {
 		t.Error("expcted to find example community 1:23 with 'some tag'",
 			"but got:", label)
 	}
+
+	// Check prefix lookup cutoff
+	if config.Server.PrefixLookupCommunityFilterCutoff != 123 {
+		t.Error("Expected PrefixLookupCommunityFilterCutoff to be 123")
+	}
 }
 
 // TestSourceConfig checks that the proper backend type was identified for each
