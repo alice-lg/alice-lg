@@ -27,6 +27,11 @@ func MaybePrefix(s string) bool {
 		return false
 	}
 
+	// Must contain at least one dot or colon
+	if !strings.Contains(s, ":") && !strings.Contains(s, ".") {
+		return false
+	}
+
 	// Test using regex
 	matches := ReMatchIPPrefix.FindAllStringIndex(s, -1)
 	if len(matches) == 1 {
