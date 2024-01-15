@@ -660,3 +660,23 @@ func TestNeighborFilterFromQuery(t *testing.T) {
 		t.Error("Unexpected name:", filter.name)
 	}
 }
+
+func TestSearchFiltersHasKey(t *testing.T) {
+	// Sources filter present
+	query := "asn=2342&sources=foo"
+	values, _ := url.ParseQuery(query)
+	filters, _ := FiltersFromQuery(values)
+
+	if !filters.HasGroup(SearchKeySources) {
+		t.Error("sources should be filtered")
+	}
+
+	// Check without sources present
+	query = "asn=2342"
+	values, _ = url.ParseQuery(query)
+	filters, _ = FiltersFromQuery(values)
+
+	if filters.HasGroup(SearchKeySources) {
+		t.Error("sources should not be filtered")
+	}
+}

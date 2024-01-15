@@ -78,6 +78,20 @@ func (s *Server) apiLookupPrefixGlobal(
 	imported := make(api.LookupRoutes, 0, totalResults)
 	filtered := make(api.LookupRoutes, 0, totalResults)
 
+	// TODO: Make configurable
+	communityFilterCutoff := 100000
+	canFilterCommunities := totalResults <= communityFilterCutoff
+
+	// In case there is a source filter applied, we can filter communities
+	if filtersApplied.HasGroup(api.SearchKeySources) {
+		canFilterCommunities = true
+	}
+
+	filtersNotAvailable := []string{}
+	if !canFilterCommunities {
+		filtersNotAvailable = append(filtersNotAvailable, api.SearchKeyCommunities)
+	}
+
 	// Now, as we have allocated even more space process routes by, splitting,
 	// filtering and updating the available filters...
 	filtersAvailable := api.NewSearchFilters()
@@ -94,7 +108,14 @@ func (s *Server) apiLookupPrefixGlobal(
 			imported = append(imported, r)
 		}
 
-		filtersAvailable.UpdateFromLookupRoute(r)
+		// Update available filters for sources and asns,
+		// conditionally for communities.
+		filtersAvailable.UpdateSourcesFromLookupRoute(r)
+		filtersAvailable.UpdateASNSFromLookupRoute(r)
+
+		if canFilterCommunities {
+			filtersAvailable.UpdateCommunitiesFromLookupRoute(r)
+		}
 	}
 
 	// Remove applied filters from available
@@ -148,8 +169,9 @@ func (s *Server) apiLookupPrefixGlobal(
 			Pagination: paginationFiltered,
 		},
 		FilteredResponse: api.FilteredResponse{
-			FiltersAvailable: filtersAvailable,
-			FiltersApplied:   filtersApplied,
+			FiltersAvailable:    filtersAvailable,
+			FiltersNotAvailable: filtersNotAvailable,
+			FiltersApplied:      filtersApplied,
 		},
 	}
 

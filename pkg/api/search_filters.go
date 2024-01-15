@@ -120,6 +120,8 @@ func (f *SearchFilter) Equal(other *SearchFilter) bool {
 		cmp = searchFilterCmpInt
 	case string:
 		cmp = searchFilterCmpString
+	case *string:
+		cmp = searchFilterCmpString
 	}
 
 	if cmp == nil {
@@ -388,25 +390,26 @@ func (s *SearchFilters) GetGroupByKey(key string) *SearchFilterGroup {
 	return nil
 }
 
-// UpdateFromLookupRoute updates a filter
-// and its counters.
-//
-// Update filter struct to include route:
-//   - Extract ASN, source, bgp communities,
-//   - Find Filter in group, increment result count if required.
-func (s *SearchFilters) UpdateFromLookupRoute(r *LookupRoute) {
+// UpdateSourcesFromLookupRoute updates the source filter
+func (s *SearchFilters) UpdateSourcesFromLookupRoute(r *LookupRoute) {
 	// Add source
 	s.GetGroupByKey(SearchKeySources).AddFilter(&SearchFilter{
 		Name:  r.RouteServer.Name,
 		Value: r.RouteServer.ID,
 	})
+}
 
+// UpdateASNSFromLookupRoute updates the ASN filter
+func (s *SearchFilters) UpdateASNSFromLookupRoute(r *LookupRoute) {
 	// Add ASN from neighbor
 	s.GetGroupByKey(SearchKeyASNS).AddFilter(&SearchFilter{
 		Name:  r.Neighbor.Description,
 		Value: r.Neighbor.ASN,
 	})
+}
 
+// UpdateCommunitiesFromLookupRoute updates the communities filter
+func (s *SearchFilters) UpdateCommunitiesFromLookupRoute(r *LookupRoute) {
 	// Add communities
 	communities := s.GetGroupByKey(SearchKeyCommunities)
 	for _, c := range r.Route.BGP.Communities {
@@ -429,6 +432,18 @@ func (s *SearchFilters) UpdateFromLookupRoute(r *LookupRoute) {
 			Value: c,
 		})
 	}
+}
+
+// UpdateFromLookupRoute updates a filter
+// and its counters.
+//
+// Update filter struct to include route:
+//   - Extract ASN, source, bgp communities,
+//   - Find Filter in group, increment result count if required.
+func (s *SearchFilters) UpdateFromLookupRoute(r *LookupRoute) {
+	s.UpdateSourcesFromLookupRoute(r)
+	s.UpdateASNSFromLookupRoute(r)
+	s.UpdateCommunitiesFromLookupRoute(r)
 }
 
 // UpdateFromRoute updates a search filter, however as
@@ -591,6 +606,13 @@ func (s *SearchFilters) MergeProperties(other *SearchFilters) {
 			filter.Cardinality = otherFilter.Cardinality
 		}
 	}
+}
+
+// HasGroup checks if a group with a given key exists
+// and filters are present.
+func (s *SearchFilters) HasGroup(key string) bool {
+	group := s.GetGroupByKey(key)
+	return len(group.Filters) > 0
 }
 
 // A NeighborFilter includes only a name and ASN.

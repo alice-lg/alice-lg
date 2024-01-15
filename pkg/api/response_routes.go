@@ -129,8 +129,9 @@ type PaginatedResponse struct {
 
 // FilteredResponse includes filters applied and available
 type FilteredResponse struct {
-	FiltersAvailable *SearchFilters `json:"filters_available"`
-	FiltersApplied   *SearchFilters `json:"filters_applied"`
+	FiltersAvailable    *SearchFilters `json:"filters_available"`
+	FiltersApplied      *SearchFilters `json:"filters_applied"`
+	FiltersNotAvailable []string       `json:"filters_not_available"`
 }
 
 const (
