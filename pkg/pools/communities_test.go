@@ -125,14 +125,14 @@ func TestAcquireExtCommunitiesSets(t *testing.T) {
 	c3 := []api.ExtCommunity{
 		{"ro", 6, 1},
 		{"rt", 6, 2},
-		{"rt", 1, 1},
+		{"xyz", 1, 1},
 	}
 
 	p := NewExtCommunitiesSetPool()
 
-	pc1 := p.AcquireExt(c1)
-	pc2 := p.AcquireExt(c2)
-	pc3 := p.AcquireExt(c3)
+	pc1 := p.Acquire(c1)
+	pc2 := p.Acquire(c2)
+	pc3 := p.Acquire(c3)
 
 	if fmt.Sprintf("%p", c1) == fmt.Sprintf("%p", c2) {
 		t.Error("expected c1 !== c2")

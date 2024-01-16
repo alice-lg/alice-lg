@@ -4,6 +4,7 @@ import (
 	"math"
 	"reflect"
 	"sync"
+	"unsafe"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
 )
@@ -12,14 +13,14 @@ import (
 // This works with large and standard communities. For extended
 // communities, use the ExtCommunityPool.
 type CommunitiesPool struct {
-	root *Node
+	root *Node[int, api.Community]
 	sync.RWMutex
 }
 
 // NewCommunitiesPool creates a new pool for a single BGP community
 func NewCommunitiesPool() *CommunitiesPool {
 	return &CommunitiesPool{
-		root: NewNode(api.Community{}),
+		root: NewNode[int, api.Community](api.Community{}),
 	}
 }
 
@@ -28,9 +29,9 @@ func (p *CommunitiesPool) Acquire(c api.Community) api.Community {
 	p.Lock()
 	defer p.Unlock()
 	if len(c) == 0 {
-		return p.root.ptr.(api.Community) // root
+		return p.root.value
 	}
-	return p.root.traverse(c, c).(api.Community)
+	return p.root.traverse(c, c)
 }
 
 // Read a single bgp community
@@ -38,20 +39,20 @@ func (p *CommunitiesPool) Read(c api.Community) api.Community {
 	p.RLock()
 	defer p.RUnlock()
 	if len(c) == 0 {
-		return p.root.ptr.(api.Community) // root
+		return p.root.value // root
 	}
-	v := p.root.read(c, c)
+	v := p.root.read(c)
 	if v == nil {
 		return nil
 	}
-	return v.(api.Community)
+	return v
 }
 
 // CommunitiesSetPool is for deduplicating a list of BGP communities
 // (Large and default. The ext communities representation right now
 // makes problems and need to be fixed. TODO.)
 type CommunitiesSetPool struct {
-	root *Node
+	root *Node[unsafe.Pointer, []api.Community]
 	sync.Mutex
 }
 
@@ -59,7 +60,7 @@ type CommunitiesSetPool struct {
 // of BGP communities.
 func NewCommunitiesSetPool() *CommunitiesSetPool {
 	return &CommunitiesSetPool{
-		root: NewNode([]api.Community{}),
+		root: NewNode[unsafe.Pointer, []api.Community]([]api.Community{}),
 	}
 }
 
@@ -69,24 +70,30 @@ func (p *CommunitiesSetPool) Acquire(communities []api.Community) []api.Communit
 	defer p.Unlock()
 	// Make identification list by using the pointer address
 	// of the deduplicated community as ID
-	ids := make([]int, len(communities))
+	ids := make([]unsafe.Pointer, len(communities))
 	set := make([]api.Community, len(communities))
 	for i, comm := range communities {
 		commPtr := Communities.Acquire(comm)
-		addr := reflect.ValueOf(commPtr).UnsafePointer()
-		ids[i] = int(uintptr(addr))
+		ids[i] = reflect.ValueOf(commPtr).UnsafePointer()
 		set[i] = commPtr
 	}
 	if len(ids) == 0 {
-		return p.root.ptr.([]api.Community)
+		return p.root.value
 	}
-	return p.root.traverse(set, ids).([]api.Community)
+	return p.root.traverse(set, ids)
 }
 
-// NewExtCommunitiesSetPool creates a new pool for extended communities
-func NewExtCommunitiesSetPool() *CommunitiesSetPool {
-	return &CommunitiesSetPool{
-		root: NewNode([]api.ExtCommunity{}),
+// ExtCommunitiesSetPool is for deduplicating a list of ext. BGP communities
+type ExtCommunitiesSetPool struct {
+	root *Node[unsafe.Pointer, []api.ExtCommunity]
+	sync.Mutex
+}
+
+// NewExtCommunitiesSetPool creates a new pool for lists
+// of BGP communities.
+func NewExtCommunitiesSetPool() *ExtCommunitiesSetPool {
+	return &ExtCommunitiesSetPool{
+		root: NewNode[unsafe.Pointer, []api.ExtCommunity]([]api.ExtCommunity{}),
 	}
 }
 
@@ -99,23 +106,22 @@ func extPrefixToInt(s string) int {
 }
 
 // AcquireExt a list of ext bgp communities
-func (p *CommunitiesSetPool) AcquireExt(communities []api.ExtCommunity) []api.ExtCommunity {
+func (p *ExtCommunitiesSetPool) Acquire(communities []api.ExtCommunity) []api.ExtCommunity {
 	p.Lock()
 	defer p.Unlock()
 
 	// Make identification list
-	ids := make([]int, len(communities))
+	ids := make([]unsafe.Pointer, len(communities))
 	for i, comm := range communities {
 		r := extPrefixToInt(comm[0].(string))
 		icomm := []int{r, comm[1].(int), comm[2].(int)}
 
 		// get community identifier
 		commPtr := ExtCommunities.Acquire(icomm)
-		addr := reflect.ValueOf(commPtr).UnsafePointer()
-		ids[i] = int(uintptr(addr))
+		ids[i] = reflect.ValueOf(commPtr).UnsafePointer()
 	}
 	if len(ids) == 0 {
-		return p.root.ptr.([]api.ExtCommunity)
+		return p.root.value
 	}
-	return p.root.traverse(communities, ids).([]api.ExtCommunity)
+	return p.root.traverse(communities, ids)
 }

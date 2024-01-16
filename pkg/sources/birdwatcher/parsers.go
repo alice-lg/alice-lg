@@ -259,7 +259,7 @@ func parseRouteBgpInfo(data interface{}) *api.BGPInfo {
 		LocalPref:        localPref,
 		Med:              med,
 		Communities:      pools.CommunitiesSets.Acquire(communities),
-		ExtCommunities:   pools.ExtCommunitiesSets.AcquireExt(extCommunities),
+		ExtCommunities:   pools.ExtCommunitiesSets.Acquire(extCommunities),
 		LargeCommunities: pools.LargeCommunitiesSets.Acquire(largeCommunities),
 	}
 	return bgp

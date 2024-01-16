@@ -47,7 +47,7 @@ var ExtCommunities *CommunitiesPool
 var CommunitiesSets *CommunitiesSetPool
 
 // ExtCommunitiesSets stores a list of extended communities
-var ExtCommunitiesSets *CommunitiesSetPool
+var ExtCommunitiesSets *ExtCommunitiesSetPool
 
 // LargeCommunitiesSets store a list of large BGP communities
 var LargeCommunitiesSets *CommunitiesSetPool
