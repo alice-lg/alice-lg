@@ -99,10 +99,11 @@ func (r *RoutesBackend) FindByPrefix(
 	// We make our compare case insensitive
 	prefix = strings.ToLower(prefix)
 	result := api.LookupRoutes{}
+	hasPrefix := prefix != ""
 	r.routes.Range(func(k, rs interface{}) bool {
 		for _, route := range rs.(api.LookupRoutes) {
 			// Naiive string filtering:
-			if !strings.HasPrefix(strings.ToLower(route.Network), prefix) {
+			if hasPrefix && !strings.HasPrefix(strings.ToLower(route.Network), prefix) {
 				continue
 			}
 			if !filters.MatchRoute(route) {

@@ -26,14 +26,17 @@ func (s *Server) apiLookupPrefixGlobal(
 
 	// Get prefix to query
 	q, err := validateQueryString(req, "q")
-	if err != nil {
-		return nil, err
-	}
+	/*
+		if err != nil {
+			return nil, err
+		}
+	*/
 
 	// Check what we want to query
 	//  Prefix -> fetch prefix
 	//       _ -> fetch neighbors and routes
 	lookupPrefix := decoders.MaybePrefix(q)
+	lookupPrefix = true
 
 	// Measure response time
 	t0 := time.Now()
@@ -44,13 +47,20 @@ func (s *Server) apiLookupPrefixGlobal(
 		return nil, err
 	}
 
+	filtersApplied.GetGroupByKey(api.SearchKeyCommunities).AddFilter(&api.SearchFilter{
+		Name:  "65104:150",
+		Value: api.Community{65104, 150},
+	})
+
 	// Perform query
 	var routes api.LookupRoutes
 	if lookupPrefix {
-		q, err = validatePrefixQuery(q)
-		if err != nil {
-			return nil, err
-		}
+		/*
+			q, err = validatePrefixQuery(q)
+			if err != nil {
+				return nil, err
+			}
+		*/
 		routes, err = s.routesStore.LookupPrefix(ctx, q, filtersApplied)
 		if err != nil {
 			return nil, err
