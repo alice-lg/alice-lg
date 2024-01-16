@@ -5,7 +5,6 @@ type Node[T comparable, V any] struct {
 	children map[T]*Node[T, V] // map of children
 	value    V
 	final    bool
-	gid      uint64
 }
 
 // NewNode creates a new tree node
@@ -19,7 +18,7 @@ func NewNode[T comparable, V any](value V) *Node[T, V] {
 
 // traverse inserts a new node into the three if required
 // or returns the object if it already exists.
-func (n *Node[T, V]) traverse(gid uint64, value V, tail []T) (V, uint64) {
+func (n *Node[T, V]) traverse(value V, tail []T) V {
 	id := tail[0]
 	tail = tail[1:]
 
@@ -36,16 +35,15 @@ func (n *Node[T, V]) traverse(gid uint64, value V, tail []T) (V, uint64) {
 		if !child.final {
 			child.value = value
 			child.final = true
-			child.gid = gid
 		}
-		return child.value, child.gid
+		return child.value
 	}
 
-	return child.traverse(gid, value, tail)
+	return child.traverse(value, tail)
 }
 
 // read returns the object if it exists or nil if not.
-func (n *Node[T, V]) read(tail []T) (V, uint64) {
+func (n *Node[T, V]) read(tail []T) V {
 	id := tail[0]
 	tail = tail[1:]
 
@@ -53,12 +51,12 @@ func (n *Node[T, V]) read(tail []T) (V, uint64) {
 	child, ok := n.children[id]
 	if !ok {
 		var zero V
-		return zero, 0
+		return zero
 	}
 
 	// Set obj if required
 	if len(tail) == 0 {
-		return child.value, child.gid
+		return child.value
 	}
 
 	return child.read(tail)
