@@ -1,5 +1,6 @@
 package pools
 
+// Node is a generic tree node
 type Node[T comparable, V any] struct {
 	children map[T]*Node[T, V] // map of children
 	value    V
