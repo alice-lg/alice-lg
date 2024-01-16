@@ -214,6 +214,7 @@ func (b *RoutesBackend) CountRoutesAt(
 func (b *RoutesBackend) FindByNeighbors(
 	ctx context.Context,
 	neighbors []*api.NeighborQuery,
+	filters *api.SearchFilters,
 ) (api.LookupRoutes, error) {
 	tx, err := b.pool.BeginTx(ctx, pgx.TxOptions{
 		IsoLevel: pgx.ReadCommitted,
@@ -248,13 +249,14 @@ func (b *RoutesBackend) FindByNeighbors(
 		return nil, err
 	}
 
-	return fetchRoutes(rows)
+	return fetchRoutes(rows, filters)
 }
 
 // FindByPrefix will return the prefixes matching a pattern
 func (b *RoutesBackend) FindByPrefix(
 	ctx context.Context,
 	prefix string,
+	filters *api.SearchFilters,
 ) (api.LookupRoutes, error) {
 	tx, err := b.pool.BeginTx(ctx, pgx.TxOptions{
 		IsoLevel: pgx.ReadCommitted,
@@ -278,17 +280,20 @@ func (b *RoutesBackend) FindByPrefix(
 	if err != nil {
 		return nil, err
 	}
-	return fetchRoutes(rows)
+	return fetchRoutes(rows, filters)
 }
 
 // Private fetchRoutes will load the queried result set
-func fetchRoutes(rows pgx.Rows) (api.LookupRoutes, error) {
+func fetchRoutes(rows pgx.Rows, filters *api.SearchFilters) (api.LookupRoutes, error) {
 	cmd := rows.CommandTag()
 	results := make(api.LookupRoutes, 0, cmd.RowsAffected())
 	for rows.Next() {
 		route := &api.LookupRoute{}
 		if err := rows.Scan(&route); err != nil {
 			return nil, err
+		}
+		if !filters.MatchRoute(route) {
+			continue
 		}
 		results = append(results, route)
 	}

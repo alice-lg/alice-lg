@@ -51,7 +51,7 @@ func (s *Server) apiLookupPrefixGlobal(
 		if err != nil {
 			return nil, err
 		}
-		routes, err = s.routesStore.LookupPrefix(ctx, q)
+		routes, err = s.routesStore.LookupPrefix(ctx, q, filtersApplied)
 		if err != nil {
 			return nil, err
 		}
@@ -66,7 +66,7 @@ func (s *Server) apiLookupPrefixGlobal(
 		if err != nil {
 			return nil, err
 		}
-		routes, err = s.routesStore.LookupPrefixForNeighbors(ctx, neighbors)
+		routes, err = s.routesStore.LookupPrefixForNeighbors(ctx, neighbors, filtersApplied)
 		if err != nil {
 			return nil, err
 		}
@@ -94,14 +94,10 @@ func (s *Server) apiLookupPrefixGlobal(
 			filtersNotAvailable, api.SearchKeyCommunities)
 	}
 
-	// Now, as we have allocated even more space process routes by, splitting,
-	// filtering and updating the available filters...
+	// Now, as we have allocated even more space split routes,
+	// and update the available filters...
 	filtersAvailable := api.NewSearchFilters()
 	for _, r := range routes {
-
-		if !filtersApplied.MatchRoute(r) {
-			continue // Exclude route from results set
-		}
 
 		switch r.State {
 		case api.RouteStateFiltered:

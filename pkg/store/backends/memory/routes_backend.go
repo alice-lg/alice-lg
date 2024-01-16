@@ -67,15 +67,21 @@ func (r *RoutesBackend) CountRoutesAt(
 func (r *RoutesBackend) FindByNeighbors(
 	ctx context.Context,
 	query []*api.NeighborQuery,
+	filters *api.SearchFilters,
 ) (api.LookupRoutes, error) {
 	result := api.LookupRoutes{}
 
 	r.routes.Range(func(k, rs interface{}) bool {
 		for _, route := range rs.(api.LookupRoutes) {
 			for _, q := range query {
-				if route.MatchNeighborQuery(q) {
-					result = append(result, route)
+				if !route.MatchNeighborQuery(q) {
+					continue
 				}
+				if !filters.MatchRoute(route) {
+					continue
+				}
+
+				result = append(result, route)
 			}
 		}
 		return true
@@ -88,6 +94,7 @@ func (r *RoutesBackend) FindByNeighbors(
 func (r *RoutesBackend) FindByPrefix(
 	ctx context.Context,
 	prefix string,
+	filters *api.SearchFilters,
 ) (api.LookupRoutes, error) {
 	// We make our compare case insensitive
 	prefix = strings.ToLower(prefix)
@@ -95,9 +102,13 @@ func (r *RoutesBackend) FindByPrefix(
 	r.routes.Range(func(k, rs interface{}) bool {
 		for _, route := range rs.(api.LookupRoutes) {
 			// Naiive string filtering:
-			if strings.HasPrefix(strings.ToLower(route.Network), prefix) {
-				result = append(result, route)
+			if !strings.HasPrefix(strings.ToLower(route.Network), prefix) {
+				continue
 			}
+			if !filters.MatchRoute(route) {
+				continue
+			}
+			result = append(result, route)
 		}
 		return true
 	})

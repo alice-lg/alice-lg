@@ -52,12 +52,14 @@ type RoutesStoreBackend interface {
 	FindByNeighbors(
 		ctx context.Context,
 		neighbors []*api.NeighborQuery,
+		filters *api.SearchFilters,
 	) (api.LookupRoutes, error)
 
 	// FindByPrefix
 	FindByPrefix(
 		ctx context.Context,
 		prefix string,
+		filters *api.SearchFilters,
 	) (api.LookupRoutes, error)
 }
 
@@ -328,8 +330,9 @@ func (s *RoutesStore) CacheTTL(
 func (s *RoutesStore) LookupPrefix(
 	ctx context.Context,
 	prefix string,
+	filters *api.SearchFilters,
 ) (api.LookupRoutes, error) {
-	return s.backend.FindByPrefix(ctx, prefix)
+	return s.backend.FindByPrefix(ctx, prefix, filters)
 }
 
 // LookupPrefixForNeighbors returns all routes for
@@ -337,6 +340,7 @@ func (s *RoutesStore) LookupPrefix(
 func (s *RoutesStore) LookupPrefixForNeighbors(
 	ctx context.Context,
 	neighbors api.NeighborsLookupResults,
+	filters *api.SearchFilters,
 ) (api.LookupRoutes, error) {
 	query := make([]*api.NeighborQuery, 0, len(neighbors))
 
@@ -349,5 +353,5 @@ func (s *RoutesStore) LookupPrefixForNeighbors(
 			query = append(query, q)
 		}
 	}
-	return s.backend.FindByNeighbors(ctx, query)
+	return s.backend.FindByNeighbors(ctx, query, filters)
 }
