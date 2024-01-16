@@ -9,7 +9,8 @@ import (
 //
 // A Tree datastructure is used.
 type IntListPool struct {
-	root *Node[int, []int]
+	root    *Node[int, []int]
+	counter uint64
 	sync.Mutex
 }
 
@@ -20,15 +21,25 @@ func NewIntListPool() *IntListPool {
 	}
 }
 
-// Acquire int list from pool
-func (p *IntListPool) Acquire(list []int) []int {
+// AcquireGid int list from pool and return with gid
+func (p *IntListPool) AcquireGid(list []int) ([]int, uint64) {
 	p.Lock()
 	defer p.Unlock()
 
 	if len(list) == 0 {
-		return p.root.value // root
+		return p.root.value, p.root.gid // root
 	}
-	return p.root.traverse(list, list)
+	v, c := p.root.traverse(p.counter+1, list, list)
+	if c > p.counter {
+		p.counter = c
+	}
+	return v, c
+}
+
+// Acquire int list from pool without gid
+func (p *IntListPool) Acquire(list []int) []int {
+	v, _ := p.AcquireGid(list)
+	return v
 }
 
 // A StringListPool can be used for deduplicating lists
@@ -50,10 +61,11 @@ func NewStringListPool() *StringListPool {
 	}
 }
 
-// Acquire the string list pointer from the pool
-func (p *StringListPool) Acquire(list []string) []string {
+// AcquireGid aquires the string list pointer from the pool
+// and also returns the gid.
+func (p *StringListPool) AcquireGid(list []string) ([]string, uint64) {
 	if len(list) == 0 {
-		return p.root.value
+		return p.root.value, p.root.gid
 	}
 
 	// Make idenfier list
@@ -69,5 +81,11 @@ func (p *StringListPool) Acquire(list []string) []string {
 		id[i] = v
 	}
 
-	return p.root.traverse(list, id)
+	return p.root.traverse(uint64(p.head), list, id)
+}
+
+// Acquire aquires the string list pointer from the pool
+func (p *StringListPool) Acquire(list []string) []string {
+	v, _ := p.AcquireGid(list)
+	return v
 }
