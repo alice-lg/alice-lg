@@ -174,7 +174,7 @@ func filterValueAsString(value interface{}) string {
 	case ExtCommunity:
 		return v.String()
 	}
-	panic("unexpected filter value")
+	panic("unexpected filter value: " + fmt.Sprintf("%v", value))
 }
 
 // GetFilterByValue retrieves a filter by matching
@@ -563,7 +563,7 @@ func parseCommunityFilterText(text string) (string, *SearchFilter, error) {
 
 	filter, err := parseCommunityValue(text)
 	if err != nil {
-		return "", nil, err
+		return "", nil, fmt.Errorf("BGP community incomplete")
 	}
 
 	if len(tokens) == 2 {
@@ -573,19 +573,17 @@ func parseCommunityFilterText(text string) (string, *SearchFilter, error) {
 	return SearchKeyLargeCommunities, filter, nil
 }
 
-// FiltersFromQueryText parses the passed list of filters
+// FiltersFromTokens parses the passed list of filters
 // extracted from the query string and creates the filter.
-func FiltersFromQueryText(filters []string) (*SearchFilters, error) {
+func FiltersFromTokens(tokens []string) (*SearchFilters, error) {
 	queryFilters := NewSearchFilters()
-	for _, filter := range filters {
-		if strings.HasPrefix(filter, "#") { // Community query
-			key, value, err := parseCommunityFilterText(filter[1:])
+	for _, value := range tokens {
+		if strings.HasPrefix(value, "#") { // Community query
+			key, filter, err := parseCommunityFilterText(value[1:])
 			if err != nil {
 				return nil, err
 			}
-			queryFilters.GetGroupByKey(key).AddFilter(&SearchFilter{
-				Value: value,
-			})
+			queryFilters.GetGroupByKey(key).AddFilter(filter)
 		}
 
 	}
@@ -621,6 +619,31 @@ func (s *SearchFilters) MatchRoute(r Filterable) bool {
 	}
 
 	return true
+}
+
+// Combine two search filters
+func (s *SearchFilters) Combine(other *SearchFilters) *SearchFilters {
+	result := make(SearchFilters, len(*s))
+	for id, group := range *s {
+		otherGroup := (*other)[id]
+		combined := &SearchFilterGroup{
+			Key:     group.Key,
+			Filters: []*SearchFilter{},
+		}
+		for _, f := range group.Filters {
+			combined.Filters = append(combined.Filters, f)
+		}
+		for _, f := range otherGroup.Filters {
+			if combined.Contains(f) {
+				continue
+			}
+			combined.Filters = append(combined.Filters, f)
+		}
+		combined.rebuildIndex()
+		result[id] = combined
+	}
+
+	return &result
 }
 
 // Sub makes a diff of two search filters

@@ -738,3 +738,54 @@ func TestParseExtCommunityFilterText(t *testing.T) {
 		t.Error("Expected community to be ro:12345:23 but got:", v)
 	}
 }
+
+func TestFiltersFromTokens(t *testing.T) {
+	tokens := []string{"#23:42", "#ro:23:42", "#1000:23:42"}
+
+	filters, err := FiltersFromTokens(tokens)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Check communities
+	communities := filters.GetGroupByKey(SearchKeyCommunities).Filters
+	if len(communities) != 1 {
+		t.Error("There should be 1 community filter")
+	}
+
+	v0 := communities[0].Value.(Community)
+	if v0[0] != 23 && v0[1] != 42 {
+		t.Error("Expected community to be 23:42 but got:", v0)
+	}
+
+	// Check ext. communities
+	extCommunities := filters.GetGroupByKey(SearchKeyExtCommunities).Filters
+	if len(extCommunities) != 1 {
+		t.Error("There should be 1 ext. community filter")
+	}
+
+	v1 := extCommunities[0].Value.(ExtCommunity)
+	if v1[0] != "ro" && v1[1] != "23" && v1[2] != "42" {
+		t.Error("Expected community to be ro:23:42 but got:", v1)
+	}
+
+	// Check large communities
+	largeCommunities := filters.GetGroupByKey(SearchKeyLargeCommunities).Filters
+	if len(largeCommunities) != 1 {
+		t.Error("There should be 1 large community filter")
+	}
+
+	v2 := largeCommunities[0].Value.(Community)
+	if v2[0] != 1000 && v2[1] != 23 && v2[2] != 42 {
+		t.Error("Expected community to be 1000:23:42 but got:", v2)
+	}
+}
+
+func TestFiltersFromTokensInvalid(t *testing.T) {
+	tokens := []string{"#"}
+	_, err := FiltersFromTokens(tokens)
+	if err == nil {
+		t.Error("Expected error for invalid filter")
+	}
+	t.Log(err)
+}

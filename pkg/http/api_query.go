@@ -57,3 +57,24 @@ func apiQueryFilterNextHopGateway(
 
 	return results
 }
+
+// QueryString wraps the q parameter from the query.
+// Extract the value and additional filters from the string
+type QueryString string
+
+// ExtractFilters separates query and filters from string.
+func (q QueryString) ExtractFilters() (string, []string) {
+	tokens := strings.Split(string(q), " ")
+	query := []string{}
+	filters := []string{}
+
+	for _, t := range tokens {
+		if strings.HasPrefix(t, "#") {
+			filters = append(filters, t)
+		} else {
+			query = append(query, t)
+		}
+	}
+
+	return strings.Join(query, " "), filters
+}
