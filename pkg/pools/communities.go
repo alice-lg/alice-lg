@@ -2,7 +2,9 @@ package pools
 
 import (
 	"math"
+	"reflect"
 	"sync"
+	"unsafe"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
 )
@@ -11,8 +13,7 @@ import (
 // This works with large and standard communities. For extended
 // communities, use the ExtCommunityPool.
 type CommunitiesPool struct {
-	root    *Node[int, api.Community]
-	counter uint64
+	root *Node[int, api.Community]
 	sync.RWMutex
 }
 
@@ -23,32 +24,22 @@ func NewCommunitiesPool() *CommunitiesPool {
 	}
 }
 
-// AcquireGid acquires a single bgp community with gid
-func (p *CommunitiesPool) AcquireGid(c api.Community) (api.Community, uint64) {
+// Acquire a single bgp community
+func (p *CommunitiesPool) Acquire(c api.Community) api.Community {
 	p.Lock()
 	defer p.Unlock()
 	if len(c) == 0 {
-		return p.root.value, p.root.gid
+		return p.root.value
 	}
-	v, gid := p.root.traverse(p.counter+1, c, c)
-	if gid > p.counter {
-		p.counter = gid
-	}
-	return v, gid
-}
-
-// Acquire a single bgp community without gid
-func (p *CommunitiesPool) Acquire(c api.Community) api.Community {
-	v, _ := p.AcquireGid(c)
-	return v
+	return p.root.traverse(c, c)
 }
 
 // Read a single bgp community
-func (p *CommunitiesPool) Read(c api.Community) (api.Community, uint64) {
+func (p *CommunitiesPool) Read(c api.Community) api.Community {
 	p.RLock()
 	defer p.RUnlock()
 	if len(c) == 0 {
-		return p.root.value, p.root.gid
+		return p.root.value
 	}
 	return p.root.read(c)
 }
@@ -57,8 +48,7 @@ func (p *CommunitiesPool) Read(c api.Community) (api.Community, uint64) {
 // (Large and default. The ext communities representation right now
 // makes problems and need to be fixed. TODO.)
 type CommunitiesSetPool struct {
-	root    *Node[uint64, []api.Community]
-	counter uint64
+	root *Node[unsafe.Pointer, []api.Community]
 	sync.Mutex
 }
 
@@ -66,47 +56,34 @@ type CommunitiesSetPool struct {
 // of BGP communities.
 func NewCommunitiesSetPool() *CommunitiesSetPool {
 	return &CommunitiesSetPool{
-		root: NewNode[uint64, []api.Community]([]api.Community{}),
+		root: NewNode[unsafe.Pointer, []api.Community]([]api.Community{}),
 	}
-}
-
-// AcquireGid acquires a list of bgp communities and returns a gid
-func (p *CommunitiesSetPool) AcquireGid(
-	communities []api.Community,
-) ([]api.Community, uint64) {
-	p.Lock()
-	defer p.Unlock()
-	// Make identification list by using the pointer address
-	// of the deduplicated community as ID
-	ids := make([]uint64, len(communities))
-	set := make([]api.Community, len(communities))
-	for i, comm := range communities {
-		ptr, gid := Communities.AcquireGid(comm)
-		ids[i] = gid
-		set[i] = ptr
-	}
-	if len(ids) == 0 {
-		return p.root.value, p.root.gid
-	}
-	v, id := p.root.traverse(p.counter+1, set, ids)
-	if id > p.counter {
-		p.counter = id
-	}
-	return v, id
 }
 
 // Acquire a list of bgp communities
 func (p *CommunitiesSetPool) Acquire(
 	communities []api.Community,
 ) []api.Community {
-	v, _ := p.AcquireGid(communities)
-	return v
+	p.Lock()
+	defer p.Unlock()
+	// Make identification list by using the pointer address
+	// of the deduplicated community as ID
+	ids := make([]unsafe.Pointer, len(communities))
+	set := make([]api.Community, len(communities))
+	for i, comm := range communities {
+		ptr := Communities.Acquire(comm)
+		ids[i] = reflect.ValueOf(ptr).UnsafePointer()
+		set[i] = ptr
+	}
+	if len(ids) == 0 {
+		return p.root.value
+	}
+	return p.root.traverse(set, ids)
 }
 
 // ExtCommunitiesSetPool is for deduplicating a list of ext. BGP communities
 type ExtCommunitiesSetPool struct {
-	root    *Node[uint64, []api.ExtCommunity]
-	counter uint64
+	root *Node[unsafe.Pointer, []api.ExtCommunity]
 	sync.Mutex
 }
 
@@ -114,7 +91,7 @@ type ExtCommunitiesSetPool struct {
 // of BGP communities.
 func NewExtCommunitiesSetPool() *ExtCommunitiesSetPool {
 	return &ExtCommunitiesSetPool{
-		root: NewNode[uint64, []api.ExtCommunity]([]api.ExtCommunity{}),
+		root: NewNode[unsafe.Pointer, []api.ExtCommunity]([]api.ExtCommunity{}),
 	}
 }
 
@@ -126,37 +103,25 @@ func extPrefixToInt(s string) int {
 	return v
 }
 
-// AcquireGid acquires a list of ext bgp communities
-func (p *ExtCommunitiesSetPool) AcquireGid(
+// Acquire a list of ext bgp communities
+func (p *ExtCommunitiesSetPool) Acquire(
 	communities []api.ExtCommunity,
-) ([]api.ExtCommunity, uint64) {
+) []api.ExtCommunity {
 	p.Lock()
 	defer p.Unlock()
 
 	// Make identification list
-	ids := make([]uint64, len(communities))
+	ids := make([]unsafe.Pointer, len(communities))
 	for i, comm := range communities {
 		r := extPrefixToInt(comm[0].(string))
 		icomm := []int{r, comm[1].(int), comm[2].(int)}
 
 		// get community identifier
-		_, gid := ExtCommunities.AcquireGid(icomm)
-		ids[i] = gid
+		ptr := ExtCommunities.Acquire(icomm)
+		ids[i] = reflect.ValueOf(ptr).UnsafePointer()
 	}
 	if len(ids) == 0 {
-		return p.root.value, p.root.gid
+		return p.root.value
 	}
-	v, id := p.root.traverse(p.counter+1, communities, ids)
-	if id > p.counter {
-		p.counter = id
-	}
-	return v, id
-}
-
-// Acquire a list of ext bgp communities
-func (p *ExtCommunitiesSetPool) Acquire(
-	communities []api.ExtCommunity,
-) []api.ExtCommunity {
-	v, _ := p.AcquireGid(communities)
-	return v
+	return p.root.traverse(communities, ids)
 }
