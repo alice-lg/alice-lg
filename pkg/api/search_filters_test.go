@@ -680,3 +680,61 @@ func TestSearchFiltersHasKey(t *testing.T) {
 		t.Error("sources should not be filtered")
 	}
 }
+
+func TestParseInvalidCommunityFilterText(t *testing.T) {
+	_, _, err := parseCommunityFilterText("")
+	if err == nil {
+		t.Error("Expected error for empty filter")
+	}
+	t.Log(err)
+
+	_, _, err = parseCommunityFilterText("23452")
+	if err == nil {
+		t.Error("Expected error for empty filter")
+	}
+}
+
+func TestParseCommunityFilterText(t *testing.T) {
+	text := "12345:23"
+	key, filter, err := parseCommunityFilterText(text)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if key != SearchKeyCommunities {
+		t.Error("Expected key to be", SearchKeyCommunities, "but got:", key)
+	}
+	v := filter.Value.(Community)
+	if v[0] != 12345 && v[1] != 23 {
+		t.Error("Expected community to be 12345:23 but got:", v)
+	}
+}
+
+func TestParseLargeCommunityFilterText(t *testing.T) {
+	text := "12345:23:42"
+	key, filter, err := parseCommunityFilterText(text)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if key != SearchKeyLargeCommunities {
+		t.Error("Expected key to be", SearchKeyLargeCommunities, "but got:", key)
+	}
+	v := filter.Value.(Community)
+	if v[0] != 12345 && v[1] != 23 && v[2] != 42 {
+		t.Error("Expected community to be 12345:23:42 but got:", v)
+	}
+}
+
+func TestParseExtCommunityFilterText(t *testing.T) {
+	text := "ro:12345:23"
+	key, filter, err := parseCommunityFilterText(text)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if key != SearchKeyExtCommunities {
+		t.Error("Expected key to be", SearchKeyExtCommunities, "but got:", key)
+	}
+	v := filter.Value.(ExtCommunity)
+	if v[0] != "ro" && v[1] != "12345" && v[2] != "23" {
+		t.Error("Expected community to be ro:12345:23 but got:", v)
+	}
+}

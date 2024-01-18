@@ -1,9 +1,11 @@
 package api
 
 import (
+	"fmt"
 	"log"
 	"net/url"
 	"strconv"
+	"strings"
 )
 
 // SearchKeys are filterable attributes
@@ -531,6 +533,61 @@ func FiltersFromQuery(query url.Values) (*SearchFilters, error) {
 			}
 			queryFilters.GetGroupByKey(SearchKeyLargeCommunities).AddFilters(filters)
 		}
+	}
+	return queryFilters, nil
+}
+
+// parseCommunityFilterText creates FilterValue from the
+// text input which may be a api.Community or api.ExtCommunity.
+func parseCommunityFilterText(text string) (string, *SearchFilter, error) {
+	tokens := strings.Split(text, ":")
+	if len(tokens) < 2 {
+		return "", nil, fmt.Errorf("BGP community incomplete")
+	}
+
+	// Check if we are dealing with an ext. community
+	maybeExt := false
+	_, err := strconv.Atoi(tokens[0])
+	if err != nil {
+		maybeExt = true
+	}
+
+	// Parse filter value
+	if maybeExt {
+		filter, err := parseExtCommunityValue(text)
+		if err != nil {
+			return "", nil, err
+		}
+		return SearchKeyExtCommunities, filter, nil
+	}
+
+	filter, err := parseCommunityValue(text)
+	if err != nil {
+		return "", nil, err
+	}
+
+	if len(tokens) == 2 {
+		return SearchKeyCommunities, filter, nil
+	}
+
+	return SearchKeyLargeCommunities, filter, nil
+}
+
+// FiltersFromQueryText parses the passed list of filters
+// extracted from the query string and creates the filter.
+func FiltersFromQueryText(filters []string) (*SearchFilters, error) {
+	queryFilters := NewSearchFilters()
+	for _, filter := range filters {
+		if strings.HasPrefix(filter, "#") { // Community query
+			key, value, err := parseCommunityFilterText(filter[1:])
+			if err != nil {
+				return nil, err
+			}
+			queryFilters.GetGroupByKey(key).AddFilter(&SearchFilter{
+				Value: value,
+			})
+		}
+
 	}
 	return queryFilters, nil
 }
