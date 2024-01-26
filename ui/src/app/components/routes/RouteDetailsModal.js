@@ -14,11 +14,10 @@ import { Modal
   from 'app/components/modal/Modal';
 import BgpCommunitiyLabel
   from 'app/components/routes/BgpCommunityLabel';
-import RelativeTimestampFormat
-  from 'app/components/datetime/RelativeTimestampFormat';
-import RelativeTimestamp
-  from 'app/components/datetime/RelativeTimestamp';
-
+import { RouteAgeDetails } 
+  from 'app/components/routes/Age';
+import AsPath
+  from 'app/components/asns/AsPath';
 
 const RouteDetailsModal = () => {
   const [ route, setRoute ] = useRouteDetails();
@@ -56,17 +55,10 @@ const RouteDetailsModal = () => {
           <table className="table table-nolines">
            <tbody>
             <tr>
-              <th>Age:</th><td>
-                <RelativeTimestampFormat
-                  value={route.age}
-                  now={api.receivedAt}
-                  format="YYYY-MM-DD HH:mm:ss"/> UTC
-                <b> (<RelativeTimestamp
-                        value={route.age}
-                        now={api.receivedAt}
-                        suffix={true} />)
-               </b>
-            </td>
+              <th>Age:</th>
+              <td>
+                <RouteAgeDetails route={route} />
+              </td>
             </tr>
             <tr>
               <th>Origin:</th><td>{attrs.origin}</td>
@@ -83,7 +75,8 @@ const RouteDetailsModal = () => {
             </tr>
             {attrs.as_path &&
                 <tr>
-                  <th>AS Path:</th><td>{attrs.as_path.join(' ')}</td>
+                  <th>AS Path:</th>
+                  <td><AsPath asns={attrs.as_path} /></td>
                 </tr>}
             {communities.length > 0 &&
                 <tr>

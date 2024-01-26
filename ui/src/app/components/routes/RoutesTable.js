@@ -24,6 +24,12 @@ import BlackholeIndicator
   from 'app/components/routes/flags/BlackholeIndicator';
 import RejectCandidateIndicator
   from 'app/components/routes/flags/RejectCandidateIndicator';
+import AsPath
+  from 'app/components/asns/AsPath';
+import AsnLink
+  from 'app/components/asns/AsnLink';
+import { RouteAgeRelative }
+  from 'app/components/routes/Age';
 
 // Helper: Lookup value in route path
 export const getAttr = (r, path) => {
@@ -85,16 +91,30 @@ export const ColAsPath = ({route}) => {
     if(!asns){
       asns = [];
     }
-    const baseUrl = "https://irrexplorer.nlnog.net/asn/AS"
-    let asnLinks = asns.map((asn, i) => {
-      return (<a key={`${asn}_${i}`} href={baseUrl + asn} target="_blank" rel="noreferrer">{asn} </a>);
-    });
-
     return (
       <td>
-        {asnLinks}
+        <AsPath asns={asns} />
       </td>
     );
+}
+
+// ASN
+export const ColAsn = ({route, column, onClick}) => {
+  const asn = getAttr(route, column);
+  return (
+    <td className="col-route-asn">
+      <AsnLink asn={asn} />
+    </td>
+  );
+}
+
+// Route Age
+export const ColAge = ({route, onClick}) => {
+  return (
+    <td className="route-age">
+      <span onClick={onClick}><RouteAgeRelative route={route} /></span>
+    </td>
+  );
 }
 
 export const ColFlags = ({route}) => {
@@ -127,9 +147,13 @@ const RouteColumn = ({onClick, column, route}) => {
 
     "Flags": ColFlags,
     "ASPath": ColAsPath,
+    "asn": ColAsn,
+    "neighbor.asn": ColAsn,
 
     "routeserver.name": ColRouteServer,
     "neighbor.description": ColNeighbor,
+
+    "age": ColAge,
   };
 
   let Cell = cells[column] || ColDefault;

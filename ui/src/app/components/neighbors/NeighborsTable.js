@@ -34,6 +34,8 @@ import { isUpState }
   from 'app/components/neighbors/state';
 import RelativeTimestamp
   from 'app/components/datetime/RelativeTimestamp';
+import AsnLink
+  from 'app/components/asns/AsnLink';
 
 /**
  * Default: Sort by ASN, ascending order.
@@ -238,6 +240,12 @@ const ColPlain = ({neighbor, column}) => {
   );
 }
 
+const ColAsn = ({neighbor}) => {
+  return (
+    <td><AsnLink asn={neighbor.asn} /></td>
+  );
+}
+
 const ColNotAvailable = () => {
   return <td>-</td>;
 }
@@ -247,7 +255,7 @@ const NeighborColumn = ({neighbor, column}) => {
   const rs = useRouteServer();
   const widgets = {
     // Special cases
-    "asn": ColPlain,
+    "asn": ColAsn,
     "state": ColPlain,
 
     "Uptime": ColUptime,
