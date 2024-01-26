@@ -81,8 +81,8 @@ const Help = () => {
       <h3>Did you know?</h3>
       <p>You can search for</p>
       <ul>
-        <li><b>Prefixes</b>,</li>
-        <li><b>Peers</b> by entering their name and</li>
+        <li><b>Prefixes</b></li>
+        <li><b>Peers</b> by entering their name</li>
         <li><b>ASNs</b> by prefixing them with 'AS'</li>
         <li><b>Communities</b> by prefixing them with '#'</li>
       </ul>
