@@ -40,3 +40,37 @@
     }
 }
 
+.lookup-examples {
+  
+  > ul {
+    display: flex;
+    list-style: none;
+    padding: 0px;
+    margin: 0px;
+    width: 50%;
+    flex-wrap: wrap;
+
+    li {
+      flex: 1;
+      padding: 0px;
+
+      .label {
+        display: flex;
+        margin: 5px;
+        line-height: inherit;
+        font-size: 1.4rem;
+        box-shadow: 0 1px 1px rgba(0,0,0,.2);
+      }
+
+      .label-default {
+        background-color: #ffffff;
+        color: #222;
+      }
+
+      a {
+        text-decoration: none;
+      }
+    }
+  }
+}
+

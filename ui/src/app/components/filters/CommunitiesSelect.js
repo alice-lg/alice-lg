@@ -108,15 +108,6 @@ const CommunitiesSelect = () => {
   const filtersNotAvailable = filters.notAvailable;
   const isDisabled = filtersNotAvailable.includes("communities");
 
-  if (isDisabled) {
-    return (
-      <div className="text-muted">
-        Due to a large number of results, filtering by BGP communities
-        becomes availble only after selecting a route server.
-      </div>
-    );
-  }
-
   const hasAvailable =
       communitiesFilters.filters.available.length > 0 ||
       extCommunitiesFilters.filters.available.length > 0 ||
@@ -186,6 +177,10 @@ const CommunitiesSelect = () => {
         {appliedCommunities}
         {appliedExtCommunities}
         {appliedLargeCommunities}
+        {isDisabled && <div className="text-muted">
+            Due to a large number of results, selecting BGP communities
+            becomes availble only after selecting a route server.
+          </div>}
         {hasAvailable &&
             <tr>
               <td className="select-container" colSpan="2">

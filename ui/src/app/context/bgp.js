@@ -51,6 +51,9 @@ const resolveCommunity = (base, community) => {
     }
     lookup = res;
   }
+  if (typeof(lookup) !== "string") {
+    return null;
+  }
   return lookup;
 }
 
@@ -97,6 +100,7 @@ export const useRejectCandidate = (route) => {
 
 const getReadableCommunity = (communities, community) => {
   const label = resolveCommunity(communities, community);
+  console.log(label);
   return expandVars(label, community);
 }
 
