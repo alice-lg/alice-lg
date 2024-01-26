@@ -28,8 +28,9 @@ const AppliedCommunity = ({group, filter, onRemove}) => {
     onRemove([group, filter.value]);
   }, [filter, group, onRemove]);
   const [{q}] = useQuery();
+  let query = q || '';
   const repr = filter.value.join(':');
-  const canRemove = !q.includes(repr);
+  const canRemove = !query.includes(repr);
 
   return (
     <tr>
