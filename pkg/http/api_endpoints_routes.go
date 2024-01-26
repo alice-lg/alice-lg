@@ -11,6 +11,7 @@ import (
 )
 
 // Handle routes
+/*
 func (s *Server) apiRoutesList(
 	ctx context.Context,
 	_req *http.Request,
@@ -34,6 +35,7 @@ func (s *Server) apiRoutesList(
 
 	return result, err
 }
+*/
 
 // Paginated Routes Respponse: Received routes
 func (s *Server) apiRoutesListReceived(
