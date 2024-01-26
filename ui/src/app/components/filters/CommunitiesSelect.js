@@ -3,6 +3,8 @@ import { useMemo
        }
   from 'react';
 
+import { useQuery }
+  from 'app/context/query';
 import { useReadableCommunity }
   from 'app/context/bgp';
 import { FILTER_GROUP_COMMUNITIES
@@ -25,6 +27,9 @@ const AppliedCommunity = ({group, filter, onRemove}) => {
   const removeFilter = useCallback(() => {
     onRemove([group, filter.value]);
   }, [filter, group, onRemove]);
+  const [{q}] = useQuery();
+  const repr = filter.value.join(':');
+  const canRemove = !q.includes(repr);
 
   return (
     <tr>
@@ -32,7 +37,7 @@ const AppliedCommunity = ({group, filter, onRemove}) => {
         <BgpCommunityLabel community={filter.value} />
       </td>
       <td>
-        <ButtonRemoveFilter onClick={removeFilter} />
+        {canRemove &&<ButtonRemoveFilter onClick={removeFilter} />}
       </td>
     </tr>
   );
