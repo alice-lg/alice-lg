@@ -95,12 +95,22 @@ func (r *RoutesBackend) FindByPrefix(
 	ctx context.Context,
 	prefix string,
 	filters *api.SearchFilters,
+	limit uint,
 ) (api.LookupRoutes, error) {
 	// We make our compare case insensitive
+	var (
+		count         uint
+		limitExceeded bool
+	)
+
 	prefix = strings.ToLower(prefix)
 	result := api.LookupRoutes{}
 	hasPrefix := prefix != ""
 	r.routes.Range(func(k, rs interface{}) bool {
+		if limit > 0 && count >= limit {
+			limitExceeded = true
+			return false
+		}
 		for _, route := range rs.(api.LookupRoutes) {
 			// Naiive string filtering:
 			if hasPrefix && !strings.HasPrefix(strings.ToLower(route.Network), prefix) {
@@ -110,8 +120,16 @@ func (r *RoutesBackend) FindByPrefix(
 				continue
 			}
 			result = append(result, route)
+			count++
+			if limit > 0 && count >= limit {
+				limitExceeded = true
+				return false
+			}
 		}
 		return true
 	})
+	if limitExceeded {
+		return nil, api.ErrTooManyRoutes
+	}
 	return result, nil
 }

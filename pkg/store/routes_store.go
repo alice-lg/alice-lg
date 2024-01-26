@@ -60,6 +60,7 @@ type RoutesStoreBackend interface {
 		ctx context.Context,
 		prefix string,
 		filters *api.SearchFilters,
+		limit uint,
 	) (api.LookupRoutes, error)
 }
 
@@ -70,6 +71,7 @@ type RoutesStore struct {
 	backend   RoutesStoreBackend
 	sources   *SourcesStore
 	neighbors *NeighborsStore
+	limit     uint
 }
 
 // NewRoutesStore makes a new store instance
@@ -93,6 +95,7 @@ func NewRoutesStore(
 
 	log.Println("Routes refresh interval set to:", refreshInterval)
 	log.Println("Routes refresh parallelism:", refreshParallelism)
+	log.Println("Routes store query limit:", cfg.Server.RoutesStoreQueryLimit)
 
 	// Store refresh information per store
 	sources := NewSourcesStore(cfg, refreshInterval, refreshParallelism)
@@ -100,6 +103,7 @@ func NewRoutesStore(
 		backend:   backend,
 		sources:   sources,
 		neighbors: neighbors,
+		limit:     cfg.Server.RoutesStoreQueryLimit,
 	}
 	return store
 }
@@ -332,7 +336,7 @@ func (s *RoutesStore) LookupPrefix(
 	prefix string,
 	filters *api.SearchFilters,
 ) (api.LookupRoutes, error) {
-	return s.backend.FindByPrefix(ctx, prefix, filters)
+	return s.backend.FindByPrefix(ctx, prefix, filters, s.limit)
 }
 
 // LookupPrefixForNeighbors returns all routes for

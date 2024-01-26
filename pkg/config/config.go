@@ -87,6 +87,7 @@ type ServerConfig struct {
 	NeighborsStoreRefreshParallelism  int    `ini:"neighbors_store_refresh_parallelism"`
 	RoutesStoreRefreshInterval        int    `ini:"routes_store_refresh_interval"`
 	RoutesStoreRefreshParallelism     int    `ini:"routes_store_refresh_parallelism"`
+	RoutesStoreQueryLimit             uint   `ini:"routes_store_query_limit"`
 	StoreBackend                      string `ini:"store_backend"`
 	DefaultAsn                        int    `ini:"asn"`
 	EnableNeighborsStatusRefresh      bool   `ini:"enable_neighbors_status_refresh"`

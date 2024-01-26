@@ -50,10 +50,18 @@ func (s *Server) apiLookupPrefixGlobal(
 	// Merge query filters into applied filters
 	filtersApplied = filtersApplied.Combine(queryFilters)
 
-	// Check what we want to query
+	// Select the query strategy:
 	//  Prefix -> fetch prefix
 	//       _ -> fetch neighbors and routes
+	//
 	lookupPrefix := decoders.MaybePrefix(q)
+	lookupEmptyQuery := false
+	if q == "" && (filtersApplied.HasGroup(api.SearchKeyCommunities) ||
+		filtersApplied.HasGroup(api.SearchKeyExtCommunities) ||
+		filtersApplied.HasGroup(api.SearchKeyLargeCommunities)) {
+		lookupPrefix = true
+		lookupEmptyQuery = true
+	}
 
 	// Measure response time
 	t0 := time.Now()
@@ -61,9 +69,11 @@ func (s *Server) apiLookupPrefixGlobal(
 	// Perform query
 	var routes api.LookupRoutes
 	if lookupPrefix {
-		q, err = validatePrefixQuery(q)
-		if err != nil {
-			return nil, err
+		if !lookupEmptyQuery {
+			q, err = validatePrefixQuery(q)
+			if err != nil {
+				return nil, err
+			}
 		}
 		routes, err = s.routesStore.LookupPrefix(ctx, q, filtersApplied)
 		if err != nil {

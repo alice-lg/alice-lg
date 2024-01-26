@@ -71,30 +71,38 @@ func apiErrorResponse(
 	tag := TagGenericError
 	status := StatusError
 
-	switch e := err.(type) {
-	case ErrTimeout:
-		tag = TagConnectionTimeout
-		code = CodeConnectionTimeout
-		status = TimeoutError
-	case *ErrResourceNotFoundError:
-		tag = TagResourceNotFound
-		code = CodeResourceNotFound
-		status = StatusResourceNotFound
-	case *url.Error:
-		if strings.Contains(message, "connection refused") {
-			tag = TagConnectionRefused
-			code = CodeConnectionRefused
-			message = "Connection refused while dialing the API"
-		} else if e.Timeout() {
-			tag = TagConnectionTimeout
-			code = CodeConnectionTimeout
-			message = "Connection timed out when connecting to the backend API"
-		}
-	case *ErrValidationFailed:
+	// TODO: This needs refactoring.
+	if err == api.ErrTooManyRoutes {
 		tag = TagValidationError
 		code = CodeValidationError
 		status = StatusValidationError
-		message = e.Reason
+	} else {
+
+		switch e := err.(type) {
+		case ErrTimeout:
+			tag = TagConnectionTimeout
+			code = CodeConnectionTimeout
+			status = TimeoutError
+		case *ErrResourceNotFoundError:
+			tag = TagResourceNotFound
+			code = CodeResourceNotFound
+			status = StatusResourceNotFound
+		case *url.Error:
+			if strings.Contains(message, "connection refused") {
+				tag = TagConnectionRefused
+				code = CodeConnectionRefused
+				message = "Connection refused while dialing the API"
+			} else if e.Timeout() {
+				tag = TagConnectionTimeout
+				code = CodeConnectionTimeout
+				message = "Connection timed out when connecting to the backend API"
+			}
+		case *ErrValidationFailed:
+			tag = TagValidationError
+			code = CodeValidationError
+			status = StatusValidationError
+			message = e.Reason
+		}
 	}
 
 	return api.ErrorResponse{

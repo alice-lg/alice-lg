@@ -249,7 +249,7 @@ func (b *RoutesBackend) FindByNeighbors(
 		return nil, err
 	}
 
-	return fetchRoutes(rows, filters)
+	return fetchRoutes(rows, filters, 0)
 }
 
 // FindByPrefix will return the prefixes matching a pattern
@@ -257,6 +257,7 @@ func (b *RoutesBackend) FindByPrefix(
 	ctx context.Context,
 	prefix string,
 	filters *api.SearchFilters,
+	limit uint,
 ) (api.LookupRoutes, error) {
 	tx, err := b.pool.BeginTx(ctx, pgx.TxOptions{
 		IsoLevel: pgx.ReadCommitted,
@@ -280,11 +281,16 @@ func (b *RoutesBackend) FindByPrefix(
 	if err != nil {
 		return nil, err
 	}
-	return fetchRoutes(rows, filters)
+	return fetchRoutes(rows, filters, limit)
 }
 
 // Private fetchRoutes will load the queried result set
-func fetchRoutes(rows pgx.Rows, filters *api.SearchFilters) (api.LookupRoutes, error) {
+func fetchRoutes(
+	rows pgx.Rows,
+	filters *api.SearchFilters,
+	limit uint,
+) (api.LookupRoutes, error) {
+	var count uint
 	cmd := rows.CommandTag()
 	results := make(api.LookupRoutes, 0, cmd.RowsAffected())
 	for rows.Next() {
@@ -296,6 +302,10 @@ func fetchRoutes(rows pgx.Rows, filters *api.SearchFilters) (api.LookupRoutes, e
 			continue
 		}
 		results = append(results, route)
+		count++
+		if limit > 0 && count >= limit {
+			return nil, api.ErrTooManyRoutes
+		}
 	}
 	return results, nil
 }
