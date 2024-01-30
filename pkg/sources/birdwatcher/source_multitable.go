@@ -534,18 +534,18 @@ func (src *MultiTableBirdwatcher) NeighborsSummary(
 // from the birdwatcher backend.
 func (src *MultiTableBirdwatcher) Routes(
 	ctx context.Context,
-	neighbourID string,
+	neighborID string,
 ) (*api.RoutesResponse, error) {
 	response := &api.RoutesResponse{}
 	// Fetch required routes first (received and filtered)
 	// However: Store in separate cache for faster access
-	required, err := src.fetchRequiredRoutes(ctx, neighbourID)
+	required, err := src.fetchRequiredRoutes(ctx, neighborID)
 	if err != nil {
 		return nil, err
 	}
 
 	// Optional: NoExport
-	_, notExported, err := src.fetchNotExportedRoutes(ctx, neighbourID)
+	_, notExported, err := src.fetchNotExportedRoutes(ctx, neighborID)
 	if err != nil {
 		return nil, err
 	}
