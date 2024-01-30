@@ -122,7 +122,10 @@ func TestLookupPrefix(t *testing.T) {
 	store := makeTestRoutesStore()
 	query := "193.200."
 
-	results, err := store.LookupPrefix(context.Background(), query)
+	results, err := store.LookupPrefix(
+		context.Background(),
+		query,
+		api.NewSearchFilters())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -157,7 +160,10 @@ func TestLookupPrefixForNeighbors(t *testing.T) {
 	store := makeTestRoutesStore()
 
 	// Query
-	results, err := store.LookupPrefixForNeighbors(context.Background(), neighbors)
+	results, err := store.LookupPrefixForNeighbors(
+		context.Background(),
+		neighbors,
+		api.NewSearchFilters())
 	if err != nil {
 		t.Fatal(err)
 	}

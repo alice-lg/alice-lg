@@ -122,7 +122,10 @@ func TestFindByNeighbors(t *testing.T) {
 		SourceID:   pools.RouteServers.Acquire("rs2"),
 	}
 
-	routes, err := b.FindByNeighbors(ctx, []*api.NeighborQuery{nq1, nq2})
+	routes, err := b.FindByNeighbors(
+		ctx,
+		[]*api.NeighborQuery{nq1, nq2},
+		api.NewSearchFilters())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -178,7 +181,7 @@ func TestFindByPrefix(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	routes, err := b.FindByPrefix(ctx, "1.2.")
+	routes, err := b.FindByPrefix(ctx, "1.2.", api.NewSearchFilters(), 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -187,6 +190,6 @@ func TestFindByPrefix(t *testing.T) {
 		t.Error("unexpected routes:", routes)
 	}
 
-	routes, _ = b.FindByPrefix(ctx, "5.5.")
+	routes, _ = b.FindByPrefix(ctx, "5.5.", api.NewSearchFilters(), 0)
 	t.Log(routes)
 }

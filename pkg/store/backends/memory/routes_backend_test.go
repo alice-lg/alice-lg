@@ -27,7 +27,10 @@ func TestFindByNeighbors(t *testing.T) {
 		SourceID:   pools.RouteServers.Get("rs1"),
 	}
 
-	routes, err := b.FindByNeighbors(ctx, []*api.NeighborQuery{q})
+	routes, err := b.FindByNeighbors(
+		ctx,
+		[]*api.NeighborQuery{q},
+		api.NewSearchFilters())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -68,7 +71,7 @@ func TestConcurrentRoutesAccess(t *testing.T) {
 	for i := 0; i < 200000; i++ {
 		wg.Add(1)
 		go func() {
-			b.FindByNeighbors(ctx, []*api.NeighborQuery{n1, n2})
+			b.FindByNeighbors(ctx, []*api.NeighborQuery{n1, n2}, api.NewSearchFilters())
 			wg.Done()
 		}()
 	}
