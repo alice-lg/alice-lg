@@ -39,7 +39,7 @@ Alice-LG is a BGP looking glass which gets its data from external APIs.
 Currently Alice-LG supports the following APIs:
 - [birdwatcher API](https://github.com/alice-lg/birdwatcher) for [BIRD](http://bird.network.cz/)
 - [GoBGP](https://osrg.github.io/gobgp/)
-- [OpenBGPD](https://www.openbgpd.org/)
+- [bgplgd](https://man.openbsd.org/bgplgd) or [`openbgpd-state-server`](https://github.com/alice-lg/openbgpd-state-server) for [OpenBGP](https://www.openbgpd.org/)
 
 ### Birdwatcher
 Normally you would first install the [birdwatcher API](https://github.com/alice-lg/birdwatcher) directly on the machine(s) where you run [BIRD](http://bird.network.cz/) on
@@ -56,7 +56,7 @@ See the configuration section for more detail.
 
 ### OpenBGPD
 
-Alice-LG supports OpenBGP via [`bgplgd`](https://github.com/cjeker/bgplgd) 
+Alice-LG supports OpenBGP via [`bgplgd`](https://man.openbsd.org/bgplgd)
 and [`openbgpd-state-server`](https://github.com/alice-lg/openbgpd-state-server).
 
 ## Building Alice-LG from scratch
