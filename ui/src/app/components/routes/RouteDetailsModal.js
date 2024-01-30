@@ -4,8 +4,6 @@ import { useCallback }
 
 import { useRouteDetails }
   from 'app/context/routes';
-import { useApiStatus }
-  from 'app/context/api-status';
 import { Modal
        , ModalHeader
        , ModalBody
@@ -21,8 +19,6 @@ import AsPath
 
 const RouteDetailsModal = () => {
   const [ route, setRoute ] = useRouteDetails();
-  const api = useApiStatus();
-
   const onDismiss = useCallback(() => setRoute(null), [setRoute]);
 
   const attrs = route?.bgp;
