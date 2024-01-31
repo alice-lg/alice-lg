@@ -59,3 +59,25 @@ func TestParseExtCommunityValue(t *testing.T) {
 	}
 
 }
+
+func TestPartialParseExtCommunityValue(t *testing.T) {
+	filter, err := parseExtCommunityValue("rt:23")
+	if err == nil {
+		t.Error("Expected error, result:", filter)
+	}
+
+	filter, err = parseExtCommunityValue("rt:23:")
+	if err == nil {
+		t.Error("Expected error, result:", filter)
+	}
+
+	filter, err = parseExtCommunityValue("rt::")
+	if err == nil {
+		t.Error("Expected error, result:", filter)
+	}
+
+	filter, err = parseExtCommunityValue("::")
+	if err == nil {
+		t.Error("Expected error, result:", filter)
+	}
+}

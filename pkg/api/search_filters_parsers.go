@@ -1,9 +1,14 @@
 package api
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 	"strings"
+)
+
+// Errors
+var (
+	ErrExtCommunityIncomplete = errors.New("incomplete extended community")
 )
 
 // FilterQueryParser parses a filter value into a search filter
@@ -64,10 +69,14 @@ func parseExtCommunityValue(value string) (*SearchFilter, error) {
 	community := make(ExtCommunity, len(components))
 
 	if len(community) != 3 {
-		return nil, fmt.Errorf("malformed ext. community: %s", value)
+		return nil, ErrExtCommunityIncomplete
 	}
 
-	// Communities are not stringly typed, but a mix of string and int
+	// Check if the community is incomplete
+	if components[0] == "" || components[1] == "" || components[2] == "" {
+		return nil, ErrExtCommunityIncomplete
+	}
+	// TODO: Mixing strings and integers is not a good idea
 	community[0] = components[0]
 	community[1], _ = strconv.Atoi(components[1])
 	community[2], _ = strconv.Atoi(components[2])
