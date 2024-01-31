@@ -16,11 +16,34 @@
 
  * The BGP info modal can now be dismissed by pressing `esc`.
 
+ * Global search now supports querying for bgp communities.
+   Please set the `routes_store_query_limit` config variable.
+   Some communities might match a large number of routes.
+
+ * Examples for the global search can be added using the
+   theme's `Alice.updateContent` API:
+   `{lookup: {examples: [["asn" "AS2342"], ...]}}`. Valid types
+   are: `asn`, `community` `prefix` and `q`.
+ 
+ * Performance in search has been improved.
+   You can now set the `prefix_lookup_community_filter_cutoff`
+   config variable to prevent timeouts with large result sets.
+
+ * The configuration now supports defining variables like
+   `$ASN01 = 65535` which can be used for expressivly describing
+   communities. For now see `pkg/config/testdata/alice.conf` for
+   usage.
+
  * Bugfixes: 
    - Fixed parsing and handling of ext community filters.
    - Fixed stylesheet compatibility: For route flags, new SVG icons
      are now wrapped in an `<i>` tag, to ensure backward compatiblity.
    - Fixed trying to decode an 'undefined' value for a query filter.
+   - Spelling fixes
+
+ * Deprecations: 
+   - The `/api/v1/routeservers/<rs>/neighbors/<id>/routes` endpoint
+     is removed.
 
 
 ## 6.0.0 (2022-11-10)
