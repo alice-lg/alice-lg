@@ -119,15 +119,6 @@ const CommunitiesSelect = () => {
       extCommunitiesFilters.filters.available.length > 0 ||
       largeCommunitiesFilters.filters.available.length > 0;
 
-  const hasApplied =
-      communitiesFilters.filters.applied.length > 0 ||
-      extCommunitiesFilters.filters.applied.length > 0 ||
-      largeCommunitiesFilters.filters.applied.length > 0;
-
-  if (!hasApplied && !hasAvailable) {
-    return null; // nothing to do here.
-  }
-
   const communitiesAvailable =
     communitiesFilters.filters.available.sort((a, b) => {
       return (a.value[0] - b.value[0]) * 100000 + (a.value[1] - b.value[1]);
@@ -185,7 +176,8 @@ const CommunitiesSelect = () => {
         {appliedLargeCommunities}
         {isDisabled && <div className="text-muted">
             Due to a large number of results, selecting BGP communities
-            becomes availble only after selecting a route server.
+            becomes availble only after selecting a route server or
+            a neighbor.
           </div>}
         {hasAvailable &&
             <tr>
