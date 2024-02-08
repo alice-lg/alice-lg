@@ -176,7 +176,7 @@ const CommunitiesSelect = () => {
         {appliedLargeCommunities}
         {isDisabled && <div className="text-muted">
             Due to a large number of results, selecting BGP communities
-            becomes availble only after selecting a route server or
+            becomes available only after selecting a route server or
             a neighbor.
           </div>}
         {hasAvailable &&
