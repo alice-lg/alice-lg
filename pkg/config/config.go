@@ -74,6 +74,10 @@ const (
 	// routes after which the community filter will not be
 	// available.
 	DefaultPrefixLookupCommunityFilterCutoff = 100000
+
+	// DefaultRoutesStoreQueryLimit is the default limit for
+	// prefixes returned from the store.
+	DefaultRoutesStoreQueryLimit = 200000
 )
 
 // A ServerConfig holds the runtime configuration
@@ -940,6 +944,7 @@ func LoadConfig(file string) (*Config, error) {
 		StoreBackend:                      "memory",
 		RoutesStoreRefreshParallelism:     1,
 		NeighborsStoreRefreshParallelism:  1,
+		RoutesStoreQueryLimit:             DefaultRoutesStoreQueryLimit,
 	}
 	if err := parsedConfig.Section("server").MapTo(&server); err != nil {
 		return nil, err
