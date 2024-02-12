@@ -1,7 +1,7 @@
 
 # Changelog
 
-## 6.1.0
+## 6.1.0 (2024-02-12)
 
  * Added memory pools for deduplicating route information.
    This drastically reduces the memory consumption.
