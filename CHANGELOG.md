@@ -22,7 +22,7 @@
 
  * Examples for the global search can be added using the
    theme's `Alice.updateContent` API:
-   `{lookup: {examples: [["asn" "AS2342"], ...]}}`. Valid types
+   `{lookup: {examples: [["asn", "AS2342"], ...]}}`. Valid types
    are: `asn`, `community` `prefix` and `q`.
  
  * Performance in search has been improved.
