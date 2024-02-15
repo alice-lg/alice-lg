@@ -29,7 +29,7 @@ var (
 	// not be identified from the section.
 	ErrSourceTypeUnknown = errors.New("source type unknown")
 
-	// ErrPostgresUnconfigured will occure when the
+	// ErrPostgresUnconfigured will occur when the
 	// postgres database URL is required, but missing.
 	ErrPostgresUnconfigured = errors.New(
 		"the selected postgres backend requires configuration")
@@ -731,7 +731,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 
 		if len(sourceConfigSections) > 1 {
 			// The source is ambiguous
-			return nil, fmt.Errorf("%s has ambigous backends", section.Name())
+			return nil, fmt.Errorf("%s has ambiguous backends", section.Name())
 		}
 
 		// Configure backend

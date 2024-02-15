@@ -1,3 +1,3 @@
 // Package decoders contains functions for
-// decoding backend responses into internal datastrucures.
+// decoding backend responses into internal datastructures.
 package decoders

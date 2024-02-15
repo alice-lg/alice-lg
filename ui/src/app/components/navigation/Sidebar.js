@@ -19,7 +19,7 @@ const Sidebar = () => {
       <div className="sidebar-header">
         <div className="logo">
           <Link to='/'>
-            <i>{/* Theme compatbility */}
+            <i>{/* Theme compatibility */}
             <FontAwesomeIcon 
               className="logo-icon"
               icon={faCloud} size="lg" transform="grow-11" />

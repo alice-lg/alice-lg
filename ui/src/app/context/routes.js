@@ -207,7 +207,7 @@ const createRoutesProvider = (Context, useFetchRoutesState) => ({
 
 
 /**
- * RoutesReceivedProvider loads all routes recieved for a neighbor
+ * RoutesReceivedProvider loads all routes received for a neighbor
  */
 export const RoutesReceivedProvider = createRoutesProvider(
   RoutesReceivedContext,

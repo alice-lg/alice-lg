@@ -20,7 +20,7 @@ const (
 )
 
 // StateServerSource implements the OpenBGPD source for Alice.
-// It is intendet to consume structured bgpctl output
+// It is intended to consume structured bgpctl output
 // queried over HTTP using the:
 //
 //	openbgpd-state-server
@@ -93,7 +93,7 @@ func (src *StateServerSource) ShowNeighborsSummaryRequest(
 	return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 }
 
-// ShowNeighborRIBRequest retrives the routes accepted from the neighbor
+// ShowNeighborRIBRequest retrieves the routes accepted from the neighbor
 // identified by bgp-id.
 func (src *StateServerSource) ShowNeighborRIBRequest(
 	ctx context.Context,
@@ -153,7 +153,7 @@ func (src *StateServerSource) Status(
 	return response, nil
 }
 
-// Neighbors retrievs a full list of all neighbors
+// Neighbors retrieves a full list of all neighbors
 func (src *StateServerSource) Neighbors(
 	ctx context.Context,
 ) (*api.NeighborsResponse, error) {
@@ -250,8 +250,8 @@ func (src *StateServerSource) NeighborsSummary(
 	return response, nil
 }
 
-// NeighborsStatus retrives the status summary
-// for all neightbors
+// NeighborsStatus retrieves the status summary
+// for all neighbors
 func (src *StateServerSource) NeighborsStatus(
 	ctx context.Context,
 ) (*api.NeighborsStatusResponse, error) {
@@ -430,7 +430,7 @@ func (src *StateServerSource) RoutesFiltered(
 	return response, nil
 }
 
-// RoutesNotExported retrievs the routes not exported
+// RoutesNotExported retrieves the routes not exported
 // from the rs for a neighbor.
 func (src *StateServerSource) RoutesNotExported(
 	ctx context.Context,
@@ -447,7 +447,7 @@ func (src *StateServerSource) RoutesNotExported(
 	return response, nil
 }
 
-// AllRoutes retrievs the entire RIB from the source. This is never
+// AllRoutes retrieves the entire RIB from the source. This is never
 // cached as it is processed by the store.
 func (src *StateServerSource) AllRoutes(
 	ctx context.Context,

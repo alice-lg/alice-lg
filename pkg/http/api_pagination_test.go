@@ -31,7 +31,7 @@ func TestApiRoutesPagination(t *testing.T) {
 	}
 
 	if pagination.Page != 0 {
-		t.Error("Exptected current page to be 0, got:", pagination.Page)
+		t.Error("Expected current page to be 0, got:", pagination.Page)
 	}
 
 	// Check paginated slicing

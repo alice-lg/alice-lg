@@ -13,7 +13,7 @@ import (
 )
 
 // Web Client
-// Handle assets and client app preprarations
+// Handle assets and client app preparations
 
 // Prepare client HTML:
 // Set paths and add version to assets.
@@ -76,7 +76,7 @@ func (s *Server) webRegisterAssets(
 			io.WriteString(res, themedHTML)
 		})
 
-	// ...and all alice related paths aswell
+	// ...and all alice related paths as well
 	alicePaths := []string{
 		"/routeservers/*path",
 		"/search/*path",

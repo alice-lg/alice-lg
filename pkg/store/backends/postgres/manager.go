@@ -58,7 +58,7 @@ func (m *Manager) Start(ctx context.Context) {
 }
 
 // Status retrieves the current schema version
-// and checks if migrated. In case an error occures,
+// and checks if migrated. In case an error occurs,
 // it will be included in the result.
 func (m *Manager) Status(ctx context.Context) *Status {
 	status := &Status{}
@@ -82,7 +82,7 @@ func (m *Manager) Status(ctx context.Context) *Status {
 	return status
 }
 
-// Migrate applies the database intialisation script if required.
+// Migrate applies the database initialization script if required.
 func (m *Manager) Migrate(ctx context.Context) error {
 	s := m.Status(ctx)
 	if s.Migrated {

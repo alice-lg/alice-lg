@@ -37,7 +37,7 @@ func NewRoutesCache(disabled bool, size int) *RoutesCache {
 	return cache
 }
 
-// Get retrievs all routes for a given neighbor
+// Get retrieves all routes for a given neighbor
 func (cache *RoutesCache) Get(neighborID string) *api.RoutesResponse {
 	if cache.disabled {
 		return nil

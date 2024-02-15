@@ -116,7 +116,7 @@ const GroupSelect = ({groups, selected, onSelect}) => {
     <GroupSelectOption key={group} group={group} onSelect={selectGroup} />
   );
 
-  // Partition options into n coulumns with a maximum
+  // Partition options into n columns with a maximum
   // of 10 rows per column.
   const maxRows = 10;
   const n = Math.ceil(options.length / maxRows);

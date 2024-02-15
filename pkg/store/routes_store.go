@@ -167,7 +167,7 @@ func (s *RoutesStore) safeUpdateSource(ctx context.Context, id string) {
 
 	if err := s.updateSource(ctx, src); err != nil {
 		log.Println(
-			"Refeshing routes of", src.Name, "failed:", err)
+			"Refreshing routes of", src.Name, "failed:", err)
 		s.sources.RefreshError(id, err)
 	} else {
 		status, err := s.sources.GetStatus(id)

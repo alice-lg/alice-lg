@@ -9,7 +9,7 @@ package http
  directory will be included in the frontends HTML.
 
  Additional files can be added in subdirectories.
- These are served aswell and can be used for additional
+ These are served as well and can be used for additional
  assets. (E.g. a logo)
 */
 
@@ -108,7 +108,7 @@ func (t *Theme) StylesheetIncludes() string {
 	return strings.Join(includes, "\n")
 }
 
-// Scripts retrieve a list of includeable javascipts
+// Scripts retrieve a list of includeable javascripts
 func (t *Theme) Scripts() []string {
 	return t.listIncludes(".js")
 }

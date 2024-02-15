@@ -70,7 +70,7 @@ func describeNeighbor(nb interface{}) string {
 	return fmt.Sprintf("PEER AS%s %s", asn, addr)
 }
 
-// decodeNeighbors retrievs neighbors data from
+// decodeNeighbors retrieves neighbors data from
 // the bgpctl response.
 func decodeNeighbors(res map[string]interface{}) (api.Neighbors, error) {
 	nbs := decoders.MapGet(res, "neighbors", nil)
@@ -92,7 +92,7 @@ func decodeNeighbors(res map[string]interface{}) (api.Neighbors, error) {
 	return all, nil
 }
 
-// decodeNeighborsStatus retrievs a neighbors summary
+// decodeNeighborsStatus retrieves a neighbors summary
 // and decodes the status.
 func decodeNeighborsStatus(res map[string]interface{}) (api.NeighborsStatus, error) {
 	nbs := decoders.MapGet(res, "neighbors", nil)
@@ -234,7 +234,7 @@ func decodeCommunities(c interface{}) api.Communities {
 	return comms
 }
 
-// decodeExtendedCommunities decodes extended communties
+// decodeExtendedCommunities decodes extended communities
 // into a list of (str, int, int).
 func decodeExtendedCommunities(c interface{}) api.ExtCommunities {
 	details := decoders.StringList(c)

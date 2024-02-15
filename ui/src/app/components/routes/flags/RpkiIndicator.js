@@ -63,7 +63,7 @@ const RpkiIndicator = ({route}) => {
     }
 
     // RPKI INVALID
-    // Depending on the configration this can either be a
+    // Depending on the configuration this can either be a
     // single flag or a range with a given reason.
     let rpkiInvalidReason = 0;
     for (const invalid of rpkiInvalid) {

@@ -30,7 +30,7 @@ func NewNeighborsCache(disabled bool) *NeighborsCache {
 	return cache
 }
 
-// Get retrievs the neighbors response from the cache, if present,
+// Get retrieves the neighbors response from the cache, if present,
 // and makes sure the information is still up to date.
 func (cache *NeighborsCache) Get() *api.NeighborsResponse {
 	if cache.disabled {
