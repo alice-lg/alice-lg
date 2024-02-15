@@ -10,6 +10,7 @@ Take a look at Alice-LG production examples at:
 - https://lg.netnod.se/
 - https://alice-rs.linx.net/
 - https://lg.ix.br/
+- https://alice.sfmix.org/
 
 And checkout the API at:
 - https://lg.de-cix.net/api/v1/config
