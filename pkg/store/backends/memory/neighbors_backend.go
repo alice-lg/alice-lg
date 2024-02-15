@@ -17,7 +17,7 @@ type NeighborsBackend struct {
 	neighbors *sync.Map
 }
 
-// NewNeighborsBackend instanciates a new in memory
+// NewNeighborsBackend instantiates a new in memory
 // neighbors backend.
 func NewNeighborsBackend() *NeighborsBackend {
 	return &NeighborsBackend{
@@ -79,7 +79,7 @@ func (b *NeighborsBackend) GetNeighborsMapAt(
 	return result, nil
 }
 
-// CountNeighborsAt retrievs the number of neighbors
+// CountNeighborsAt retrieves the number of neighbors
 // at this source.
 func (b *NeighborsBackend) CountNeighborsAt(
 	ctx context.Context,

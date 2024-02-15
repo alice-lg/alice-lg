@@ -43,7 +43,7 @@ Currently Alice-LG supports the following APIs:
 
 ### Birdwatcher
 Normally you would first install the [birdwatcher API](https://github.com/alice-lg/birdwatcher) directly on the machine(s) where you run [BIRD](http://bird.network.cz/) on
-and then install Alice-LG on a seperate public facing server and point her to the afore mentioned [birdwatcher API](https://github.com/alice-lg/birdwatcher).
+and then install Alice-LG on a separate public facing server and point her to the afore mentioned [birdwatcher API](https://github.com/alice-lg/birdwatcher).
 
 This project was a direct result of the [RIPE IXP Tools Hackathon](https://atlas.ripe.net/hackathon/ixp-tools/)
 just prior to [RIPE73](https://ripe73.ripe.net/) in Madrid, Spain.
@@ -188,10 +188,10 @@ with the optional parameter (the "mountpoint" of the theme)
     url_base = /theme
 
 
-You can put assets (images, fonts, javscript, css) in
+You can put assets (images, fonts, javascript, css) in
 this folder.
 
-Stylesheets and Javascripts are automatically included in
+Stylesheets and JavaScripts are automatically included in
 the client's html and are served from the backend.
 
 Alice provides early stages of an extension API, which is for now

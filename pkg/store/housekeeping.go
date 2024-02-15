@@ -11,7 +11,7 @@ import (
 )
 
 // StartHousekeeping is a background task flushing
-// memory and expireing caches.
+// memory and expiring caches.
 func StartHousekeeping(ctx context.Context, cfg *config.Config) {
 
 	for {

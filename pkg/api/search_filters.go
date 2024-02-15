@@ -372,7 +372,7 @@ func NewSearchFilters() *SearchFilters {
 	return groups
 }
 
-// GetGroupByKey retrievs a search filter group
+// GetGroupByKey retrieves a search filter group
 // by a string.
 func (s *SearchFilters) GetGroupByKey(key string) *SearchFilterGroup {
 	// This is an optimization (this is basically a fixed hash map,

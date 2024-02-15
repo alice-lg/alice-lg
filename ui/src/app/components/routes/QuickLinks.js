@@ -30,7 +30,7 @@ const QuickLinks = () => {
   const filtered = useRoutesFiltered();
   const notExported = useRoutesNotExported();
 
-  const locRecevied = useMemo(() => ({...location, hash: "routes-received"}), [
+  const locReceived = useMemo(() => ({...location, hash: "routes-received"}), [
     location,
   ]);
   const locFiltered = useMemo(() => ({...location, hash: "routes-filtered"}), [
@@ -57,7 +57,7 @@ const QuickLinks = () => {
             <Link to={locFiltered}>Filtered</Link></li>}
         { showReceived &&
           <li className="received">
-            <Link to={locRecevied}>Accepted</Link></li>}
+            <Link to={locReceived}>Accepted</Link></li>}
         { showNotExported &&
           <li className="not-exported">
             <Link to={locNotExported}>Not Exported</Link></li>}

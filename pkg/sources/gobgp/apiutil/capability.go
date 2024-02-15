@@ -57,7 +57,7 @@ func NewExtendedNexthopCapability(a *bgp.CapExtendedNexthop) *api.ExtendedNextho
 	}
 }
 
-// NewGracefulRestartCapability creates a new graceful resetart capabilty
+// NewGracefulRestartCapability creates a new graceful restart capability
 func NewGracefulRestartCapability(a *bgp.CapGracefulRestart) *api.GracefulRestartCapability {
 	tuples := make([]*api.GracefulRestartCapabilityTuple, 0, len(a.Tuples))
 	for _, t := range a.Tuples {
@@ -73,7 +73,7 @@ func NewGracefulRestartCapability(a *bgp.CapGracefulRestart) *api.GracefulRestar
 	}
 }
 
-// NewFourOctetASNumberCapability creates new 32bit ASN capabiliy
+// NewFourOctetASNumberCapability creates new 32bit ASN capability
 func NewFourOctetASNumberCapability(a *bgp.CapFourOctetASNumber) *api.FourOctetASNumberCapability {
 	return &api.FourOctetASNumberCapability{
 		As: a.CapValue,

@@ -51,7 +51,7 @@ func Test_ParseApiStatus(t *testing.T) {
 		return
 	}
 
-	// Assertations
+	// Assertions
 	if apiStatus.Version != "1.7.11" {
 		t.Error("Expected version: 1.7.11, got:", apiStatus.Version)
 	}
@@ -106,7 +106,7 @@ func Test_RoutesParsing(t *testing.T) {
 		t.Error("Expected parsed routes to be 1, not:", len(routes))
 	}
 
-	// TODO: addo more tests
+	// TODO: add more tests
 }
 
 func Test_ParseServerTime(t *testing.T) {

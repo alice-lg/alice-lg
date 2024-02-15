@@ -130,7 +130,7 @@ func TestHasCommunity(t *testing.T) {
 	}
 
 	if bgp.HasLargeCommunity(Community{23, 42}) != false {
-		t.Error("23:42 should not be present in large commnuties")
+		t.Error("23:42 should not be present in large communities")
 	}
 }
 

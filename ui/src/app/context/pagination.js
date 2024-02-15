@@ -11,8 +11,8 @@ import { useQuery
 
 
 /**
- * usePageQuery retrievs the pagination
- * query paramters and decodes the value
+ * usePageQuery retrieves the pagination
+ * query parameters and decodes the value
  */
 export const usePageQuery = () => {
   const [query] = useQuery({

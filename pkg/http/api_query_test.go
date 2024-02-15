@@ -48,7 +48,7 @@ func TestApiQueryFilterNextHopGateway(t *testing.T) {
 	)
 
 	if len(filtered) != 2 {
-		t.Error("Exptected 2 routes, got:", len(filtered))
+		t.Error("Expected 2 routes, got:", len(filtered))
 	}
 
 	// Check presence of route_01 and _03, matching prefix 123.

@@ -108,7 +108,7 @@ func (s *NeighborsStore) Start(ctx context.Context) {
 	}
 }
 
-// GetStatus retrievs the status for a route server
+// GetStatus retrieves the status for a route server
 // identified by sourceID.
 func (s *NeighborsStore) GetStatus(sourceID string) (*Status, error) {
 	return s.sources.GetStatus(sourceID)
@@ -173,7 +173,7 @@ func (s *NeighborsStore) safeUpdateSource(ctx context.Context, id string) {
 
 	if err := s.updateSource(ctx, src, id); err != nil {
 		log.Println(
-			"Refeshing neighbors of", srcName, "failed:", err)
+			"Refreshing neighbors of", srcName, "failed:", err)
 		s.sources.RefreshError(id, err)
 	}
 

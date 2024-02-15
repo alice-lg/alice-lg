@@ -2,7 +2,7 @@
 import moment from 'moment'
 
 /**
- * Render the formated 'absolute' time when given a
+ * Render the formatted 'absolute' time when given a
  * relative timestamp (in nanoseconds).
  *
  * The timestamp is the duration from now to the absolute
