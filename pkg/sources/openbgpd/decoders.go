@@ -43,7 +43,7 @@ func decodeNeighbor(n interface{}) (*api.Neighbor, error) {
 	prefixes := decoders.MapGet(stats, "prefixes", map[string]interface{}{})
 
 	neighbor := &api.Neighbor{
-		// ID:             decoders.MapGetString(nb, "remote_addr", "invalid_id"),
+		ID:             decoders.MapGetString(nb, "remote_addr", "invalid_id"),
 		Address:        decoders.MapGetString(nb, "remote_addr", "invalid_address"),
 		ASN:            decoders.IntFromString(decoders.MapGetString(nb, "remote_as", ""), -1),
 		State:          decodeState(decoders.MapGetString(nb, "state", "unknown")),
