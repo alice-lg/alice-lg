@@ -89,7 +89,7 @@ const Neighbors = () => {
         up.push(n);
       } else if (s.includes("down")) {
         down.push(n);
-      } else if (s.includes("start") || s.includes("active")) {
+      } else if (s.includes("start") || s.includes("active") || s.includes("idle") || s.includes("connect")) {
         idle.push(n);
       } else {
         console.error("Couldn't classify neighbor by state:", n);
