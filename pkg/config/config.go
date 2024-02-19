@@ -192,6 +192,8 @@ type SourceConfig struct {
 	// Blackhole IPs
 	Blackholes []string
 
+	HiddenNeighbors []string
+
 	// Source configurations
 	Type        string
 	Backend     string
@@ -748,15 +750,17 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 		sourceGroup := section.Key("group").MustString("")
 		sourceBlackholes := decoders.TrimmedCSVStringList(
 			section.Key("blackholes").MustString(""))
+		sourceHiddenNeighbors := decoders.TrimmedCSVStringList(section.Key("hidden_neighbors").MustString(""))
 
 		srcCfg := &SourceConfig{
-			ID:         sourceID,
-			Order:      order,
-			Name:       sourceName,
-			Group:      sourceGroup,
-			Blackholes: sourceBlackholes,
-			Backend:    backendType,
-			Type:       sourceType,
+			ID:              sourceID,
+			Order:           order,
+			Name:            sourceName,
+			Group:           sourceGroup,
+			Blackholes:      sourceBlackholes,
+			HiddenNeighbors: sourceHiddenNeighbors,
+			Backend:         backendType,
+			Type:            sourceType,
 		}
 
 		// Register route server ID with pool
@@ -776,8 +780,9 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 			}
 
 			c := birdwatcher.Config{
-				ID:   srcCfg.ID,
-				Name: srcCfg.Name,
+				ID:              srcCfg.ID,
+				Name:            srcCfg.Name,
+				HiddenNeighbors: srcCfg.HiddenNeighbors,
 
 				Timezone:        "UTC",
 				ServerTime:      "2006-01-02T15:04:05.999999999Z07:00",
@@ -808,8 +813,9 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 
 		case SourceBackendGoBGP:
 			c := gobgp.Config{
-				ID:   srcCfg.ID,
-				Name: srcCfg.Name,
+				ID:              srcCfg.ID,
+				Name:            srcCfg.Name,
+				HiddenNeighbors: srcCfg.HiddenNeighbors,
 			}
 
 			if err := backendConfig.MapTo(&c); err != nil {
@@ -836,6 +842,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 			c := openbgpd.Config{
 				ID:                srcCfg.ID,
 				Name:              srcCfg.Name,
+				HiddenNeighbors:   srcCfg.HiddenNeighbors,
 				CacheTTL:          cacheTTL,
 				RoutesCacheSize:   routesCacheSize,
 				RejectCommunities: rejectComms,
@@ -858,6 +865,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 			c := openbgpd.Config{
 				ID:                srcCfg.ID,
 				Name:              srcCfg.Name,
+				HiddenNeighbors:   srcCfg.HiddenNeighbors,
 				CacheTTL:          cacheTTL,
 				RoutesCacheSize:   routesCacheSize,
 				RejectCommunities: rejectComms,
@@ -1007,9 +1015,9 @@ func (cfg *SourceConfig) GetInstance() sources.Source {
 	var instance sources.Source
 	switch cfg.Backend {
 	case SourceBackendBirdwatcher:
-		instance = birdwatcher.NewBirdwatcher(cfg.Birdwatcher)
+		instance = birdwatcher.NewBirdwatcher(&cfg.Birdwatcher)
 	case SourceBackendGoBGP:
-		instance = gobgp.NewGoBGP(cfg.GoBGP)
+		instance = gobgp.NewGoBGP(&cfg.GoBGP)
 	case SourceBackendOpenBGPDStateServer:
 		instance = openbgpd.NewStateServerSource(&cfg.OpenBGPD)
 	case SourceBackendOpenBGPDBgplgd:

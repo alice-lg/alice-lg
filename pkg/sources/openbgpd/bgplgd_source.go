@@ -158,6 +158,10 @@ func (src *BgplgdSource) Neighbors(
 	if err != nil {
 		return nil, err
 	}
+	nb, err = sources.FilterHiddenNeighbors(nb, src.cfg.HiddenNeighbors)
+	if err != nil {
+		return nil, err
+	}
 	// Set route server id (sourceID) for all neighbors and
 	// calculate the filtered routes.
 	for _, n := range nb {
@@ -211,6 +215,11 @@ func (src *BgplgdSource) NeighborsSummary(
 	if err != nil {
 		return nil, err
 	}
+	nb, err = sources.FilterHiddenNeighbors(nb, src.cfg.HiddenNeighbors)
+	if err != nil {
+		return nil, err
+	}
+
 	// Set route server id (sourceID) for all neighbors and
 	// calculate the filtered routes.
 	for _, n := range nb {
@@ -249,6 +258,10 @@ func (src *BgplgdSource) NeighborsStatus(
 	}
 
 	nb, err := decodeNeighborsStatus(body)
+	if err != nil {
+		return nil, err
+	}
+	nb, err = sources.FilterHiddenNeighborsStatus(nb, src.cfg.HiddenNeighbors)
 	if err != nil {
 		return nil, err
 	}
