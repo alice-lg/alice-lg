@@ -359,7 +359,7 @@ func TestSearchFilterExcludeRoute(t *testing.T) {
 }
 
 // Communities should match all aswell
-func testSearchFilterCommunities(route Filterable, t *testing.T) {
+func testSearchFilterCommunities(route RouteFilterable, t *testing.T) {
 	query := "communities=23:42,111:11"
 	values, err := url.ParseQuery(query)
 	if err != nil {
@@ -402,7 +402,7 @@ func TestSearchFilterLookupRouteCommunity(t *testing.T) {
 }
 
 // Check that ext. communities work
-func testSearchFilterExtCommunities(route Filterable, t *testing.T) {
+func testSearchFilterExtCommunities(route RouteFilterable, t *testing.T) {
 	query := "ext_communities=ro:23:123"
 	values, err := url.ParseQuery(query)
 	if err != nil {
@@ -450,7 +450,7 @@ func TestSearchFilterLookupRouteExtCommunities(t *testing.T) {
 }
 
 // Check that large communities work aswell
-func testSearchFilterLargeCommunities(route Filterable, t *testing.T) {
+func testSearchFilterLargeCommunities(route RouteFilterable, t *testing.T) {
 	query := "large_communities=1000:23:42"
 	values, err := url.ParseQuery(query)
 	if err != nil {
@@ -638,6 +638,87 @@ func TestNeighborFilterMatch(t *testing.T) {
 
 	if filter.Match(n1) == false || filter.Match(n2) == false {
 		t.Error("Expected filter to match both neighbors.")
+	}
+}
+
+func TestNeighborFilterFromPatternsInvalid(t *testing.T) {
+	// An unparseable regular expression (that is neither a valid
+	// CIDR nor IP) must be rejected at construction time.
+	if _, err := NeighborFilterFromPatterns([]string{"*invalid("}); err == nil {
+		t.Error("Expected an error for an invalid pattern")
+	}
+}
+
+func TestNeighborFilterMatchHidden(t *testing.T) {
+	filter, err := NeighborFilterFromPatterns([]string{
+		"192.0.2.1",         // single IP
+		"2001:db8::/32",     // CIDR
+		"^rs-.*-collector$", // regexp on protocol name
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cases := []struct {
+		address string
+		hidden  bool
+	}{
+		{"192.0.2.1", true},         // exact IP
+		{"192.0.2.2", false},        // different IP
+		{"2001:db8:1234::5", true},  // inside CIDR
+		{"2001:dead::1", false},     // outside CIDR
+		{"rs-flow-collector", true}, // matches regexp
+		{"rs-normal-peer", false},   // does not match regexp
+		{"192_0_2_1", false},        // non-IP, non-matching string
+	}
+
+	for _, c := range cases {
+		n := &Neighbor{Address: c.address}
+		if got := filter.MatchHidden(n); got != c.hidden {
+			t.Errorf("MatchHidden(%q) = %v, want %v", c.address, got, c.hidden)
+		}
+		// NeighborStatus is matched on its ID, which mirrors the
+		// address for the purposes of hidden neighbor exclusion.
+		ns := &NeighborStatus{ID: c.address}
+		if got := filter.MatchHidden(ns); got != c.hidden {
+			t.Errorf("MatchHidden(status %q) = %v, want %v", c.address, got, c.hidden)
+		}
+	}
+}
+
+func TestExcludeHidden(t *testing.T) {
+	filter, err := NeighborFilterFromPatterns([]string{"192.0.2.0/24"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	neighbors := Neighbors{
+		{Address: "192.0.2.10"}, // hidden
+		{Address: "198.51.100.1"},
+		{Address: "192.0.2.20"}, // hidden
+		{Address: "203.0.113.7"},
+	}
+	visible := ExcludeHidden(filter, neighbors)
+	if len(visible) != 2 {
+		t.Fatalf("Expected 2 visible neighbors, got %d", len(visible))
+	}
+	for _, n := range visible {
+		if filter.MatchHidden(n) {
+			t.Errorf("Neighbor %q should have been excluded", n.Address)
+		}
+	}
+
+	// A nil filter leaves the input untouched.
+	if got := ExcludeHidden[*Neighbor](nil, neighbors); len(got) != len(neighbors) {
+		t.Errorf("Expected nil filter to keep all %d neighbors, got %d",
+			len(neighbors), len(got))
+	}
+
+	// An empty filter (no patterns) hides nothing.
+	empty, _ := NeighborFilterFromPatterns(nil)
+	if got := ExcludeHidden(empty, neighbors); len(got) != len(neighbors) {
+		t.Errorf("Expected empty filter to keep all %d neighbors, got %d",
+			len(neighbors), len(got))
 	}
 }
 

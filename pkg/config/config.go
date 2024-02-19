@@ -193,6 +193,10 @@ type SourceConfig struct {
 	// Blackhole IPs
 	Blackholes []string
 
+	// HiddenNeighbors holds the parsed exclusion rules for
+	// neighbors that should not be exposed by this source.
+	HiddenNeighbors *api.NeighborFilter
+
 	// Source configurations
 	Type        string
 	Backend     string
@@ -740,15 +744,23 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 		sourceGroup := section.Key("group").MustString("")
 		sourceBlackholes := decoders.TrimmedCSVStringList(
 			section.Key("blackholes").MustString(""))
+		sourceHiddenNeighbors := decoders.TrimmedCSVStringList(
+			section.Key("hidden_neighbors").MustString(""))
+		hiddenNeighbors, err := api.NeighborFilterFromPatterns(sourceHiddenNeighbors)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"in source %s: %w", sourceID, err)
+		}
 
 		srcCfg := &SourceConfig{
-			ID:         sourceID,
-			Order:      order,
-			Name:       sourceName,
-			Group:      sourceGroup,
-			Blackholes: sourceBlackholes,
-			Backend:    backendType,
-			Type:       sourceType,
+			ID:              sourceID,
+			Order:           order,
+			Name:            sourceName,
+			Group:           sourceGroup,
+			Blackholes:      sourceBlackholes,
+			HiddenNeighbors: hiddenNeighbors,
+			Backend:         backendType,
+			Type:            sourceType,
 		}
 
 		// Register route server ID with pool
@@ -772,8 +784,9 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 			}
 
 			c := birdwatcher.Config{
-				ID:   srcCfg.ID,
-				Name: srcCfg.Name,
+				ID:              srcCfg.ID,
+				Name:            srcCfg.Name,
+				HiddenNeighbors: srcCfg.HiddenNeighbors,
 
 				Timezone:        "UTC",
 				ServerTime:      "2006-01-02T15:04:05.999999999Z07:00",
@@ -805,8 +818,9 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 
 		case SourceBackendGoBGP:
 			c := gobgp.Config{
-				ID:   srcCfg.ID,
-				Name: srcCfg.Name,
+				ID:              srcCfg.ID,
+				Name:            srcCfg.Name,
+				HiddenNeighbors: srcCfg.HiddenNeighbors,
 			}
 
 			if err := backendConfig.MapTo(&c); err != nil {
@@ -833,6 +847,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 			c := openbgpd.Config{
 				ID:                srcCfg.ID,
 				Name:              srcCfg.Name,
+				HiddenNeighbors:   srcCfg.HiddenNeighbors,
 				CacheTTL:          cacheTTL,
 				RoutesCacheSize:   routesCacheSize,
 				RejectCommunities: rejectComms,
@@ -855,6 +870,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 			c := openbgpd.Config{
 				ID:                srcCfg.ID,
 				Name:              srcCfg.Name,
+				HiddenNeighbors:   srcCfg.HiddenNeighbors,
 				CacheTTL:          cacheTTL,
 				RoutesCacheSize:   routesCacheSize,
 				RejectCommunities: rejectComms,

@@ -1,9 +1,12 @@
 package gobgp
 
+import "github.com/alice-lg/alice-lg/pkg/api"
+
 // Config is a GoBGP source config
 type Config struct {
-	ID   string
-	Name string
+	ID              string
+	Name            string
+	HiddenNeighbors *api.NeighborFilter `ini:"-"`
 
 	Host     string `ini:"host"`
 	Insecure bool   `ini:"insecure"`

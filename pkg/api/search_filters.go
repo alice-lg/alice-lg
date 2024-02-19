@@ -3,7 +3,9 @@ package api
 import (
 	"fmt"
 	"log"
+	"net"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -18,9 +20,9 @@ const (
 	SearchKeyAddrFamily       = "addr_family"
 )
 
-// Filterable objects provide methods for matching
+// RouteFilterable objects provide methods for matching
 // by ID, ASN, Community, etc...
-type Filterable interface {
+type RouteFilterable interface {
 	MatchSourceID(sourceID string) bool
 	MatchASN(asn int) bool
 	MatchCommunity(community Community) bool
@@ -227,9 +229,9 @@ func (g *SearchFilterGroup) rebuildIndex() {
 }
 
 // A SearchFilterComparator compares route with a filter
-type SearchFilterComparator func(route Filterable, value any) bool
+type SearchFilterComparator func(route RouteFilterable, value any) bool
 
-func searchFilterMatchSource(route Filterable, value any) bool {
+func searchFilterMatchSource(route RouteFilterable, value any) bool {
 	sourceID, ok := value.(string)
 	if !ok {
 		return false
@@ -237,7 +239,7 @@ func searchFilterMatchSource(route Filterable, value any) bool {
 	return route.MatchSourceID(sourceID)
 }
 
-func searchFilterMatchASN(route Filterable, value any) bool {
+func searchFilterMatchASN(route RouteFilterable, value any) bool {
 	asn, ok := value.(int)
 	if !ok {
 		return false
@@ -246,7 +248,7 @@ func searchFilterMatchASN(route Filterable, value any) bool {
 	return route.MatchASN(asn)
 }
 
-func searchFilterMatchCommunity(route Filterable, value any) bool {
+func searchFilterMatchCommunity(route RouteFilterable, value any) bool {
 	community, ok := value.(Community)
 	if !ok {
 		return false
@@ -254,7 +256,7 @@ func searchFilterMatchCommunity(route Filterable, value any) bool {
 	return route.MatchCommunity(community)
 }
 
-func searchFilterMatchExtCommunity(route Filterable, value any) bool {
+func searchFilterMatchExtCommunity(route RouteFilterable, value any) bool {
 	community, ok := value.(ExtCommunity)
 	if !ok {
 		return false
@@ -262,7 +264,7 @@ func searchFilterMatchExtCommunity(route Filterable, value any) bool {
 	return route.MatchExtCommunity(community)
 }
 
-func searchFilterMatchLargeCommunity(route Filterable, value any) bool {
+func searchFilterMatchLargeCommunity(route RouteFilterable, value any) bool {
 	community, ok := value.(Community)
 	if !ok {
 		return false
@@ -270,7 +272,7 @@ func searchFilterMatchLargeCommunity(route Filterable, value any) bool {
 	return route.MatchLargeCommunity(community)
 }
 
-func searchFilterMatchAddrFamily(route Filterable, value any) bool {
+func searchFilterMatchAddrFamily(route RouteFilterable, value any) bool {
 	family, ok := value.(int)
 	if !ok {
 		return false
@@ -302,7 +304,7 @@ func selectCmpFuncByKey(key string) SearchFilterComparator {
 
 // MatchAny checks if a route matches any filter
 // in a filter group.
-func (g *SearchFilterGroup) MatchAny(route Filterable) bool {
+func (g *SearchFilterGroup) MatchAny(route RouteFilterable) bool {
 	// Check if we have any filter to match
 	if len(g.Filters) == 0 {
 		return true // no filter, everything matches
@@ -325,7 +327,7 @@ func (g *SearchFilterGroup) MatchAny(route Filterable) bool {
 
 // MatchAll checks if a route matches all predicates
 // in the filter group.
-func (g *SearchFilterGroup) MatchAll(route Filterable) bool {
+func (g *SearchFilterGroup) MatchAll(route RouteFilterable) bool {
 	// Check if we have any filter to match
 	if len(g.Filters) == 0 {
 		return true // no filter, everything matches. Like above.
@@ -646,7 +648,7 @@ func FiltersFromTokens(tokens []string) (*SearchFilters, error) {
 
 // MatchRoute checks if a route matches all filters.
 // Unless all filters are blank.
-func (s *SearchFilters) MatchRoute(r Filterable) bool {
+func (s *SearchFilters) MatchRoute(r RouteFilterable) bool {
 	sources := s.GetGroupByKey(SearchKeySources)
 	if !sources.MatchAny(r) {
 		return false
@@ -752,12 +754,61 @@ func (s *SearchFilters) HasGroup(key string) bool {
 	return len(group.Filters) > 0
 }
 
-// A NeighborFilter includes only a name and ASN.
-// We are using a slightly simpler solution for
-// neighbor queries.
+// NeighborFilterable objects can be matched against a NeighborFilter.
+// It is implemented by *Neighbor and *NeighborStatus, so the same
+// filter can be applied to both the full neighbor list and the
+// reduced neighbor status list.
+type NeighborFilterable interface {
+	// MatchName reports a (partial, case insensitive) match of the
+	// neighbor's description / name.
+	MatchName(name string) bool
+	// MatchASN reports whether the neighbor has the given ASN.
+	MatchASN(asn int) bool
+	// NeighborAddress returns the address (or protocol ID) used for
+	// address based matching, e.g. hidden neighbor exclusion.
+	NeighborAddress() string
+}
+
+// A NeighborFilter is used both for neighbor queries (by name and
+// ASN) and for excluding hidden neighbors from a source's responses.
+//
+// The exclusion rules (IPs, CIDRs and regular expressions) are parsed
+// once at configuration time so that invalid patterns fail fast.
 type NeighborFilter struct {
 	name string
 	asn  int
+
+	// Hidden neighbor exclusion rules
+	excludeIPs      []net.IP
+	excludeCIDRs    []*net.IPNet
+	excludePatterns []*regexp.Regexp
+}
+
+// NeighborFilterFromPatterns constructs a NeighborFilter from a list
+// of exclusion patterns. Each entry is interpreted, in order, as a
+// CIDR, an IP address, or a regular expression matched against the
+// neighbor address (or protocol ID).
+//
+// A compilation error is returned for invalid regular expressions so
+// that broken configuration is rejected at parse time instead of on
+// the first refresh or request.
+func NeighborFilterFromPatterns(patterns []string) (*NeighborFilter, error) {
+	filter := &NeighborFilter{}
+	for _, pattern := range patterns {
+		if _, cidr, err := net.ParseCIDR(pattern); err == nil {
+			filter.excludeCIDRs = append(filter.excludeCIDRs, cidr)
+		} else if ip := net.ParseIP(pattern); ip != nil {
+			filter.excludeIPs = append(filter.excludeIPs, ip)
+		} else {
+			re, err := regexp.Compile(pattern)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"invalid hidden neighbor pattern %q: %w", pattern, err)
+			}
+			filter.excludePatterns = append(filter.excludePatterns, re)
+		}
+	}
+	return filter, nil
 }
 
 // NeighborFilterFromQuery constructs a NeighborFilter
@@ -793,7 +844,7 @@ func NeighborFilterFromQueryString(q string) *NeighborFilter {
 
 // Match neighbor with filter: Check if the neighbor
 // in question has the required parameters.
-func (s *NeighborFilter) Match(neighbor *Neighbor) bool {
+func (s *NeighborFilter) Match(neighbor NeighborFilterable) bool {
 	if s.name != "" && neighbor.MatchName(s.name) {
 		return true
 	}
@@ -801,4 +852,49 @@ func (s *NeighborFilter) Match(neighbor *Neighbor) bool {
 		return true
 	}
 	return false
+}
+
+// MatchHidden reports whether the neighbor should be hidden according
+// to the filter's IP, CIDR and regular-expression exclusion rules.
+func (s *NeighborFilter) MatchHidden(neighbor NeighborFilterable) bool {
+	address := neighbor.NeighborAddress()
+	if ip := net.ParseIP(address); ip != nil {
+		for _, excluded := range s.excludeIPs {
+			if ip.Equal(excluded) {
+				return true
+			}
+		}
+		for _, cidr := range s.excludeCIDRs {
+			if cidr.Contains(ip) {
+				return true
+			}
+		}
+	}
+	for _, pattern := range s.excludePatterns {
+		if pattern.MatchString(address) {
+			return true
+		}
+	}
+	return false
+}
+
+// ExcludeHidden returns the subset of neighbors that are not hidden by
+// the given filter. It is generic over the neighbor type so it can be
+// applied to both api.Neighbors and api.NeighborsStatus. A nil filter
+// leaves the input unchanged.
+func ExcludeHidden[T NeighborFilterable](
+	filter *NeighborFilter,
+	neighbors []T,
+) []T {
+	if filter == nil {
+		return neighbors
+	}
+	visible := make([]T, 0, len(neighbors))
+	for _, neighbor := range neighbors {
+		if filter.MatchHidden(neighbor) {
+			continue
+		}
+		visible = append(visible, neighbor)
+	}
+	return visible
 }

@@ -257,6 +257,7 @@ func (b *GenericBirdwatcher) NeighborsStatus(ctx context.Context) (
 	if err != nil {
 		return nil, err
 	}
+	neighbors = api.ExcludeHidden(b.config.HiddenNeighbors, neighbors)
 
 	response := &api.NeighborsStatusResponse{
 		Response: api.Response{

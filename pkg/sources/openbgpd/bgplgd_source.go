@@ -154,6 +154,7 @@ func (src *BgplgdSource) Neighbors(
 	if err != nil {
 		return nil, err
 	}
+	nb = api.ExcludeHidden(src.cfg.HiddenNeighbors, nb)
 	// Set route server id (sourceID) for all neighbors and
 	// calculate the filtered routes.
 	for _, n := range nb {
@@ -207,6 +208,8 @@ func (src *BgplgdSource) NeighborsSummary(
 	if err != nil {
 		return nil, err
 	}
+	nb = api.ExcludeHidden(src.cfg.HiddenNeighbors, nb)
+
 	// Set route server id (sourceID) for all neighbors and
 	// calculate the filtered routes.
 	for _, n := range nb {
@@ -248,6 +251,7 @@ func (src *BgplgdSource) NeighborsStatus(
 	if err != nil {
 		return nil, err
 	}
+	nb = api.ExcludeHidden(src.cfg.HiddenNeighbors, nb)
 
 	response := &api.NeighborsStatusResponse{
 		Response: api.Response{

@@ -55,7 +55,7 @@ func (neighbors Neighbors) Swap(i, j int) {
 	neighbors[i], neighbors[j] = neighbors[j], neighbors[i]
 }
 
-// MatchSourceID implements Filterable interface
+// MatchSourceID implements RouteFilterable interface
 func (n *Neighbor) MatchSourceID(id string) bool {
 	return n.RouteServerID == id
 }
@@ -87,6 +87,12 @@ func (n *Neighbor) MatchName(name string) bool {
 	neighName := strings.ToLower(n.Description)
 
 	return strings.Contains(neighName, name)
+}
+
+// NeighborAddress implements NeighborFilterable and returns the
+// neighbor's address used for hidden neighbor matching.
+func (n *Neighbor) NeighborAddress() string {
+	return n.Address
 }
 
 // RoutesChannel has the routes stats per channel,
@@ -123,6 +129,25 @@ type NeighborStatus struct {
 	ID    string        `json:"id"`
 	State string        `json:"state"`
 	Since time.Duration `json:"uptime"`
+}
+
+// MatchName implements NeighborFilterable. A neighbor status carries
+// no description, so it never matches a name.
+func (n *NeighborStatus) MatchName(string) bool {
+	return false
+}
+
+// MatchASN implements NeighborFilterable. A neighbor status carries
+// no ASN, so it never matches an ASN.
+func (n *NeighborStatus) MatchASN(int) bool {
+	return false
+}
+
+// NeighborAddress implements NeighborFilterable and returns the
+// neighbor's protocol ID used for hidden neighbor matching. This may
+// be an IP address or a protocol name, depending on the backend.
+func (n *NeighborStatus) NeighborAddress() string {
+	return n.ID
 }
 
 // NeighborsStatus is a list of statuses.

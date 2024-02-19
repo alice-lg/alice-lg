@@ -1,10 +1,13 @@
 package birdwatcher
 
+import "github.com/alice-lg/alice-lg/pkg/api"
+
 // Config contains all configuration attributes
 // for a birdwatcher based source.
 type Config struct {
-	ID   string
-	Name string
+	ID              string
+	Name            string
+	HiddenNeighbors *api.NeighborFilter `ini:"-"`
 
 	API             string `ini:"api"`
 	Timezone        string `ini:"timezone"`
