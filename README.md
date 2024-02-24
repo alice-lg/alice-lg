@@ -3,20 +3,27 @@ __"No, no! The adventures first, explanations take such a dreadful time."__
 _Lewis Carroll, Alice's Adventures in Wonderland & Through the Looking-Glass_
 
 Take a look at Alice-LG production examples at:
-- https://lg.de-cix.net/
 - https://lg.ams-ix.net
-- https://lg.bcix.de/
-- https://lg.megaport.com/
-- https://lg.netnod.se/
-- https://alice-rs.linx.net/
-- https://lg.ix.br/
+- https://lg.bcix.de
+- https://lg.dd-ix.net
+- https://lg.de-cix.net
+- https://glass.gigapix.pt
+- https://lg.ix.br
+- https://alice-rs.linx.net
+- https://lg.megaport.com
+- https://lg.netnod.se
+- https://lg.s-ix.de
+- https://lg.top-ix.org
 
-And checkout the API at:
+And check out the API at:
 - https://lg.de-cix.net/api/v1/config
+- https://lg.de-cix.net/api/v1/status
 - https://lg.de-cix.net/api/v1/routeservers
 - https://lg.de-cix.net/api/v1/routeservers/rs1_fra_ipv4/status
 - https://lg.de-cix.net/api/v1/routeservers/rs1_fra_ipv4/neighbors
-- https://lg.de-cix.net/api/v1/routeservers/rs1_fra_ipv4/neighbors/R194_106/routes
+- https://lg.de-cix.net/api/v1/routeservers/rs1_fra_ipv4/neighbors/R194_106/routes/received
+- https://lg.de-cix.net/api/v1/routeservers/rs1_fra_ipv4/neighbors/R194_106/routes/filtered
+- https://lg.de-cix.net/api/v1/routeservers/rs1_fra_ipv4/neighbors/R194_106/routes/not-exported
 - https://lg.de-cix.net/api/v1/lookup/prefix?q=217.115.0.0
 
 
