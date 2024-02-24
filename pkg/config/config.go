@@ -795,15 +795,14 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 			}
 			srcCfg.Birdwatcher = c
 
-			log.Println("Adding birdwatcher source",
-				c.Name, "of type", sourceType,
-				"with peer_table_prefix", peerTablePrefix,
-				"and pipe_protocol_prefix", pipeProtocolPrefix)
-			if c.AltPipeProtocolSuffix != "" {
-				log.Println(
-					"Alt pipe protocol prefix:", c.AltPipeProtocolPrefix,
-					"suffix:", c.AltPipeProtocolSuffix,
-				)
+			log.Println("Adding birdwatcher source", c.Name, "of type", sourceType)
+			if sourceType == "multi_table" {
+				log.Println("  Peer table prefix:", peerTablePrefix)
+				log.Println("  Pipe protocol prefix:", pipeProtocolPrefix)
+				if c.AltPipeProtocolSuffix != "" {
+					log.Println("  Alternative pipe protocol prefix:", c.AltPipeProtocolPrefix)
+					log.Println("  Alternative pipe protocol suffix:", c.AltPipeProtocolSuffix)
+				}
 			}
 
 		case SourceBackendGoBGP:
