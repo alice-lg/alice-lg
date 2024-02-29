@@ -130,6 +130,7 @@ func (gobgp *GoBGP) NeighborsStatus(
 				_resp.Peer.Timers.State.Uptime.Seconds,
 				int64(_resp.Peer.Timers.State.Uptime.Nanos)))
 		}
+		response.Neighbors = append(response.Neighbors, &ns)
 
 	}
 	return &response, nil
