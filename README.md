@@ -9,13 +9,16 @@ Take a look at Alice-LG production examples at:
 - https://lg.de-cix.net
 - https://glass.gigapix.pt
 - https://lg.ix.br
+- https://alice.sfmix.org/
 - https://alice-rs.linx.net
 - https://lg.megaport.com
 - https://lg.netnod.se
 - https://lg.s-ix.de
 - https://lg.top-ix.org
+- https://alice.sfmix.org/
 
 And check out the API at:
+
 - https://lg.de-cix.net/api/v1/config
 - https://lg.de-cix.net/api/v1/status
 - https://lg.de-cix.net/api/v1/routeservers

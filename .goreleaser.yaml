@@ -20,9 +20,6 @@ builds:
       - -X "github.com/alice-lg/alice-lg/pkg/config.Version={{ .Version }}"
 archives:
   - name_template: 'alice-lg_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
-    replacements:
-      386: i386
-      amd64: x86_64
 
 checksum:
   name_template: 'checksums.txt'

@@ -1,7 +1,7 @@
 
 # Changelog
 
-## 6.1.0
+## 6.1.0 (2024-02-12)
 
  * Added memory pools for deduplicating route information.
    This drastically reduces the memory consumption.
@@ -22,7 +22,7 @@
 
  * Examples for the global search can be added using the
    theme's `Alice.updateContent` API:
-   `{lookup: {examples: [["asn" "AS2342"], ...]}}`. Valid types
+   `{lookup: {examples: [["asn", "AS2342"], ...]}}`. Valid types
    are: `asn`, `community` `prefix` and `q`.
  
  * Performance in search has been improved.
