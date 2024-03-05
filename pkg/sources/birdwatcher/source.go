@@ -36,7 +36,7 @@ type GenericBirdwatcher struct {
 
 // NewBirdwatcher creates a new Birdwatcher instance.
 // This might be either a GenericBirdWatcher or a MultiTableBirdwatcher.
-func NewBirdwatcher(config Config) Birdwatcher {
+func NewBirdwatcher(config *Config) Birdwatcher {
 	client := NewClient(config.API)
 
 	// Cache settings:
@@ -58,7 +58,7 @@ func NewBirdwatcher(config Config) Birdwatcher {
 	if config.Type == "single_table" {
 		singleTableBirdwatcher := new(SingleTableBirdwatcher)
 
-		singleTableBirdwatcher.config = config
+		singleTableBirdwatcher.config = *config
 		singleTableBirdwatcher.client = client
 
 		singleTableBirdwatcher.neighborsCache = neighborsCache
@@ -72,7 +72,7 @@ func NewBirdwatcher(config Config) Birdwatcher {
 	} else if config.Type == "multi_table" {
 		multiTableBirdwatcher := new(MultiTableBirdwatcher)
 
-		multiTableBirdwatcher.config = config
+		multiTableBirdwatcher.config = *config
 		multiTableBirdwatcher.client = client
 
 		multiTableBirdwatcher.neighborsCache = neighborsCache
@@ -247,6 +247,10 @@ func (b *GenericBirdwatcher) NeighborsStatus(ctx context.Context) (
 
 	// Parse the neighbors short
 	neighbors, err := parseNeighborsShort(birdProtocols, b.config)
+	if err != nil {
+		return nil, err
+	}
+	neighbors, err = sources.FilterHiddenNeighborsStatus(neighbors, b.config.HiddenNeighbors)
 	if err != nil {
 		return nil, err
 	}

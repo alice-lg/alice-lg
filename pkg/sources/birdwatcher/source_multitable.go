@@ -11,6 +11,7 @@ import (
 	"github.com/alice-lg/alice-lg/pkg/api"
 	"github.com/alice-lg/alice-lg/pkg/decoders"
 	"github.com/alice-lg/alice-lg/pkg/pools"
+	"github.com/alice-lg/alice-lg/pkg/sources"
 )
 
 // MultiTableBirdwatcher implements a birdwatcher with
@@ -510,6 +511,11 @@ func (src *MultiTableBirdwatcher) Neighbors(
 			neighbor.RoutesAccepted -= pipeRoutesFiltered
 			neighbor.RoutesFiltered += pipeRoutesFiltered
 		}
+	}
+
+	neighbors, err = sources.FilterHiddenNeighbors(neighbors, src.config.HiddenNeighbors)
+	if err != nil {
+		return nil, err
 	}
 
 	response = &api.NeighborsResponse{

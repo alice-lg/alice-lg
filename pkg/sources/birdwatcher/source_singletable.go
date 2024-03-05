@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
+	"github.com/alice-lg/alice-lg/pkg/sources"
 )
 
 // SingleTableBirdwatcher is an Alice Source
@@ -155,6 +156,11 @@ func (src *SingleTableBirdwatcher) Neighbors(
 
 	// Parse the neighbors
 	neighbors, err := parseNeighbors(bird, src.config)
+	if err != nil {
+		return nil, err
+	}
+
+	neighbors, err = sources.FilterHiddenNeighbors(neighbors, src.config.HiddenNeighbors)
 	if err != nil {
 		return nil, err
 	}

@@ -2,9 +2,6 @@ package config
 
 import (
 	"testing"
-
-	"github.com/alice-lg/alice-lg/pkg/sources/birdwatcher"
-	"github.com/alice-lg/alice-lg/pkg/sources/gobgp"
 )
 
 // Test configuration loading and parsing
@@ -58,14 +55,13 @@ func TestSourceConfig(t *testing.T) {
 	rs2 := config.Sources[1] // Birdwatcher v6
 	rs3 := config.Sources[2] // GoBGP
 
-	nilBirdwatcherConfig := birdwatcher.Config{}
-	if rs1.Birdwatcher == nilBirdwatcherConfig {
+	if rs1.Backend == SourceBackendBirdwatcher {
 		t.Errorf(
 			"Example routeserver %s should have been identified as a birdwatcher source but was not",
 			rs1.Name,
 		)
 	}
-	if rs2.Birdwatcher == nilBirdwatcherConfig {
+	if rs2.Backend == SourceBackendBirdwatcher {
 		t.Errorf(
 			"Example routeserver %s should have been identified as a birdwatcher source but was not",
 			rs2.Name,
@@ -78,8 +74,7 @@ func TestSourceConfig(t *testing.T) {
 			t.Error("Unexpected StreamParserThrottle", rs2.Birdwatcher.StreamParserThrottle)
 		}
 	}
-	nilGoBGPConfig := gobgp.Config{}
-	if rs3.GoBGP == nilGoBGPConfig {
+	if rs3.Backend == SourceBackendGoBGP {
 		t.Errorf(
 			"Example routeserver %s should have been identified as a gobgp source but was not",
 			rs3.Name,

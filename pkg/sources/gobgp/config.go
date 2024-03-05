@@ -2,8 +2,9 @@ package gobgp
 
 // Config is a GoBGP source config
 type Config struct {
-	ID   string
-	Name string
+	ID              string
+	Name            string
+	HiddenNeighbors []string
 
 	Host     string `ini:"host"`
 	Insecure bool   `ini:"insecure"`
