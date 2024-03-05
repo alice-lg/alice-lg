@@ -72,7 +72,7 @@ type Rpki struct {
 }
 
 // Meta contains response meta information
-// like cacheing time and cache ttl or the API version
+// like caching time and cache ttl or the API version
 type Meta struct {
 	Version         string           `json:"version"`
 	CacheStatus     CacheStatus      `json:"cache_status"`

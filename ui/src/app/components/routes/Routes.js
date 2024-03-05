@@ -117,7 +117,7 @@ const RoutesNotExported = createRoutesSet(
 
 /**
  * Show a button to load routes not exported on demand.
- * IF config states loading routes shoud be done automatically
+ * IF config states loading routes should be done automatically
  * update the query parameter.
  */
 const RoutesNotExportedRequest = () => {

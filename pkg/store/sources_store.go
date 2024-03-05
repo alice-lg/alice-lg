@@ -190,7 +190,7 @@ func (s *SourcesStore) ShouldRefresh(
 	}
 	if status.State == StateError {
 		// The refresh interval in the config is ok if the
-		// success case. When an error occures it is desirable
+		// success case. When an error occurs it is desirable
 		// to retry sooner, without spamming the server.
 		nextRefresh = status.LastRefresh.Add(10 * time.Second)
 	}
@@ -202,7 +202,7 @@ func (s *SourcesStore) ShouldRefresh(
 	return true // Go for it
 }
 
-// CachedAt retrievs the oldest refresh time
+// CachedAt retrieves the oldest refresh time
 // from all sources. All data is then guaranteed to be older
 // than the CachedAt date.
 func (s *SourcesStore) CachedAt(ctx context.Context) time.Time {

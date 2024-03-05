@@ -262,7 +262,7 @@ const NeighborColumn = ({neighbor, column}) => {
     "Description": ColDescription,
   };
 
-  // For openbgpd the value is ommitted
+  // For openbgpd the value is omitted
   if (rs.type === "openbgpd") {
       widgets["routes_not_exported"] = ColNotAvailable;
   }

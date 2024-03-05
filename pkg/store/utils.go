@@ -14,11 +14,11 @@ func ContainsCi(s, substr string) bool {
 	)
 }
 
-// SerializeReasons asserts the bgp communitiy parts are
+// SerializeReasons asserts the bgp community parts are
 // actually strings, because there are no such things as
 // integers as keys in json.
 // Serialization of this is undefined behaviour, so we
-// keep these interallybut provide a string as a key for
+// keep these internally but provide a string as a key for
 // serialization
 func SerializeReasons(reasons map[int]string) map[string]string {
 	res := make(map[string]string)

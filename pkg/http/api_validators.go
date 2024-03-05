@@ -19,7 +19,7 @@ func (err *ErrValidationFailed) Error() string {
 	return err.Reason
 }
 
-// NewErrMissingParam returns a new error idicating
+// NewErrMissingParam returns a new error indicating
 // a missing query parameter.
 func NewErrMissingParam(key string) *ErrValidationFailed {
 	return &ErrValidationFailed{
@@ -28,12 +28,12 @@ func NewErrMissingParam(key string) *ErrValidationFailed {
 	}
 }
 
-// NewErrAmbigousParam returns an ErrValidationFailed,
-// indicating that the parameter was ambigous.
-func NewErrAmbigousParam(key string) *ErrValidationFailed {
+// NewErrAmbiguousParam returns an ErrValidationFailed,
+// indicating that the parameter was ambiguous.
+func NewErrAmbiguousParam(key string) *ErrValidationFailed {
 	return &ErrValidationFailed{
 		Param:  key,
-		Reason: fmt.Sprintf("query parameter %s is ambigous", key),
+		Reason: fmt.Sprintf("query parameter %s is ambiguous", key),
 	}
 }
 
@@ -79,7 +79,7 @@ func validateQueryString(req *http.Request, key string) (string, error) {
 	}
 
 	if len(values) != 1 {
-		return "", NewErrAmbigousParam(key)
+		return "", NewErrAmbiguousParam(key)
 	}
 
 	value := values[0]

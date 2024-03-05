@@ -93,7 +93,7 @@ func (gobgp *GoBGP) ExpireCaches() int {
 	return count
 }
 
-// NeighborsStatus retrievs all status information
+// NeighborsStatus retrieves all status information
 // for all peers on the RS.
 func (gobgp *GoBGP) NeighborsStatus(
 	ctx context.Context,
@@ -130,12 +130,13 @@ func (gobgp *GoBGP) NeighborsStatus(
 				_resp.Peer.Timers.State.Uptime.Seconds,
 				int64(_resp.Peer.Timers.State.Uptime.Nanos)))
 		}
+		response.Neighbors = append(response.Neighbors, &ns)
 
 	}
 	return &response, nil
 }
 
-// Status retrievs the routers status
+// Status retrieves the routers status
 func (gobgp *GoBGP) Status(
 	ctx context.Context,
 ) (*api.StatusResponse, error) {
@@ -154,7 +155,7 @@ func (gobgp *GoBGP) Status(
 	return &response, nil
 }
 
-// Neighbors retrievs a list of neighbors
+// Neighbors retrieves a list of neighbors
 func (gobgp *GoBGP) Neighbors(
 	ctx context.Context,
 ) (*api.NeighborsResponse, error) {

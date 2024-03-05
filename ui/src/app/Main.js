@@ -76,7 +76,7 @@ const Routing = () => (
 
 /**
  * The application main entry point.
- * Instanciate global providers and the router.
+ * Instantiate global providers and the router.
  */
 const Main = () => {
   return (

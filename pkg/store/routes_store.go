@@ -142,7 +142,7 @@ func (s *RoutesStore) safeUpdateSource(ctx context.Context, id string) {
 	}
 
 	if err := s.sources.LockSource(id); err != nil {
-		log.Println("Cloud not start routes refresh:", err)
+		log.Println("[routes store] could not start routes refresh:", err)
 		return
 	}
 
@@ -153,28 +153,28 @@ func (s *RoutesStore) safeUpdateSource(ctx context.Context, id string) {
 	src := s.sources.Get(id)
 	srcName := s.sources.GetName(id)
 
-	log.Println("[routes store] begin routes refresh of:", srcName)
+	log.Println("[routes store] begin routes refresh from", srcName)
 
 	// Prepare for impact.
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(
-				"Recovering after failed routes refresh of",
-				src.Name, "from:", err)
+				"[routes store] recovering after failed routes refresh from",
+				src.Name, "with error:", err)
 			s.sources.RefreshError(id, err)
 		}
 	}()
 
 	if err := s.updateSource(ctx, src); err != nil {
 		log.Println(
-			"Refeshing routes of", src.Name, "failed:", err)
+			"[routes store] refreshing routes from", src.Name, "failed:", err)
 		s.sources.RefreshError(id, err)
 	} else {
 		status, err := s.sources.GetStatus(id)
 		if err != nil {
 			log.Println(err)
 		} else {
-			log.Println("Refreshed routes of", srcName, "in", status.LastRefreshDuration)
+			log.Println("[routes store] refreshed routes from", srcName, "in", status.LastRefreshDuration)
 		}
 	}
 }
@@ -194,7 +194,7 @@ func (s *RoutesStore) updateSource(
 		return err
 	}
 
-	log.Println("[routes store] finished fetching routes dump from RS", src.Name)
+	log.Println("[routes store] finished fetching routes dump from", src.Name)
 
 	neighbors, err := s.neighbors.GetNeighborsMapAt(ctx, src.ID)
 	if err != nil {
@@ -203,7 +203,7 @@ func (s *RoutesStore) updateSource(
 
 	log.Println(
 		"[routes store] retrieved", len(res.Imported),
-		"accepted and", len(res.Filtered), "filtered routes for:", src.Name)
+		"accepted and", len(res.Filtered), "filtered routes from", src.Name)
 
 	// Prepare imported routes for lookup
 	srcRS := &api.LookupRouteServer{
@@ -214,11 +214,11 @@ func (s *RoutesStore) updateSource(
 	filtered := res.Filtered.ToLookupRoutes("filtered", srcRS, neighbors)
 	lookupRoutes := append(imported, filtered...)
 
-	log.Println("[routes store] importing", len(lookupRoutes), "into store from", src.Name)
+	log.Println("[routes store] importing", len(lookupRoutes), "routes into store from", src.Name)
 	if err = s.backend.SetRoutes(ctx, src.ID, lookupRoutes); err != nil {
 		return err
 	}
-	log.Println("[routes store] import success")
+	log.Println("[routes store] successfully imported", len(lookupRoutes), "routes into store from", src.Name)
 
 	return s.sources.RefreshSuccess(src.ID)
 }
@@ -277,7 +277,7 @@ func (s *RoutesStore) Stats(ctx context.Context) *api.RoutesStoreStats {
 	for _, sourceID := range s.sources.GetSourceIDs() {
 		status, err := s.sources.GetStatus(sourceID)
 		if err != nil {
-			log.Println("error while getting source status:", err)
+			log.Println("[routes store] error while getting source status:", err)
 			continue
 		}
 
@@ -285,7 +285,7 @@ func (s *RoutesStore) Stats(ctx context.Context) *api.RoutesStoreStats {
 		nImported, nFiltered, err := s.backend.CountRoutesAt(ctx, sourceID)
 		if err != nil {
 			if !errors.Is(err, sources.ErrSourceNotFound) {
-				log.Println("error during routes count:", err)
+				log.Println("[routes store] error during routes count:", err)
 			}
 		}
 

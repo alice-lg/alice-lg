@@ -19,11 +19,17 @@ const Sidebar = () => {
       <div className="sidebar-header">
         <div className="logo">
           <Link to='/'>
-            <i>{/* Theme compatbility */}
-            <FontAwesomeIcon 
-              className="logo-icon"
-              icon={faCloud} size="lg" transform="grow-11" />
-            </i>
+            <span>
+              <Content id="header.logo">
+                <i>
+                  <FontAwesomeIcon
+                    className="logo-icon"
+                    icon={faCloud}
+                    size="lg"
+                    transform="grow-11" />
+                </i>
+              </Content>
+            </span>
           </Link>
         </div>
         <div className="title">
