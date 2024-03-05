@@ -123,13 +123,13 @@ const Section = ({state}) => {
       sectionTitle  = 'BGP Sessions Established';
       sectionCls  += 'established ';
       break;
+    case 'idle':
+      sectionTitle = 'Idle BGP Sessions';
+      sectionCls += 'idle ';
+      break;
     case 'down':
       sectionTitle = 'BGP Sessions Down';
       sectionCls += 'down ';
-      break;
-    case 'start':
-      sectionTitle = 'BGP Sessions Start';
-      sectionCls += '';
       break;
     default:
   }
