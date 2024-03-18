@@ -1,5 +1,5 @@
 
-import { faCircleExclamation }
+import { faTriangleExclamation }
   from '@fortawesome/free-solid-svg-icons';
 
 import { useRejectCandidate }
@@ -22,7 +22,7 @@ const RejectCandidateIndicator = ({route}) => {
 
   return (
     <span className="route-prefix-flag reject-candidate-route">
-      <FlagIcon icon={faCircleExclamation} tooltip="Reject Candidate" />
+      <FlagIcon icon={faTriangleExclamation} tooltip="Reject Candidate" />
     </span>
   );
 }
