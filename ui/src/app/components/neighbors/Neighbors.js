@@ -87,9 +87,9 @@ const Neighbors = () => {
       let s = n.state.toLowerCase();
       if (s.includes("up") || s.includes("established") ) {
         up.push(n);
-      } else if (s.includes("down")) {
+      } else if (s.includes("down") || s.includes("start") || s.includes("active") || s.includes("connect")) {
         down.push(n);
-      } else if (s.includes("start") || s.includes("active")) {
+      } else if (s.includes("idle")) {
         idle.push(n);
       } else {
         console.error("Couldn't classify neighbor by state:", n);
