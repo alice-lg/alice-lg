@@ -3,8 +3,9 @@ package birdwatcher
 // Config contains all configuration attributes
 // for a birdwatcher based source.
 type Config struct {
-	ID   string
-	Name string
+	ID              string
+	Name            string
+	HiddenNeighbors []string
 
 	API             string `ini:"api"`
 	Timezone        string `ini:"timezone"`
