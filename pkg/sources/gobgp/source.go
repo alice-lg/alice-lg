@@ -1,7 +1,7 @@
 package gobgp
 
 import (
-	gobgpapi "github.com/osrg/gobgp/api"
+	gobgpapi "github.com/osrg/gobgp/v3/api"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
@@ -179,7 +179,7 @@ func (gobgp *GoBGP) Neighbors(
 		neigh := api.Neighbor{}
 
 		neigh.Address = _resp.Peer.State.NeighborAddress
-		neigh.ASN = int(_resp.Peer.State.PeerAs)
+		neigh.ASN = int(_resp.Peer.State.PeerAsn)
 		switch _resp.Peer.State.SessionState {
 		case gobgpapi.PeerState_ESTABLISHED:
 			neigh.State = "up"

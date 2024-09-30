@@ -19,8 +19,8 @@ import (
 	"testing"
 
 	"github.com/golang/protobuf/ptypes"
-	api "github.com/osrg/gobgp/api"
-	"github.com/osrg/gobgp/pkg/packet/bgp"
+	api "github.com/osrg/gobgp/v3/api"
+	"github.com/osrg/gobgp/v3/pkg/packet/bgp"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -142,8 +142,8 @@ func Test_GracefulRestartCapability(t *testing.T) {
 func Test_FourOctetASNumberCapability(t *testing.T) {
 	assert := assert.New(t)
 
-	input := &api.FourOctetASNumberCapability{
-		As: 100,
+	input := &api.FourOctetASNCapability{
+		Asn: 100,
 	}
 
 	a, err := ptypes.MarshalAny(input)
@@ -168,7 +168,7 @@ func Test_AddPathCapability(t *testing.T) {
 					Afi:  api.Family_AFI_IP,
 					Safi: api.Family_SAFI_UNICAST,
 				},
-				Mode: api.AddPathMode_MODE_BOTH,
+				Mode: api.AddPathCapabilityTuple_BOTH,
 			},
 		},
 	}
