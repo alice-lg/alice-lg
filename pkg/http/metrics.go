@@ -98,7 +98,7 @@ func (s *Server) registerMetrics(
 			select {
 			case <-ctx.Done():
 				return
-			case <-time.After(time.Second):
+			case <-time.After(time.Second * 5):
 				routeServers, err := s.apiRouteServersList(ctx, nil, nil)
 				if err != nil {
 					log.Println("[metrics] error getting route servers: ", err)
