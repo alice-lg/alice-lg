@@ -96,6 +96,7 @@ type ServerConfig struct {
 	DefaultAsn                        int    `ini:"asn"`
 	EnableNeighborsStatusRefresh      bool   `ini:"enable_neighbors_status_refresh"`
 	StreamParserThrottle              int    `ini:"stream_parser_throttle"`
+	EnablePrometheus                  bool   `ini:"enable_prometheus"`
 }
 
 // PostgresConfig is the configuration for the database
@@ -945,6 +946,7 @@ func LoadConfig(file string) (*Config, error) {
 		RoutesStoreRefreshParallelism:     1,
 		NeighborsStoreRefreshParallelism:  1,
 		RoutesStoreQueryLimit:             DefaultRoutesStoreQueryLimit,
+		EnablePrometheus:                  true,
 	}
 	if err := parsedConfig.Section("server").MapTo(&server); err != nil {
 		return nil, err
