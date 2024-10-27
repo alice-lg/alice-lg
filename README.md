@@ -126,7 +126,7 @@ neighbors_refresh_timeout = 2
 # type = single_table / multi_table
 type = multi_table
 # not needed for single_table
-neighbor_table_prefix = T
+peer_table_prefix = T
 pipe_protocol_prefix = M
 
 [source.rs1-example-v6]
