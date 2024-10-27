@@ -26,26 +26,26 @@ func (s *Server) registerMetrics(
 		"route_server_id",
 		"route_server_name",
 		"route_server_group",
-		"peer_id",
-		"peer_description",
-		"peer_asn",
-		"peer_address",
+		"neighbor_id",
+		"neighbor_description",
+		"neighbor_asn",
+		"neighbor_address",
 	}
 
 	s.routesStore.Stats(ctx)
 
-	peerState := prometheus.NewGaugeVec(
+	neighborState := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Name: "peer_state",
-			Help: "The state of a peer in a route server (0 = down, 1 = up)",
+			Name: "neighbor_state",
+			Help: "The state of a neighbor in a route server (0 = down, 1 = up)",
 		},
 		labels,
 	)
 
-	peerUptime := prometheus.NewGaugeVec(
+	neighborUptime := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Name: "peer_uptime",
-			Help: "The uptime of a peer on a route server in seconds",
+			Name: "neighbor_uptime",
+			Help: "The uptime of a neighbor on a route server in seconds",
 		},
 		labels,
 	)
@@ -53,7 +53,7 @@ func (s *Server) registerMetrics(
 	routesReceived := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "routes_received",
-			Help: "Total number of routes received by a route server",
+			Help: "Total number of routes received by a route server for a given neighbor",
 		},
 		labels,
 	)
@@ -61,7 +61,7 @@ func (s *Server) registerMetrics(
 	routesFiltered := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "routes_filtered",
-			Help: "Total number of routes filtered by a route server",
+			Help: "Total number of routes filtered by a route server for a given neighbor",
 		},
 		labels,
 	)
@@ -69,7 +69,7 @@ func (s *Server) registerMetrics(
 	routesPreferred := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "routes_preferred",
-			Help: "Total number of routes preferred by a route server",
+			Help: "Total number of routes preferred by a route server for a given neighbor",
 		},
 		labels,
 	)
@@ -77,13 +77,13 @@ func (s *Server) registerMetrics(
 	routesAccepted := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "routes_accepted",
-			Help: "Total number of routes accepted by a route server",
+			Help: "Total number of routes accepted by a route server for a given neighbor",
 		},
 		labels,
 	)
 
-	prometheus.MustRegister(peerState)
-	prometheus.MustRegister(peerUptime)
+	prometheus.MustRegister(neighborState)
+	prometheus.MustRegister(neighborUptime)
 	prometheus.MustRegister(routesReceived)
 	prometheus.MustRegister(routesFiltered)
 	prometheus.MustRegister(routesPreferred)
@@ -93,7 +93,7 @@ func (s *Server) registerMetrics(
 	router.Handler("GET", "/metrics", promhttp.Handler())
 
 	go func() {
-		// Every second, update the metrics with the latest data
+		// Every 5 second, update the metrics with the latest data from the cache
 		for {
 			select {
 			case <-ctx.Done():
@@ -106,7 +106,6 @@ func (s *Server) registerMetrics(
 				}
 
 				for _, routeServer := range routeServers.(api.RouteServersResponse).RouteServers {
-					// Get all peers
 					neighbors, err := s.apiNeighborsList(ctx, nil, httprouter.Params{{Key: "id", Value: routeServer.ID}})
 					if err != nil {
 						log.Println("[metrics] error getting neighbors:", err)
@@ -115,13 +114,13 @@ func (s *Server) registerMetrics(
 
 					for _, neighbor := range neighbors.(*api.NeighborsResponse).Neighbors {
 						labels := prometheus.Labels{
-							"route_server_id":    routeServer.ID,
-							"route_server_name":  routeServer.Name,
-							"route_server_group": routeServer.Group,
-							"peer_id":            neighbor.ID,
-							"peer_description":   neighbor.Description,
-							"peer_asn":           strconv.Itoa(neighbor.ASN),
-							"peer_address":       neighbor.Address,
+							"route_server_id":      routeServer.ID,
+							"route_server_name":    routeServer.Name,
+							"route_server_group":   routeServer.Group,
+							"neighbor_id":          neighbor.ID,
+							"neighbor_description": neighbor.Description,
+							"neighbor_asn":         strconv.Itoa(neighbor.ASN),
+							"neighbor_address":     neighbor.Address,
 						}
 
 						state := float64(0)
@@ -129,8 +128,8 @@ func (s *Server) registerMetrics(
 							state = 1
 						}
 
-						peerState.With(labels).Set(state)
-						peerUptime.With(labels).Set(neighbor.Uptime.Seconds())
+						neighborState.With(labels).Set(state)
+						neighborUptime.With(labels).Set(neighbor.Uptime.Seconds())
 						routesReceived.With(labels).Set(float64(neighbor.RoutesReceived))
 						routesFiltered.With(labels).Set(float64(neighbor.RoutesFiltered))
 						routesPreferred.With(labels).Set(float64(neighbor.RoutesPreferred))

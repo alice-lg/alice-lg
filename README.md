@@ -126,7 +126,7 @@ neighbors_refresh_timeout = 2
 # type = single_table / multi_table
 type = multi_table
 # not needed for single_table
-peer_table_prefix = T
+neighbor_table_prefix = T
 pipe_protocol_prefix = M
 
 [source.rs1-example-v6]
@@ -238,8 +238,8 @@ format.
 
 The following metrics are available:
 
-- `peer_state` - The state of the BGP peers (1 = established, 0 = not established)
-- `peer_uptime` - The uptime of the BGP peers in seconds
+- `neighbor_state` - The state of the BGP peers (1 = established, 0 = not established)
+- `neighbor_uptime` - The uptime of the BGP peers in seconds
 - `routes_accepted` - The number of routes accepted from a peer
 - `routes_filtered` - The number of routes filtered from a peer
 - `routes_preferred` - The number of routes preferred from a peer
@@ -247,10 +247,10 @@ The following metrics are available:
 
 The following labels are available:
 
-- `peer_address` - The address of the BGP peer
-- `peer_asn` - The ASN of the BGP peer
-- `peer_description` - The description of the BGP peer
-- `peer_id` - The ID of the BGP peer
+- `neighbor_address` - The address of the BGP peer
+- `neighbor_asn` - The ASN of the BGP peer
+- `neighbor_description` - The description of the BGP peer
+- `neighbor_id` - The ID of the BGP peer
 - `route_server_group` - The group of the route server
 - `route_server_id` - The ID of the route server
 - `route_server_name` - The name of the route server
