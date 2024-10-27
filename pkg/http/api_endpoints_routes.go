@@ -67,7 +67,7 @@ func (s *Server) apiRoutesListReceived(
 	allRoutes := apiQueryFilterNextHopGateway(req, "q", result.Imported)
 	routes := api.Routes{}
 
-	// Apply other (commmunity) filters
+	// Apply other (community) filters
 	filtersApplied, err := api.FiltersFromQuery(req.URL.Query())
 	if err != nil {
 		return nil, err
@@ -145,7 +145,7 @@ func (s *Server) apiRoutesListFiltered(
 	allRoutes := apiQueryFilterNextHopGateway(req, "q", result.Filtered)
 	routes := api.Routes{}
 
-	// Apply other (commmunity) filters
+	// Apply other (community) filters
 	filtersApplied, err := api.FiltersFromQuery(req.URL.Query())
 	if err != nil {
 		return nil, err
@@ -223,7 +223,7 @@ func (s *Server) apiRoutesListNotExported(
 	allRoutes := apiQueryFilterNextHopGateway(req, "q", result.NotExported)
 	routes := api.Routes{}
 
-	// Apply other (commmunity) filters
+	// Apply other (community) filters
 	filtersApplied, err := api.FiltersFromQuery(req.URL.Query())
 	if err != nil {
 		return nil, err

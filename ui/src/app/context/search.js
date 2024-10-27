@@ -61,7 +61,7 @@ const initialState = {
 }
 
 /**
- * useSearchParam retrievs the query parameter
+ * useSearchParam retrieves the query parameter
  */
 export const useSearchQuery = () => {
   const [query] = useQuery({
@@ -125,7 +125,7 @@ const decodeSearchResult = (result) => {
 
 
 /**
- * useSearchResult retrievs the url and returns the state
+ * useSearchResult retrieves the url and returns the state
  */
 const useSearchResults = ({
   query,
@@ -207,7 +207,7 @@ export const SearchStatusProvider = ({children, api}) => {
 
 /**
  * RoutesSearchProvider provides routes received, filtered
- * and not exportet.
+ * and not exported.
  */
 export const RoutesSearchProvider = ({
   children,

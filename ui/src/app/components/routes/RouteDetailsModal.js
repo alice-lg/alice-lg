@@ -10,7 +10,7 @@ import { Modal
        , ModalFooter
        }
   from 'app/components/modal/Modal';
-import BgpCommunitiyLabel
+import BgpCommunityLabel
   from 'app/components/routes/BgpCommunityLabel';
 import { RouteAgeDetails } 
   from 'app/components/routes/Age';
@@ -78,21 +78,21 @@ const RouteDetailsModal = () => {
                 <tr>
                   <th>Communities:</th>
                   <td>
-                    {communities.map((c) => <BgpCommunitiyLabel community={c} key={communityKey(c)} />)}
+                    {communities.map((c) => <BgpCommunityLabel community={c} key={communityKey(c)} />)}
                   </td>
                 </tr>}
             {extCommunities.length > 0 &&
               <tr>
                 <th>Ext. Communities:</th>
                 <td>
-                    {extCommunities.map((c) => <BgpCommunitiyLabel community={c} key={communityKey(c)} />)}
+                    {extCommunities.map((c) => <BgpCommunityLabel community={c} key={communityKey(c)} />)}
                 </td>
               </tr>}
             {largeCommunities.length > 0 &&
                 <tr>
                   <th>Large Communities:</th>
                   <td>
-                    {largeCommunities.map((c) => <BgpCommunitiyLabel community={c} key={communityKey(c)} />)}
+                    {largeCommunities.map((c) => <BgpCommunityLabel community={c} key={communityKey(c)} />)}
                   </td>
                 </tr>}
            </tbody>

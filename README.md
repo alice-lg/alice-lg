@@ -1,28 +1,36 @@
 # Alice-LG - Your friendly looking glass
-
 __"No, no! The adventures first, explanations take such a dreadful time."__  
 _Lewis Carroll, Alice's Adventures in Wonderland & Through the Looking-Glass_
 
 Take a look at Alice-LG production examples at:
-
-- https://lg.de-cix.net/
 - https://lg.ams-ix.net
-- https://lg.bcix.de/
-- https://lg.megaport.com/
-- https://lg.netnod.se/
-- https://alice-rs.linx.net/
-- https://lg.ix.br/
+- https://lg.bcix.de
+- https://lg.dd-ix.net
+- https://lg.de-cix.net
+- https://glass.gigapix.pt
+- https://lg.ix.br
+- https://alice.sfmix.org/
+- https://alice-rs.linx.net
+- https://lg.megaport.com
+- https://lg.netnod.se
+- https://lg.s-ix.de
+- https://lg.top-ix.org
+- https://alice.sfmix.org/
 - https://lg.ix.asn.au/
 - https://lg.ix.nz/
 
-And checkout the API at:
+And check out the API at:
 
 - https://lg.de-cix.net/api/v1/config
+- https://lg.de-cix.net/api/v1/status
 - https://lg.de-cix.net/api/v1/routeservers
 - https://lg.de-cix.net/api/v1/routeservers/rs1_fra_ipv4/status
 - https://lg.de-cix.net/api/v1/routeservers/rs1_fra_ipv4/neighbors
-- https://lg.de-cix.net/api/v1/routeservers/rs1_fra_ipv4/neighbors/R194_106/routes
+- https://lg.de-cix.net/api/v1/routeservers/rs1_fra_ipv4/neighbors/R194_106/routes/received
+- https://lg.de-cix.net/api/v1/routeservers/rs1_fra_ipv4/neighbors/R194_106/routes/filtered
+- https://lg.de-cix.net/api/v1/routeservers/rs1_fra_ipv4/neighbors/R194_106/routes/not-exported
 - https://lg.de-cix.net/api/v1/lookup/prefix?q=217.115.0.0
+
 
 ## Breaking Changes
 
@@ -38,32 +46,23 @@ The spelling of "neighbors" is now harmonized. Please update your config and
 replace e.g. neighbour.asn with neighbor.asn (in case of java script errors).
 
 ## Explanations
-
 Alice-LG is a BGP looking glass which gets its data from external APIs.
 
 Currently Alice-LG supports the following APIs:
-
 - [birdwatcher API](https://github.com/alice-lg/birdwatcher) for [BIRD](http://bird.network.cz/)
 - [GoBGP](https://osrg.github.io/gobgp/)
-- [bgplgd](https://man.openbsd.org/bgplgd)
-  or [`openbgpd-state-server`](https://github.com/alice-lg/openbgpd-state-server)
-  for [OpenBGP](https://www.openbgpd.org/)
+- [bgplgd](https://man.openbsd.org/bgplgd) or [`openbgpd-state-server`](https://github.com/alice-lg/openbgpd-state-server) for [OpenBGP](https://www.openbgpd.org/)
 
 ### Birdwatcher
-
-Normally you would first install the [birdwatcher API](https://github.com/alice-lg/birdwatcher) directly on the machine(
-s) where you run [BIRD](http://bird.network.cz/) on
-and then install Alice-LG on a seperate public facing server and point her to the afore
-mentioned [birdwatcher API](https://github.com/alice-lg/birdwatcher).
+Normally you would first install the [birdwatcher API](https://github.com/alice-lg/birdwatcher) directly on the machine(s) where you run [BIRD](http://bird.network.cz/) on
+and then install Alice-LG on a separate public facing server and point her to the afore mentioned [birdwatcher API](https://github.com/alice-lg/birdwatcher).
 
 This project was a direct result of the [RIPE IXP Tools Hackathon](https://atlas.ripe.net/hackathon/ixp-tools/)
 just prior to [RIPE73](https://ripe73.ripe.net/) in Madrid, Spain.
 
-Major thanks to Barry O'Donovan who built the original [INEX Bird's Eye](https://github.com/inex/birdseye) BIRD API of
-which Alice-LG is a spinnoff
+Major thanks to Barry O'Donovan who built the original [INEX Bird's Eye](https://github.com/inex/birdseye) BIRD API of which Alice-LG is a spinnoff
 
 ### GoBGP
-
 Alice-LG supports direct integration with GoBGP instances using gRPC.
 See the configuration section for more detail.
 
@@ -73,23 +72,17 @@ Alice-LG supports OpenBGP via [`bgplgd`](https://man.openbsd.org/bgplgd)
 and [`openbgpd-state-server`](https://github.com/alice-lg/openbgpd-state-server).
 
 ## Building Alice-LG from scratch
-
-__These examples include setting up your Go environment, if you already have set that up then you can obviously skip
-that__
+__These examples include setting up your Go environment, if you already have set that up then you can obviously skip that__
 
 ### CentOS:
-
 First add the following lines at the end of your `~/.bash_profile`:
-
 ```bash
 GOPATH=$HOME/go
 export GOPATH
 PATH=$PATH:$GOPATH/bin
 export PATH
 ```
-
 Now run:
-
 ```bash
 source ~/.bash_profile
 
@@ -105,9 +98,7 @@ git clone https://github.com/alice-lg/alice-lg.git
 cd alice-lg
 make
 ```
-
-Your Alice-LG source will now be located at `~/go/src/github.com/alice-lg/alice-lg` and your alice-LG executable should
-be at `~/go/src/github.com/alice-lg/alice-lg/bin/alice-lg-linux-amd64`
+Your Alice-LG source will now be located at `~/go/src/github.com/alice-lg/alice-lg` and your alice-LG executable should be at `~/go/src/github.com/alice-lg/alice-lg/bin/alice-lg-linux-amd64`
 
 ## Configuration
 
@@ -120,11 +111,10 @@ You can copy it to any of the following locations:
     etc/alice-lg/alice.local.conf  # local
     /etc/alice-lg/alice.conf       # global
 
-You will have to edit the configuration file as you need to point Alice-LG to the correct backend source. Multiple
-sources can be configured.
+
+You will have to edit the configuration file as you need to point Alice-LG to the correct backend source.  Multiple sources can be configured.
 
 [Birdwatcher](https://github.com/alice-lg/birdwatcher):
-
 ```ini
 [source.rs1-example-v4]
 name = rs1.example.com (IPv4)
@@ -146,7 +136,6 @@ api = http://rs1.example.com:29186/
 ```
 
 [GoBGP](https://osrg.github.io/gobgp/):
-
 ```ini
 [source.rs2-example]
 name = rs2.example.com
@@ -158,9 +147,7 @@ host = rs2.example.com:50051
 # ProcessingTimeout is a timeout in seconds configured per gRPC call to a given GoBGP daemon
 processing_timeout = 300
 ```
-
 Configure TLS with:
-
 ```ini
 tls_crt = /path/to/cert
 tls_common_name = "common name"
@@ -169,7 +156,6 @@ tls_common_name = "common name"
 You can disable TLS with `insecure = true`.
 
 [OpenBGPD](https://www.openbgpd.org/) via `openbgpd-state-server`:
-
 ```ini
 [source.rs-example]
 name = rs-example.openbgpd-state-server
@@ -183,7 +169,6 @@ cache_ttl = 100
 ```
 
 [OpenBGPD](https://www.openbgpd.org/) via `bgplgd`:
-
 ```ini
 [source.rs-example]
 name = rs-example.openbgpd-bgplgd
@@ -202,6 +187,7 @@ Launch the server by running
 
     ./bin/alice-lg-linux-amd64
 
+
 ## Customization
 
 Alice now supports custom themes!
@@ -211,12 +197,13 @@ In your alice.conf, you now can specify a theme by setting:
     path = /path/to/my/alice-theme
 
 with the optional parameter (the "mountpoint" of the theme)
-url_base = /theme
+    url_base = /theme
 
-You can put assets (images, fonts, javscript, css) in
+
+You can put assets (images, fonts, javascript, css) in
 this folder.
 
-Stylesheets and Javascripts are automatically included in
+Stylesheets and JavaScripts are automatically included in
 the client's html and are served from the backend.
 
 Alice provides early stages of an extension API, which is for now
@@ -237,7 +224,7 @@ A callback for running custom javascript after the base application
 was initialized can be installed using:
 
 ```javascript
-Alice.onLayoutReady(function (page) {
+Alice.onLayoutReady(function(page) {
     // page is the layout HTML root element
 });
 ```
@@ -276,7 +263,6 @@ All sources are available in `ui/`.
 `Yarn` is required for building the UI.
 
 Create a fresh UI build with
-
 ```bash
 cd ui/
 make
@@ -295,6 +281,7 @@ backend and run a webpack dev server for the UI.
 The UI is then available on http://localhost:3000/ and on http://localhost:7340/
 the backend will serve the API.
 
+
 ## Sponsors
 
 The development of Alice is now sponsored by
@@ -304,8 +291,7 @@ The development of Alice is now sponsored by
     </a>
 </p>
 
-Many thanks go out to [ECIX](https://www.ecix.net), where this project originated and was backed over the last two
-years.
+Many thanks go out to [ECIX](https://www.ecix.net), where this project originated and was backed over the last two years.
 
 Support for **OpenBGPD** was sponsored by the [Route Server Support Foundation](https://www.rssf.nl/).
 

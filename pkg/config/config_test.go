@@ -35,7 +35,7 @@ func TestLoadConfigs(t *testing.T) {
 		t.Error(err)
 	}
 	if label != "some tag" {
-		t.Error("expcted to find example community 1:23 with 'some tag'",
+		t.Error("expected to find example community 1:23 with 'some tag'",
 			"but got:", label)
 	}
 

@@ -96,7 +96,7 @@ func parseCacheStatus(
 
 	status := api.CacheStatus{
 		CachedAt: cachedAtTime,
-		// We ommit OrigTTL for now...
+		// We omit OrigTTL for now...
 	}
 
 	return status, nil
@@ -286,7 +286,7 @@ func parseBgpCommunities(data interface{}) []api.Community {
 	return communities
 }
 
-// Extract extended communtieis
+// Extract extended communities
 func parseExtBgpCommunities(data interface{}) []api.ExtCommunity {
 	communities := []api.ExtCommunity{}
 	ldata, ok := data.([]interface{})

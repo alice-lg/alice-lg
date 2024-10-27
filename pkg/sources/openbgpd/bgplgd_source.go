@@ -81,7 +81,7 @@ func (src *BgplgdSource) ShowNeighborsSummaryRequest(
 	return http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 }
 
-// ShowNeighborRIBRequest retrives the routes accepted from the neighbor
+// ShowNeighborRIBRequest retrieves the routes accepted from the neighbor
 // identified by bgp-id.
 func (src *BgplgdSource) ShowNeighborRIBRequest(
 	ctx context.Context,
@@ -129,7 +129,7 @@ func (src *BgplgdSource) Status(ctx context.Context) (*api.StatusResponse, error
 	return response, nil
 }
 
-// Neighbors retrievs a full list of all neighbors
+// Neighbors retrieves a full list of all neighbors
 func (src *BgplgdSource) Neighbors(
 	ctx context.Context,
 ) (*api.NeighborsResponse, error) {
@@ -180,7 +180,7 @@ func (src *BgplgdSource) Neighbors(
 	return response, nil
 }
 
-// NeighborsSummary retrievs list of neighbors, which
+// NeighborsSummary retrieves list of neighbors, which
 // might lack details like with number of rejected routes.
 // It is much faster though.
 func (src *BgplgdSource) NeighborsSummary(
@@ -227,8 +227,8 @@ func (src *BgplgdSource) NeighborsSummary(
 	return response, nil
 }
 
-// NeighborsStatus retrives the status summary
-// for all neightbors
+// NeighborsStatus retrieves the status summary
+// for all neighbors
 func (src *BgplgdSource) NeighborsStatus(
 	ctx context.Context,
 ) (*api.NeighborsStatusResponse, error) {
@@ -411,7 +411,7 @@ func (src *BgplgdSource) RoutesFiltered(
 	return response, nil
 }
 
-// RoutesNotExported retrievs the routes not exported
+// RoutesNotExported retrieves the routes not exported
 // from the rs for a neighbor.
 func (src *BgplgdSource) RoutesNotExported(
 	ctx context.Context,
@@ -428,7 +428,7 @@ func (src *BgplgdSource) RoutesNotExported(
 	return response, nil
 }
 
-// AllRoutes retrievs the entire RIB from the source. This is never
+// AllRoutes retrieves the entire RIB from the source. This is never
 // cached as it is processed by the store.
 func (src *BgplgdSource) AllRoutes(
 	ctx context.Context,

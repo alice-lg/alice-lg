@@ -57,7 +57,7 @@ func (p *StringListPool) Acquire(list []string) []string {
 		return p.root.value
 	}
 
-	// Make idenfier list
+	// Make identifier list
 	id := make([]int, len(list))
 	for i, s := range list {
 		// Resolve string value into int

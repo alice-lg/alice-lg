@@ -108,7 +108,7 @@ func (s *NeighborsStore) Start(ctx context.Context) {
 	}
 }
 
-// GetStatus retrievs the status for a route server
+// GetStatus retrieves the status for a route server
 // identified by sourceID.
 func (s *NeighborsStore) GetStatus(sourceID string) (*Status, error) {
 	return s.sources.GetStatus(sourceID)
@@ -150,7 +150,7 @@ func (s *NeighborsStore) safeUpdateSource(ctx context.Context, id string) {
 	}
 
 	if err := s.sources.LockSource(id); err != nil {
-		log.Println("Cloud not start neighbor refresh:", err)
+		log.Println("[neighbors store] could not start neighbor refresh:", err)
 		return
 	}
 
@@ -165,15 +165,15 @@ func (s *NeighborsStore) safeUpdateSource(ctx context.Context, id string) {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println(
-				"Recovering after failed neighbors refresh of",
-				srcName, "from:", err)
+				"[neighbors store] recovering after failed neighbors refresh from",
+				srcName, "with error:", err)
 			s.sources.RefreshError(id, err)
 		}
 	}()
 
 	if err := s.updateSource(ctx, src, id); err != nil {
 		log.Println(
-			"Refeshing neighbors of", srcName, "failed:", err)
+			"[neighbors store] refreshing neighbors from", srcName, "failed:", err)
 		s.sources.RefreshError(id, err)
 	}
 
@@ -181,7 +181,7 @@ func (s *NeighborsStore) safeUpdateSource(ctx context.Context, id string) {
 	if err != nil {
 		log.Println(err)
 	} else {
-		log.Println("Refreshed neighbors of", srcName, "in", status.LastRefreshDuration)
+		log.Println("[neighbors store] refreshed neighbors from", srcName, "in", status.LastRefreshDuration)
 	}
 }
 
@@ -332,7 +332,7 @@ func (s *NeighborsStore) Stats(
 		ncount, err := s.backend.CountNeighborsAt(ctx, sourceID)
 		if err != nil {
 			if !errors.Is(err, sources.ErrSourceNotFound) {
-				log.Println("error during neighbor count:", err)
+				log.Println("[neighbors store] error during neighbor count:", err)
 			}
 		}
 		totalNeighbors += ncount
@@ -381,7 +381,7 @@ func (s *NeighborsStore) Status(ctx context.Context) *api.StoreStatus {
 func (s *NeighborsStore) SourceCachedAt(sourceID string) time.Time {
 	status, err := s.sources.GetStatus(sourceID)
 	if err != nil {
-		log.Println("error while getting source cached at:", err)
+		log.Println("[neighbors store] error while getting source cached at:", err)
 		return time.Time{}
 	}
 	return status.LastRefresh
