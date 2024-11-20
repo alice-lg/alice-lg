@@ -133,6 +133,11 @@ func main() {
 		go routesStore.Start(ctx)
 	}
 
+	// Start exporting metrics
+	if cfg.Server.EnableMetrics {
+		go store.StartMetrics(ctx, neighborsStore)
+	}
+
 	// Start the Housekeeping
 	go store.StartHousekeeping(ctx, cfg)
 
