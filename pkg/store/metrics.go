@@ -23,8 +23,7 @@ type metrics struct {
 
 // Initialize
 func initMetrics(s *NeighborsStore) *metrics {
-	log.Println(
-		"[metrics] Initializing export")
+	log.Println("[metrics] Initializing export.")
 
 	labels := []string{
 		// The route server ID
@@ -101,6 +100,7 @@ func initMetrics(s *NeighborsStore) *metrics {
 		routesReceived:  routesReceived,
 		routesFiltered:  routesFiltered,
 		routesPreferred: routesPreferred,
+		routesAccepted:  routesAccepted,
 	}
 }
 
@@ -111,7 +111,11 @@ func (m *metrics) update(ctx context.Context) error {
 	// For all route servers, fetch neighbors list and
 	// update statistics.
 	for _, rsID := range rsIDs {
+		if !m.neighborsStore.IsInitialized(rsID) {
+			continue // No data from RS yet
+		}
 		rs := m.neighborsStore.sources.Get(rsID)
+
 		neighbors, err := m.neighborsStore.GetNeighborsAt(ctx, rsID)
 		if err != nil {
 			return err
@@ -170,20 +174,17 @@ func StartMetrics(
 	m := initMetrics(neighborsStore)
 
 	// Every 5 second, update the metrics
-	log.Println(
-		"[metrics] Starting refresh.")
-	go func() {
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			case <-time.After(time.Second * 5):
-				err := m.update(ctx)
-				if err != nil {
-					log.Println(
-						"[metrics] Error while updating:", err)
-				}
+	log.Println("[metrics] Starting refresh.")
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(time.Second * 5):
+			err := m.update(ctx)
+			if err != nil {
+				log.Println(
+					"[metrics] Error while updating:", err)
 			}
 		}
-	}()
+	}
 }
