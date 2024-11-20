@@ -16,6 +16,8 @@ Take a look at Alice-LG production examples at:
 - https://lg.s-ix.de
 - https://lg.top-ix.org
 - https://alice.sfmix.org/
+- https://lg.ix.asn.au/
+- https://lg.ix.nz/
 
 And check out the API at:
 
@@ -228,6 +230,30 @@ Alice.onLayoutReady(function(page) {
 ```
 
 For an example check out: https://github.com/alice-lg/alice-theme-example
+
+## Metrics
+
+When `enable_prometheus` is set to `true` in the configuration, Alice will expose metrics on `/metrics` in Prometheus
+format.
+
+The following metrics are available:
+
+- `neighbor_state` - The state of the BGP peers (1 = established, 0 = not established)
+- `neighbor_uptime` - The uptime of the BGP peers in seconds
+- `routes_accepted` - The number of routes accepted from a peer
+- `routes_filtered` - The number of routes filtered from a peer
+- `routes_preferred` - The number of routes preferred from a peer
+- `routes_received` - The number of routes received from a peer
+
+The following labels are available:
+
+- `neighbor_address` - The address of the BGP peer
+- `neighbor_asn` - The ASN of the BGP peer
+- `neighbor_description` - The description of the BGP peer
+- `neighbor_id` - The ID of the BGP peer
+- `route_server_group` - The group of the route server
+- `route_server_id` - The ID of the route server
+- `route_server_name` - The name of the route server
 
 ## Hacking
 
