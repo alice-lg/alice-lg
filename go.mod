@@ -10,7 +10,7 @@ require (
 	github.com/osrg/gobgp/v3 v3.34.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.10.0
-	google.golang.org/grpc v1.65.0-dev
+	google.golang.org/grpc v1.64.1
 )
 
 require (
