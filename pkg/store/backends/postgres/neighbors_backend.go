@@ -6,7 +6,7 @@ import (
 
 	"github.com/alice-lg/alice-lg/pkg/api"
 
-	"github.com/jackc/pgx/v4"
+	pgx "github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 

@@ -21,8 +21,8 @@ import (
 
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/any"
-	api "github.com/osrg/gobgp/api"
-	"github.com/osrg/gobgp/pkg/packet/bgp"
+	api "github.com/osrg/gobgp/v3/api"
+	"github.com/osrg/gobgp/v3/pkg/packet/bgp"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -134,7 +134,7 @@ func Test_AggregatorAttribute(t *testing.T) {
 	assert := assert.New(t)
 
 	input := &api.AggregatorAttribute{
-		As:      65000,
+		Asn:     65000,
 		Address: "1.1.1.1",
 	}
 
@@ -144,7 +144,7 @@ func Test_AggregatorAttribute(t *testing.T) {
 	assert.Nil(err)
 
 	output := NewAggregatorAttributeFromNative(n.(*bgp.PathAttributeAggregator))
-	assert.Equal(input.As, output.As)
+	assert.Equal(input.Asn, output.Asn)
 	assert.Equal(input.Address, output.Address)
 }
 
@@ -452,7 +452,7 @@ func Test_MpReachNLRIAttribute_EVPN_AD_Route(t *testing.T) {
 	assert := assert.New(t)
 
 	nlris := make([]*any.Any, 0, 1)
-	rd, err := ptypes.MarshalAny(&api.RouteDistinguisherTwoOctetAS{
+	rd, err := ptypes.MarshalAny(&api.RouteDistinguisherTwoOctetASN{
 		Admin:    65000,
 		Assigned: 100,
 	})
@@ -548,7 +548,7 @@ func Test_MpReachNLRIAttribute_EVPN_MC_Route(t *testing.T) {
 	assert := assert.New(t)
 
 	nlris := make([]*any.Any, 0, 1)
-	rd, err := ptypes.MarshalAny(&api.RouteDistinguisherFourOctetAS{
+	rd, err := ptypes.MarshalAny(&api.RouteDistinguisherFourOctetASN{
 		Admin:    65000,
 		Assigned: 100,
 	})
@@ -780,8 +780,8 @@ func Test_MpReachNLRIAttribute_RTC_UC(t *testing.T) {
 	})
 	assert.Nil(err)
 	a, err := ptypes.MarshalAny(&api.RouteTargetMembershipNLRI{
-		As: 65000,
-		Rt: rt,
+		Asn: 65000,
+		Rt:  rt,
 	})
 	assert.Nil(err)
 	nlris = append(nlris, a)
@@ -1187,7 +1187,7 @@ func Test_ExtendedCommunitiesAttribute(t *testing.T) {
 	a, err := ptypes.MarshalAny(&api.TwoOctetAsSpecificExtended{
 		IsTransitive: true,
 		SubType:      0x02, // ROUTE_TARGET
-		As:           65001,
+		Asn:          65001,
 		LocalAdmin:   100,
 	})
 	assert.Nil(err)
@@ -1203,7 +1203,7 @@ func Test_ExtendedCommunitiesAttribute(t *testing.T) {
 	a, err = ptypes.MarshalAny(&api.FourOctetAsSpecificExtended{
 		IsTransitive: true,
 		SubType:      0x02, // ROUTE_TARGET
-		As:           65003,
+		Asn:          65003,
 		LocalAdmin:   300,
 	})
 	assert.Nil(err)
@@ -1257,7 +1257,7 @@ func Test_ExtendedCommunitiesAttribute(t *testing.T) {
 	assert.Nil(err)
 	communities = append(communities, a)
 	a, err = ptypes.MarshalAny(&api.TrafficRateExtended{
-		As:   65004,
+		Asn:  65004,
 		Rate: 100.0,
 	})
 	assert.Nil(err)
@@ -1269,7 +1269,7 @@ func Test_ExtendedCommunitiesAttribute(t *testing.T) {
 	assert.Nil(err)
 	communities = append(communities, a)
 	a, err = ptypes.MarshalAny(&api.RedirectTwoOctetAsSpecificExtended{
-		As:         65005,
+		Asn:        65005,
 		LocalAdmin: 500,
 	})
 	assert.Nil(err)
@@ -1281,7 +1281,7 @@ func Test_ExtendedCommunitiesAttribute(t *testing.T) {
 	assert.Nil(err)
 	communities = append(communities, a)
 	a, err = ptypes.MarshalAny(&api.RedirectFourOctetAsSpecificExtended{
-		As:         65007,
+		Asn:        65007,
 		LocalAdmin: 700,
 	})
 	assert.Nil(err)
@@ -1346,7 +1346,7 @@ func Test_As4AggregatorAttribute(t *testing.T) {
 	assert := assert.New(t)
 
 	input := &api.As4AggregatorAttribute{
-		As:      65000,
+		Asn:     65000,
 		Address: "1.1.1.1",
 	}
 
@@ -1356,7 +1356,7 @@ func Test_As4AggregatorAttribute(t *testing.T) {
 	assert.Nil(err)
 
 	output := NewAs4AggregatorAttributeFromNative(n.(*bgp.PathAttributeAs4Aggregator))
-	assert.Equal(input.As, output.As)
+	assert.Equal(input.Asn, output.Asn)
 	assert.Equal(input.Address, output.Address)
 }
 

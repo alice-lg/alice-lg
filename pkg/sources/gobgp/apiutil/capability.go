@@ -21,8 +21,8 @@ import (
 	proto "github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/any"
-	api "github.com/osrg/gobgp/api"
-	"github.com/osrg/gobgp/pkg/packet/bgp"
+	api "github.com/osrg/gobgp/v3/api"
+	"github.com/osrg/gobgp/v3/pkg/packet/bgp"
 )
 
 // NewMultiProtocolCapability creates a new multi protocol capability
@@ -74,9 +74,9 @@ func NewGracefulRestartCapability(a *bgp.CapGracefulRestart) *api.GracefulRestar
 }
 
 // NewFourOctetASNumberCapability creates new 32bit ASN capabiliy
-func NewFourOctetASNumberCapability(a *bgp.CapFourOctetASNumber) *api.FourOctetASNumberCapability {
-	return &api.FourOctetASNumberCapability{
-		As: a.CapValue,
+func NewFourOctetASNumberCapability(a *bgp.CapFourOctetASNumber) *api.FourOctetASNCapability {
+	return &api.FourOctetASNCapability{
+		Asn: a.CapValue,
 	}
 }
 
@@ -87,7 +87,7 @@ func NewAddPathCapability(a *bgp.CapAddPath) *api.AddPathCapability {
 		afi, safi := bgp.RouteFamilyToAfiSafi(t.RouteFamily)
 		tuples = append(tuples, &api.AddPathCapabilityTuple{
 			Family: ToAPIFamily(afi, safi),
-			Mode:   api.AddPathMode(t.Mode),
+			Mode:   api.AddPathCapabilityTuple_Mode(t.Mode),
 		})
 	}
 	return &api.AddPathCapability{
@@ -218,8 +218,8 @@ func unmarshalCapability(a *any.Any) (bgp.ParameterCapabilityInterface, error) {
 			notification = true
 		}
 		return bgp.NewCapGracefulRestart(restarting, notification, uint16(a.Time), tuples), nil
-	case *api.FourOctetASNumberCapability:
-		return bgp.NewCapFourOctetASNumber(a.As), nil
+	case *api.FourOctetASNCapability:
+		return bgp.NewCapFourOctetASNumber(a.Asn), nil
 	case *api.AddPathCapability:
 		tuples := make([]*bgp.CapAddPathTuple, 0, len(a.Tuples))
 		for _, t := range a.Tuples {

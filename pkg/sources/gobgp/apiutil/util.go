@@ -21,8 +21,8 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/ptypes"
-	api "github.com/osrg/gobgp/api"
-	"github.com/osrg/gobgp/pkg/packet/bgp"
+	api "github.com/osrg/gobgp/v3/api"
+	"github.com/osrg/gobgp/v3/pkg/packet/bgp"
 )
 
 // Path structure: This is a workaround.

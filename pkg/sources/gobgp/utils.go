@@ -7,13 +7,13 @@ import (
 	"io"
 
 	// External imports
-	api "github.com/osrg/gobgp/api"
+	api "github.com/osrg/gobgp/v3/api"
 	// Internal imports
 )
 
 // PeerHash calculates a peer hash
 func PeerHash(peer *api.Peer) string {
-	return PeerHashWithASAndAddress(peer.State.PeerAs, peer.State.NeighborAddress)
+	return PeerHashWithASAndAddress(peer.State.PeerAsn, peer.State.NeighborAddress)
 }
 
 // PeerHashWithASAndAddress creates a peer hash (sha1) from

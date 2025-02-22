@@ -20,11 +20,11 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/golang/protobuf/proto"
+	proto "github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/any"
-	api "github.com/osrg/gobgp/api"
-	"github.com/osrg/gobgp/pkg/packet/bgp"
+	api "github.com/osrg/gobgp/v3/api"
+	"github.com/osrg/gobgp/v3/pkg/packet/bgp"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -59,7 +59,7 @@ func UnmarshalAttribute(an *any.Any) (bgp.PathAttributeInterface, error) {
 		if net.ParseIP(a.Address).To4() == nil {
 			return nil, fmt.Errorf("invalid aggregator address: %s", a.Address)
 		}
-		return bgp.NewPathAttributeAggregator(a.As, a.Address), nil
+		return bgp.NewPathAttributeAggregator(a.Asn, a.Address), nil
 	case *api.CommunitiesAttribute:
 		return bgp.NewPathAttributeCommunities(a.Communities), nil
 	case *api.OriginatorIdAttribute:
@@ -90,7 +90,7 @@ func NewAsPathAttributeFromNative(a *bgp.PathAttributeAsPath) *api.AsPathAttribu
 	segments := make([]*api.AsSegment, 0, len(a.Value))
 	for _, param := range a.Value {
 		segments = append(segments, &api.AsSegment{
-			Type:    uint32(param.GetType()),
+			Type:    api.AsSegment_Type(param.GetType()),
 			Numbers: param.GetAS(),
 		})
 	}
@@ -128,7 +128,7 @@ func NewAtomicAggregateAttributeFromNative(a *bgp.PathAttributeAtomicAggregate) 
 // NewAggregatorAttributeFromNative creates a new aggregator attribute
 func NewAggregatorAttributeFromNative(a *bgp.PathAttributeAggregator) *api.AggregatorAttribute {
 	return &api.AggregatorAttribute{
-		As:      a.Value.AS,
+		Asn:     a.Value.AS,
 		Address: a.Value.Address.String(),
 	}
 }
@@ -163,7 +163,7 @@ func MarshalRD(rd bgp.RouteDistinguisherInterface) *any.Any {
 	var r proto.Message
 	switch v := rd.(type) {
 	case *bgp.RouteDistinguisherTwoOctetAS:
-		r = &api.RouteDistinguisherTwoOctetAS{
+		r = &api.RouteDistinguisherTwoOctetASN{
 			Admin:    uint32(v.Admin),
 			Assigned: v.Assigned,
 		}
@@ -173,7 +173,7 @@ func MarshalRD(rd bgp.RouteDistinguisherInterface) *any.Any {
 			Assigned: uint32(v.Assigned),
 		}
 	case *bgp.RouteDistinguisherFourOctetAS:
-		r = &api.RouteDistinguisherFourOctetAS{
+		r = &api.RouteDistinguisherFourOctetASN{
 			Admin:    v.Admin,
 			Assigned: uint32(v.Assigned),
 		}
@@ -195,7 +195,7 @@ func UnmarshalRD(a *any.Any) (bgp.RouteDistinguisherInterface, error) {
 		return nil, fmt.Errorf("failed to unmarshal route distinguisher: %s", err)
 	}
 	switch v := value.Message.(type) {
-	case *api.RouteDistinguisherTwoOctetAS:
+	case *api.RouteDistinguisherTwoOctetASN:
 		return bgp.NewRouteDistinguisherTwoOctetAS(uint16(v.Admin), v.Assigned), nil
 	case *api.RouteDistinguisherIPAddress:
 		rd := bgp.NewRouteDistinguisherIPAddressAS(v.Admin, uint16(v.Assigned))
@@ -203,7 +203,7 @@ func UnmarshalRD(a *any.Any) (bgp.RouteDistinguisherInterface, error) {
 			return nil, fmt.Errorf("invalid address for route distinguisher: %s", v.Admin)
 		}
 		return rd, nil
-	case *api.RouteDistinguisherFourOctetAS:
+	case *api.RouteDistinguisherFourOctetASN:
 		return bgp.NewRouteDistinguisherFourOctetAS(v.Admin, uint16(v.Assigned)), nil
 	}
 	return nil, fmt.Errorf("invalid route distinguisher type: %s", a.TypeUrl)
@@ -427,8 +427,8 @@ func MarshalNLRI(value bgp.AddrPrefixInterface) *any.Any {
 		}
 	case *bgp.RouteTargetMembershipNLRI:
 		nlri = &api.RouteTargetMembershipNLRI{
-			As: v.AS,
-			Rt: MarshalRT(v.RouteTarget),
+			Asn: v.AS,
+			Rt:  MarshalRT(v.RouteTarget),
 		}
 	case *bgp.FlowSpecIPv4Unicast:
 		nlri = &api.FlowSpecNLRI{
@@ -571,7 +571,7 @@ func UnmarshalNLRI(rf bgp.RouteFamily, an *any.Any) (bgp.AddrPrefixInterface, er
 		if err != nil {
 			return nil, err
 		}
-		nlri = bgp.NewRouteTargetMembershipNLRI(v.As, rt)
+		nlri = bgp.NewRouteTargetMembershipNLRI(v.Asn, rt)
 	case *api.FlowSpecNLRI:
 		rules, err := UnmarshalFlowSpecRules(v.Rules)
 		if err != nil {
@@ -656,7 +656,7 @@ func MarshalRT(rt bgp.ExtendedCommunityInterface) *any.Any {
 		r = &api.TwoOctetAsSpecificExtended{
 			IsTransitive: true,
 			SubType:      uint32(bgp.EC_SUBTYPE_ROUTE_TARGET),
-			As:           uint32(v.AS),
+			Asn:          uint32(v.AS),
 			LocalAdmin:   uint32(v.LocalAdmin),
 		}
 	case *bgp.IPv4AddressSpecificExtended:
@@ -670,7 +670,7 @@ func MarshalRT(rt bgp.ExtendedCommunityInterface) *any.Any {
 		r = &api.FourOctetAsSpecificExtended{
 			IsTransitive: true,
 			SubType:      uint32(bgp.EC_SUBTYPE_ROUTE_TARGET),
-			As:           uint32(v.AS),
+			Asn:          uint32(v.AS),
 			LocalAdmin:   uint32(v.LocalAdmin),
 		}
 	default:
@@ -701,7 +701,7 @@ func UnmarshalRT(a *any.Any) (bgp.ExtendedCommunityInterface, error) {
 	}
 	switch v := value.Message.(type) {
 	case *api.TwoOctetAsSpecificExtended:
-		return bgp.NewTwoOctetAsSpecificExtended(bgp.ExtendedCommunityAttrSubType(v.SubType), uint16(v.As), v.LocalAdmin, v.IsTransitive), nil
+		return bgp.NewTwoOctetAsSpecificExtended(bgp.ExtendedCommunityAttrSubType(v.SubType), uint16(v.Asn), v.LocalAdmin, v.IsTransitive), nil
 	case *api.IPv4AddressSpecificExtended:
 		rt := bgp.NewIPv4AddressSpecificExtended(bgp.ExtendedCommunityAttrSubType(v.SubType), v.Address, uint16(v.LocalAdmin), v.IsTransitive)
 		if rt == nil {
@@ -709,7 +709,7 @@ func UnmarshalRT(a *any.Any) (bgp.ExtendedCommunityInterface, error) {
 		}
 		return rt, nil
 	case *api.FourOctetAsSpecificExtended:
-		return bgp.NewFourOctetAsSpecificExtended(bgp.ExtendedCommunityAttrSubType(v.SubType), v.As, uint16(v.LocalAdmin), v.IsTransitive), nil
+		return bgp.NewFourOctetAsSpecificExtended(bgp.ExtendedCommunityAttrSubType(v.SubType), v.Asn, uint16(v.LocalAdmin), v.IsTransitive), nil
 	}
 	return nil, fmt.Errorf("invalid route target type: %s", a.TypeUrl)
 }
@@ -737,7 +737,7 @@ func NewExtendedCommunitiesAttributeFromNative(a *bgp.PathAttributeExtendedCommu
 			community = &api.TwoOctetAsSpecificExtended{
 				IsTransitive: v.IsTransitive,
 				SubType:      uint32(v.SubType),
-				As:           uint32(v.AS),
+				Asn:          uint32(v.AS),
 				LocalAdmin:   uint32(v.LocalAdmin),
 			}
 		case *bgp.IPv4AddressSpecificExtended:
@@ -751,7 +751,7 @@ func NewExtendedCommunitiesAttributeFromNative(a *bgp.PathAttributeExtendedCommu
 			community = &api.FourOctetAsSpecificExtended{
 				IsTransitive: v.IsTransitive,
 				SubType:      uint32(v.SubType),
-				As:           uint32(v.AS),
+				Asn:          uint32(v.AS),
 				LocalAdmin:   uint32(v.LocalAdmin),
 			}
 		case *bgp.ValidationExtended:
@@ -793,7 +793,7 @@ func NewExtendedCommunitiesAttributeFromNative(a *bgp.PathAttributeExtendedCommu
 			}
 		case *bgp.TrafficRateExtended:
 			community = &api.TrafficRateExtended{
-				As:   uint32(v.AS),
+				Asn:  uint32(v.AS),
 				Rate: v.Rate,
 			}
 		case *bgp.TrafficActionExtended:
@@ -803,7 +803,7 @@ func NewExtendedCommunitiesAttributeFromNative(a *bgp.PathAttributeExtendedCommu
 			}
 		case *bgp.RedirectTwoOctetAsSpecificExtended:
 			community = &api.RedirectTwoOctetAsSpecificExtended{
-				As:         uint32(v.AS),
+				Asn:        uint32(v.AS),
 				LocalAdmin: v.LocalAdmin,
 			}
 		case *bgp.RedirectIPv4AddressSpecificExtended:
@@ -813,7 +813,7 @@ func NewExtendedCommunitiesAttributeFromNative(a *bgp.PathAttributeExtendedCommu
 			}
 		case *bgp.RedirectFourOctetAsSpecificExtended:
 			community = &api.RedirectFourOctetAsSpecificExtended{
-				As:         v.AS,
+				Asn:        v.AS,
 				LocalAdmin: uint32(v.LocalAdmin),
 			}
 		case *bgp.TrafficRemarkExtended:
@@ -850,11 +850,11 @@ func unmarshalExComm(a *api.ExtendedCommunitiesAttribute) (*bgp.PathAttributeExt
 		}
 		switch v := value.Message.(type) {
 		case *api.TwoOctetAsSpecificExtended:
-			community = bgp.NewTwoOctetAsSpecificExtended(bgp.ExtendedCommunityAttrSubType(v.SubType), uint16(v.As), v.LocalAdmin, v.IsTransitive)
+			community = bgp.NewTwoOctetAsSpecificExtended(bgp.ExtendedCommunityAttrSubType(v.SubType), uint16(v.Asn), v.LocalAdmin, v.IsTransitive)
 		case *api.IPv4AddressSpecificExtended:
 			community = bgp.NewIPv4AddressSpecificExtended(bgp.ExtendedCommunityAttrSubType(v.SubType), v.Address, uint16(v.LocalAdmin), v.IsTransitive)
 		case *api.FourOctetAsSpecificExtended:
-			community = bgp.NewFourOctetAsSpecificExtended(bgp.ExtendedCommunityAttrSubType(v.SubType), v.As, uint16(v.LocalAdmin), v.IsTransitive)
+			community = bgp.NewFourOctetAsSpecificExtended(bgp.ExtendedCommunityAttrSubType(v.SubType), v.Asn, uint16(v.LocalAdmin), v.IsTransitive)
 		case *api.ValidationExtended:
 			community = bgp.NewValidationExtended(bgp.ValidationState(v.State))
 		case *api.ColorExtended:
@@ -874,15 +874,15 @@ func unmarshalExComm(a *api.ExtendedCommunitiesAttribute) (*bgp.PathAttributeExt
 		case *api.RouterMacExtended:
 			community = bgp.NewRoutersMacExtended(v.Mac)
 		case *api.TrafficRateExtended:
-			community = bgp.NewTrafficRateExtended(uint16(v.As), v.Rate)
+			community = bgp.NewTrafficRateExtended(uint16(v.Asn), v.Rate)
 		case *api.TrafficActionExtended:
 			community = bgp.NewTrafficActionExtended(v.Terminal, v.Sample)
 		case *api.RedirectTwoOctetAsSpecificExtended:
-			community = bgp.NewRedirectTwoOctetAsSpecificExtended(uint16(v.As), v.LocalAdmin)
+			community = bgp.NewRedirectTwoOctetAsSpecificExtended(uint16(v.Asn), v.LocalAdmin)
 		case *api.RedirectIPv4AddressSpecificExtended:
 			community = bgp.NewRedirectIPv4AddressSpecificExtended(v.Address, uint16(v.LocalAdmin))
 		case *api.RedirectFourOctetAsSpecificExtended:
-			community = bgp.NewRedirectFourOctetAsSpecificExtended(v.As, uint16(v.LocalAdmin))
+			community = bgp.NewRedirectFourOctetAsSpecificExtended(v.Asn, uint16(v.LocalAdmin))
 		case *api.TrafficRemarkExtended:
 			community = bgp.NewTrafficRemarkExtended(uint8(v.Dscp))
 		case *api.UnknownExtended:
@@ -901,7 +901,7 @@ func NewAs4PathAttributeFromNative(a *bgp.PathAttributeAs4Path) *api.As4PathAttr
 	segments := make([]*api.AsSegment, 0, len(a.Value))
 	for _, param := range a.Value {
 		segments = append(segments, &api.AsSegment{
-			Type:    uint32(param.Type),
+			Type:    api.AsSegment_Type(param.GetType()),
 			Numbers: param.AS,
 		})
 	}
@@ -913,7 +913,7 @@ func NewAs4PathAttributeFromNative(a *bgp.PathAttributeAs4Path) *api.As4PathAttr
 // NewAs4AggregatorAttributeFromNative creates a new aggregator path attribute
 func NewAs4AggregatorAttributeFromNative(a *bgp.PathAttributeAs4Aggregator) *api.As4AggregatorAttribute {
 	return &api.As4AggregatorAttribute{
-		As:      a.Value.AS,
+		Asn:     a.Value.AS,
 		Address: a.Value.Address.String(),
 	}
 }
@@ -1175,7 +1175,7 @@ func unmarshalAttribute(an *any.Any) (bgp.PathAttributeInterface, error) {
 		if net.ParseIP(a.Address).To4() == nil {
 			return nil, fmt.Errorf("invalid aggregator address: %s", a.Address)
 		}
-		return bgp.NewPathAttributeAggregator(a.As, a.Address), nil
+		return bgp.NewPathAttributeAggregator(a.Asn, a.Address), nil
 	case *api.CommunitiesAttribute:
 		return bgp.NewPathAttributeCommunities(a.Communities), nil
 	case *api.OriginatorIdAttribute:
@@ -1238,7 +1238,7 @@ func unmarshalAttribute(an *any.Any) (bgp.PathAttributeInterface, error) {
 		if net.ParseIP(a.Address).To4() == nil {
 			return nil, fmt.Errorf("invalid as4 aggregator address: %s", a.Address)
 		}
-		return bgp.NewPathAttributeAs4Aggregator(a.As, a.Address), nil
+		return bgp.NewPathAttributeAs4Aggregator(a.Asn, a.Address), nil
 	case *api.PmsiTunnelAttribute:
 		typ := bgp.PmsiTunnelType(a.Type)
 		var isLeafInfoRequired bool
