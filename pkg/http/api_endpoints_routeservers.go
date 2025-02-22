@@ -65,7 +65,10 @@ func (s *Server) apiRouteServerStatusShow(
 		return nil, err
 	}
 	if result != nil {
-		result.Meta.Version = config.Version
+		// Prevent panic if *api.Meta is null
+		if result.Meta != nil {
+			result.Meta.Version = config.Version
+		}
 	}
 
 	return result, nil
