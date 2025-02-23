@@ -125,7 +125,7 @@ name = rs1.example.com (IPv6)
 api = http://rs1.example.com:29186/
 ```
 
-[GoBGP](https://osrg.github.io/gobgp/):
+[GoBGP](https://osrg.github.io/gobgp/) (API V3):
 ```ini
 [source.rs2-example]
 name = rs2.example.com
