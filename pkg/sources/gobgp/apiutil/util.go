@@ -17,70 +17,74 @@ package apiutil
 
 import (
 	"encoding/json"
+	"fmt"
 	"net"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
 	api "github.com/osrg/gobgp/v3/api"
 	"github.com/osrg/gobgp/v3/pkg/packet/bgp"
+	tspb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// Path structure: This is a workaround.
-// This for the json format compatibility.
-// Once we update senario tests, we can remove this.
+// workaround. This for the json format compatibility. Once we update senario tests, we can remove this.
 type Path struct {
-	Nlri       bgp.AddrPrefixInterface      `json:"nlri"`
-	Age        int64                        `json:"age"`
-	Best       bool                         `json:"best"`
-	Attrs      []bgp.PathAttributeInterface `json:"attrs"`
-	Stale      bool                         `json:"stale"`
-	Withdrawal bool                         `json:"withdrawal,omitempty"`
-	SourceID   net.IP                       `json:"source-id,omitempty"`
-	NeighborIP net.IP                       `json:"neighbor-ip,omitempty"`
+	Nlri  bgp.AddrPrefixInterface      `json:"nlri"`
+	Age   int64                        `json:"age"`
+	Best  bool                         `json:"best"`
+	Attrs []bgp.PathAttributeInterface `json:"attrs"`
+	Stale bool                         `json:"stale"`
+	// true if the path has been filtered out due to max path count reached
+	SendMaxFiltered bool   `json:"send-max-filtered,omitempty"`
+	Withdrawal      bool   `json:"withdrawal,omitempty"`
+	SourceID        net.IP `json:"source-id,omitempty"`
+	NeighborIP      net.IP `json:"neighbor-ip,omitempty"`
 }
 
-// Destination contains a list of paths
 type Destination struct {
 	Paths []*Path
 }
 
-// MarshalJSON serializes a destination
 func (d *Destination) MarshalJSON() ([]byte, error) {
 	return json.Marshal(d.Paths)
 }
 
-// NewDestination creates a new destination
 func NewDestination(dst *api.Destination) *Destination {
 	l := make([]*Path, 0, len(dst.Paths))
 	for _, p := range dst.Paths {
 		nlri, _ := GetNativeNlri(p)
 		attrs, _ := GetNativePathAttributes(p)
-		t, _ := ptypes.Timestamp(p.Age)
 		l = append(l, &Path{
-			Nlri:       nlri,
-			Age:        t.Unix(),
-			Best:       p.Best,
-			Attrs:      attrs,
-			Stale:      p.Stale,
-			Withdrawal: p.IsWithdraw,
-			SourceID:   net.ParseIP(p.SourceId),
-			NeighborIP: net.ParseIP(p.NeighborIp),
+			Nlri:            nlri,
+			Age:             p.Age.AsTime().Unix(),
+			Best:            p.Best,
+			Attrs:           attrs,
+			Stale:           p.Stale,
+			SendMaxFiltered: p.SendMaxFiltered,
+			Withdrawal:      p.IsWithdraw,
+			SourceID:        net.ParseIP(p.SourceId),
+			NeighborIP:      net.ParseIP(p.NeighborIp),
 		})
 	}
 	return &Destination{Paths: l}
 }
 
-// NewPath creates a new path
-func NewPath(nlri bgp.AddrPrefixInterface, isWithdraw bool, attrs []bgp.PathAttributeInterface, age time.Time) *api.Path {
-	t, _ := ptypes.TimestampProto(age)
-	return &api.Path{
-		Nlri:       MarshalNLRI(nlri),
-		Pattrs:     MarshalPathAttributes(attrs),
-		Age:        t,
-		IsWithdraw: isWithdraw,
-		Family:     ToAPIFamily(nlri.AFI(), nlri.SAFI()),
-		Identifier: nlri.PathIdentifier(),
+func NewPath(nlri bgp.AddrPrefixInterface, isWithdraw bool, attrs []bgp.PathAttributeInterface, age time.Time) (*api.Path, error) {
+	n, err := MarshalNLRI(nlri)
+	if err != nil {
+		return nil, err
 	}
+	a, err := MarshalPathAttributes(attrs)
+	if err != nil {
+		return nil, err
+	}
+	return &api.Path{
+		Nlri:       n,
+		Pattrs:     a,
+		Age:        tspb.New(age),
+		IsWithdraw: isWithdraw,
+		Family:     ToApiFamily(nlri.AFI(), nlri.SAFI()),
+		Identifier: nlri.PathIdentifier(),
+	}, nil
 }
 
 func getNLRI(family bgp.RouteFamily, buf []byte) (bgp.AddrPrefixInterface, error) {
@@ -95,15 +99,16 @@ func getNLRI(family bgp.RouteFamily, buf []byte) (bgp.AddrPrefixInterface, error
 	return nlri, nil
 }
 
-// GetNativeNlri creates an address prefix from a path
 func GetNativeNlri(p *api.Path) (bgp.AddrPrefixInterface, error) {
+	if p.Family == nil {
+		return nil, fmt.Errorf("family cannot be nil")
+	}
 	if len(p.NlriBinary) > 0 {
 		return getNLRI(ToRouteFamily(p.Family), p.NlriBinary)
 	}
 	return UnmarshalNLRI(ToRouteFamily(p.Family), p.Nlri)
 }
 
-// GetNativePathAttributes gets the path attributes from a path
 func GetNativePathAttributes(p *api.Path) ([]bgp.PathAttributeInterface, error) {
 	pattrsLen := len(p.PattrsBinary)
 	if pattrsLen > 0 {
@@ -124,13 +129,11 @@ func GetNativePathAttributes(p *api.Path) ([]bgp.PathAttributeInterface, error) 
 	return UnmarshalPathAttributes(p.Pattrs)
 }
 
-// ToRouteFamily makes an route family from an API family
 func ToRouteFamily(f *api.Family) bgp.RouteFamily {
 	return bgp.AfiSafiToRouteFamily(uint16(f.Afi), uint8(f.Safi))
 }
 
-// ToAPIFamily makes an API Family from a route family
-func ToAPIFamily(afi uint16, safi uint8) *api.Family {
+func ToApiFamily(afi uint16, safi uint8) *api.Family {
 	return &api.Family{
 		Afi:  api.Family_Afi(afi),
 		Safi: api.Family_Safi(safi),

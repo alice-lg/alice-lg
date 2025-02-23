@@ -18,38 +18,33 @@ package apiutil
 import (
 	"fmt"
 
-	proto "github.com/golang/protobuf/proto"
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/any"
 	api "github.com/osrg/gobgp/v3/api"
 	"github.com/osrg/gobgp/v3/pkg/packet/bgp"
+	proto "google.golang.org/protobuf/proto"
+	apb "google.golang.org/protobuf/types/known/anypb"
 )
 
-// NewMultiProtocolCapability creates a new multi protocol capability
 func NewMultiProtocolCapability(a *bgp.CapMultiProtocol) *api.MultiProtocolCapability {
 	afi, safi := bgp.RouteFamilyToAfiSafi(a.CapValue)
 	return &api.MultiProtocolCapability{
-		Family: ToAPIFamily(afi, safi),
+		Family: ToApiFamily(afi, safi),
 	}
 }
 
-// NewRouteRefreshCapability creates a new capability
 func NewRouteRefreshCapability(a *bgp.CapRouteRefresh) *api.RouteRefreshCapability {
 	return &api.RouteRefreshCapability{}
 }
 
-// NewCarryingLabelInfoCapability creates a new capability
 func NewCarryingLabelInfoCapability(a *bgp.CapCarryingLabelInfo) *api.CarryingLabelInfoCapability {
 	return &api.CarryingLabelInfoCapability{}
 }
 
-// NewExtendedNexthopCapability creates a new extended capability
 func NewExtendedNexthopCapability(a *bgp.CapExtendedNexthop) *api.ExtendedNexthopCapability {
 	tuples := make([]*api.ExtendedNexthopCapabilityTuple, 0, len(a.Tuples))
 	for _, t := range a.Tuples {
 		tuples = append(tuples, &api.ExtendedNexthopCapabilityTuple{
-			NlriFamily:    ToAPIFamily(t.NLRIAFI, uint8(t.NLRISAFI)),
-			NexthopFamily: ToAPIFamily(t.NexthopAFI, bgp.SAFI_UNICAST),
+			NlriFamily:    ToApiFamily(t.NLRIAFI, uint8(t.NLRISAFI)),
+			NexthopFamily: ToApiFamily(t.NexthopAFI, bgp.SAFI_UNICAST),
 		})
 	}
 	return &api.ExtendedNexthopCapability{
@@ -57,12 +52,11 @@ func NewExtendedNexthopCapability(a *bgp.CapExtendedNexthop) *api.ExtendedNextho
 	}
 }
 
-// NewGracefulRestartCapability creates a new graceful resetart capabilty
 func NewGracefulRestartCapability(a *bgp.CapGracefulRestart) *api.GracefulRestartCapability {
 	tuples := make([]*api.GracefulRestartCapabilityTuple, 0, len(a.Tuples))
 	for _, t := range a.Tuples {
 		tuples = append(tuples, &api.GracefulRestartCapabilityTuple{
-			Family: ToAPIFamily(t.AFI, t.SAFI),
+			Family: ToApiFamily(t.AFI, t.SAFI),
 			Flags:  uint32(t.Flags),
 		})
 	}
@@ -73,20 +67,18 @@ func NewGracefulRestartCapability(a *bgp.CapGracefulRestart) *api.GracefulRestar
 	}
 }
 
-// NewFourOctetASNumberCapability creates new 32bit ASN capabiliy
 func NewFourOctetASNumberCapability(a *bgp.CapFourOctetASNumber) *api.FourOctetASNCapability {
 	return &api.FourOctetASNCapability{
 		Asn: a.CapValue,
 	}
 }
 
-// NewAddPathCapability creates a add path capability
 func NewAddPathCapability(a *bgp.CapAddPath) *api.AddPathCapability {
 	tuples := make([]*api.AddPathCapabilityTuple, 0, len(a.Tuples))
 	for _, t := range a.Tuples {
 		afi, safi := bgp.RouteFamilyToAfiSafi(t.RouteFamily)
 		tuples = append(tuples, &api.AddPathCapabilityTuple{
-			Family: ToAPIFamily(afi, safi),
+			Family: ToApiFamily(afi, safi),
 			Mode:   api.AddPathCapabilityTuple_Mode(t.Mode),
 		})
 	}
@@ -95,17 +87,15 @@ func NewAddPathCapability(a *bgp.CapAddPath) *api.AddPathCapability {
 	}
 }
 
-// NewEnhancedRouteRefreshCapability creates a new capability
 func NewEnhancedRouteRefreshCapability(a *bgp.CapEnhancedRouteRefresh) *api.EnhancedRouteRefreshCapability {
 	return &api.EnhancedRouteRefreshCapability{}
 }
 
-// NewLongLivedGracefulRestartCapability creates a new capability
 func NewLongLivedGracefulRestartCapability(a *bgp.CapLongLivedGracefulRestart) *api.LongLivedGracefulRestartCapability {
 	tuples := make([]*api.LongLivedGracefulRestartCapabilityTuple, 0, len(a.Tuples))
 	for _, t := range a.Tuples {
 		tuples = append(tuples, &api.LongLivedGracefulRestartCapabilityTuple{
-			Family: ToAPIFamily(t.AFI, uint8(t.SAFI)),
+			Family: ToApiFamily(t.AFI, uint8(t.SAFI)),
 			Flags:  uint32(t.Flags),
 			Time:   t.RestartTime,
 		})
@@ -115,12 +105,23 @@ func NewLongLivedGracefulRestartCapability(a *bgp.CapLongLivedGracefulRestart) *
 	}
 }
 
-// NewRouteRefreshCiscoCapability creates a new capability
 func NewRouteRefreshCiscoCapability(a *bgp.CapRouteRefreshCisco) *api.RouteRefreshCiscoCapability {
 	return &api.RouteRefreshCiscoCapability{}
 }
 
-// NewUnknownCapability creates a new unknown capability
+func NewFQDNCapability(a *bgp.CapFQDN) *api.FqdnCapability {
+	return &api.FqdnCapability{
+		HostName:   a.HostName,
+		DomainName: a.DomainName,
+	}
+}
+
+func NewSoftwareVersionCapability(a *bgp.CapSoftwareVersion) *api.SoftwareVersionCapability {
+	return &api.SoftwareVersionCapability{
+		SoftwareVersion: a.SoftwareVersion,
+	}
+}
+
 func NewUnknownCapability(a *bgp.CapUnknown) *api.UnknownCapability {
 	return &api.UnknownCapability{
 		Code:  uint32(a.CapCode),
@@ -128,8 +129,7 @@ func NewUnknownCapability(a *bgp.CapUnknown) *api.UnknownCapability {
 	}
 }
 
-// MarshalCapability serializes a capability interface
-func MarshalCapability(value bgp.ParameterCapabilityInterface) (*any.Any, error) {
+func MarshalCapability(value bgp.ParameterCapabilityInterface) (*apb.Any, error) {
 	var m proto.Message
 	switch n := value.(type) {
 	case *bgp.CapMultiProtocol:
@@ -152,17 +152,20 @@ func MarshalCapability(value bgp.ParameterCapabilityInterface) (*any.Any, error)
 		m = NewLongLivedGracefulRestartCapability(n)
 	case *bgp.CapRouteRefreshCisco:
 		m = NewRouteRefreshCiscoCapability(n)
+	case *bgp.CapFQDN:
+		m = NewFQDNCapability(n)
+	case *bgp.CapSoftwareVersion:
+		m = NewSoftwareVersionCapability(n)
 	case *bgp.CapUnknown:
 		m = NewUnknownCapability(n)
 	default:
 		return nil, fmt.Errorf("invalid capability type to marshal: %+v", value)
 	}
-	return ptypes.MarshalAny(m)
+	return apb.New(m)
 }
 
-// MarshalCapabilities serializes a list of capability interfaces
-func MarshalCapabilities(values []bgp.ParameterCapabilityInterface) ([]*any.Any, error) {
-	caps := make([]*any.Any, 0, len(values))
+func MarshalCapabilities(values []bgp.ParameterCapabilityInterface) ([]*apb.Any, error) {
+	caps := make([]*apb.Any, 0, len(values))
 	for _, value := range values {
 		a, err := MarshalCapability(value)
 		if err != nil {
@@ -173,12 +176,12 @@ func MarshalCapabilities(values []bgp.ParameterCapabilityInterface) ([]*any.Any,
 	return caps, nil
 }
 
-func unmarshalCapability(a *any.Any) (bgp.ParameterCapabilityInterface, error) {
-	var value ptypes.DynamicAny
-	if err := ptypes.UnmarshalAny(a, &value); err != nil {
+func unmarshalCapability(a *apb.Any) (bgp.ParameterCapabilityInterface, error) {
+	value, err := a.UnmarshalNew()
+	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal capability: %s", err)
 	}
-	switch a := value.Message.(type) {
+	switch a := value.(type) {
 	case *api.MultiProtocolCapability:
 		return bgp.NewCapMultiProtocol(ToRouteFamily(a.Family)), nil
 	case *api.RouteRefreshCapability:
@@ -240,14 +243,17 @@ func unmarshalCapability(a *any.Any) (bgp.ParameterCapabilityInterface, error) {
 		return bgp.NewCapLongLivedGracefulRestart(tuples), nil
 	case *api.RouteRefreshCiscoCapability:
 		return bgp.NewCapRouteRefreshCisco(), nil
+	case *api.FqdnCapability:
+		return bgp.NewCapFQDN(a.HostName, a.DomainName), nil
+	case *api.SoftwareVersionCapability:
+		return bgp.NewCapSoftwareVersion(a.SoftwareVersion), nil
 	case *api.UnknownCapability:
 		return bgp.NewCapUnknown(bgp.BGPCapabilityCode(a.Code), a.Value), nil
 	}
 	return nil, fmt.Errorf("invalid capability type to unmarshal: %s", a.TypeUrl)
 }
 
-// UnmarshalCapabilities deserializes a list of capabilities
-func UnmarshalCapabilities(values []*any.Any) ([]bgp.ParameterCapabilityInterface, error) {
+func UnmarshalCapabilities(values []*apb.Any) ([]bgp.ParameterCapabilityInterface, error) {
 	caps := make([]bgp.ParameterCapabilityInterface, 0, len(values))
 	for _, value := range values {
 		c, err := unmarshalCapability(value)

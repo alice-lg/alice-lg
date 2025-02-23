@@ -4,17 +4,17 @@ go 1.22.7
 
 require (
 	github.com/go-ini/ini v1.67.0
-	github.com/golang/protobuf v1.5.4
 	github.com/jackc/pgx/v4 v4.18.3
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/osrg/gobgp/v3 v3.34.0
-	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.10.0
-	google.golang.org/grpc v1.64.1
+	google.golang.org/grpc v1.56.3
+	google.golang.org/protobuf v1.33.0
 )
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.14.3 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
@@ -29,7 +29,5 @@ require (
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240318140521-94a12d6c2237 // indirect
-	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-
 )
