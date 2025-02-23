@@ -1,6 +1,6 @@
 module github.com/alice-lg/alice-lg
 
-go 1.23.0
+go 1.22.7
 
 require (
 	github.com/go-ini/ini v1.67.0
