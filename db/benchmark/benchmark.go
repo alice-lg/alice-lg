@@ -23,22 +23,23 @@ func randomNet() string {
 }
 
 func makeRoute(n int) *api.LookupRoute {
-	id := fmt.Sprintf("route_%d", n)
+	//id := fmt.Sprintf("route_%d", n)
 	nid := fmt.Sprintf("neighbor_%d", n%50)
 	gw := fmt.Sprintf("fd23:2342:%04d::1", n%50)
+	intf := "enp0s23"
 	net := randomNet()
 	return &api.LookupRoute{
 		Route: &api.Route{
-			ID:         id,
-			NeighborID: nid,
+			//ID:         id,
+			NeighborID: &nid,
 			Network:    net,
-			Interface:  "enp0s23",
-			Gateway:    gw,
+			Interface:  &intf,
+			Gateway:    &gw,
 			Metric:     100,
 			Age:        30 * time.Second,
 			Type:       []string{"BGP", "unicast", "univ"},
 			Primary:    true,
-			LearntFrom: gw,
+			LearntFrom: &gw,
 		},
 		State: "imported",
 		Neighbor: &api.Neighbor{
@@ -95,7 +96,7 @@ func main() {
 	log.Println("database initialized")
 
 	go m.Start(ctx)
-	backend := postgres.NewRoutesBackend(pool)
+	backend := postgres.NewRoutesBackend(pool, cfg.Sources)
 
 	// Now insert tons of routes...
 	for i := 0; i < 10; i++ {
