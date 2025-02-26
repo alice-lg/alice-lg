@@ -15,6 +15,7 @@ import (
 	"github.com/alice-lg/alice-lg/pkg/sources/gobgp/apiutil"
 )
 
+/*
 var families []gobgpapi.Family = []gobgpapi.Family{{
 	Afi:  gobgpapi.Family_AFI_IP,
 	Safi: gobgpapi.Family_SAFI_UNICAST,
@@ -23,6 +24,7 @@ var families []gobgpapi.Family = []gobgpapi.Family{{
 	Safi: gobgpapi.Family_SAFI_UNICAST,
 },
 }
+*/
 
 // NewRoutesResponse creates a new routes response
 func NewRoutesResponse() api.RoutesResponse {
@@ -179,12 +181,29 @@ func (gobgp *GoBGP) GetRoutes(
 		ctx, time.Second*time.Duration(gobgp.config.ProcessingTimeout))
 	defer cancel()
 
-	for _, family := range families {
+	for i := 1; i < 3; i++ {
+
+		var family *gobgpapi.Family
+
+		switch i {
+		case 1:
+			{
+				family = &gobgpapi.Family{
+					Afi:  gobgpapi.Family_AFI_IP,
+					Safi: gobgpapi.Family_SAFI_UNICAST}
+			}
+		case 2:
+			{
+				family = &gobgpapi.Family{
+					Afi:  gobgpapi.Family_AFI_IP6,
+					Safi: gobgpapi.Family_SAFI_UNICAST}
+			}
+		}
 
 		pathStream, err := gobgp.client.ListPath(ctx, &gobgpapi.ListPathRequest{
 			Name:           peer.State.NeighborAddress,
 			TableType:      tableType,
-			Family:         &family,
+			Family:         family,
 			EnableFiltered: true,
 		})
 
