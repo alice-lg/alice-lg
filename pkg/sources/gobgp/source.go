@@ -1,6 +1,8 @@
 package gobgp
 
 import (
+	"fmt"
+
 	gobgpapi "github.com/osrg/gobgp/v3/api"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -149,8 +151,14 @@ func (gobgp *GoBGP) Status(
 	}
 
 	response := api.StatusResponse{}
-	response.Status.RouterID = resp.Global.RouterId
+	response.Status.RouterID = resp.Global.GetRouterId()
 	response.Status.Backend = "gobgp"
+	response.Status.ServerTime = time.Now()
+	// TODO: What get last reconfig time from gobgp?
+	response.Status.LastReconfig = time.Now()
+	response.Status.Message = fmt.Sprintf("AS%d", resp.Global.GetAsn())
+	// TODO: What get version gobgp?
+	response.Status.Version = ""
 	return &response, nil
 }
 
