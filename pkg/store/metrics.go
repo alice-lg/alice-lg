@@ -165,7 +165,7 @@ func (m *metrics) update(ctx context.Context) error {
 	return nil
 }
 
-// Startmetrics registers the metrics and starts a
+// StartMetrics registers the metrics and starts a
 // periodical refresh.
 func StartMetrics(
 	ctx context.Context,
