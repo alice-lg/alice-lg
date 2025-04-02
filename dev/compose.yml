@@ -1,4 +1,3 @@
-version: "3.7"
 
 # Composefile for developing with alice. A postgres server
 # and the ui live dev server are started.
