@@ -3,22 +3,32 @@ __"No, no! The adventures first, explanations take such a dreadful time."__
 _Lewis Carroll, Alice's Adventures in Wonderland & Through the Looking-Glass_
 
 Take a look at Alice-LG production examples at:
-- https://lg.de-cix.net/
 - https://lg.ams-ix.net
-- https://lg.bcix.de/
-- https://lg.megaport.com/
-- https://lg.netnod.se/
-- https://alice-rs.linx.net/
-- https://lg.ix.br/
+- https://lg.bcix.de
+- https://lg.dd-ix.net
+- https://lg.de-cix.net
+- https://glass.gigapix.pt
+- https://lg.ix.br
+- https://alice.sfmix.org/
+- https://alice-rs.linx.net
+- https://lg.megaport.com
+- https://lg.netnod.se
+- https://lg.s-ix.de
+- https://lg.top-ix.org
+- https://alice.sfmix.org/
 - https://lg.ix.asn.au/
 - https://lg.ix.nz/
 
-And checkout the API at:
+And check out the API at:
+
 - https://lg.de-cix.net/api/v1/config
+- https://lg.de-cix.net/api/v1/status
 - https://lg.de-cix.net/api/v1/routeservers
 - https://lg.de-cix.net/api/v1/routeservers/rs1_fra_ipv4/status
 - https://lg.de-cix.net/api/v1/routeservers/rs1_fra_ipv4/neighbors
-- https://lg.de-cix.net/api/v1/routeservers/rs1_fra_ipv4/neighbors/R194_106/routes
+- https://lg.de-cix.net/api/v1/routeservers/rs1_fra_ipv4/neighbors/R194_106/routes/received
+- https://lg.de-cix.net/api/v1/routeservers/rs1_fra_ipv4/neighbors/R194_106/routes/filtered
+- https://lg.de-cix.net/api/v1/routeservers/rs1_fra_ipv4/neighbors/R194_106/routes/not-exported
 - https://lg.de-cix.net/api/v1/lookup/prefix?q=217.115.0.0
 
 
@@ -45,7 +55,7 @@ Currently Alice-LG supports the following APIs:
 
 ### Birdwatcher
 Normally you would first install the [birdwatcher API](https://github.com/alice-lg/birdwatcher) directly on the machine(s) where you run [BIRD](http://bird.network.cz/) on
-and then install Alice-LG on a seperate public facing server and point her to the afore mentioned [birdwatcher API](https://github.com/alice-lg/birdwatcher).
+and then install Alice-LG on a separate public facing server and point her to the afore mentioned [birdwatcher API](https://github.com/alice-lg/birdwatcher).
 
 This project was a direct result of the [RIPE IXP Tools Hackathon](https://atlas.ripe.net/hackathon/ixp-tools/)
 just prior to [RIPE73](https://ripe73.ripe.net/) in Madrid, Spain.
@@ -190,10 +200,10 @@ with the optional parameter (the "mountpoint" of the theme)
     url_base = /theme
 
 
-You can put assets (images, fonts, javscript, css) in
+You can put assets (images, fonts, javascript, css) in
 this folder.
 
-Stylesheets and Javascripts are automatically included in
+Stylesheets and JavaScripts are automatically included in
 the client's html and are served from the backend.
 
 Alice provides early stages of an extension API, which is for now
@@ -220,6 +230,30 @@ Alice.onLayoutReady(function(page) {
 ```
 
 For an example check out: https://github.com/alice-lg/alice-theme-example
+
+## Metrics
+
+When `enable_prometheus` is set to `true` in the configuration, Alice will expose metrics on `/metrics` in Prometheus
+format.
+
+The following metrics are available:
+
+- `neighbor_state` - The state of the BGP peers (1 = established, 0 = not established)
+- `neighbor_uptime` - The uptime of the BGP peers in seconds
+- `routes_accepted` - The number of routes accepted from a peer
+- `routes_filtered` - The number of routes filtered from a peer
+- `routes_preferred` - The number of routes preferred from a peer
+- `routes_received` - The number of routes received from a peer
+
+The following labels are available:
+
+- `neighbor_address` - The address of the BGP peer
+- `neighbor_asn` - The ASN of the BGP peer
+- `neighbor_description` - The description of the BGP peer
+- `neighbor_id` - The ID of the BGP peer
+- `route_server_group` - The group of the route server
+- `route_server_id` - The ID of the route server
+- `route_server_name` - The name of the route server
 
 ## Hacking
 

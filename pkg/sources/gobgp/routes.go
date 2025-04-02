@@ -43,7 +43,7 @@ func (gobgp *GoBGP) lookupNeighbor(
 	return nil, fmt.Errorf("could not lookup neighbor")
 }
 
-// GetNeighbors retrievs all neighbors and returns
+// GetNeighbors retrieves all neighbors and returns
 // a list of peers.
 func (gobgp *GoBGP) GetNeighbors(
 	ctx context.Context,

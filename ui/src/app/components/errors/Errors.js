@@ -1,6 +1,6 @@
 
 /**
- * Errors Component renders a stack of dismissable errors.
+ * Errors Component renders a stack of dismissible errors.
  */
 import { FontAwesomeIcon }
   from '@fortawesome/react-fontawesome';
@@ -25,7 +25,7 @@ const infoFromError = (error) => {
 
 
 /**
- * Error renders a single dismissable error
+ * Error renders a single dismissible error
  */
 const Error = ({error, onDismiss}) => {
   const routeServers = useRouteServers();

@@ -30,7 +30,7 @@ type GenericBirdwatcher struct {
 	routesRequiredCache    *caches.RoutesCache
 	routesNotExportedCache *caches.RoutesCache
 
-	// Mutices:
+	// Mutexes:
 	routesFetchMutex *LockMap
 }
 
@@ -205,7 +205,7 @@ func (b *GenericBirdwatcher) ExpireCaches() int {
 	return count
 }
 
-// Status retrievs the current backend status
+// Status retrieves the current backend status
 func (b *GenericBirdwatcher) Status(ctx context.Context) (*api.StatusResponse, error) {
 	bird, err := b.client.GetJSON(ctx, "/status")
 	if err != nil {

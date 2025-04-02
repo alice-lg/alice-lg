@@ -113,7 +113,7 @@ func Duration(value interface{}, fallback time.Duration) time.Duration {
 }
 
 // DurationTimeframe decodes a duration: Bgpctl encodes
-// this using fmt_timeframe, whiuch outputs a format similar
+// this using fmt_timeframe, which outputs a format similar
 // to that being understood by time.ParseDuration - however
 // the time unit "w" (weeks) is not supported.
 // According to https://github.com/openbgpd-portable/openbgpd-openbsd/blob/master/src/usr.sbin/bgpctl/bgpctl.c#L586-L591

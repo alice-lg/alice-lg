@@ -12,7 +12,7 @@ used key.
 */
 type LRUMap map[string]time.Time
 
-// LRU retrievs the least recently used key
+// LRU retrieves the least recently used key
 func (lrumap LRUMap) LRU() string {
 	t := time.Now()
 	key := ""

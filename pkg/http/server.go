@@ -8,10 +8,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/alice-lg/alice-lg/pkg/config"
-	"github.com/alice-lg/alice-lg/pkg/store"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/julienschmidt/httprouter"
+
+	"github.com/alice-lg/alice-lg/pkg/config"
+	"github.com/alice-lg/alice-lg/pkg/store"
 )
 
 // Server provides the HTTP server for the API
@@ -49,6 +50,9 @@ func (s *Server) Start(ctx context.Context) {
 		log.Fatal(err)
 	}
 	if err := s.apiRegisterEndpoints(router); err != nil {
+		log.Fatal(err)
+	}
+	if err := s.registerMetrics(ctx, router); err != nil {
 		log.Fatal(err)
 	}
 

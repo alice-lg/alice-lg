@@ -1,6 +1,6 @@
 package decoders
 
-// MapGet retrievs a key from an expected map
+// MapGet retrieves a key from an expected map
 // it falls back if the input is not a map
 // or the key was not found.
 func MapGet(m interface{}, key string, fallback interface{}) interface{} {
@@ -15,7 +15,7 @@ func MapGet(m interface{}, key string, fallback interface{}) interface{} {
 	return val
 }
 
-// MapGetString retrievs a key from a map and
+// MapGetString retrieves a key from a map and
 // asserts its type is a string. Otherwise fallback
 // will be returned.
 func MapGetString(m interface{}, key string, fallback string) string {
