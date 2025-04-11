@@ -54,6 +54,7 @@ type NeighborsStoreBackend interface {
 type NeighborsStore struct {
 	backend NeighborsStoreBackend
 	sources *SourcesStore
+	cfg *config.Config
 
 	forceNeighborRefresh bool
 }
@@ -92,6 +93,7 @@ func NewNeighborsStore(
 		backend:              backend,
 		sources:              sources,
 		forceNeighborRefresh: forceNeighborRefresh,
+		cfg: cfg,
 	}
 	return store
 }

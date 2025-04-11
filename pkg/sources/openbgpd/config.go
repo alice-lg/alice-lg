@@ -10,8 +10,9 @@ import (
 
 // Config is a OpenBGPD source config
 type Config struct {
-	ID   string
-	Name string
+	ID              string
+	Name            string
+	HiddenNeighbors []string
 
 	CacheTTL        time.Duration
 	RoutesCacheSize int

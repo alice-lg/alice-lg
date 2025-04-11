@@ -36,7 +36,7 @@ type GoBGP struct {
 }
 
 // NewGoBGP creates a new GoBGP source instance
-func NewGoBGP(config Config) *GoBGP {
+func NewGoBGP(config *Config) *GoBGP {
 	dialOpts := make([]grpc.DialOption, 0)
 	if config.Insecure {
 		dialOpts = append(dialOpts, grpc.WithInsecure())
@@ -76,7 +76,7 @@ func NewGoBGP(config Config) *GoBGP {
 		routesCacheDisabled, routesCacheMaxSize)
 
 	return &GoBGP{
-		config: config,
+		config: *config,
 		client: client,
 
 		neighborsCache: neighborsCache,
@@ -134,6 +134,10 @@ func (gobgp *GoBGP) NeighborsStatus(
 		}
 		response.Neighbors = append(response.Neighbors, &ns)
 
+	}
+	response.Neighbors, err = sources.FilterHiddenNeighborsStatus(response.Neighbors, gobgp.config.HiddenNeighbors)
+	if err != nil {
+		return nil, err
 	}
 	return &response, nil
 }
@@ -213,6 +217,11 @@ func (gobgp *GoBGP) Neighbors(
 				int64(_resp.Peer.Timers.State.Uptime.Nanos)))
 		}
 
+	}
+
+	response.Neighbors, err = sources.FilterHiddenNeighbors(response.Neighbors, gobgp.config.HiddenNeighbors)
+	if err != nil {
+		return nil, err
 	}
 
 	return &response, nil

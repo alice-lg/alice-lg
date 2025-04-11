@@ -200,6 +200,10 @@ func (src *StateServerSource) Neighbors(
 		},
 		Neighbors: nb,
 	}
+	response.Neighbors, err = sources.FilterHiddenNeighbors(response.Neighbors, src.cfg.HiddenNeighbors)
+	if err != nil {
+		return nil, err
+	}
 	src.neighborsCache.Set(response)
 
 	return response, nil
@@ -232,6 +236,10 @@ func (src *StateServerSource) NeighborsSummary(
 	}
 
 	nb, err := decodeNeighbors(body)
+	if err != nil {
+		return nil, err
+	}
+	nb, err = sources.FilterHiddenNeighbors(nb, src.cfg.HiddenNeighbors)
 	if err != nil {
 		return nil, err
 	}
@@ -272,6 +280,10 @@ func (src *StateServerSource) NeighborsStatus(
 	}
 
 	nb, err := decodeNeighborsStatus(body)
+	if err != nil {
+		return nil, err
+	}
+	nb, err = sources.FilterHiddenNeighborsStatus(nb, src.cfg.HiddenNeighbors)
 	if err != nil {
 		return nil, err
 	}
