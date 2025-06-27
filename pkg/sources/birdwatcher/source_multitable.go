@@ -152,14 +152,84 @@ func (src *MultiTableBirdwatcher) fetchReceivedRoutes(
 	return apiStatus, received, nil
 }
 
+func (src *MultiTableBirdwatcher) fetchPipeFilteredRoutes(
+	ctx context.Context,
+	protocols map[string]interface{},
+	neighborID string,
+	keepDetails bool,
+) (*api.Meta, api.Routes, error) {
+	neighborProto := protocols[neighborID].(map[string]interface{})
+	table := neighborProto["table"].(string)
+
+	pipes := []string{}
+
+	for pid, p := range protocols {
+		prot := p.(map[string]interface{})
+		if prot["bird_protocol"] == "Pipe" && prot["table"] == table {
+			pipes = append(pipes, pid)
+		}
+	}
+
+	filtered := api.Routes{}
+	var meta *api.Meta
+
+	for _, pipe := range pipes {
+		res, err := src.client.GetEndpoint(
+			ctx,
+			"/routes/pipe/filtered?table="+table+"&pipe="+pipe+"&protocol="+neighborID)
+		if err != nil {
+			log.Println("WARNING Could not retrieve filtered routes:", err)
+			log.Println("Is the 'pipe_filtered' module active in birdwatcher?")
+			return nil, nil, err
+		}
+		defer res.Body.Close()
+
+		// Parse the routes
+		m, pipeFiltered, err := parseRoutesResponseStream(res.Body, src.config, keepDetails)
+		if err != nil {
+			return nil, nil, err
+		}
+		filtered = append(filtered, pipeFiltered...)
+		meta = m
+	}
+
+	/*
+
+		// Query birdwatcher
+		res, err = src.client.GetEndpoint(
+			ctx,
+			"/routes/pipe/filtered/protocol?table="+table+"&pipe="+pipeName+"&protocol="+protocolID)
+		if err != nil {
+			log.Println("WARNING Could not retrieve filtered routes:", err)
+			log.Println("Is the 'pipe_filtered' module active in birdwatcher?")
+			return meta, nil, err
+		}
+		defer res.Body.Close()
+
+		// Parse the routes
+		_, pipeFiltered, err := parseRoutesResponseStream(res.Body, src.config, keepDetails)
+		if err != nil {
+			return nil, nil, err
+		}
+	*/
+
+	return meta, filtered, nil
+}
+
 func (src *MultiTableBirdwatcher) fetchFilteredRoutesStream(
 	ctx context.Context,
 	protocols map[string]interface{},
 	neighborID string,
 	keepDetails bool,
 ) (*api.Meta, api.Routes, error) {
-	if _, ok := protocols[neighborID]; !ok {
+	neighborProto, ok := protocols[neighborID].(map[string]interface{})
+	if !ok {
 		return nil, nil, fmt.Errorf("invalid Neighbor")
+	}
+	table := neighborProto["table"].(string)
+
+	if src.config.PipeProtocolLookup == "table" {
+		return src.fetchPipeFilteredRoutes(ctx, protocols, neighborID, keepDetails)
 	}
 
 	// Stage 1 filters
@@ -177,7 +247,6 @@ func (src *MultiTableBirdwatcher) fetchFilteredRoutesStream(
 	}
 
 	// Stage 2 filters
-	table := protocols[neighborID].(map[string]interface{})["table"].(string)
 	pipeName := src.getMasterPipeName(table)
 
 	// If there is no pipe to master, there is nothing left to do
