@@ -22,7 +22,7 @@ func (src *SingleTableBirdwatcher) fetchReceivedRoutes(
 	}
 	defer res.Body.Close()
 
-	meta, routes, err := parseRoutesResponseStream(res.Body, src.config)
+	meta, routes, err := parseRoutesResponseStream(res.Body, src.config, false)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -42,7 +42,7 @@ func (src *SingleTableBirdwatcher) fetchFilteredRoutes(
 	}
 	defer res.Body.Close()
 
-	meta, routes, err := parseRoutesResponseStream(res.Body, src.config)
+	meta, routes, err := parseRoutesResponseStream(res.Body, src.config, false)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -62,7 +62,7 @@ func (src *SingleTableBirdwatcher) fetchNotExportedRoutes(
 	}
 	defer res.Body.Close()
 
-	meta, routes, err := parseRoutesResponseStream(res.Body, src.config)
+	meta, routes, err := parseRoutesResponseStream(res.Body, src.config, false)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -305,7 +305,7 @@ func (src *SingleTableBirdwatcher) AllRoutes(
 	}
 	defer res.Body.Close()
 
-	meta, birdImported, err := parseRoutesResponseStream(res.Body, src.config)
+	meta, birdImported, err := parseRoutesResponseStream(res.Body, src.config, false)
 	if err != nil {
 		return nil, err
 	}
@@ -317,7 +317,7 @@ func (src *SingleTableBirdwatcher) AllRoutes(
 	}
 	defer res.Body.Close()
 
-	_, birdFiltered, err := parseRoutesResponseStream(res.Body, src.config)
+	_, birdFiltered, err := parseRoutesResponseStream(res.Body, src.config, false)
 	if err != nil {
 		return nil, err
 	}

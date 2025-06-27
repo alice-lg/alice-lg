@@ -11,6 +11,7 @@ import (
 func parseRoutesResponseStream(
 	body io.Reader,
 	config Config,
+	keepDetails bool,
 ) (*api.Meta, api.Routes, error) {
 	dec := json.NewDecoder(body)
 	meta := &api.Meta{}
@@ -72,7 +73,7 @@ func parseRoutesResponseStream(
 				// Wait a bit, so our CPUs do not go up in flames.
 				time.Sleep(throttle)
 
-				route := parseRouteData(rdata, config, false)
+				route := parseRouteData(rdata, config, keepDetails)
 				routes = append(routes, route)
 			}
 		}
