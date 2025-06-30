@@ -22,7 +22,8 @@ const Content = ({id, children}) => {
   }
 
   if (!resolved) {
-    resolved = defaultValue; 
+    // resolved = defaultValue; 
+    return defaultValue;
   }
 
   return <span dangerouslySetInnerHTML={{__html: resolved}}></span>;
