@@ -258,6 +258,7 @@ type BGPInfo struct {
 	ExtCommunities   ExtCommunities `json:"ext_communities"`
 	LocalPref        int            `json:"local_pref"`
 	Med              int            `json:"med"`
+	OTC              *int           `json:"otc"`
 }
 
 // HasCommunity checks for the presence of a BGP community.

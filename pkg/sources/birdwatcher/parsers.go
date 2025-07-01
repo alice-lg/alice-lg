@@ -247,6 +247,12 @@ func parseRouteBgpInfo(data interface{}) *api.BGPInfo {
 	localPref, _ := strconv.Atoi(decoders.String(bgpData["local_pref"], "0"))
 	med, _ := strconv.Atoi(decoders.String(bgpData["med"], "0"))
 
+	var otc *int
+	otcv, err := strconv.Atoi(decoders.String(bgpData["otc"], "-"))
+	if err != nil {
+		otc = &otcv
+	}
+
 	// Using pools has a bit of a performance impact. While parsing
 	// ~600000 routes without deduplication, this takes roughly 14 seconds.
 	// With pools this is now 19 seconds.
@@ -258,6 +264,7 @@ func parseRouteBgpInfo(data interface{}) *api.BGPInfo {
 			decoders.String(bgpData["next_hop"], "unknown")),
 		LocalPref:        localPref,
 		Med:              med,
+		OTC:              otc,
 		Communities:      pools.CommunitiesSets.Acquire(communities),
 		ExtCommunities:   pools.ExtCommunitiesSets.Acquire(extCommunities),
 		LargeCommunities: pools.LargeCommunitiesSets.Acquire(largeCommunities),
