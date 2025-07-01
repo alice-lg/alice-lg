@@ -4,6 +4,9 @@
 all: deps
 	yarn build
 
+dev:
+	yarn start
+
 deps:
 	yarn install
 
