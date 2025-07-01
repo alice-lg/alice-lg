@@ -69,6 +69,11 @@ const RouteDetailsModal = () => {
                 <th>MED:</th>
                 <td>{attrs.med}</td>
             </tr>
+            {attrs.otc &&
+                <tr>
+                    <th>OTC:</th>
+                    <td>{attrs.otc}</td>
+                </tr>}
             {attrs.as_path &&
                 <tr>
                   <th>AS Path:</th>
