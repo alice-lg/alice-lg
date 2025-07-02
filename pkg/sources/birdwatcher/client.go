@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 // ClientResponse is a json key value mapping
@@ -20,6 +21,9 @@ type Client struct {
 
 // NewClient creates a new client instance
 func NewClient(api string) *Client {
+	// Strip trailing slashes from api base
+	api = strings.TrimSuffix(api, "/")
+
 	client := &Client{
 		api: api,
 	}
