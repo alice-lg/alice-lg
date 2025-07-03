@@ -119,3 +119,30 @@ func parseRangeCommunity(s string) (api.BGPCommunityRange, error) {
 	}
 	return comm, nil
 }
+
+// Parse rejection candidate section
+func parseRejectionCandidateCommunities(comms api.BGPCommunityMap, s string) error {
+	lines := strings.Split(s, "\n")
+	n := 0
+	for _, line := range lines {
+		kv := strings.SplitN(line, "=", 2)
+		if len(kv) != 2 {
+			log.Println("Skipping malformed reject candidate BGP community:", line)
+			continue
+		}
+
+		key := strings.TrimSpace(kv[0])
+		if key != "communities" {
+			log.Printf("unexpected key '%s' in section 'rejection_candidates'", key)
+			continue
+		}
+
+		value := strings.TrimSpace(kv[1])
+		for _, c := range strings.Split(value, ",") {
+			n += 1
+			comms.Set(c, fmt.Sprintf("reject-candidate-%d", n))
+		}
+	}
+
+	return nil
+}

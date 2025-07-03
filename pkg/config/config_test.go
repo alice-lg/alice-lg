@@ -207,15 +207,25 @@ func TestRejectCandidatesConfig(t *testing.T) {
 		t.Fatal("Could not load test config:", err)
 	}
 
-	t.Log(config.UI.RoutesRejectCandidates.Communities)
+	// Candidate Communities
+	cc := config.UI.RoutesRejectCandidates.Communities
+	t.Log(cc)
 
-	description, err := config.UI.RoutesRejectCandidates.Communities.Lookup("23:42:46")
+	// Base
+	_, err = cc.Lookup("23:42:46")
 	if err != nil {
-		t.Error(err)
+		t.Error("expected 23:42:46 to be a rejection candidate:", err)
 	}
 
-	if description != "reject-candidate-3" {
-		t.Error("expected 23:42:46 to be a 'reject-candidate'")
+	// Expanded
+	_, err = cc.Lookup("2222:1902:23")
+	if err != nil {
+		t.Error("expected 2222:1902:23 to be a rejection candidate:", err)
+	}
+
+	_, err = cc.Lookup("9999:111:222")
+	if err == nil {
+		t.Error("community should not be a rejection candidate")
 	}
 }
 

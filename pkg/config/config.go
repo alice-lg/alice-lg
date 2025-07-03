@@ -474,23 +474,16 @@ func getBlackholeCommunities(config *ini.File) (api.BGPCommunitiesSet, error) {
 
 // Get UI config: Reject candidates
 func getRejectCandidatesConfig(config *ini.File) (RejectCandidatesConfig, error) {
-	candidateCommunities := config.Section(
-		"rejection_candidates").Key("communities").String()
-
-	if candidateCommunities == "" {
-		return RejectCandidatesConfig{}, nil
-	}
-
-	communities := api.BGPCommunityMap{}
-	for i, c := range strings.Split(candidateCommunities, ",") {
-		communities.Set(c, fmt.Sprintf("reject-candidate-%d", i+1))
-	}
-
 	conf := RejectCandidatesConfig{
-		Communities: communities,
+		Communities: api.BGPCommunityMap{},
+	}
+	section := config.Section("rejection_candidates")
+	if section == nil {
+		return conf, nil // nothing to do here.
 	}
 
-	return conf, nil
+	err := parseRejectionCandidateCommunities(conf.Communities, section.Body())
+	return conf, err
 }
 
 // Get UI config: RPKI configuration
@@ -927,6 +920,7 @@ func LoadConfig(file string) (*Config, error) {
 			"bgp_communities",
 			"blackhole_communities",
 			"rejection_reasons",
+			"rejection_candidates",
 			"noexport_reasons",
 			"rpki",
 		},
