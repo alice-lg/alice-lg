@@ -1,3 +1,5 @@
+//lint:file-ignore ST1000 vendored file
+//lint:file-ignore ST1003 vendored file
 // Copyright (C) 2018 Nippon Telegraph and Telephone Corporation.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");

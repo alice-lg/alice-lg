@@ -1,0 +1,8 @@
+The apiutil is vendored from gobgp.
+Linter errors found by staticcheck will be ignored.
+
+All files are prefixed with suprressing directives:
+
+//lint:file-ignore ST1000 vendored file
+//lint:file-ignore ST1003 vendored file
+//lint:file-ignore ST1021 vendored file

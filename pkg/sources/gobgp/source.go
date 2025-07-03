@@ -6,19 +6,16 @@ import (
 	gobgpapi "github.com/osrg/gobgp/v3/api"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 
 	api "github.com/alice-lg/alice-lg/pkg/api"
 	"github.com/alice-lg/alice-lg/pkg/caches"
-	"github.com/alice-lg/alice-lg/pkg/sources"
 
 	"context"
 	"io"
 	"log"
 	"time"
 )
-
-// Ensure source implements the interface
-var _GoBGPSource sources.Source = &GoBGP{}
 
 // GoBGP is a source for Alice.
 type GoBGP struct {
@@ -39,7 +36,8 @@ type GoBGP struct {
 func NewGoBGP(config Config) *GoBGP {
 	dialOpts := make([]grpc.DialOption, 0)
 	if config.Insecure {
-		dialOpts = append(dialOpts, grpc.WithInsecure())
+		// dialOpts = append(dialOpts, grpc.WithInsecure())
+		dialOpts = append(dialOpts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	} else {
 		creds, err := credentials.NewClientTLSFromFile(
 			config.TLSCert,
