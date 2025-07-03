@@ -3,10 +3,18 @@
 
 ## 6.2.0 
 
- * Metrics can be enabled.
+ * Support for GoBGP with API V3 was merged. Thanks @Ales999
 
- * Multitable Birdwatcher Source is also now using stream
-   route response parsing.
+ * New Features:
+   - OpenMetrics / Prometheus exports can be enabled
+
+   - Show 'otc' attribute in route details #174
+
+   - Multitable Birdwatcher Source is also now using stream
+     route response parsing.
+
+ * Fixes:
+   - Variable expansion for reject candidates #157
 
 
 ## 6.1.0 (2024-02-12)
