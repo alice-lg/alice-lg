@@ -3,6 +3,7 @@ package birdwatcher
 import (
 	"context"
 	"fmt"
+	"log"
 	"sort"
 	"time"
 
@@ -83,6 +84,12 @@ func NewBirdwatcher(config Config) Birdwatcher {
 		multiTableBirdwatcher.routesFetchMutex = NewLockMap()
 
 		birdwatcher = multiTableBirdwatcher
+
+		// Notify about missing information
+		if config.PeerTableOnly {
+			log.Println("WARNING: This bird setup does not use a main table.")
+			log.Println("The number of filtered routes an routes not exported can not be determined.")
+		}
 	}
 
 	return birdwatcher
