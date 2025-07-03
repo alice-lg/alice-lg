@@ -19,6 +19,8 @@ type MultiTableBirdwatcher struct {
 	GenericBirdwatcher
 }
 
+// Get the name of the pipe derived from the
+// peer table: E.g. T65535 -> P65535
 func (src *MultiTableBirdwatcher) getMasterPipeName(table string) string {
 	ptPrefix := src.config.PeerTablePrefix
 	if strings.HasPrefix(table, ptPrefix) {
@@ -38,11 +40,15 @@ func (src *MultiTableBirdwatcher) isAltSession(pipe string) bool {
 	return strings.HasSuffix(pipe, suffix)
 }
 
+// Get the alternative pipe name.
 func (src *MultiTableBirdwatcher) getAltPipeName(pipe string) string {
 	prefix := src.config.PipeProtocolPrefix
 	return src.config.AltPipeProtocolPrefix + pipe[len(prefix):]
 }
 
+// Build a protocol map for BGP protocols for the lookup of:
+//
+//	protocol.table => protocol.neighbor_address => protocol
 func (src *MultiTableBirdwatcher) parseProtocolToTableTree(
 	bird ClientResponse,
 ) map[string]interface{} {
@@ -73,6 +79,7 @@ func (src *MultiTableBirdwatcher) parseProtocolToTableTree(
 	return response
 }
 
+// Fetch all protocols from bird. Including Pipe protocols.
 func (src *MultiTableBirdwatcher) fetchProtocols(ctx context.Context) (
 	*api.Meta,
 	map[string]interface{},
@@ -97,13 +104,14 @@ func (src *MultiTableBirdwatcher) fetchProtocols(ctx context.Context) (
 	return apiStatus, bird, nil
 }
 
+// Fetch received routes from bird for a given protocolID.
 func (src *MultiTableBirdwatcher) fetchReceivedRoutes(
 	ctx context.Context,
 	protocols map[string]interface{},
 	neighborID string,
 	keepDetails bool,
 ) (*api.Meta, api.Routes, error) {
-	// Query birdwatcher for protocols
+	// Get protocol details by ID
 	if _, ok := protocols[neighborID]; !ok {
 		return nil, nil, fmt.Errorf("invalid Neighbor")
 	}
@@ -134,17 +142,23 @@ func (src *MultiTableBirdwatcher) fetchReceivedRoutes(
 	return meta, routes, nil
 }
 
+// Fetch routes filtered on all pipes originating
+// from the neighbors table.
+//
+// This applies only to peer-table-only bird setups.
 func (src *MultiTableBirdwatcher) fetchPipeFilteredRoutes(
 	ctx context.Context,
 	protocols map[string]interface{},
 	neighborID string,
 	keepDetails bool,
 ) (*api.Meta, api.Routes, error) {
+	// Get table from neighbor protocol
 	neighborProto := protocols[neighborID].(map[string]interface{})
 	table := neighborProto["table"].(string)
 
 	pipes := []string{}
 
+	// Get all pipes originating from this table
 	for pid, p := range protocols {
 		prot := p.(map[string]interface{})
 		if prot["bird_protocol"] == "Pipe" && prot["table"] == table {
@@ -178,6 +192,7 @@ func (src *MultiTableBirdwatcher) fetchPipeFilteredRoutes(
 	return meta, filtered, nil
 }
 
+// Fetch filtered routes.
 func (src *MultiTableBirdwatcher) fetchFilteredRoutes(
 	ctx context.Context,
 	protocols map[string]interface{},
@@ -192,12 +207,8 @@ func (src *MultiTableBirdwatcher) fetchFilteredRoutes(
 
 	if src.config.PeerTableOnly {
 		return &api.Meta{}, api.Routes{}, nil // No result is better than wrong.
+		// return src.fetchPipeFilteredRoutes(ctx, protocols, neighborID, keepDetails)
 	}
-	/*
-		if src.config.PipeProtocolLookup == "table" {
-			return src.fetchPipeFilteredRoutes(ctx, protocols, neighborID, keepDetails)
-		}
-	*/
 
 	// Stage 1 filters
 	res, err := src.client.GetEndpoint(ctx, "/routes/filtered/"+neighborID)
@@ -245,8 +256,10 @@ func (src *MultiTableBirdwatcher) fetchFilteredRoutes(
 
 	filtered = append(filtered, pipeFiltered...)
 
+	// Sort routes for deterministic ordering
+	// (Is this really required?)
 	if !keepDetails {
-		// Yes this is not the right variable name to convey this...
+		// Yes, this is not the right variable name to convey this...
 		sort.Sort(filtered)
 	}
 
@@ -594,7 +607,7 @@ func (src *MultiTableBirdwatcher) fetchNeighbors(
 		Neighbors: neighbors,
 	}
 
-	return response, nil // dereference for now
+	return response, nil
 }
 
 // Neighbors get neighbors from protocols.
@@ -608,15 +621,18 @@ func (src *MultiTableBirdwatcher) Neighbors(
 		return response, nil
 	}
 
-	// We can use the table to map related pipe protocols or try
-	// to derive by prefix.
 	if src.config.PeerTableOnly {
+		// For now there is no way to get the filtered routes
+		// information to my knowledge. An attempt was made with
+		// fetchNeighborsPipeTable and is kept just in case.
 		res, err := src.fetchNeighbors(ctx)
 		if err != nil {
 			return nil, err
 		}
 		response = res
 	} else {
+		// We can use the table to map related pipe protocols or try
+		// to derive by prefix.
 		res, err := src.fetchNeighborsPipeMaster(ctx)
 		if err != nil {
 			return nil, err
@@ -627,7 +643,7 @@ func (src *MultiTableBirdwatcher) Neighbors(
 	// Cache result
 	src.neighborsCache.Set(response)
 
-	return response, nil // dereference for now
+	return response, nil
 }
 
 // NeighborsSummary is for now using Neighbors
