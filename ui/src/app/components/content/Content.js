@@ -21,8 +21,9 @@ const Content = ({id, children}) => {
     }
   }
 
+  // When there is no custom override, fallback to
+  // the child elements.
   if (!resolved) {
-    // resolved = defaultValue; 
     return defaultValue;
   }
 
