@@ -15,11 +15,11 @@ type Config struct {
 
 	Type                    string `ini:"type"`
 	MainTable               string `ini:"main_table"`
+	PeerTableOnly           bool   `ini:"peer_table_only"`
 	PeerTablePrefix         string `ini:"peer_table_prefix"`
 	PipeProtocolPrefix      string `ini:"pipe_protocol_prefix"`
 	AltPipeProtocolPrefix   string `ini:"alt_pipe_protocol_prefix"`
 	AltPipeProtocolSuffix   string `ini:"alt_pipe_protocol_suffix"`
-	PipeProtocolLookup      string `ini:"pipe_protocol_lookup"`
 	NeighborsRefreshTimeout int    `ini:"neighbors_refresh_timeout"`
 
 	StreamParserThrottle int
