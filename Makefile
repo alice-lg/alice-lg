@@ -11,7 +11,7 @@ VERSION=$(shell cat ./VERSION)
 
 all: alice
 
-test: ui_test backend_test
+test: ui_test backend_check backend_test
 
 alice: ui backend
 	cp cmd/alice-lg/alice-lg-* bin/
@@ -24,6 +24,17 @@ ui_test:
 
 backend:
 	$(MAKE) -C cmd/alice-lg/ static
+
+
+backend_check:
+	# Vet
+	go vet ./pkg/...
+	go vet ./cmd/...
+
+	# Staticcheck
+	staticcheck ./pkg/...
+	staticcheck ./cmd/...
+
 
 backend_test:
 	mkdir -p ./ui/build
