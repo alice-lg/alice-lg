@@ -1,6 +1,14 @@
 
 # Changelog
 
+## 6.2.0 
+
+ * Metrics can be enabled.
+
+ * Multitable Birdwatcher Source is also now using stream
+   route response parsing.
+
+
 ## 6.1.0 (2024-02-12)
 
  * Added memory pools for deduplicating route information.
