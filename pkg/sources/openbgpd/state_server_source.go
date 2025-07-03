@@ -8,11 +8,7 @@ import (
 	"github.com/alice-lg/alice-lg/pkg/api"
 	"github.com/alice-lg/alice-lg/pkg/caches"
 	"github.com/alice-lg/alice-lg/pkg/decoders"
-	"github.com/alice-lg/alice-lg/pkg/sources"
 )
-
-// Ensure source interface is implemented
-var _OpenBGPStateServerSource sources.Source = &StateServerSource{}
 
 const (
 	// StateServerSourceVersion is currently fixed at 1.0

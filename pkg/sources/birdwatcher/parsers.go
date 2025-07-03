@@ -47,7 +47,7 @@ func parseAPIStatus(bird ClientResponse, config Config) (*api.Meta, error) {
 			// Unknown error
 			return nil, fmt.Errorf("invalid API response received from server")
 		}
-		return nil, fmt.Errorf(birdErr)
+		return nil, fmt.Errorf("bird error: %s", birdErr)
 	}
 
 	// Parse TTL

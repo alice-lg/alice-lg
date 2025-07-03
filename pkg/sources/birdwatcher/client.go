@@ -5,7 +5,7 @@ package birdwatcher
 import (
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 )
@@ -60,7 +60,7 @@ func (c *Client) GetJSON(
 
 	// Read body
 	defer res.Body.Close()
-	payload, err := ioutil.ReadAll(res.Body)
+	payload, err := io.ReadAll(res.Body)
 	if err != nil {
 		return ClientResponse{}, err
 	}

@@ -146,6 +146,8 @@ func (src *MultiTableBirdwatcher) fetchReceivedRoutes(
 // from the neighbors table.
 //
 // This applies only to peer-table-only bird setups.
+//
+//lint:ignore U1000 function kept for future use.
 func (src *MultiTableBirdwatcher) fetchPipeFilteredRoutes(
 	ctx context.Context,
 	protocols map[string]interface{},
@@ -375,6 +377,8 @@ func (src *MultiTableBirdwatcher) fetchRequiredRoutes(
 
 // Fetch Neighbors and map the corresponding pipe protocols
 // by the 'table' attribute.
+//
+//lint:ignore U1000 function kept for future use.
 func (src *MultiTableBirdwatcher) fetchNeighborsPipeTable(
 	ctx context.Context,
 ) (*api.NeighborsResponse, error) {
@@ -798,12 +802,7 @@ func (src *MultiTableBirdwatcher) fetchAllRoutesFromPeerTable(
 		return nil, err
 	}
 	protocols := birdProtocols["protocols"].(map[string]interface{})
-	protocolsBgp := src.filterProtocolsBgp(birdProtocols)["protocols"].(map[string]interface{})
-
-	type fetchPeerReq struct {
-		protocol string
-		table    string
-	}
+	protocolsBGP := src.filterProtocolsBgp(birdProtocols)["protocols"].(map[string]interface{})
 
 	wg := &sync.WaitGroup{}
 	req := make(chan string, 1024)
@@ -817,8 +816,8 @@ func (src *MultiTableBirdwatcher) fetchAllRoutesFromPeerTable(
 		go func() {
 			defer wg.Done()
 			// Consume request queue and emit resuts.
-			for protoId := range req {
-				_, routes, err := src.fetchReceivedRoutes(ctx, protocols, protoId, false)
+			for protoID := range req {
+				_, routes, err := src.fetchReceivedRoutes(ctx, protocols, protoID, false)
 				if err != nil {
 					log.Println("error while fetching received routes:", err)
 				}
@@ -829,8 +828,8 @@ func (src *MultiTableBirdwatcher) fetchAllRoutesFromPeerTable(
 
 	// Request routes
 	go func() {
-		for protoId, _ := range protocolsBgp {
-			req <- protoId
+		for protoID := range protocolsBGP {
+			req <- protoID
 		}
 		close(req)
 	}()

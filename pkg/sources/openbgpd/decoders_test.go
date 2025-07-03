@@ -2,13 +2,13 @@ package openbgpd
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 )
 
 func readTestData(filename string) map[string]interface{} {
-	data, _ := ioutil.ReadFile(filepath.Join("testdata", filename))
+	data, _ := os.ReadFile(filepath.Join("testdata", filename))
 	payload := make(map[string]interface{})
 	_ = json.Unmarshal(data, &payload)
 	return payload
