@@ -630,9 +630,7 @@ func (s *SearchFilters) Combine(other *SearchFilters) *SearchFilters {
 			Key:     group.Key,
 			Filters: []*SearchFilter{},
 		}
-		for _, f := range group.Filters {
-			combined.Filters = append(combined.Filters, f)
-		}
+		combined.Filters = append(combined.Filters, group.Filters...)
 		for _, f := range otherGroup.Filters {
 			if combined.Contains(f) {
 				continue
