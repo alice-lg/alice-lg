@@ -1,13 +1,14 @@
 package pools
 
 import (
-	"fmt"
 	"testing"
 )
 
 func TestAcquireString(t *testing.T) {
 	p := NewStringPool()
 	s1 := p.Acquire("hello")
+	_ = s1
+
 	s2 := p.Acquire("hello")
 	s3 := p.Acquire("world")
 	s1 = p.Acquire("hello")
@@ -15,12 +16,12 @@ func TestAcquireString(t *testing.T) {
 	if s1 != s2 {
 		t.Error("expected s1 == s2")
 	}
-	t.Log(fmt.Sprintf("s1, s2: %x %x", s1, s2))
+	t.Logf("s1, s2: %x %x", s1, s2)
 
 	if s2 == s3 {
 		t.Error("expected s2 !== s3")
 	}
-	t.Log(fmt.Sprintf("s1, s2: %x %x", s1, s2))
+	t.Logf("s1, s2: %x %x", s1, s2)
 }
 
 func TestGarbageCollectString(t *testing.T) {

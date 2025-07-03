@@ -9,8 +9,7 @@ import (
 //
 // A Tree datastructure is used.
 type IntListPool struct {
-	root    *Node[int, []int]
-	counter uint64
+	root *Node[int, []int]
 	sync.Mutex
 }
 
