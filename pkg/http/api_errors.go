@@ -25,7 +25,7 @@ func (err *ErrResourceNotFoundError) Error() string {
 // ErrTimeout will be sent if the request took too long
 type ErrTimeout string
 
-// Implement Error interface
+// Error implements the Error interface
 func (err ErrTimeout) Error() string {
 	return string(err)
 }

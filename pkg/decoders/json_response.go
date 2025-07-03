@@ -4,7 +4,7 @@ package decoders
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
@@ -13,7 +13,7 @@ import (
 func ReadJSONResponse(res *http.Response) (map[string]interface{}, error) {
 	// Read body
 	defer res.Body.Close()
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
 	}

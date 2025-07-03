@@ -1,7 +1,6 @@
 package http
 
 import (
-	"io/ioutil"
 	"path/filepath"
 
 	"os"
@@ -13,11 +12,11 @@ import (
 
 func touchFile(path, filename string) error {
 	target := filepath.Join(path, filename)
-	return ioutil.WriteFile(target, []byte{}, 0644)
+	return os.WriteFile(target, []byte{}, 0644)
 }
 
 func TestThemeFiles(t *testing.T) {
-	themePath, err := ioutil.TempDir("", "alice-lg-tmp-theme")
+	themePath, err := os.MkdirTemp("", "alice-lg-tmp-theme")
 	if err != nil {
 		t.Error(err)
 	}
@@ -57,7 +56,7 @@ func TestThemeFiles(t *testing.T) {
 }
 
 func TestThemeIncludeHash(t *testing.T) {
-	themePath, err := ioutil.TempDir("", "alice-lg-tmp-theme")
+	themePath, err := os.MkdirTemp("", "alice-lg-tmp-theme")
 	if err != nil {
 		t.Error(err)
 	}
@@ -81,7 +80,7 @@ func TestThemeIncludeHash(t *testing.T) {
 }
 
 func TestThemeIncludes(t *testing.T) {
-	themePath, err := ioutil.TempDir("", "alice-lg-tmp-theme")
+	themePath, err := os.MkdirTemp("", "alice-lg-tmp-theme")
 	if err != nil {
 		t.Error(err)
 	}

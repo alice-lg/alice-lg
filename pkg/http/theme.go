@@ -20,7 +20,6 @@ import (
 	"strconv"
 	"strings"
 
-	"io/ioutil"
 	"net/http"
 	"path/filepath"
 
@@ -46,7 +45,7 @@ func NewTheme(config config.ThemeConfig) *Theme {
 func (t *Theme) listIncludes(suffix string) []string {
 	includes := []string{}
 
-	files, err := ioutil.ReadDir(t.Config.Path)
+	files, err := os.ReadDir(t.Config.Path)
 	if err != nil {
 		return []string{}
 	}

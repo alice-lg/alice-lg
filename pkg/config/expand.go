@@ -131,7 +131,7 @@ func (e ExpandMap) Expand(s string) ([]string, error) {
 		if len(subs) == 0 {
 			level := expandGetLevel(p)
 			if level == 1 {
-				err := fmt.Errorf("No substitution for %s in '%s'", p, s)
+				err := fmt.Errorf("no substitution for %s in '%s'", p, s)
 				return []string{}, err
 			}
 			continue
@@ -177,7 +177,7 @@ func (e ExpandMap) AddExpr(expr string) error {
 		// Split key and value
 		parts := strings.SplitN(exp, "=", 2)
 		if len(parts) != 2 {
-			return fmt.Errorf("Invalid expression '%s'", expr)
+			return fmt.Errorf("invalid expression '%s'", expr)
 		}
 		key := strings.TrimSpace(parts[0])
 		val := strings.TrimSpace(parts[1])

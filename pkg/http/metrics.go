@@ -12,7 +12,7 @@ func (s *Server) registerMetrics(
 	ctx context.Context,
 	router *httprouter.Router,
 ) error {
-	if s.cfg.Server.EnableMetrics == false {
+	if !s.cfg.Server.EnableMetrics {
 		return nil
 	}
 

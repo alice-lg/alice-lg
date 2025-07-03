@@ -570,7 +570,7 @@ func getRpkiConfig(config *ini.File) (RpkiConfig, error) {
 	// As the euro-ix document states, this can be a range.
 	for i, com := range rpki.Invalid {
 		if len(com) != 3 {
-			return rpki, fmt.Errorf("Invalid rpki.invalid config: %v", com)
+			return rpki, fmt.Errorf("invalid rpki.invalid config: %v", com)
 		}
 		tokens := strings.Split(com[2], "-")
 		rpki.Invalid[i] = append([]string{com[0], com[1]}, tokens...)
@@ -900,9 +900,7 @@ func preprocessConfig(data []byte) []byte {
 		if err != nil {
 			log.Fatal("Error expanding expression in config:", l, err)
 		}
-		for _, e := range exp {
-			configLines = append(configLines, e)
-		}
+		configLines = append(configLines, exp...)
 	}
 	return []byte(strings.Join(configLines, "\n"))
 }

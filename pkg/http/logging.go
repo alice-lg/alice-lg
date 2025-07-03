@@ -34,14 +34,14 @@ func (s *Server) logSourceError(
 	}
 
 	if err != nil {
-		log.Println(fmt.Sprintf(
+		log.Printf(
 			"API ERROR :: %s.%s(%s) :: %v",
 			sourceName, module, strings.Join(args, ", "), err,
-		))
+		)
 	} else {
-		log.Println(fmt.Sprintf(
+		log.Printf(
 			"API ERROR :: %s.%s(%s)",
 			sourceName, module, strings.Join(args, ", "),
-		))
+		)
 	}
 }
