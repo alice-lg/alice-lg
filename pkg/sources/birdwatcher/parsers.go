@@ -249,7 +249,7 @@ func parseRouteBgpInfo(data interface{}) *api.BGPInfo {
 
 	var otc *int
 	otcv, err := strconv.Atoi(decoders.String(bgpData["otc"], "-"))
-	if err != nil {
+	if err == nil {
 		otc = &otcv
 	}
 
