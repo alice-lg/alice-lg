@@ -15,6 +15,8 @@ type Config struct {
 
 	Type                    string `ini:"type"`
 	MainTable               string `ini:"main_table"`
+	MainTable4              string `ini:"main_table4"`
+	MainTable6              string `ini:"main_table6"`
 	PeerTableOnly           bool   `ini:"peer_table_only"`
 	PeerTablePrefix         string `ini:"peer_table_prefix"`
 	PipeProtocolPrefix      string `ini:"pipe_protocol_prefix"`

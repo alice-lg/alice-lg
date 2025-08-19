@@ -108,6 +108,13 @@ func (res *RoutesResponse) CacheTTL() time.Duration {
 	return res.Response.Meta.TTL.Sub(now)
 }
 
+// Merge combines two routes responses by appending
+func (res *RoutesResponse) Merge(other *RoutesResponse) {
+	res.Imported = append(res.Imported, other.Imported...)
+	res.Filtered = append(res.Filtered, other.Filtered...)
+	res.NotExported = append(res.NotExported, other.NotExported...)
+}
+
 // TimedResponse include the duration of the request
 type TimedResponse struct {
 	RequestDuration float64 `json:"request_duration_ms"`
