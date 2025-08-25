@@ -26,6 +26,9 @@ type Neighbor struct {
 	LastError       string        `json:"last_error"`
 	RouteServerID   string        `json:"routeserver_id"`
 
+	// Per-channel route counts (dualchannel ipv4, ipv6)
+	RoutesChannels map[string]*RoutesChannel `json:"routes_channels"`
+
 	// Original response
 	Details map[string]interface{} `json:"details"`
 }
@@ -84,6 +87,16 @@ func (n *Neighbor) MatchName(name string) bool {
 	neighName := strings.ToLower(n.Description)
 
 	return strings.Contains(neighName, name)
+}
+
+// RoutesChannel has the routes stats per channel,
+// if the backend supports it.
+type RoutesChannel struct {
+	RoutesReceived  int `json:"routes_received"`
+	RoutesFiltered  int `json:"routes_filtered"`
+	RoutesExported  int `json:"routes_exported"`
+	RoutesPreferred int `json:"routes_preferred"`
+	RoutesAccepted  int `json:"routes_accepted"`
 }
 
 // A NeighborsResponse is a list of neighbors with

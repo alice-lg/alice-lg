@@ -6,11 +6,13 @@ import { FontAwesomeIcon }
   from '@fortawesome/react-fontawesome';
 import { faCircleArrowUp
        , faCircleArrowDown
+       , faCirclePlus
+       , faCircleMinus
        }
   from '@fortawesome/free-solid-svg-icons';
 
 
-import { useMemo }
+import { useMemo, useState }
   from 'react';
 
 import { useParams
@@ -251,6 +253,24 @@ const ColNotAvailable = () => {
 }
 
 
+const ColToggleExtended = (params) => {
+    const [isExtended, setExtended] = params.extended;
+    let icon = faCirclePlus;
+    if (isExtended) {
+        icon = faCircleMinus;
+    }
+    return (
+      <td>
+        <button
+          className="btn btn-xs btn-extend"
+          onClick={() => setExtended(!isExtended)}>
+            <FontAwesomeIcon icon={icon} />
+        </button>
+      </td>
+    );
+}
+
+
 const NeighborColumn = ({neighbor, column}) => {
   const rs = useRouteServer();
   const widgets = {
@@ -274,18 +294,67 @@ const NeighborColumn = ({neighbor, column}) => {
   );
 }
 
-const NeighborRow = ({neighbor, columns}) => {
-  return useMemo(() => {
-    const cols = columns.map((c) => 
-      <NeighborColumn 
-        key={c}
-        neighbor={neighbor}
-        column={c} />);
-    return (
-      <tr>{cols}</tr>
-    );
-  }, [neighbor, columns]);
+
+const NeighborRow = ({neighbor, columns, extended}) => {
+  const cols = useMemo(() => columns.map((c) =>
+    <NeighborColumn
+      key={c}
+      neighbor={neighbor}
+      column={c} />
+  ), [neighbor, columns]);
+
+  return (
+    <tr>
+        {cols}
+        <ColToggleExtended extended={extended} />
+    </tr>
+  );
 }
+
+const NeighborRowDetails = ({neighbor, columns, channel, extended}) => {
+    const [isExtended] = extended;
+    if (!isExtended || !channel) {
+        return null;
+    }
+
+    let chan = neighbor?.routes_channels?.ipv4;
+    if (channel === 6) {
+        chan = neighbor?.routes_channels?.ipv6;
+    }
+
+    const cols = columns.map((c) => {
+        let cval = chan[c];
+        if (cval) {
+            return <td key={c}>{cval}</td>;
+        }
+        if (c === "Description") {
+            return <td key={c} className="col-ip-info">IPv{channel}</td>;
+        }
+        return <td key={c}></td>;
+    });
+
+    return <tr>{cols}<td></td></tr>;
+}
+
+const TableNeighbor = ({columns, neighbor}) => {
+    const extended = useState(false);
+    return <>
+        <NeighborRow
+            columns={columns}
+            neighbor={neighbor}
+            extended={extended} />
+        <NeighborRowDetails
+            columns={columns}
+            neighbor={neighbor}
+            channel={4}
+            extended={extended} />
+        <NeighborRowDetails
+            columns={columns}
+            neighbor={neighbor}
+            channel={6}
+            extended={extended} />
+    </>;
+};
 
 /**
  * NeighborsTable renders the table of neighbors
@@ -319,7 +388,7 @@ const NeighborsTable = ({neighbors, state, ref}) => {
   }
 
   const rows = sortedNeighbors.map((neighbor) => 
-    <NeighborRow
+    <TableNeighbor
       key={neighbor.id}
       columns={columnsOrder}
       neighbor={neighbor} />);
