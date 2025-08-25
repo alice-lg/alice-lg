@@ -20,6 +20,7 @@ type Route struct {
 	Type       []string      `json:"type"` // [BGP, unicast, univ]
 	Primary    bool          `json:"primary"`
 	LearntFrom *string       `json:"learnt_from"`
+	AddrFamily uint8         `json:"address_family"` // 1=IPv4, 2=IPv6
 
 	Details *json.RawMessage `json:"details"`
 }
@@ -27,6 +28,11 @@ type Route struct {
 func (r *Route) String() string {
 	s, _ := json.Marshal(r)
 	return string(s)
+}
+
+// MatchAddrFamily checks if the route matches the given address family
+func (r *Route) MatchAddrFamily(family uint8) bool {
+	return r.AddrFamily == family
 }
 
 // MatchSourceID implements Filterable interface for routes
@@ -191,6 +197,11 @@ func (r *LookupRoute) MatchExtCommunity(community ExtCommunity) bool {
 // MatchLargeCommunity matches large communities.
 func (r *LookupRoute) MatchLargeCommunity(community Community) bool {
 	return r.Route.BGP.HasLargeCommunity(community)
+}
+
+// MatchAddrFamily matches address family.
+func (r *LookupRoute) MatchAddrFamily(family uint8) bool {
+	return r.Route.MatchAddrFamily(family)
 }
 
 // MatchNeighborQuery matches a neighbor query

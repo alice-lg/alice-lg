@@ -10,6 +10,25 @@ import (
 	"github.com/alice-lg/alice-lg/pkg/api"
 )
 
+// populateAddrFamilyFilters adds static address family filters
+func populateAddrFamilyFilters(filters *api.SearchFilters) {
+	addrFamilyGroup := filters.GetGroupByKey(api.SearchKeyAddrFamily)
+	// Only add if not already present
+	if len(addrFamilyGroup.Filters) == 0 {
+		// Use AddFilter to properly maintain the index
+		addrFamilyGroup.AddFilter(&api.SearchFilter{
+			Name:        "IPv4",
+			Value:       1, // Use numeric value
+			Cardinality: 1,
+		})
+		addrFamilyGroup.AddFilter(&api.SearchFilter{
+			Name:        "IPv6",
+			Value:       2, // Use numeric value
+			Cardinality: 1,
+		})
+	}
+}
+
 // Handle routes
 /*
 func (s *Server) apiRoutesList(
@@ -74,6 +93,7 @@ func (s *Server) apiRoutesListReceived(
 	}
 
 	filtersAvailable := api.NewSearchFilters()
+	populateAddrFamilyFilters(filtersAvailable)
 	for _, r := range allRoutes {
 		if !filtersApplied.MatchRoute(r) {
 			continue // Exclude route from results set
@@ -152,6 +172,7 @@ func (s *Server) apiRoutesListFiltered(
 	}
 
 	filtersAvailable := api.NewSearchFilters()
+	populateAddrFamilyFilters(filtersAvailable)
 	for _, r := range allRoutes {
 		if !filtersApplied.MatchRoute(r) {
 			continue // Exclude route from results set
@@ -230,6 +251,7 @@ func (s *Server) apiRoutesListNotExported(
 	}
 
 	filtersAvailable := api.NewSearchFilters()
+	populateAddrFamilyFilters(filtersAvailable)
 	for _, r := range allRoutes {
 		if !filtersApplied.MatchRoute(r) {
 			continue // Exclude route from results set

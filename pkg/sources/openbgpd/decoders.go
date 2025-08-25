@@ -195,6 +195,12 @@ func decodeRoute(details map[string]interface{}) (*api.Route, error) {
 	}
 	rawDetails := json.RawMessage(detailsJSON)
 
+	// Determine address family
+	var addrFamily uint8 = 1 // Default to IPv4
+	if strings.Contains(prefix, ":") {
+		addrFamily = 2 // IPv6
+	}
+
 	r := &api.Route{
 		NeighborID: pools.Neighbors.Acquire(neighborID),
 		Network:    prefix,
@@ -203,6 +209,7 @@ func decodeRoute(details map[string]interface{}) (*api.Route, error) {
 		Age:        lastUpdate,
 		Type:       pools.Types.Acquire([]string{origin}),
 		Primary:    isPrimary,
+		AddrFamily: addrFamily,
 		Details:    &rawDetails,
 	}
 	return r, nil

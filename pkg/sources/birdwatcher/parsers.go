@@ -347,12 +347,18 @@ func parseRouteData(
 		learntFrom = gateway
 	}
 
+	network := decoders.String(rdata["network"], "unknown net")
+	var addrFamily uint8 = 1 // Default to IPv4
+	if strings.Contains(network, ":") {
+		addrFamily = 2 // IPv6
+	}
+
 	route := &api.Route{
 		// ID: decoders.String(rdata["network"], "unknown"),
 
 		NeighborID: pools.Neighbors.Acquire(
 			decoders.String(rdata["from_protocol"], "unknown neighbor")),
-		Network: decoders.String(rdata["network"], "unknown net"),
+		Network: network,
 		Interface: pools.Interfaces.Acquire(
 			decoders.String(rdata["interface"], "unknown interface")),
 		Metric:     decoders.Int(rdata["metric"], -1),
@@ -362,6 +368,7 @@ func parseRouteData(
 		Age:        age,
 		Type:       pools.Types.Acquire(rtype),
 		BGP:        bgpInfo,
+		AddrFamily: addrFamily,
 
 		Details: &details,
 	}

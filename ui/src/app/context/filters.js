@@ -27,12 +27,14 @@ const FILTER_KEY_ASNS = "asns";
 const FILTER_KEY_COMMUNITIES = "communities";
 const FILTER_KEY_EXT_COMMUNITIES = "ext_communities";
 const FILTER_KEY_LARGE_COMMUNITIES = "large_communities";
+const FILTER_KEY_ADDR_FAMILY = "addr_family";
 
 export const FILTER_GROUP_SOURCES = 0;
 export const FILTER_GROUP_ASNS = 1;
 export const FILTER_GROUP_COMMUNITIES = 2;
 export const FILTER_GROUP_EXT_COMMUNITIES = 3;
 export const FILTER_GROUP_LARGE_COMMUNITIES = 4;
+export const FILTER_GROUP_ADDR_FAMILY = 5;
 
 const FILTER_GROUP_KEYS = {
   [FILTER_GROUP_SOURCES]: FILTER_KEY_SOURCES,
@@ -40,6 +42,7 @@ const FILTER_GROUP_KEYS = {
   [FILTER_GROUP_COMMUNITIES]: FILTER_KEY_COMMUNITIES,
   [FILTER_GROUP_EXT_COMMUNITIES]: FILTER_KEY_EXT_COMMUNITIES,
   [FILTER_GROUP_LARGE_COMMUNITIES]: FILTER_KEY_LARGE_COMMUNITIES,
+  [FILTER_GROUP_ADDR_FAMILY]: FILTER_KEY_ADDR_FAMILY,
 };
 
 
@@ -52,10 +55,14 @@ export const initializeFilterState = () => ([
   {"key": "communities", "filters": []},
   {"key": "ext_communities", "filters": []},
   {"key": "large_communities", "filters": []},
+  {"key": "addr_family", "filters": []},
 ]);
 
 // Compare values
 const cmpValue = (a, b) => a === b;
+
+// Compare values, stringly typed
+const cmpValueString = (a, b) => String(a) === String(b)
 
 // Compare list values
 const cmpList = (a, b) => 
@@ -69,6 +76,7 @@ const FILTER_VALUE_CMP = {
   [FILTER_GROUP_COMMUNITIES]: cmpList,
   [FILTER_GROUP_EXT_COMMUNITIES]: cmpList,
   [FILTER_GROUP_LARGE_COMMUNITIES]: cmpList,
+  [FILTER_GROUP_ADDR_FAMILY]: cmpValueString,
 }
 
 /*
@@ -133,6 +141,7 @@ const _mergeFilters = (a, b) => {
   setCmp[FILTER_GROUP_COMMUNITIES] = cmpFilterCommunity;
   setCmp[FILTER_GROUP_EXT_COMMUNITIES] = cmpFilterCommunity;
   setCmp[FILTER_GROUP_LARGE_COMMUNITIES] = cmpFilterCommunity;
+  setCmp[FILTER_GROUP_ADDR_FAMILY] = cmpFilterValue;
   for (const i in groups) {
     if (a[i]?.filters && b[i]?.filters) {
       groups[i].filters = mergeFilterSet(setCmp[i], a[i].filters, b[i].filters);
@@ -199,6 +208,7 @@ const decodeQuery = (query) => {
   const communities = decodeCommunities(query[FILTER_KEY_COMMUNITIES]);
   const extCommunities = decodeExtCommunities(query[FILTER_KEY_EXT_COMMUNITIES]);
   const largeCommunities = decodeCommunities(query[FILTER_KEY_LARGE_COMMUNITIES]);
+  const addrFamily = decodeStringList(query[FILTER_KEY_ADDR_FAMILY]);
 
   let filters = {};
   filters[FILTER_KEY_SOURCES] = sources;
@@ -206,6 +216,7 @@ const decodeQuery = (query) => {
   filters[FILTER_KEY_COMMUNITIES] = communities;
   filters[FILTER_KEY_EXT_COMMUNITIES] = extCommunities;
   filters[FILTER_KEY_LARGE_COMMUNITIES] = largeCommunities;
+  filters[FILTER_KEY_ADDR_FAMILY] = addrFamily;
   return filters;
 }
 
@@ -227,12 +238,14 @@ export const encodeFilters = (filters) => {
   const communities = filters[FILTER_KEY_COMMUNITIES];
   const extCommunities = filters[FILTER_KEY_EXT_COMMUNITIES];
   const largeCommunities = filters[FILTER_KEY_LARGE_COMMUNITIES];
+  const addrFamily = filters[FILTER_KEY_ADDR_FAMILY];
   return cleanParams({
     [FILTER_KEY_SOURCES]: encodeList(sources),
     [FILTER_KEY_ASNS]: encodeList(asns),
     [FILTER_KEY_COMMUNITIES]: encodeCommunities(communities),
     [FILTER_KEY_EXT_COMMUNITIES]: encodeCommunities(extCommunities),
     [FILTER_KEY_LARGE_COMMUNITIES]: encodeCommunities(largeCommunities),
+    [FILTER_KEY_ADDR_FAMILY]: encodeList(addrFamily),
   });
 }
 
@@ -247,6 +260,7 @@ export const useFiltersQuery = () => {
     [FILTER_KEY_COMMUNITIES]: "",
     [FILTER_KEY_EXT_COMMUNITIES]: "",
     [FILTER_KEY_LARGE_COMMUNITIES]: "",
+    [FILTER_KEY_ADDR_FAMILY]: "",
   });
 
   const filterQuery = useMemo(() => decodeQuery(query), [query]);
@@ -327,6 +341,8 @@ export const useExtCommunitiesFilters = createGroupFilters(
   FILTER_GROUP_EXT_COMMUNITIES);
 export const useLargeCommunitiesFilters = createGroupFilters(
   FILTER_GROUP_LARGE_COMMUNITIES);
+export const useAddrFamilyFilters = createGroupFilters(
+  FILTER_GROUP_ADDR_FAMILY);
 
 /**
  * RoutesFiltersProvider merged the filters from the
