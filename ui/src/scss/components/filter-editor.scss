@@ -55,5 +55,25 @@
      }
   }
 
+  // Checkbox Select
+  .chk-filter-group {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .chk-filter-label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    margin-right: 16px;
+
+    .chk-filter {
+      margin: 0px;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+  }
+
+
 }
 

@@ -28,7 +28,7 @@ const AddrFamilySelect = () => {
     
 
     return (
-        <div>
+        <div className="chk-filter-group">
           <label className="chk-filter-label">
             <input
               type="checkbox"
@@ -37,7 +37,7 @@ const AddrFamilySelect = () => {
               onChange={toggleIp4}  />
             IPv4
           </label>
-          <label>
+          <label className="chk-filter-label">
             <input
               type="checkbox"
               className="chk-filter"
