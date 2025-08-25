@@ -69,7 +69,7 @@ const RouteDetailsModal = () => {
                 <th>MED:</th>
                 <td>{attrs.med}</td>
             </tr>
-            {attrs.otc &&
+            {attrs.otc > 0 &&
                 <tr>
                     <th>OTC:</th>
                     <td>{attrs.otc}</td>
