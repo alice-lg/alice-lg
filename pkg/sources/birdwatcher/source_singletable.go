@@ -291,13 +291,11 @@ func (src *SingleTableBirdwatcher) RoutesNotExported(
 	return response, nil
 }
 
-// AllRoutes retrieves a route dump
-func (src *SingleTableBirdwatcher) AllRoutes(
+// Internal: fetch all routes single channel mode
+func (src *SingleTableBirdwatcher) fetchAllRoutesTable(
 	ctx context.Context,
+	mainTable string,
 ) (*api.RoutesResponse, error) {
-	// First fetch all routes from the master table
-	mainTable := src.GenericBirdwatcher.config.MainTable
-
 	// Routes received
 	res, err := src.client.GetEndpoint(ctx, "/routes/table/"+mainTable)
 	if err != nil {
@@ -331,4 +329,29 @@ func (src *SingleTableBirdwatcher) AllRoutes(
 	}
 
 	return response, nil
+}
+
+// AllRoutes retrieves a route dump
+func (src *SingleTableBirdwatcher) AllRoutes(
+	ctx context.Context,
+) (*api.RoutesResponse, error) {
+	// First fetch all routes from the master table
+	cfg := src.GenericBirdwatcher.config
+
+	// Check if we are running in dual mode
+	if cfg.MainTable4 != "" && cfg.MainTable6 != "" {
+		res4, err := src.fetchAllRoutesTable(ctx, cfg.MainTable4)
+		if err != nil {
+			return nil, err
+		}
+		res6, err := src.fetchAllRoutesTable(ctx, cfg.MainTable6)
+		if err != nil {
+			return nil, err
+		}
+		// Combine results
+		res4.Merge(res6)
+		return res4, nil
+	}
+
+	return src.fetchAllRoutesTable(ctx, cfg.MainTable)
 }

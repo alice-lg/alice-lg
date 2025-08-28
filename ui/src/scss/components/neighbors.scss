@@ -1,4 +1,11 @@
 
+.btn-extend {
+  border-radius: 20px;
+  color: #555;
+  padding: 1px 4px 1px 3px;
+}
+
+
 .col-neighbor-attr {
     white-space: nowrap;
     a, a:link, a:active {
@@ -8,6 +15,11 @@
     i.fa {
         color: #333;
     }
+}
+
+.col-ip-info {
+  text-align: right;
+  font-weight: bold;
 }
 
 .col-neighbor-active {

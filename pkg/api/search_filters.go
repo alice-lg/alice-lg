@@ -15,6 +15,7 @@ const (
 	SearchKeyCommunities      = "communities"
 	SearchKeyExtCommunities   = "ext_communities"
 	SearchKeyLargeCommunities = "large_communities"
+	SearchKeyAddrFamily       = "addr_family"
 )
 
 // Filterable objects provide methods for matching
@@ -25,6 +26,7 @@ type Filterable interface {
 	MatchCommunity(community Community) bool
 	MatchExtCommunity(community ExtCommunity) bool
 	MatchLargeCommunity(community Community) bool
+	MatchAddrFamily(family uint8) bool
 }
 
 // FilterValue can be anything
@@ -165,6 +167,8 @@ func filterValueAsString(value interface{}) string {
 	switch v := value.(type) {
 	case int:
 		return strconv.Itoa(v)
+	case uint8:
+		return strconv.Itoa(int(v))
 	case *string:
 		return *v
 	case string:
@@ -266,6 +270,14 @@ func searchFilterMatchLargeCommunity(route Filterable, value interface{}) bool {
 	return route.MatchLargeCommunity(community)
 }
 
+func searchFilterMatchAddrFamily(route Filterable, value interface{}) bool {
+	family, ok := value.(int)
+	if !ok {
+		return false
+	}
+	return route.MatchAddrFamily(uint8(family))
+}
+
 func selectCmpFuncByKey(key string) SearchFilterComparator {
 	var cmp SearchFilterComparator
 	switch key {
@@ -279,6 +291,8 @@ func selectCmpFuncByKey(key string) SearchFilterComparator {
 		cmp = searchFilterMatchExtCommunity
 	case SearchKeyLargeCommunities:
 		cmp = searchFilterMatchLargeCommunity
+	case SearchKeyAddrFamily:
+		cmp = searchFilterMatchAddrFamily
 	default:
 		cmp = nil
 	}
@@ -367,6 +381,11 @@ func NewSearchFilters() *SearchFilters {
 			Filters:    []*SearchFilter{},
 			filtersIdx: make(map[string]int),
 		},
+		&SearchFilterGroup{
+			Key:        SearchKeyAddrFamily,
+			Filters:    []*SearchFilter{},
+			filtersIdx: make(map[string]int),
+		},
 	}
 
 	return groups
@@ -388,6 +407,8 @@ func (s *SearchFilters) GetGroupByKey(key string) *SearchFilterGroup {
 		return (*s)[3]
 	case SearchKeyLargeCommunities:
 		return (*s)[4]
+	case SearchKeyAddrFamily:
+		return (*s)[5]
 	}
 	return nil
 }
@@ -478,6 +499,31 @@ func (s *SearchFilters) UpdateFromRoute(r *Route) {
 	}
 }
 
+// SetFilterAddrFamily adds a filter to the addr family
+// filter group if enabled.
+func (s *SearchFilters) SetFilterAddrFamilies(ip4, ip6 bool) {
+	if ip4 {
+		s.addFilterAddrFamily(AddrFamilyIPv4)
+	}
+	if ip6 {
+		s.addFilterAddrFamily(AddrFamilyIPv6)
+	}
+}
+
+// Internal: set the actual addr family filter
+func (s *SearchFilters) addFilterAddrFamily(af uint8) {
+	name := "IPv4"
+	if af == AddrFamilyIPv6 {
+		name = "IPv6"
+	}
+	grp := s.GetGroupByKey(SearchKeyAddrFamily)
+	grp.AddFilter(&SearchFilter{
+		Name:        name,
+		Value:       int(af),
+		Cardinality: 1,
+	})
+}
+
 // FiltersFromQuery builds a filter struct from
 // query parameters.
 //
@@ -532,6 +578,14 @@ func FiltersFromQuery(query url.Values) (*SearchFilters, error) {
 				return nil, err
 			}
 			queryFilters.GetGroupByKey(SearchKeyLargeCommunities).AddFilters(filters)
+
+		case SearchKeyAddrFamily:
+			// Parse as int values for address family
+			filters, err := parseQueryValueList(parseIntValue, value)
+			if err != nil {
+				return nil, err
+			}
+			queryFilters.GetGroupByKey(SearchKeyAddrFamily).AddFilters(filters)
 		}
 	}
 	return queryFilters, nil
@@ -615,6 +669,11 @@ func (s *SearchFilters) MatchRoute(r Filterable) bool {
 
 	largeCommunities := s.GetGroupByKey(SearchKeyLargeCommunities)
 	if !largeCommunities.MatchAll(r) {
+		return false
+	}
+
+	addrFamily := s.GetGroupByKey(SearchKeyAddrFamily)
+	if !addrFamily.MatchAny(r) {
 		return false
 	}
 

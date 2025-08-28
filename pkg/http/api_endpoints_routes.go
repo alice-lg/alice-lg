@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -73,6 +74,7 @@ func (s *Server) apiRoutesListReceived(
 		return nil, err
 	}
 
+	var hasIP4, hasIP6 bool
 	filtersAvailable := api.NewSearchFilters()
 	for _, r := range allRoutes {
 		if !filtersApplied.MatchRoute(r) {
@@ -80,7 +82,11 @@ func (s *Server) apiRoutesListReceived(
 		}
 		routes = append(routes, r)
 		filtersAvailable.UpdateFromRoute(r)
+		hasIP4 = hasIP4 || r.AddrFamily == api.AddrFamilyIPv4
+		hasIP6 = hasIP6 || r.AddrFamily == api.AddrFamilyIPv6
 	}
+	fmt.Println("hasip", hasIP4, hasIP6)
+	filtersAvailable.SetFilterAddrFamilies(hasIP4, hasIP6)
 
 	// Remove applied filters from available
 	filtersApplied.MergeProperties(filtersAvailable)
@@ -152,13 +158,18 @@ func (s *Server) apiRoutesListFiltered(
 	}
 
 	filtersAvailable := api.NewSearchFilters()
+	var hasIP4, hasIP6 bool
 	for _, r := range allRoutes {
 		if !filtersApplied.MatchRoute(r) {
 			continue // Exclude route from results set
 		}
 		routes = append(routes, r)
+
 		filtersAvailable.UpdateFromRoute(r)
+		hasIP4 = hasIP4 || r.AddrFamily == api.AddrFamilyIPv4
+		hasIP6 = hasIP6 || r.AddrFamily == api.AddrFamilyIPv6
 	}
+	filtersAvailable.SetFilterAddrFamilies(hasIP4, hasIP6)
 
 	// Remove applied filters from available
 	filtersApplied.MergeProperties(filtersAvailable)
@@ -230,13 +241,17 @@ func (s *Server) apiRoutesListNotExported(
 	}
 
 	filtersAvailable := api.NewSearchFilters()
+	var hasIP4, hasIP6 bool
 	for _, r := range allRoutes {
 		if !filtersApplied.MatchRoute(r) {
 			continue // Exclude route from results set
 		}
 		routes = append(routes, r)
 		filtersAvailable.UpdateFromRoute(r)
+		hasIP4 = hasIP4 || r.AddrFamily == api.AddrFamilyIPv4
+		hasIP6 = hasIP6 || r.AddrFamily == api.AddrFamilyIPv6
 	}
+	filtersAvailable.SetFilterAddrFamilies(hasIP4, hasIP6)
 
 	// Remove applied filters from available
 	filtersApplied.MergeProperties(filtersAvailable)

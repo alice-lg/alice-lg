@@ -761,6 +761,10 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 		case SourceBackendBirdwatcher:
 			sourceType := backendConfig.Key("type").MustString("")
 			mainTable := backendConfig.Key("main_table").MustString("master")
+
+			mainTable4 := backendConfig.Key("main_table4").MustString("")
+			mainTable6 := backendConfig.Key("main_table6").MustString("")
+
 			peerTablePrefix := backendConfig.Key("peer_table_prefix").MustString("T")
 			pipeProtocolPrefix := backendConfig.Key("pipe_protocol_prefix").MustString("M")
 
@@ -780,6 +784,8 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 
 				Type:               sourceType,
 				MainTable:          mainTable,
+				MainTable4:         mainTable4,
+				MainTable6:         mainTable6,
 				PeerTablePrefix:    peerTablePrefix,
 				PipeProtocolPrefix: pipeProtocolPrefix,
 			}

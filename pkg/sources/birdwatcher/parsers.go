@@ -149,6 +149,42 @@ func parseRelativeServerTime(uptime interface{}, config Config) time.Duration {
 	return time.Since(serverTime)
 }
 
+// parseRoutesChannels extracts per-channel route counts from protocol data
+func parseRoutesChannels(protocol map[string]interface{}) map[string]*api.RoutesChannel {
+	routesChannels := make(map[string]*api.RoutesChannel)
+
+	channels, ok := protocol["channels"].(map[string]interface{})
+	if !ok {
+		return routesChannels
+	}
+
+	for channelName, channelData := range channels {
+		channel, ok := channelData.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		routesCounts, ok := channel["routes_count"].(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		if len(routesCounts) == 0 {
+			continue // No channel info
+		}
+
+		routesChannels[channelName] = &api.RoutesChannel{
+			RoutesReceived:  decoders.Int(routesCounts["imported"], 0) + decoders.Int(routesCounts["filtered"], 0),
+			RoutesAccepted:  decoders.Int(routesCounts["imported"], 0),
+			RoutesFiltered:  decoders.Int(routesCounts["filtered"], 0),
+			RoutesExported:  decoders.Int(routesCounts["exported"], 0),
+			RoutesPreferred: decoders.Int(routesCounts["preferred"], 0),
+		}
+	}
+
+	return routesChannels
+}
+
 // Parse neighbors response
 func parseNeighbors(bird ClientResponse, config Config) (api.Neighbors, error) {
 	rsID := config.ID
@@ -187,6 +223,8 @@ func parseNeighbors(bird ClientResponse, config Config) (api.Neighbors, error) {
 			RoutesFiltered:  decoders.Int(routes["filtered"], 0),
 			RoutesExported:  decoders.Int(routes["exported"], 0), //TODO protocol_exported?
 			RoutesPreferred: decoders.Int(routes["preferred"], 0),
+
+			RoutesChannels: parseRoutesChannels(protocol),
 
 			Uptime:    uptime,
 			LastError: lastError,
@@ -347,12 +385,18 @@ func parseRouteData(
 		learntFrom = gateway
 	}
 
+	network := decoders.String(rdata["network"], "unknown net")
+	var addrFamily uint8 = 1 // Default to IPv4
+	if strings.Contains(network, ":") {
+		addrFamily = 2 // IPv6
+	}
+
 	route := &api.Route{
 		// ID: decoders.String(rdata["network"], "unknown"),
 
 		NeighborID: pools.Neighbors.Acquire(
 			decoders.String(rdata["from_protocol"], "unknown neighbor")),
-		Network: decoders.String(rdata["network"], "unknown net"),
+		Network: network,
 		Interface: pools.Interfaces.Acquire(
 			decoders.String(rdata["interface"], "unknown interface")),
 		Metric:     decoders.Int(rdata["metric"], -1),
@@ -362,6 +406,7 @@ func parseRouteData(
 		Age:        age,
 		Type:       pools.Types.Acquire(rtype),
 		BGP:        bgpInfo,
+		AddrFamily: addrFamily,
 
 		Details: &details,
 	}
