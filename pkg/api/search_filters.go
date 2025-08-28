@@ -499,8 +499,8 @@ func (s *SearchFilters) UpdateFromRoute(r *Route) {
 	}
 }
 
-// SetFilterAddrFamily adds a filter to the addr family
-// filter group if enabled.
+// SetFilterAddrFamilies adds an ipv4 / ipv6 filter
+// to the addr family filter group if enabled.
 func (s *SearchFilters) SetFilterAddrFamilies(ip4, ip6 bool) {
 	if ip4 {
 		s.addFilterAddrFamily(AddrFamilyIPv4)
