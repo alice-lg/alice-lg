@@ -253,12 +253,18 @@ const ColNotAvailable = () => {
 }
 
 
-const ColToggleExtended = (params) => {
-    const [isExtended, setExtended] = params.extended;
+const ColToggleExtended = ({extended, neighbor}) => {
+    const [isExtended, setExtended] = extended;
     let icon = faCirclePlus;
     if (isExtended) {
         icon = faCircleMinus;
     }
+    const channels = neighbor?.routes_channels;
+    const isMultiChannel = (channels?.ipv4 && channels?.ipv6);
+    if (!isMultiChannel) {
+        return <td></td>;
+    }
+
     return (
       <td>
         <button
@@ -302,11 +308,10 @@ const NeighborRow = ({neighbor, columns, extended}) => {
       neighbor={neighbor}
       column={c} />
   ), [neighbor, columns]);
-
   return (
     <tr>
         {cols}
-        <ColToggleExtended extended={extended} />
+        <ColToggleExtended neighbor={neighbor} extended={extended} />
     </tr>
   );
 }

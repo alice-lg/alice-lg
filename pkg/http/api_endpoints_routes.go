@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -9,25 +10,6 @@ import (
 
 	"github.com/alice-lg/alice-lg/pkg/api"
 )
-
-// populateAddrFamilyFilters adds static address family filters
-func populateAddrFamilyFilters(filters *api.SearchFilters) {
-	addrFamilyGroup := filters.GetGroupByKey(api.SearchKeyAddrFamily)
-	// Only add if not already present
-	if len(addrFamilyGroup.Filters) == 0 {
-		// Use AddFilter to properly maintain the index
-		addrFamilyGroup.AddFilter(&api.SearchFilter{
-			Name:        "IPv4",
-			Value:       1, // Use numeric value
-			Cardinality: 1,
-		})
-		addrFamilyGroup.AddFilter(&api.SearchFilter{
-			Name:        "IPv6",
-			Value:       2, // Use numeric value
-			Cardinality: 1,
-		})
-	}
-}
 
 // Handle routes
 /*
@@ -92,15 +74,19 @@ func (s *Server) apiRoutesListReceived(
 		return nil, err
 	}
 
+	var hasIP4, hasIP6 bool
 	filtersAvailable := api.NewSearchFilters()
-	populateAddrFamilyFilters(filtersAvailable)
 	for _, r := range allRoutes {
 		if !filtersApplied.MatchRoute(r) {
 			continue // Exclude route from results set
 		}
 		routes = append(routes, r)
 		filtersAvailable.UpdateFromRoute(r)
+		hasIP4 = hasIP4 || r.AddrFamily == api.AddrFamilyIPv4
+		hasIP6 = hasIP6 || r.AddrFamily == api.AddrFamilyIPv6
 	}
+	fmt.Println("hasip", hasIP4, hasIP6)
+	filtersAvailable.SetFilterAddrFamilies(hasIP4, hasIP6)
 
 	// Remove applied filters from available
 	filtersApplied.MergeProperties(filtersAvailable)
@@ -172,14 +158,18 @@ func (s *Server) apiRoutesListFiltered(
 	}
 
 	filtersAvailable := api.NewSearchFilters()
-	populateAddrFamilyFilters(filtersAvailable)
+	var hasIP4, hasIP6 bool
 	for _, r := range allRoutes {
 		if !filtersApplied.MatchRoute(r) {
 			continue // Exclude route from results set
 		}
 		routes = append(routes, r)
+
 		filtersAvailable.UpdateFromRoute(r)
+		hasIP4 = hasIP4 || r.AddrFamily == api.AddrFamilyIPv4
+		hasIP6 = hasIP6 || r.AddrFamily == api.AddrFamilyIPv6
 	}
+	filtersAvailable.SetFilterAddrFamilies(hasIP4, hasIP6)
 
 	// Remove applied filters from available
 	filtersApplied.MergeProperties(filtersAvailable)
@@ -251,14 +241,17 @@ func (s *Server) apiRoutesListNotExported(
 	}
 
 	filtersAvailable := api.NewSearchFilters()
-	populateAddrFamilyFilters(filtersAvailable)
+	var hasIP4, hasIP6 bool
 	for _, r := range allRoutes {
 		if !filtersApplied.MatchRoute(r) {
 			continue // Exclude route from results set
 		}
 		routes = append(routes, r)
 		filtersAvailable.UpdateFromRoute(r)
+		hasIP4 = hasIP4 || r.AddrFamily == api.AddrFamilyIPv4
+		hasIP6 = hasIP6 || r.AddrFamily == api.AddrFamilyIPv6
 	}
+	filtersAvailable.SetFilterAddrFamilies(hasIP4, hasIP6)
 
 	// Remove applied filters from available
 	filtersApplied.MergeProperties(filtersAvailable)

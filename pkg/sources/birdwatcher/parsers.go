@@ -169,6 +169,10 @@ func parseRoutesChannels(protocol map[string]interface{}) map[string]*api.Routes
 			continue
 		}
 
+		if len(routesCounts) == 0 {
+			continue // No channel info
+		}
+
 		routesChannels[channelName] = &api.RoutesChannel{
 			RoutesReceived:  decoders.Int(routesCounts["imported"], 0) + decoders.Int(routesCounts["filtered"], 0),
 			RoutesAccepted:  decoders.Int(routesCounts["imported"], 0),

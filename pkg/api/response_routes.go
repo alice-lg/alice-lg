@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+const (
+	AddrFamilyIPv4 = 1
+	AddrFamilyIPv6 = 2
+)
+
 // Route is a prefix with BGP information.
 type Route struct {
 	// ID         string  `json:"id"`

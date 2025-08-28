@@ -167,6 +167,8 @@ func filterValueAsString(value interface{}) string {
 	switch v := value.(type) {
 	case int:
 		return strconv.Itoa(v)
+	case uint8:
+		return strconv.Itoa(int(v))
 	case *string:
 		return *v
 	case string:
@@ -495,6 +497,31 @@ func (s *SearchFilters) UpdateFromRoute(r *Route) {
 			Value: c,
 		})
 	}
+}
+
+// SetFilterAddrFamily adds a filter to the addr family
+// filter group if enabled.
+func (s *SearchFilters) SetFilterAddrFamilies(ip4, ip6 bool) {
+	if ip4 {
+		s.addFilterAddrFamily(AddrFamilyIPv4)
+	}
+	if ip6 {
+		s.addFilterAddrFamily(AddrFamilyIPv6)
+	}
+}
+
+// Internal: set the actual addr family filter
+func (s *SearchFilters) addFilterAddrFamily(af uint8) {
+	name := "IPv4"
+	if af == AddrFamilyIPv6 {
+		name = "IPv6"
+	}
+	grp := s.GetGroupByKey(SearchKeyAddrFamily)
+	grp.AddFilter(&SearchFilter{
+		Name:        name,
+		Value:       int(af),
+		Cardinality: 1,
+	})
 }
 
 // FiltersFromQuery builds a filter struct from

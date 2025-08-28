@@ -12,7 +12,6 @@ import (
 	"github.com/alice-lg/alice-lg/pkg/decoders"
 )
 
-
 // Handle global lookup
 func (s *Server) apiLookupPrefixGlobal(
 	ctx context.Context,
@@ -122,7 +121,7 @@ func (s *Server) apiLookupPrefixGlobal(
 	// Now, as we have allocated even more space split routes,
 	// and update the available filters...
 	filtersAvailable := api.NewSearchFilters()
-	populateAddrFamilyFilters(filtersAvailable)
+	var hasIP4, hasIP6 bool
 	for _, r := range routes {
 
 		switch r.State {
@@ -140,7 +139,11 @@ func (s *Server) apiLookupPrefixGlobal(
 		if canFilterCommunities {
 			filtersAvailable.UpdateCommunitiesFromLookupRoute(r)
 		}
+
+		hasIP4 = hasIP4 || r.AddrFamily == api.AddrFamilyIPv4
+		hasIP6 = hasIP6 || r.AddrFamily == api.AddrFamilyIPv6
 	}
+	filtersAvailable.SetFilterAddrFamilies(hasIP4, hasIP6)
 
 	// Remove applied filters from available
 	filtersApplied.MergeProperties(filtersAvailable)
