@@ -84,7 +84,7 @@ func (gobgp *GoBGP) parsePathIntoRoute(
 	route.Interface = pools.Interfaces.Acquire("unknown")
 	route.Age = time.Since(time.Unix(path.Age.GetSeconds(), int64(path.Age.GetNanos())))
 	route.Primary = path.Best
-	
+
 	// Set AddrFamily based on prefix
 	if strings.Contains(prefix, ":") {
 		route.AddrFamily = 2 // IPv6
