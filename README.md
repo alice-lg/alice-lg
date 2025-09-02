@@ -42,6 +42,8 @@ And check out the API at:
    with big thanks to [BCIX](https://bcix.de) for backing
    this feature!
 
+See the full [Changelog](CHANGELOG.md) for details!
+
 
 ## Breaking Changes
 
