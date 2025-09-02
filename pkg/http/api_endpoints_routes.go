@@ -2,7 +2,6 @@ package http
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -85,7 +84,6 @@ func (s *Server) apiRoutesListReceived(
 		hasIP4 = hasIP4 || r.AddrFamily == api.AddrFamilyIPv4
 		hasIP6 = hasIP6 || r.AddrFamily == api.AddrFamilyIPv6
 	}
-	fmt.Println("hasip", hasIP4, hasIP6)
 	filtersAvailable.SetFilterAddrFamilies(hasIP4, hasIP6)
 
 	// Remove applied filters from available
