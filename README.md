@@ -295,14 +295,17 @@ the backend will serve the API.
 
 ## Sponsors
 
-The development of Alice is now sponsored by
+The development of Alice is backed by
 <p align="center">
     <a href="https://www.de-cix.net" target="_blank">
         <img src="doc/images/DE-CIX_Logo_2016_small.png?raw=true" alt="DE-CIX Logo" title="DE-CIX" />
     </a>
 </p>
+<br>
 
-Many thanks go out to [ECIX](https://www.ecix.net), where this project originated and was backed over the last two years.
+Many thanks go out to [ECIX](https://www.ecix.net), where this project originated.
 
-Support for **OpenBGPD** was sponsored by the [Route Server Support Foundation](https://www.rssf.nl/).
+Thank you, [BCIX](https://bcix.de) for backing the RFC8950 support!
+
+Support for **OpenBGPD** was sponsored by the [Route Server Support Foundation](https://www.rssf.nl/). Thank you!
 
