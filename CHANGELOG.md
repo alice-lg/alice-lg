@@ -1,7 +1,7 @@
 
 # Changelog
 
-## 6.2.0 
+## 6.2.0 (02-09-2025)
 
  * Support for GoBGP with API V3 was merged. Thanks @Ales999
 
@@ -13,6 +13,12 @@
    - Multitable Birdwatcher Source is also now using stream
      route response parsing.
 
+   - BIRD Multi-channel BGP support / RFC 8950
+     (IPv4 over IPv6 Next Hop)
+
+     A big thank you to [BCIX](https://www.bcix.de/) for backing 
+     the feature!
+     
  * Fixes:
    - Variable expansion for reject candidates #157
 
