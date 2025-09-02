@@ -32,6 +32,15 @@ And check out the API at:
 - https://lg.de-cix.net/api/v1/lookup/prefix?q=217.115.0.0
 
 
+## Release Highlights 6.2.0
+
+ * Optional OpenMetrics exports
+ * Stream parsing for multi table bird sources 
+ * Support for BIRD Multi-channel BGP / RFC 8950
+   with big thanks to [BCIX](https://bcix.de) for backing
+   this feature!
+
+
 ## Breaking Changes
 
 ### 6.0.0

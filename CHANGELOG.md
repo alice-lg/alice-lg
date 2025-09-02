@@ -16,11 +16,19 @@
    - BIRD Multi-channel BGP support / RFC 8950
      (IPv4 over IPv6 Next Hop)
 
-     A big thank you to [BCIX](https://www.bcix.de/) for backing 
+     A big thank you to [BCIX](https://www.bcix.de/) for backing
      the feature!
-     
+
+ * Changes in configuration:
+   - `enable_metrics`  (default: false) enable open metrics export
+
+   - Source: BIRD mode `single_table` can now set `main_table4` and
+     `main_table6` which is required for ingesting the routes
+     table dump for global lookup.
+
  * Fixes:
    - Variable expansion for reject candidates #157
+   - Code quality improvments / Fixed linter errors
 
 
 ## 6.1.0 (2024-02-12)
