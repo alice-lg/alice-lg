@@ -32,7 +32,9 @@ And check out the API at:
 - https://lg.de-cix.net/api/v1/lookup/prefix?q=217.115.0.0
 
 
-## Release Highlights 6.2.0
+## Release Highlights
+
+### 6.2.0
 
  * Optional OpenMetrics exports
  * Stream parsing for multi table bird sources 
