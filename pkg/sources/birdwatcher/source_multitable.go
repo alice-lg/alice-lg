@@ -207,10 +207,12 @@ func (src *MultiTableBirdwatcher) fetchFilteredRoutes(
 	}
 	table := neighborProto["table"].(string)
 
-	if src.config.PeerTableOnly {
-		return &api.Meta{}, api.Routes{}, nil // No result is better than wrong.
-		// return src.fetchPipeFilteredRoutes(ctx, protocols, neighborID, keepDetails)
-	}
+	/*
+		if src.config.PeerTableOnly {
+			return &api.Meta{}, api.Routes{}, nil // No result is better than wrong.
+			// return src.fetchPipeFilteredRoutes(ctx, protocols, neighborID, keepDetails)
+		}
+	*/
 
 	// Stage 1 filters
 	res, err := src.client.GetEndpoint(ctx, "/routes/filtered/"+neighborID)
@@ -629,7 +631,8 @@ func (src *MultiTableBirdwatcher) Neighbors(
 		// For now there is no way to get the filtered routes
 		// information to my knowledge. An attempt was made with
 		// fetchNeighborsPipeTable and is kept just in case.
-		res, err := src.fetchNeighbors(ctx)
+		// res, err := src.fetchNeighbors(ctx)
+		res, err := src.fetchNeighborsPipeTable(ctx)
 		if err != nil {
 			return nil, err
 		}
