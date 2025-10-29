@@ -96,15 +96,15 @@ func NewBirdwatcher(config Config) Birdwatcher {
 }
 
 func (b *GenericBirdwatcher) filterProtocols(
-	protocols map[string]interface{},
+	protocols map[string]any,
 	protocol string,
-) map[string]interface{} {
-	response := make(map[string]interface{})
-	response["protocols"] = make(map[string]interface{})
+) map[string]any {
+	response := make(map[string]any)
+	response["protocols"] = make(map[string]any)
 
 	for protocolID, protocolData := range protocols {
-		if protocolData.(map[string]interface{})["bird_protocol"] == protocol {
-			response["protocols"].(map[string]interface{})[protocolID] = protocolData
+		if protocolData.(map[string]any)["bird_protocol"] == protocol {
+			response["protocols"].(map[string]any)[protocolID] = protocolData
 		}
 	}
 
@@ -113,14 +113,14 @@ func (b *GenericBirdwatcher) filterProtocols(
 
 func (b *GenericBirdwatcher) filterProtocolsBgp(
 	bird ClientResponse,
-) map[string]interface{} {
-	return b.filterProtocols(bird["protocols"].(map[string]interface{}), "BGP")
+) map[string]any {
+	return b.filterProtocols(bird["protocols"].(map[string]any), "BGP")
 }
 
 func (b *GenericBirdwatcher) filterProtocolsPipe(
 	bird ClientResponse,
-) map[string]interface{} {
-	return b.filterProtocols(bird["protocols"].(map[string]interface{}), "Pipe")
+) map[string]any {
+	return b.filterProtocols(bird["protocols"].(map[string]any), "Pipe")
 }
 
 func (b *GenericBirdwatcher) filterRoutesByPeerOrLearntFrom(
@@ -175,7 +175,7 @@ func (b *GenericBirdwatcher) filterRoutesByDuplicates(
 
 func (b *GenericBirdwatcher) fetchProtocolsShort(ctx context.Context) (
 	*api.Meta,
-	map[string]interface{},
+	map[string]any,
 	error,
 ) {
 	// Query birdwatcher with forced timeout

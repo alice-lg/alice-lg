@@ -2,6 +2,7 @@ package memory
 
 import (
 	"context"
+	"maps"
 	"sync"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
@@ -73,9 +74,7 @@ func (b *NeighborsBackend) GetNeighborsMapAt(
 
 	// Copy neighbors map
 	result := make(map[string]*api.Neighbor)
-	for k, v := range neighbors.(NeighborIndex) {
-		result[k] = v
-	}
+	maps.Copy(result, neighbors.(NeighborIndex))
 	return result, nil
 }
 

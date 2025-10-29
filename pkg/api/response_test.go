@@ -44,7 +44,7 @@ func TestNeighborSerialization(t *testing.T) {
         "connection": "Established"
     }`
 
-	details := make(map[string]interface{})
+	details := make(map[string]any)
 	err := json.Unmarshal([]byte(payload), &details)
 
 	if err != nil {
