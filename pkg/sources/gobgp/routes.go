@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"strings"
 	"time"
 
 	gobgpapi "github.com/osrg/gobgp/v3/api"
@@ -96,11 +95,18 @@ func (gobgp *GoBGP) parsePathIntoRoute(
 	route.Age = time.Since(time.Unix(path.Age.GetSeconds(), int64(path.Age.GetNanos())))
 	route.Primary = path.Best
 
-	// Set AddrFamily based on prefix
-	if strings.Contains(prefix, ":") {
-		route.AddrFamily = 2 // IPv6
-	} else {
-		route.AddrFamily = 1 // IPv4
+	nlri, err := apiutil.GetNativeNlri(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse NLRI: %v", err)
+	}
+
+	switch nlri := nlri.(type) {
+	case *bgp.IPAddrPrefix:
+		route.Network = fmt.Sprintf("%s/%d", nlri.Prefix.String(), nlri.Length)
+		route.AddrFamily = api.AddrFamilyIPv4
+	case *bgp.IPv6AddrPrefix:
+		route.Network = fmt.Sprintf("%s/%d", nlri.Prefix.String(), nlri.Length)
+		route.AddrFamily = api.AddrFamilyIPv6
 	}
 
 	attrs, err := apiutil.GetNativePathAttributes(path)
