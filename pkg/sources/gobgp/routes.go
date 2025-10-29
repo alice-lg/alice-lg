@@ -71,6 +71,17 @@ func (gobgp *GoBGP) GetNeighbors(
 	return peers, nil
 }
 
+func extCommunitySubTypeName(subType bgp.ExtendedCommunityAttrSubType) string {
+	switch subType {
+	case bgp.EC_SUBTYPE_ROUTE_TARGET:
+		return "rt"
+	case bgp.EC_SUBTYPE_ROUTE_ORIGIN:
+		return "ro"
+	default:
+		return "generic"
+	}
+}
+
 func (gobgp *GoBGP) parsePathIntoRoute(
 	path *gobgpapi.Path,
 	prefix string,
@@ -140,8 +151,10 @@ func (gobgp *GoBGP) parsePathIntoRoute(
 					route.BGP.ExtCommunities = append(
 						route.BGP.ExtCommunities,
 						api.ExtCommunity{
-							apiComm.AS,
-							apiComm.LocalAdmin})
+							extCommunitySubTypeName(apiComm.SubType),
+							int(apiComm.AS),
+							int(apiComm.LocalAdmin),
+						})
 				}
 			}
 		case *bgp.PathAttributeLargeCommunities:
