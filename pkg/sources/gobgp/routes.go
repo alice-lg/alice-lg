@@ -145,6 +145,17 @@ func (gobgp *GoBGP) parsePathIntoRoute(
 
 				route.BGP.Communities = append(route.BGP.Communities, apiComm)
 			}
+		case *bgp.PathAttributeMpReachNLRI:
+			// We could look at the AFI/SAFI here but gobgp really has
+			// already done the work and we can just examine the nexthop length.
+			switch len(attr.Nexthop) {
+			case 4:
+				route.Gateway = pools.Gateways4.Acquire(attr.Nexthop.String())
+				route.BGP.NextHop = pools.Gateways4.Acquire(attr.Nexthop.String())
+			case 16:
+				route.Gateway = pools.Gateways6.Acquire(attr.Nexthop.String())
+				route.BGP.NextHop = pools.Gateways6.Acquire(attr.Nexthop.String())
+			}
 		case *bgp.PathAttributeExtendedCommunities:
 			for _, community := range attr.Value {
 				if apiComm, ok := community.(*bgp.TwoOctetAsSpecificExtended); ok {
