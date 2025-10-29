@@ -202,25 +202,17 @@ func (gobgp *GoBGP) GetRoutes(
 		ctx, time.Second*time.Duration(gobgp.config.ProcessingTimeout))
 	defer cancel()
 
-	for i := 1; i < 3; i++ {
-
-		var family *gobgpapi.Family
-
-		switch i {
-		case 1:
-			{
-				family = &gobgpapi.Family{
-					Afi:  gobgpapi.Family_AFI_IP,
-					Safi: gobgpapi.Family_SAFI_UNICAST}
-			}
-		case 2:
-			{
-				family = &gobgpapi.Family{
-					Afi:  gobgpapi.Family_AFI_IP6,
-					Safi: gobgpapi.Family_SAFI_UNICAST}
-			}
-		}
-
+	families := []*gobgpapi.Family{
+		{
+			Afi:  gobgpapi.Family_AFI_IP,
+			Safi: gobgpapi.Family_SAFI_UNICAST,
+		},
+		{
+			Afi:  gobgpapi.Family_AFI_IP6,
+			Safi: gobgpapi.Family_SAFI_UNICAST,
+		},
+	}
+	for _, family := range families {
 		pathStream, err := gobgp.client.ListPath(ctx, &gobgpapi.ListPathRequest{
 			Name:           peer.State.NeighborAddress,
 			TableType:      tableType,
@@ -233,19 +225,17 @@ func (gobgp *GoBGP) GetRoutes(
 			continue
 		}
 
-		rib := make([]*gobgpapi.Destination, 0)
 		for {
-			_path, err := pathStream.Recv()
+			resp, err := pathStream.Recv()
 			if err == io.EOF {
 				break
 			} else if err != nil {
 				log.Print(err)
 				return err
 			}
-			rib = append(rib, _path.Destination)
-		}
 
-		for _, destination := range rib {
+			destination := resp.Destination
+
 			for _, path := range destination.Paths {
 				route, err := gobgp.parsePathIntoRoute(path, destination.Prefix)
 				if err != nil {
