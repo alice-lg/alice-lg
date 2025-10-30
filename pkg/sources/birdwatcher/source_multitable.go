@@ -51,28 +51,28 @@ func (src *MultiTableBirdwatcher) getAltPipeName(pipe string) string {
 //	protocol.table => protocol.neighbor_address => protocol
 func (src *MultiTableBirdwatcher) parseProtocolToTableTree(
 	bird ClientResponse,
-) map[string]interface{} {
-	protocols := bird["protocols"].(map[string]interface{})
+) map[string]any {
+	protocols := bird["protocols"].(map[string]any)
 
-	response := make(map[string]interface{})
+	response := make(map[string]any)
 
 	for _, protocolData := range protocols {
-		protocol := protocolData.(map[string]interface{})
+		protocol := protocolData.(map[string]any)
 
 		if protocol["bird_protocol"] == "BGP" {
 			table := protocol["table"].(string)
 			neighborAddress := protocol["neighbor_address"].(string)
 
 			if _, ok := response[table]; !ok {
-				response[table] = make(map[string]interface{})
+				response[table] = make(map[string]any)
 			}
 
-			if _, ok := response[table].(map[string]interface{})[neighborAddress]; !ok {
-				response[table].(map[string]interface{})[neighborAddress] = make(
-					map[string]interface{})
+			if _, ok := response[table].(map[string]any)[neighborAddress]; !ok {
+				response[table].(map[string]any)[neighborAddress] = make(
+					map[string]any)
 			}
 
-			response[table].(map[string]interface{})[neighborAddress] = protocol
+			response[table].(map[string]any)[neighborAddress] = protocol
 		}
 	}
 
@@ -82,7 +82,7 @@ func (src *MultiTableBirdwatcher) parseProtocolToTableTree(
 // Fetch all protocols from bird. Including Pipe protocols.
 func (src *MultiTableBirdwatcher) fetchProtocols(ctx context.Context) (
 	*api.Meta,
-	map[string]interface{},
+	map[string]any,
 	error,
 ) {
 	// Query birdwatcher
@@ -107,7 +107,7 @@ func (src *MultiTableBirdwatcher) fetchProtocols(ctx context.Context) (
 // Fetch received routes from bird for a given protocolID.
 func (src *MultiTableBirdwatcher) fetchReceivedRoutes(
 	ctx context.Context,
-	protocols map[string]interface{},
+	protocols map[string]any,
 	neighborID string,
 	keepDetails bool,
 ) (*api.Meta, api.Routes, error) {
@@ -116,8 +116,8 @@ func (src *MultiTableBirdwatcher) fetchReceivedRoutes(
 		return nil, nil, fmt.Errorf("invalid Neighbor")
 	}
 
-	peer := protocols[neighborID].(map[string]interface{})["neighbor_address"].(string)
-	table := protocols[neighborID].(map[string]interface{})["table"].(string)
+	peer := protocols[neighborID].(map[string]any)["neighbor_address"].(string)
+	table := protocols[neighborID].(map[string]any)["table"].(string)
 	pipe := src.getMasterPipeName(table)
 
 	qryURL := "/routes/peer/" + peer
@@ -150,19 +150,19 @@ func (src *MultiTableBirdwatcher) fetchReceivedRoutes(
 //lint:ignore U1000 function kept for future use.
 func (src *MultiTableBirdwatcher) fetchPipeFilteredRoutes(
 	ctx context.Context,
-	protocols map[string]interface{},
+	protocols map[string]any,
 	neighborID string,
 	keepDetails bool,
 ) (*api.Meta, api.Routes, error) {
 	// Get table from neighbor protocol
-	neighborProto := protocols[neighborID].(map[string]interface{})
+	neighborProto := protocols[neighborID].(map[string]any)
 	table := neighborProto["table"].(string)
 
 	pipes := []string{}
 
 	// Get all pipes originating from this table
 	for pid, p := range protocols {
-		prot := p.(map[string]interface{})
+		prot := p.(map[string]any)
 		if prot["bird_protocol"] == "Pipe" && prot["table"] == table {
 			pipes = append(pipes, pid)
 		}
@@ -197,11 +197,11 @@ func (src *MultiTableBirdwatcher) fetchPipeFilteredRoutes(
 // Fetch filtered routes.
 func (src *MultiTableBirdwatcher) fetchFilteredRoutes(
 	ctx context.Context,
-	protocols map[string]interface{},
+	protocols map[string]any,
 	neighborID string,
 	keepDetails bool,
 ) (*api.Meta, api.Routes, error) {
-	neighborProto, ok := protocols[neighborID].(map[string]interface{})
+	neighborProto, ok := protocols[neighborID].(map[string]any)
 	if !ok {
 		return nil, nil, fmt.Errorf("invalid Neighbor")
 	}
@@ -278,13 +278,13 @@ func (src *MultiTableBirdwatcher) fetchNotExportedRoutes(
 		return nil, nil, err
 	}
 
-	protocols := birdProtocols["protocols"].(map[string]interface{})
+	protocols := birdProtocols["protocols"].(map[string]any)
 
 	if _, ok := protocols[neighborID]; !ok {
 		return nil, nil, fmt.Errorf("invalid neighbor")
 	}
 
-	table := protocols[neighborID].(map[string]interface{})["table"].(string)
+	table := protocols[neighborID].(map[string]any)["table"].(string)
 	pipeName := src.getMasterPipeName(table)
 
 	// Check if this is a monitoring session, if so return no routes
@@ -324,7 +324,7 @@ func (src *MultiTableBirdwatcher) fetchNotExportedRoutes(
 // A route deduplication is applied.
 func (src *MultiTableBirdwatcher) fetchRequiredRoutes(
 	ctx context.Context,
-	protocols map[string]interface{},
+	protocols map[string]any,
 	neighborID string,
 ) (*api.RoutesResponse, error) {
 	// Allow only one concurrent request for this neighbor
@@ -389,16 +389,16 @@ func (src *MultiTableBirdwatcher) fetchNeighborsPipeTable(
 	}
 
 	bgpProtos := src.filterProtocolsBgp(birdProtocols)
-	bgpProtocols := bgpProtos["protocols"].(map[string]interface{})
+	bgpProtocols := bgpProtos["protocols"].(map[string]any)
 	pipes := src.filterProtocolsPipe(
-		birdProtocols)["protocols"].(map[string]interface{})
+		birdProtocols)["protocols"].(map[string]any)
 
 	// Get imported routes count on protocols. Mapped by Table
 	bgpCount := make(map[string]float64)
 	for _, p := range bgpProtocols {
-		proto := p.(map[string]interface{})
+		proto := p.(map[string]any)
 		table := proto["table"].(string)
-		routes := proto["routes"].(map[string]interface{})
+		routes := proto["routes"].(map[string]any)
 		imported, ok := routes["imported"].(float64)
 		if ok {
 			bgpCount[table] = imported
@@ -410,10 +410,10 @@ func (src *MultiTableBirdwatcher) fetchNeighborsPipeTable(
 	//  Rx -> n[Px | table: Tx]
 	pipeFilterCount := make(map[string]float64)
 	for _, p := range pipes {
-		pipe := p.(map[string]interface{})
+		pipe := p.(map[string]any)
 
 		table := pipe["table"].(string)
-		routes := pipe["routes"].(map[string]interface{})
+		routes := pipe["routes"].(map[string]any)
 
 		count := routes["exported"].(float64) // sigh
 		recCount := bgpCount[table]
@@ -431,8 +431,8 @@ func (src *MultiTableBirdwatcher) fetchNeighborsPipeTable(
 
 	// Update protocols
 	for _, p := range bgpProtocols {
-		proto := p.(map[string]interface{})
-		routes := proto["routes"].(map[string]interface{})
+		proto := p.(map[string]any)
+		routes := proto["routes"].(map[string]any)
 		table := proto["table"].(string)
 		filt, ok := pipeFilterCount[table]
 		if ok {
@@ -474,7 +474,7 @@ func (src *MultiTableBirdwatcher) fetchNeighborsPipeMaster(
 	}
 
 	pipes := src.filterProtocolsPipe(
-		birdProtocols)["protocols"].(map[string]interface{})
+		birdProtocols)["protocols"].(map[string]any)
 	tree := src.parseProtocolToTableTree(birdProtocols)
 
 	// Now determine the session count for each neighbor and check if the pipe
@@ -485,14 +485,14 @@ func (src *MultiTableBirdwatcher) fetchNeighborsPipeMaster(
 		pipeRoutesImported := int64(0)
 
 		// Sum up all routes from all peers for a table
-		for _, protocol := range tree[table].(map[string]interface{}) {
+		for _, protocol := range tree[table].(map[string]any) {
 			// Skip peers that are not up (start/down)
-			if !isProtocolUp(protocol.(map[string]interface{})["state"].(string)) {
+			if !isProtocolUp(protocol.(map[string]any)["state"].(string)) {
 				continue
 			}
-			allRoutesImported += int64(protocol.(map[string]interface{})["routes"].(map[string]interface{})["imported"].(float64))
+			allRoutesImported += int64(protocol.(map[string]any)["routes"].(map[string]any)["imported"].(float64))
 
-			table := protocol.(map[string]interface{})["table"].(string)
+			table := protocol.(map[string]any)["table"].(string)
 			pipeName := src.getMasterPipeName(table)
 
 			// Check if this is an alternative session and query the alt pipe instead
@@ -501,8 +501,8 @@ func (src *MultiTableBirdwatcher) fetchNeighborsPipeMaster(
 			}
 
 			if _, ok := pipes[pipeName]; ok {
-				if _, ok := pipes[pipeName].(map[string]interface{})["routes"].(map[string]interface{})["imported"]; ok {
-					pipeRoutesImported = int64(pipes[pipeName].(map[string]interface{})["routes"].(map[string]interface{})["imported"].(float64))
+				if _, ok := pipes[pipeName].(map[string]any)["routes"].(map[string]any)["imported"]; ok {
+					pipeRoutesImported = int64(pipes[pipeName].(map[string]any)["routes"].(map[string]any)["imported"].(float64))
 				} else {
 					continue
 				}
@@ -521,10 +521,10 @@ func (src *MultiTableBirdwatcher) fetchNeighborsPipeMaster(
 			continue
 		}
 
-		if len(tree[table].(map[string]interface{})) == 1 {
+		if len(tree[table].(map[string]any)) == 1 {
 			// Single router
-			for _, protocol := range tree[table].(map[string]interface{}) {
-				filtered[protocol.(map[string]interface{})["protocol"].(string)] = int(allRoutesImported - pipeRoutesImported)
+			for _, protocol := range tree[table].(map[string]any) {
+				filtered[protocol.(map[string]any)["protocol"].(string)] = int(allRoutesImported - pipeRoutesImported)
 			}
 		} else {
 			// Multiple routers
@@ -532,18 +532,18 @@ func (src *MultiTableBirdwatcher) fetchNeighborsPipeMaster(
 				// 0 is a special condition, which means that the pipe did filter ALL routes of
 				// all peers. Therefore we already know the amount of filtered routes and don't have
 				// to query birdwatcher again.
-				for _, protocol := range tree[table].(map[string]interface{}) {
+				for _, protocol := range tree[table].(map[string]any) {
 					// Skip peers that are not up (start/down)
-					if !isProtocolUp(protocol.(map[string]interface{})["state"].(string)) {
+					if !isProtocolUp(protocol.(map[string]any)["state"].(string)) {
 						continue
 					}
-					filtered[protocol.(map[string]interface{})["protocol"].(string)] = int(protocol.(map[string]interface{})["routes"].(map[string]interface{})["imported"].(float64))
+					filtered[protocol.(map[string]any)["protocol"].(string)] = int(protocol.(map[string]any)["routes"].(map[string]any)["imported"].(float64))
 				}
 			} else {
 				// Otherwise the pipe did import at least some routes which means that
 				// we have to query birdwatcher to get the count for each peer.
-				for neighborAddress, protocol := range tree[table].(map[string]interface{}) {
-					table := protocol.(map[string]interface{})["table"].(string)
+				for neighborAddress, protocol := range tree[table].(map[string]any) {
+					table := protocol.(map[string]any)["table"].(string)
 					pipe := src.getMasterPipeName(table)
 					// Check if this is an alternative session and query the alt pipe instead
 					if src.isAltSession(pipe) {
@@ -558,7 +558,7 @@ func (src *MultiTableBirdwatcher) fetchNeighborsPipeMaster(
 					}
 
 					if _, ok := count["routes"]; ok {
-						filtered[protocol.(map[string]interface{})["protocol"].(string)] = int(count["routes"].(float64))
+						filtered[protocol.(map[string]any)["protocol"].(string)] = int(count["routes"].(float64))
 					}
 				}
 			}
@@ -670,7 +670,7 @@ func (src *MultiTableBirdwatcher) Routes(
 	if err != nil {
 		return nil, err
 	}
-	protocols := birdProtocols["protocols"].(map[string]interface{})
+	protocols := birdProtocols["protocols"].(map[string]any)
 
 	// Fetch required routes first (received and filtered)
 	// However: Store in separate cache for faster access
@@ -713,7 +713,7 @@ func (src *MultiTableBirdwatcher) RoutesReceived(
 	if err != nil {
 		return nil, err
 	}
-	protocols := birdProtocols["protocols"].(map[string]interface{})
+	protocols := birdProtocols["protocols"].(map[string]any)
 
 	// Fetch required routes first (received and filtered)
 	routes, err := src.fetchRequiredRoutes(ctx, protocols, neighborID)
@@ -747,7 +747,7 @@ func (src *MultiTableBirdwatcher) RoutesFiltered(
 	if err != nil {
 		return nil, err
 	}
-	protocols := birdProtocols["protocols"].(map[string]interface{})
+	protocols := birdProtocols["protocols"].(map[string]any)
 
 	// Fetch required routes first (received and filtered)
 	routes, err := src.fetchRequiredRoutes(ctx, protocols, neighborID)
@@ -801,8 +801,8 @@ func (src *MultiTableBirdwatcher) fetchAllRoutesFromPeerTable(
 	if err != nil {
 		return nil, err
 	}
-	protocols := birdProtocols["protocols"].(map[string]interface{})
-	protocolsBGP := src.filterProtocolsBgp(birdProtocols)["protocols"].(map[string]interface{})
+	protocols := birdProtocols["protocols"].(map[string]any)
+	protocolsBGP := src.filterProtocolsBgp(birdProtocols)["protocols"].(map[string]any)
 
 	wg := &sync.WaitGroup{}
 	req := make(chan string, 1024)
@@ -810,7 +810,7 @@ func (src *MultiTableBirdwatcher) fetchAllRoutesFromPeerTable(
 	routes := api.Routes{}
 
 	// Start workers
-	for i := 0; i < 42; i++ {
+	for range 42 {
 		wg.Add(1)
 		// This is a worker for fetching routes
 		go func() {
@@ -868,7 +868,7 @@ func (src *MultiTableBirdwatcher) AllRoutes(
 	if err != nil {
 		return nil, err
 	}
-	protocols := birdProtocols["protocols"].(map[string]interface{})
+	protocols := birdProtocols["protocols"].(map[string]any)
 	mainTable := src.GenericBirdwatcher.config.MainTable
 
 	// Fetch received routes first
@@ -907,7 +907,7 @@ func (src *MultiTableBirdwatcher) AllRoutes(
 	wg := &sync.WaitGroup{}
 
 	// Start workers
-	for i := 0; i < 42; i++ {
+	for range 42 {
 		wg.Add(1)
 		go func() {
 			// This is a worker for fetching filtered routes
@@ -931,11 +931,11 @@ func (src *MultiTableBirdwatcher) AllRoutes(
 
 	// Fill request queue
 	go func() {
-		for protocolID, protocolsData := range protocolsBgp["protocols"].(map[string]interface{}) {
+		for protocolID, protocolsData := range protocolsBgp["protocols"].(map[string]any) {
 			peer := gwpool.Acquire(
-				protocolsData.(map[string]interface{})["neighbor_address"].(string))
+				protocolsData.(map[string]any)["neighbor_address"].(string))
 			learntFrom := gwpool.Acquire(
-				decoders.String(protocolsData.(map[string]interface{})["learnt_from"], *peer))
+				decoders.String(protocolsData.(map[string]any)["learnt_from"], *peer))
 
 			reqQ <- fetchFilteredReq{
 				protocolID: protocolID,

@@ -49,7 +49,7 @@ type Status struct {
 	RefreshParallelism  int           `json:"-"`
 	LastRefresh         time.Time     `json:"last_refresh"`
 	LastRefreshDuration time.Duration `json:"-"`
-	LastError           interface{}   `json:"-"`
+	LastError           any           `json:"-"`
 	State               State         `json:"state"`
 	Initialized         bool          `json:"initialized"`
 	SourceID            string        `json:"source_id"`
@@ -270,10 +270,7 @@ func (s *SourcesStore) GetSourceIDsForRefresh() []string {
 	// Sort by refresh start time ascending
 	sort.Sort(sources)
 
-	slots := s.refreshParallelism - locked
-	if slots <= 0 {
-		slots = 0
-	}
+	slots := max(s.refreshParallelism-locked, 0)
 
 	ids := make([]string, 0, slots)
 	i := 0
@@ -323,7 +320,7 @@ func (s *SourcesStore) RefreshSuccess(sourceID string) error {
 // RefreshError indicates that the refresh has failed
 func (s *SourcesStore) RefreshError(
 	sourceID string,
-	sourceErr interface{},
+	sourceErr any,
 ) {
 	s.Lock()
 	defer s.Unlock()

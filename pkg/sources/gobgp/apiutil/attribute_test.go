@@ -66,7 +66,7 @@ func Test_AsPathAttribute(t *testing.T) {
 
 	output, _ := NewAsPathAttributeFromNative(n.(*bgp.PathAttributeAsPath))
 	assert.Equal(2, len(output.Segments))
-	for i := 0; i < 2; i++ {
+	for i := range 2 {
 		assert.True(proto.Equal(input.Segments[i], output.Segments[i]))
 	}
 }
@@ -1622,7 +1622,7 @@ func Test_As4PathAttribute(t *testing.T) {
 
 	output, _ := NewAs4PathAttributeFromNative(n.(*bgp.PathAttributeAs4Path))
 	assert.Equal(2, len(output.Segments))
-	for i := 0; i < 2; i++ {
+	for i := range 2 {
 		assert.True(proto.Equal(input.Segments[i], output.Segments[i]))
 	}
 }
@@ -1820,7 +1820,7 @@ func Test_LargeCommunitiesAttribute(t *testing.T) {
 
 	output, _ := NewLargeCommunitiesAttributeFromNative(n.(*bgp.PathAttributeLargeCommunities))
 	assert.Equal(2, len(output.Communities))
-	for i := 0; i < 2; i++ {
+	for i := range 2 {
 		assert.True(proto.Equal(input.Communities[i], output.Communities[i]))
 	}
 }
