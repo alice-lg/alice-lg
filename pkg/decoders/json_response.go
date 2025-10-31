@@ -10,7 +10,7 @@ import (
 
 // ReadJSONResponse reads a json blob from a
 // http response and decodes it into a map
-func ReadJSONResponse(res *http.Response) (map[string]any, error) {
+func ReadJSONResponse(res *http.Response) (map[string]interface{}, error) {
 	// Read body
 	defer res.Body.Close()
 	data, err := io.ReadAll(res.Body)
@@ -19,7 +19,7 @@ func ReadJSONResponse(res *http.Response) (map[string]any, error) {
 	}
 
 	// Parse JSON
-	payload := make(map[string]any)
+	payload := make(map[string]interface{})
 	if err := json.Unmarshal(data, &payload); err != nil {
 		return nil, err
 	}

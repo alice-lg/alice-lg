@@ -224,7 +224,7 @@ func (b *RoutesBackend) FindByNeighbors(
 	}
 	defer tx.Rollback(ctx)
 
-	vals := make([]any, 0, len(neighbors))
+	vals := make([]interface{}, 0, len(neighbors))
 	vars := 0
 
 	qrys := []string{}

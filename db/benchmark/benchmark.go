@@ -60,7 +60,7 @@ func makeRoute(n int) *api.LookupRoute {
 
 func makeRoutes(count int) api.LookupRoutes {
 	routes := make(api.LookupRoutes, 0, count)
-	for i := range count {
+	for i := 0; i < count; i++ {
 		routes = append(routes, makeRoute(i))
 	}
 	return routes
@@ -99,7 +99,7 @@ func main() {
 	backend := postgres.NewRoutesBackend(pool, cfg.Sources)
 
 	// Now insert tons of routes...
-	for i := range 10 {
+	for i := 0; i < 10; i++ {
 		routes := makeRoutes(100000)
 		t := time.Now()
 		if err := backend.SetRoutes(

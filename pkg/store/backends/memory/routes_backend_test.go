@@ -68,7 +68,7 @@ func TestConcurrentRoutesAccess(t *testing.T) {
 	}
 
 	// Current: ~327 ms, With sync.Map: 80 ms... neat
-	for range 200000 {
+	for i := 0; i < 200000; i++ {
 		wg.Add(1)
 		go func() {
 			b.FindByNeighbors(ctx, []*api.NeighborQuery{n1, n2}, api.NewSearchFilters())

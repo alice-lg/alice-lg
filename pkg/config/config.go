@@ -458,7 +458,7 @@ func getBlackholeCommunities(config *ini.File) (api.BGPCommunitiesSet, error) {
 	section := config.Section("blackhole_communities")
 	defaultBlackholes := api.BGPCommunitiesSet{
 		Standard: []api.BGPCommunityRange{
-			{[]any{65535, 65535}, []any{666, 666}},
+			{[]interface{}{65535, 65535}, []interface{}{666, 666}},
 		},
 	}
 	if section == nil {
@@ -492,7 +492,9 @@ func getRpkiConfig(config *ini.File) (RpkiConfig, error) {
 	// Defaults taken from:
 	//   https://www.euro-ix.net/en/forixps/large-bgp-communities/
 	section := config.Section("rpki")
-	for line := range strings.Lines(section.Body()) {
+	lines := strings.Split(section.Body(), "\n")
+
+	for _, line := range lines {
 		l := strings.TrimSpace(line)
 		if !strings.Contains(l, "=") {
 			continue

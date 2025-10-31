@@ -11,7 +11,7 @@ import (
 )
 
 // ClientResponse is a json key value mapping
-type ClientResponse map[string]any
+type ClientResponse map[string]interface{}
 
 // A Client uses the http client to talk
 // to the birdwatcher API.

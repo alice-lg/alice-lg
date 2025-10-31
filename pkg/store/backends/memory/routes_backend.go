@@ -71,7 +71,7 @@ func (r *RoutesBackend) FindByNeighbors(
 ) (api.LookupRoutes, error) {
 	result := api.LookupRoutes{}
 
-	r.routes.Range(func(k, rs any) bool {
+	r.routes.Range(func(k, rs interface{}) bool {
 		for _, route := range rs.(api.LookupRoutes) {
 			for _, q := range query {
 				if !route.MatchNeighborQuery(q) {
@@ -106,7 +106,7 @@ func (r *RoutesBackend) FindByPrefix(
 	prefix = strings.ToLower(prefix)
 	result := api.LookupRoutes{}
 	hasPrefix := prefix != ""
-	r.routes.Range(func(k, rs any) bool {
+	r.routes.Range(func(k, rs interface{}) bool {
 		if limit > 0 && count >= limit {
 			limitExceeded = true
 			return false

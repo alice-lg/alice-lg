@@ -20,7 +20,7 @@ ADD ui/ .
 RUN yarn build 
 
 # Build the backend
-FROM golang:1.24 AS backend
+FROM golang:1.21 AS backend
 
 # Install dependencies
 WORKDIR /src/alice-lg

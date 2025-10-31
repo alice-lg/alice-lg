@@ -10,7 +10,7 @@ import (
 func (s *Server) logSourceError(
 	module string,
 	sourceID string,
-	params ...any,
+	params ...interface{},
 ) {
 	var err error
 	args := []string{}

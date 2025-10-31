@@ -2,7 +2,6 @@ package openbgpd
 
 import (
 	"github.com/alice-lg/alice-lg/pkg/api"
-	"slices"
 )
 
 func filterReceivedRoutes(
@@ -12,8 +11,11 @@ func filterReceivedRoutes(
 	filtered := make(api.Routes, 0, len(routes))
 	for _, r := range routes {
 		received := true
-		if slices.ContainsFunc(rejectCommunities, r.BGP.HasLargeCommunity) {
-			received = false
+		for _, c := range rejectCommunities {
+			if r.BGP.HasLargeCommunity(c) {
+				received = false
+				break
+			}
 		}
 		if received {
 			filtered = append(filtered, r)
@@ -28,7 +30,13 @@ func filterRejectedRoutes(
 ) api.Routes {
 	filtered := make(api.Routes, 0, len(routes))
 	for _, r := range routes {
-		rejected := slices.ContainsFunc(rejectCommunities, r.BGP.HasLargeCommunity)
+		rejected := false
+		for _, c := range rejectCommunities {
+			if r.BGP.HasLargeCommunity(c) {
+				rejected = true
+				break
+			}
+		}
 		if rejected {
 			filtered = append(filtered, r)
 		}

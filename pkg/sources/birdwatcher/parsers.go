@@ -17,7 +17,7 @@ import (
 )
 
 // Convert server time string to time
-func parseServerTime(value any, layout, timezone string) (time.Time, error) {
+func parseServerTime(value interface{}, layout, timezone string) (time.Time, error) {
 	svalue, ok := value.(string)
 	if !ok {
 		return time.Time{}, nil
@@ -39,7 +39,7 @@ func parseServerTime(value any, layout, timezone string) (time.Time, error) {
 // Make api status from response:
 // The api status is always included in a birdwatcher response
 func parseAPIStatus(bird ClientResponse, config Config) (*api.Meta, error) {
-	birdAPI, ok := bird["api"].(map[string]any)
+	birdAPI, ok := bird["api"].(map[string]interface{})
 	if !ok {
 		// Try to retrieve the real error from server
 		birdErr, ok := bird["error"].(string)
@@ -75,15 +75,15 @@ func parseAPIStatus(bird ClientResponse, config Config) (*api.Meta, error) {
 
 // Parse cache status from api response
 func parseCacheStatus(
-	cacheStatus map[string]any,
+	cacheStatus map[string]interface{},
 	config Config,
 ) (api.CacheStatus, error) {
-	cache, ok := cacheStatus["cache_status"].(map[string]any)
+	cache, ok := cacheStatus["cache_status"].(map[string]interface{})
 	if !ok {
 		return api.CacheStatus{}, fmt.Errorf("invalid Cache Status")
 	}
 
-	cachedAt, ok := cache["cached_at"].(map[string]any)
+	cachedAt, ok := cache["cached_at"].(map[string]interface{})
 	if !ok {
 		return api.CacheStatus{}, fmt.Errorf("invalid Cache Status")
 	}
@@ -104,7 +104,7 @@ func parseCacheStatus(
 
 // Parse birdwatcher status
 func parseBirdwatcherStatus(bird ClientResponse, config Config) (api.Status, error) {
-	birdStatus := bird["status"].(map[string]any)
+	birdStatus := bird["status"].(map[string]interface{})
 
 	// Get special fields
 	serverTime, _ := parseServerTime(
@@ -144,27 +144,27 @@ func parseBirdwatcherStatus(bird ClientResponse, config Config) (api.Status, err
 }
 
 // Parse neighbor uptime
-func parseRelativeServerTime(uptime any, config Config) time.Duration {
+func parseRelativeServerTime(uptime interface{}, config Config) time.Duration {
 	serverTime, _ := parseServerTime(uptime, config.ServerTimeShort, config.Timezone)
 	return time.Since(serverTime)
 }
 
 // parseRoutesChannels extracts per-channel route counts from protocol data
-func parseRoutesChannels(protocol map[string]any) map[string]*api.RoutesChannel {
+func parseRoutesChannels(protocol map[string]interface{}) map[string]*api.RoutesChannel {
 	routesChannels := make(map[string]*api.RoutesChannel)
 
-	channels, ok := protocol["channels"].(map[string]any)
+	channels, ok := protocol["channels"].(map[string]interface{})
 	if !ok {
 		return routesChannels
 	}
 
 	for channelName, channelData := range channels {
-		channel, ok := channelData.(map[string]any)
+		channel, ok := channelData.(map[string]interface{})
 		if !ok {
 			continue
 		}
 
-		routesCounts, ok := channel["routes_count"].(map[string]any)
+		routesCounts, ok := channel["routes_count"].(map[string]interface{})
 		if !ok {
 			continue
 		}
@@ -189,12 +189,12 @@ func parseRoutesChannels(protocol map[string]any) map[string]*api.RoutesChannel 
 func parseNeighbors(bird ClientResponse, config Config) (api.Neighbors, error) {
 	rsID := config.ID
 	neighbors := api.Neighbors{}
-	protocols := bird["protocols"].(map[string]any)
+	protocols := bird["protocols"].(map[string]interface{})
 
 	// Iterate over protocols map:
 	for protocolID, proto := range protocols {
-		protocol := proto.(map[string]any)
-		routes := protocol["routes"].(map[string]any)
+		protocol := proto.(map[string]interface{})
+		routes := protocol["routes"].(map[string]interface{})
 
 		uptime := parseRelativeServerTime(protocol["state_changed"], config)
 		lastError := decoders.String(protocol["last_error"], "")
@@ -245,11 +245,11 @@ func parseNeighbors(bird ClientResponse, config Config) (api.Neighbors, error) {
 // Parse neighbors response
 func parseNeighborsShort(bird ClientResponse, config Config) (api.NeighborsStatus, error) {
 	neighbors := api.NeighborsStatus{}
-	protocols := bird["protocols"].(map[string]any)
+	protocols := bird["protocols"].(map[string]interface{})
 
 	// Iterate over protocols map:
 	for protocolID, proto := range protocols {
-		protocol := proto.(map[string]any)
+		protocol := proto.(map[string]interface{})
 
 		uptime := parseRelativeServerTime(protocol["since"], config)
 
@@ -268,10 +268,10 @@ func parseNeighborsShort(bird ClientResponse, config Config) (api.NeighborsStatu
 }
 
 // Parse route bgp info
-func parseRouteBgpInfo(data any) *api.BGPInfo {
+func parseRouteBgpInfo(data interface{}) *api.BGPInfo {
 	gwpool := pools.Gateways4 // Let's see
 
-	bgpData, ok := data.(map[string]any)
+	bgpData, ok := data.(map[string]interface{})
 	if !ok {
 		// Info is missing
 		return &api.BGPInfo{}
@@ -311,16 +311,16 @@ func parseRouteBgpInfo(data any) *api.BGPInfo {
 }
 
 // Extract bgp communities from response
-func parseBgpCommunities(data any) []api.Community {
+func parseBgpCommunities(data interface{}) []api.Community {
 	communities := []api.Community{}
 
-	ldata, ok := data.([]any)
+	ldata, ok := data.([]interface{})
 	if !ok { // We don't have any
 		return []api.Community{}
 	}
 
 	for _, c := range ldata {
-		cdata := c.([]any)
+		cdata := c.([]interface{})
 		community := api.Community{}
 		for _, cinfo := range cdata {
 			community = append(community, int(cinfo.(float64)))
@@ -332,15 +332,15 @@ func parseBgpCommunities(data any) []api.Community {
 }
 
 // Extract extended communities
-func parseExtBgpCommunities(data any) []api.ExtCommunity {
+func parseExtBgpCommunities(data interface{}) []api.ExtCommunity {
 	communities := []api.ExtCommunity{}
-	ldata, ok := data.([]any)
+	ldata, ok := data.([]interface{})
 	if !ok { // We don't have any
 		return communities
 	}
 
 	for _, c := range ldata {
-		cdata := c.([]any)
+		cdata := c.([]interface{})
 		if len(cdata) != 3 {
 			log.Println("Ignoring malformed ext community:", cdata)
 			continue
@@ -359,7 +359,7 @@ func parseExtBgpCommunities(data any) []api.ExtCommunity {
 
 // Parse partial route
 func parseRouteData(
-	rdata map[string]any,
+	rdata map[string]interface{},
 	config Config,
 	keepDetails bool,
 ) *api.Route {
@@ -415,14 +415,14 @@ func parseRouteData(
 
 // Parse partial routes response
 func parseRoutesData(
-	birdRoutes []any,
+	birdRoutes []interface{},
 	config Config,
 	keepDetails bool,
 ) api.Routes {
 	routes := api.Routes{}
 
 	for _, data := range birdRoutes {
-		rdata := data.(map[string]any)
+		rdata := data.(map[string]interface{})
 		route := parseRouteData(rdata, config, keepDetails)
 		routes = append(routes, route)
 	}
@@ -435,7 +435,7 @@ func parseRoutes(
 	config Config,
 	keepDetails bool,
 ) (api.Routes, error) {
-	birdRoutes, ok := bird["routes"].([]any)
+	birdRoutes, ok := bird["routes"].([]interface{})
 	if !ok {
 		return api.Routes{}, fmt.Errorf("routes response missing")
 	}

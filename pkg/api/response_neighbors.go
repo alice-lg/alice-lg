@@ -30,7 +30,7 @@ type Neighbor struct {
 	RoutesChannels map[string]*RoutesChannel `json:"routes_channels"`
 
 	// Original response
-	Details map[string]any `json:"details"`
+	Details map[string]interface{} `json:"details"`
 }
 
 // String encodes a neighbor as json. This is

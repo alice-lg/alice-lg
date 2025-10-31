@@ -7,9 +7,9 @@ import (
 	"testing"
 )
 
-func readTestData(filename string) map[string]any {
+func readTestData(filename string) map[string]interface{} {
 	data, _ := os.ReadFile(filepath.Join("testdata", filename))
-	payload := make(map[string]any)
+	payload := make(map[string]interface{})
 	_ = json.Unmarshal(data, &payload)
 	return payload
 }
@@ -83,7 +83,7 @@ func TestDecodeRoutes(t *testing.T) {
 }
 
 func TestDecodeExtendedCommunities(t *testing.T) {
-	data := []any{"rt 123:456", "error invalid community"}
+	data := []interface{}{"rt 123:456", "error invalid community"}
 	comms := decodeExtendedCommunities(data)
 	if len(comms) != 1 {
 		t.Fatal("expected 1 valid community")
@@ -94,7 +94,7 @@ func TestDecodeExtendedCommunities(t *testing.T) {
 }
 
 func TestDecodeMalformedExtendedCommunities(t *testing.T) {
-	data := []any{
+	data := []interface{}{
 		"0x8000000000000000",
 		"8000000000000000",
 		"rt 1239", "generic :123", "generic ro-23:123",

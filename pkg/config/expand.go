@@ -58,7 +58,8 @@ func (e ExpandMap) matchWildcard(pattern string) []string {
 
 	// Iterate variables and add match to result set
 	for k := range e {
-		if key, ok := strings.CutPrefix(k, pattern); ok {
+		if strings.HasPrefix(k, pattern) {
+			key := strings.TrimPrefix(k, pattern)
 			matches = append(matches, key)
 		}
 	}

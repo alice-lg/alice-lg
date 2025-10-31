@@ -11,7 +11,7 @@ import (
 )
 
 // String asserts a string, provided a default
-func String(value any, fallback string) string {
+func String(value interface{}, fallback string) string {
 	sval, ok := value.(string)
 	if !ok {
 		return fallback
@@ -20,8 +20,8 @@ func String(value any, fallback string) string {
 }
 
 // StringList decodes a list of strings
-func StringList(data any) []string {
-	ldata, ok := data.([]any)
+func StringList(data interface{}) []string {
+	ldata, ok := data.([]interface{})
 	if !ok {
 		return []string{}
 	}
@@ -50,7 +50,7 @@ func TrimmedCSVStringList(s string) []string {
 }
 
 // IntList decodes a list of integers
-func IntList(data any) []int {
+func IntList(data interface{}) []int {
 	sdata := StringList(data)
 	list := make([]int, 0, len(sdata))
 	for _, e := range sdata {
@@ -77,7 +77,7 @@ func IntListFromStrings(strs []string) []int {
 }
 
 // Int decodes an integer value
-func Int(value any, fallback int) int {
+func Int(value interface{}, fallback int) int {
 	fval, ok := value.(float64)
 	if !ok {
 		return fallback
@@ -95,7 +95,7 @@ func IntFromString(s string, fallback int) int {
 }
 
 // Bool decodes a boolean value
-func Bool(value any, fallback bool) bool {
+func Bool(value interface{}, fallback bool) bool {
 	val, ok := value.(bool)
 	if !ok {
 		return fallback
@@ -104,7 +104,7 @@ func Bool(value any, fallback bool) bool {
 }
 
 // Duration decodes a time.Duration
-func Duration(value any, fallback time.Duration) time.Duration {
+func Duration(value interface{}, fallback time.Duration) time.Duration {
 	val, ok := value.(time.Duration)
 	if !ok {
 		return fallback
@@ -123,7 +123,7 @@ func Duration(value any, fallback time.Duration) time.Duration {
 //	01w3d01h
 //	1d02h03m
 //	01:02:03
-func DurationTimeframe(value any, fallback time.Duration) time.Duration {
+func DurationTimeframe(value interface{}, fallback time.Duration) time.Duration {
 	var sec, min, hour, day uint
 	var week uint64
 	sval := String(value, "")
@@ -156,7 +156,7 @@ func DurationTimeframe(value any, fallback time.Duration) time.Duration {
 }
 
 // TimeUTC returns the time expecting an UTC timestamp
-func TimeUTC(value any, fallback time.Time) time.Time {
+func TimeUTC(value interface{}, fallback time.Time) time.Time {
 	sval := String(value, "")
 	if sval == "" {
 		return fallback

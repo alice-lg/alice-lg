@@ -30,7 +30,7 @@ type Filterable interface {
 }
 
 // FilterValue can be anything
-type FilterValue any
+type FilterValue interface{}
 
 // SearchFilter is a key value pair with
 // an indicator how many results the predicate
@@ -163,7 +163,7 @@ func (g *SearchFilterGroup) Contains(filter *SearchFilter) bool {
 
 // filterValueAsString gets the string representation
 // from a filter value
-func filterValueAsString(value any) string {
+func filterValueAsString(value interface{}) string {
 	switch v := value.(type) {
 	case int:
 		return strconv.Itoa(v)
@@ -183,7 +183,7 @@ func filterValueAsString(value any) string {
 
 // GetFilterByValue retrieves a filter by matching
 // a string representation of it's filter value.
-func (g *SearchFilterGroup) GetFilterByValue(value any) *SearchFilter {
+func (g *SearchFilterGroup) GetFilterByValue(value interface{}) *SearchFilter {
 	ref := filterValueAsString(value)
 	idx, ok := g.filtersIdx[ref]
 	if !ok {
@@ -227,9 +227,9 @@ func (g *SearchFilterGroup) rebuildIndex() {
 }
 
 // A SearchFilterComparator compares route with a filter
-type SearchFilterComparator func(route Filterable, value any) bool
+type SearchFilterComparator func(route Filterable, value interface{}) bool
 
-func searchFilterMatchSource(route Filterable, value any) bool {
+func searchFilterMatchSource(route Filterable, value interface{}) bool {
 	sourceID, ok := value.(string)
 	if !ok {
 		return false
@@ -237,7 +237,7 @@ func searchFilterMatchSource(route Filterable, value any) bool {
 	return route.MatchSourceID(sourceID)
 }
 
-func searchFilterMatchASN(route Filterable, value any) bool {
+func searchFilterMatchASN(route Filterable, value interface{}) bool {
 	asn, ok := value.(int)
 	if !ok {
 		return false
@@ -246,7 +246,7 @@ func searchFilterMatchASN(route Filterable, value any) bool {
 	return route.MatchASN(asn)
 }
 
-func searchFilterMatchCommunity(route Filterable, value any) bool {
+func searchFilterMatchCommunity(route Filterable, value interface{}) bool {
 	community, ok := value.(Community)
 	if !ok {
 		return false
@@ -254,7 +254,7 @@ func searchFilterMatchCommunity(route Filterable, value any) bool {
 	return route.MatchCommunity(community)
 }
 
-func searchFilterMatchExtCommunity(route Filterable, value any) bool {
+func searchFilterMatchExtCommunity(route Filterable, value interface{}) bool {
 	community, ok := value.(ExtCommunity)
 	if !ok {
 		return false
@@ -262,7 +262,7 @@ func searchFilterMatchExtCommunity(route Filterable, value any) bool {
 	return route.MatchExtCommunity(community)
 }
 
-func searchFilterMatchLargeCommunity(route Filterable, value any) bool {
+func searchFilterMatchLargeCommunity(route Filterable, value interface{}) bool {
 	community, ok := value.(Community)
 	if !ok {
 		return false
@@ -270,7 +270,7 @@ func searchFilterMatchLargeCommunity(route Filterable, value any) bool {
 	return route.MatchLargeCommunity(community)
 }
 
-func searchFilterMatchAddrFamily(route Filterable, value any) bool {
+func searchFilterMatchAddrFamily(route Filterable, value interface{}) bool {
 	family, ok := value.(int)
 	if !ok {
 		return false

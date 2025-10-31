@@ -78,5 +78,5 @@ jobs:
         run: make ui_test
 
       - name: Backend Tests
-        run: make backend_test_ci
+        run: make backend_test
 

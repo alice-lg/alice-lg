@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"strings"
 	"time"
 
 	gobgpapi "github.com/osrg/gobgp/v3/api"
@@ -70,17 +71,6 @@ func (gobgp *GoBGP) GetNeighbors(
 	return peers, nil
 }
 
-func extCommunitySubTypeName(subType bgp.ExtendedCommunityAttrSubType) string {
-	switch subType {
-	case bgp.EC_SUBTYPE_ROUTE_TARGET:
-		return "rt"
-	case bgp.EC_SUBTYPE_ROUTE_ORIGIN:
-		return "ro"
-	default:
-		return "generic"
-	}
-}
-
 func (gobgp *GoBGP) parsePathIntoRoute(
 	path *gobgpapi.Path,
 	prefix string,
@@ -95,18 +85,11 @@ func (gobgp *GoBGP) parsePathIntoRoute(
 	route.Age = time.Since(time.Unix(path.Age.GetSeconds(), int64(path.Age.GetNanos())))
 	route.Primary = path.Best
 
-	nlri, err := apiutil.GetNativeNlri(path)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse NLRI: %v", err)
-	}
-
-	switch nlri := nlri.(type) {
-	case *bgp.IPAddrPrefix:
-		route.Network = fmt.Sprintf("%s/%d", nlri.Prefix.String(), nlri.Length)
-		route.AddrFamily = api.AddrFamilyIPv4
-	case *bgp.IPv6AddrPrefix:
-		route.Network = fmt.Sprintf("%s/%d", nlri.Prefix.String(), nlri.Length)
-		route.AddrFamily = api.AddrFamilyIPv6
+	// Set AddrFamily based on prefix
+	if strings.Contains(prefix, ":") {
+		route.AddrFamily = 2 // IPv6
+	} else {
+		route.AddrFamily = 1 // IPv4
 	}
 
 	attrs, err := apiutil.GetNativePathAttributes(path)
@@ -151,27 +134,14 @@ func (gobgp *GoBGP) parsePathIntoRoute(
 
 				route.BGP.Communities = append(route.BGP.Communities, apiComm)
 			}
-		case *bgp.PathAttributeMpReachNLRI:
-			// We could look at the AFI/SAFI here but gobgp really has
-			// already done the work and we can just examine the nexthop length.
-			switch len(attr.Nexthop) {
-			case 4:
-				route.Gateway = pools.Gateways4.Acquire(attr.Nexthop.String())
-				route.BGP.NextHop = pools.Gateways4.Acquire(attr.Nexthop.String())
-			case 16:
-				route.Gateway = pools.Gateways6.Acquire(attr.Nexthop.String())
-				route.BGP.NextHop = pools.Gateways6.Acquire(attr.Nexthop.String())
-			}
 		case *bgp.PathAttributeExtendedCommunities:
 			for _, community := range attr.Value {
 				if apiComm, ok := community.(*bgp.TwoOctetAsSpecificExtended); ok {
 					route.BGP.ExtCommunities = append(
 						route.BGP.ExtCommunities,
 						api.ExtCommunity{
-							extCommunitySubTypeName(apiComm.SubType),
-							int(apiComm.AS),
-							int(apiComm.LocalAdmin),
-						})
+							apiComm.AS,
+							apiComm.LocalAdmin})
 				}
 			}
 		case *bgp.PathAttributeLargeCommunities:
@@ -208,17 +178,25 @@ func (gobgp *GoBGP) GetRoutes(
 		ctx, time.Second*time.Duration(gobgp.config.ProcessingTimeout))
 	defer cancel()
 
-	families := []*gobgpapi.Family{
-		{
-			Afi:  gobgpapi.Family_AFI_IP,
-			Safi: gobgpapi.Family_SAFI_UNICAST,
-		},
-		{
-			Afi:  gobgpapi.Family_AFI_IP6,
-			Safi: gobgpapi.Family_SAFI_UNICAST,
-		},
-	}
-	for _, family := range families {
+	for i := 1; i < 3; i++ {
+
+		var family *gobgpapi.Family
+
+		switch i {
+		case 1:
+			{
+				family = &gobgpapi.Family{
+					Afi:  gobgpapi.Family_AFI_IP,
+					Safi: gobgpapi.Family_SAFI_UNICAST}
+			}
+		case 2:
+			{
+				family = &gobgpapi.Family{
+					Afi:  gobgpapi.Family_AFI_IP6,
+					Safi: gobgpapi.Family_SAFI_UNICAST}
+			}
+		}
+
 		pathStream, err := gobgp.client.ListPath(ctx, &gobgpapi.ListPathRequest{
 			Name:           peer.State.NeighborAddress,
 			TableType:      tableType,
@@ -231,17 +209,19 @@ func (gobgp *GoBGP) GetRoutes(
 			continue
 		}
 
+		rib := make([]*gobgpapi.Destination, 0)
 		for {
-			resp, err := pathStream.Recv()
+			_path, err := pathStream.Recv()
 			if err == io.EOF {
 				break
 			} else if err != nil {
 				log.Print(err)
 				return err
 			}
+			rib = append(rib, _path.Destination)
+		}
 
-			destination := resp.Destination
-
+		for _, destination := range rib {
 			for _, path := range destination.Paths {
 				route, err := gobgp.parsePathIntoRoute(path, destination.Prefix)
 				if err != nil {

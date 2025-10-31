@@ -31,9 +31,12 @@ func apiPaginateRoutes(
 	totalPages := int(math.Ceil(float64(totalResults) / float64(pageSize)))
 
 	offset := page * pageSize
-	rindex := min(
-		// Don't access out of bounds
-		offset+pageSize, totalResults)
+	rindex := offset + pageSize
+
+	// Don't access out of bounds
+	if rindex > totalResults {
+		rindex = totalResults
+	}
 	if offset < 0 {
 		offset = 0
 	}
@@ -75,9 +78,12 @@ func apiPaginateLookupRoutes(
 	totalPages := int(math.Ceil(float64(totalResults) / float64(pageSize)))
 
 	offset := page * pageSize
-	rindex := min(
-		// Don't access out of bounds
-		offset+pageSize, totalResults)
+	rindex := offset + pageSize
+
+	// Don't access out of bounds
+	if rindex > totalResults {
+		rindex = totalResults
+	}
 	if offset < 0 {
 		offset = 0
 	}

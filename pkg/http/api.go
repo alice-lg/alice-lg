@@ -31,7 +31,7 @@ import (
 //     LookupPrefix   /api/v1/lookup/prefix?q=<prefix>
 //     LookupNeighbor /api/v1/lookup/neighbor?asn=1235
 
-type response any
+type response interface{}
 
 type apiEndpoint func(
 	context.Context,

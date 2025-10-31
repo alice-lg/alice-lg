@@ -21,7 +21,8 @@ func parseAndMergeCommunities(
 ) api.BGPCommunityMap {
 
 	// Parse and merge communities
-	for line := range strings.Lines(body) {
+	lines := strings.Split(body, "\n")
+	for _, line := range lines {
 		kv := strings.SplitN(line, "=", 2)
 		if len(kv) != 2 {
 			log.Println("Skipping malformed BGP community:", line)
@@ -42,7 +43,8 @@ func parseRangeCommunitiesSet(body string) (*api.BGPCommunitiesSet, error) {
 	large := []api.BGPCommunityRange{}
 	ext := []api.BGPCommunityRange{}
 
-	for line := range strings.Lines(body) {
+	lines := strings.Split(body, "\n")
+	for _, line := range lines {
 		line = strings.TrimSpace(line)
 		if line == "" {
 			continue // Empty
@@ -136,7 +138,7 @@ func parseRejectionCandidateCommunities(comms api.BGPCommunityMap, s string) err
 		}
 
 		value := strings.TrimSpace(kv[1])
-		for c := range strings.SplitSeq(value, ",") {
+		for _, c := range strings.Split(value, ",") {
 			n += 1
 			comms.Set(c, fmt.Sprintf("reject-candidate-%d", n))
 		}

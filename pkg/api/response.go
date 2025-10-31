@@ -27,17 +27,17 @@ type CacheableResponse interface {
 
 // ConfigResponse is a response with client runtime configuration
 type ConfigResponse struct {
-	RejectReasons map[string]any `json:"reject_reasons"`
+	RejectReasons map[string]interface{} `json:"reject_reasons"`
 
-	Noexport        Noexport       `json:"noexport"`
-	NoexportReasons map[string]any `json:"noexport_reasons"`
+	Noexport        Noexport               `json:"noexport"`
+	NoexportReasons map[string]interface{} `json:"noexport_reasons"`
 
 	RejectCandidates RejectCandidates `json:"reject_candidates"`
 
 	Rpki Rpki `json:"rpki"`
 
-	BGPCommunities          map[string]any    `json:"bgp_communities"`
-	BGPBlackholeCommunities BGPCommunitiesSet `json:"bgp_blackhole_communities"`
+	BGPCommunities          map[string]interface{} `json:"bgp_communities"`
+	BGPBlackholeCommunities BGPCommunitiesSet      `json:"bgp_blackhole_communities"`
 
 	NeighborsColumns      map[string]string `json:"neighbors_columns"`
 	NeighborsColumnsOrder []string          `json:"neighbors_columns_order"`
@@ -59,7 +59,7 @@ type Noexport struct {
 // RejectCandidates contains a communities mapping
 // of reasons for a rejection in the future.
 type RejectCandidates struct {
-	Communities map[string]any `json:"communities"`
+	Communities map[string]interface{} `json:"communities"`
 }
 
 // Rpki is the validation status of a prefix
@@ -206,7 +206,7 @@ func (communities Communities) Unique() Communities {
 */
 
 // ExtCommunity is a BGP extended community
-type ExtCommunity []any
+type ExtCommunity []interface{}
 
 func (com ExtCommunity) String() string {
 	if len(com) < 1 {
