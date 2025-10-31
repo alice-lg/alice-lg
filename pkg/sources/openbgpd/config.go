@@ -22,7 +22,7 @@ type Config struct {
 }
 
 // APIURL creates an url from the config
-func (cfg *Config) APIURL(path string, params ...interface{}) string {
+func (cfg *Config) APIURL(path string, params ...any) string {
 	u := strings.TrimSuffix(cfg.API, "/")
 	u += fmt.Sprintf(path, params...)
 	return u

@@ -1,3 +1,5 @@
+//go:build pgstore
+
 package postgres
 
 import (

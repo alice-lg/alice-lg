@@ -2688,7 +2688,7 @@ func UnmarshalSRSegments(s []*apb.Any) ([]bgp.TunnelEncapSubTLVInterface, error)
 		return nil, nil
 	}
 	segments := make([]bgp.TunnelEncapSubTLVInterface, len(s))
-	for i := 0; i < len(s); i++ {
+	for i := range s {
 		value, err := s[i].UnmarshalNew()
 		if err != nil {
 			return nil, fmt.Errorf("failed to unmarshal SR Policy Segment: %s", err)

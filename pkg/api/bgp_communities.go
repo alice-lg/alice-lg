@@ -42,7 +42,7 @@ From: https://www.iana.org/assignments/bgp-well-known-communities/bgp-well-known
 
 // BGPCommunityMap is a tree representation of BGP communities
 // where the leaf is a description or reason.
-type BGPCommunityMap map[string]interface{}
+type BGPCommunityMap map[string]any
 
 // MakeWellKnownBGPCommunities returns a BGPCommunityMap
 // map with well known communities.
@@ -74,7 +74,7 @@ func MakeWellKnownBGPCommunities() BGPCommunityMap {
 // Lookup searches for a label in the communities map
 func (c BGPCommunityMap) Lookup(community string) (string, error) {
 	path := strings.Split(community, ":")
-	var lookup interface{} // This is all much too dynamic...
+	var lookup any // This is all much too dynamic...
 	lookup = c
 
 	for _, key := range path {
@@ -109,7 +109,7 @@ func (c BGPCommunityMap) Lookup(community string) (string, error) {
 // Set assignes a label to a community
 func (c BGPCommunityMap) Set(community string, label string) {
 	path := strings.Split(community, ":")
-	var lookup interface{} // Again, this is all much too dynamic...
+	var lookup any // Again, this is all much too dynamic...
 	lookup = c
 
 	for _, key := range path[:len(path)-1] {
@@ -183,7 +183,7 @@ const (
 
 // BGPCommunityRange is a list of tuples with the start and end
 // of the range defining a community.
-type BGPCommunityRange []interface{}
+type BGPCommunityRange []any
 
 // Type classifies the BGP Ranged BGP Community into: std, large, ext
 func (c BGPCommunityRange) Type() int {

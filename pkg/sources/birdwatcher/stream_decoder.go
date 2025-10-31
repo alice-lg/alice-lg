@@ -30,7 +30,7 @@ func parseRoutesResponseStream(
 
 		// Parse API meta data
 		if t == "api" {
-			api := make(map[string]interface{})
+			api := make(map[string]any)
 			if err := dec.Decode(&api); err != nil {
 				return nil, nil, err
 			}
@@ -65,7 +65,7 @@ func parseRoutesResponseStream(
 			}
 
 			for dec.More() {
-				rdata := make(map[string]interface{})
+				rdata := make(map[string]any)
 				if err := dec.Decode(&rdata); err != nil {
 					return nil, nil, err
 				}

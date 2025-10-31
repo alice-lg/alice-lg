@@ -8,6 +8,7 @@ ARCH=amd64
 
 VERSION=$(shell cat ./VERSION)
 
+CI_BUILD_TAGS=pgstore
 
 all: alice
 
@@ -41,6 +42,11 @@ backend_test:
 	touch ./ui/build/UI_BUILD_STUB
 	go test ./pkg/...
 	rm ./ui/build/UI_BUILD_STUB
+
+# Test postgres store backend and other integration
+# relevant tests in the future
+backend_test_ci: ui
+	go test -tags=$(CI_BUILD_TAGS) ./pkg/...
 
 
 clean:
