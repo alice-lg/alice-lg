@@ -43,5 +43,5 @@ RUN apk add -U tzdata
 COPY --from=backend /src/alice-lg/cmd/alice-lg/alice-lg-linux-amd64 /usr/bin/alice-lg
 RUN ls -lsha /usr/bin/alice-lg
 
-EXPOSE 7340:7340
+EXPOSE 7340/tcp
 CMD ["/usr/bin/alice-lg"]
