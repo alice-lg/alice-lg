@@ -4,7 +4,7 @@
 #
 
 # Build frontend first
-FROM node:latest AS ui
+FROM node:24 AS ui
 
 # Install dependencies 
 WORKDIR /src/alice-lg/ui
@@ -36,12 +36,12 @@ COPY --from=ui /src/alice-lg/ui/build ui/build
 WORKDIR /src/alice-lg/cmd/alice-lg
 RUN make alpine
 
-FROM alpine:latest
+FROM alpine:3.22
 
 RUN apk add -U tzdata
 
 COPY --from=backend /src/alice-lg/cmd/alice-lg/alice-lg-linux-amd64 /usr/bin/alice-lg
 RUN ls -lsha /usr/bin/alice-lg
 
-EXPOSE 7340:7340
+EXPOSE 7340/tcp
 CMD ["/usr/bin/alice-lg"]
