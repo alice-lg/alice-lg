@@ -2,6 +2,7 @@ package http
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"net/http"
@@ -59,6 +60,22 @@ var (
 		"q", "a prefix query must contain at least a '.' or ':'",
 	}
 )
+
+// reValidNeighborID matches BIRD protocol names: alphanumeric and underscore only.
+var reValidNeighborID = regexp.MustCompile(`^[A-Za-z0-9_]+$`)
+
+// validateNeighborID rejects neighborId values that contain URL structural
+// characters (e.g. '?', '#', '&') which would otherwise be injected into
+// internal birdwatcher API URLs when concatenated without encoding.
+func validateNeighborID(id string) (string, error) {
+	if !reValidNeighborID.MatchString(id) {
+		return "", &ErrValidationFailed{
+			Param:  "neighborId",
+			Reason: "neighborId contains invalid characters",
+		}
+	}
+	return id, nil
+}
 
 // Helper: Validate source Id
 func validateSourceID(id string) (string, error) {
