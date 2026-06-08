@@ -135,6 +135,8 @@ type noDirListFS struct {
 	http.FileSystem
 }
 
+// Open returns 404 for dotfiles and directories; otherwise delegates to the
+// underlying FileSystem.
 func (fs noDirListFS) Open(name string) (http.File, error) {
 	for _, part := range strings.Split(name, "/") {
 		if strings.HasPrefix(part, ".") && part != "." {
