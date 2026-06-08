@@ -127,12 +127,41 @@ func (t *Theme) ScriptIncludes() string {
 	return strings.Join(includes, "\n")
 }
 
+// noDirListFS wraps an http.FileSystem and returns 404 for directory requests
+// and dotfile requests, preventing http.FileServer from generating directory
+// listing HTML pages and serving hidden files. This aligns the HTTP-serving
+// behaviour with listIncludes(), which already excludes both.
+type noDirListFS struct {
+	http.FileSystem
+}
+
+func (fs noDirListFS) Open(name string) (http.File, error) {
+	for _, part := range strings.Split(name, "/") {
+		if strings.HasPrefix(part, ".") && part != "." {
+			return nil, os.ErrNotExist
+		}
+	}
+	f, err := fs.FileSystem.Open(name)
+	if err != nil {
+		return nil, err
+	}
+	stat, err := f.Stat()
+	if err != nil {
+		f.Close()
+		return nil, err
+	}
+	if stat.IsDir() {
+		f.Close()
+		return nil, os.ErrNotExist
+	}
+	return f, nil
+}
+
 // Handler is the theme HTTP handler
 func (t *Theme) Handler() http.Handler {
-	// Serve the content using the file server
 	path := t.Config.Path
 	themeFilesHandler := http.StripPrefix(
-		t.Config.BasePath, http.FileServer(http.Dir(path)))
+		t.Config.BasePath, http.FileServer(noDirListFS{http.Dir(path)}))
 	return themeFilesHandler
 }
 
