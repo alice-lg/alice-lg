@@ -3,6 +3,7 @@ package birdwatcher
 import (
 	"context"
 	"log"
+	"net/url"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
 )
@@ -16,7 +17,7 @@ func (src *SingleTableBirdwatcher) fetchReceivedRoutes(
 	ctx context.Context,
 	neighborID string,
 ) (*api.Meta, api.Routes, error) {
-	res, err := src.client.GetEndpoint(ctx, "/routes/protocol/"+neighborID)
+	res, err := src.client.GetEndpoint(ctx, "/routes/protocol/"+url.PathEscape(neighborID))
 	if err != nil {
 		return nil, nil, err
 	}
@@ -34,7 +35,7 @@ func (src *SingleTableBirdwatcher) fetchFilteredRoutes(
 	ctx context.Context,
 	neighborID string,
 ) (*api.Meta, api.Routes, error) {
-	res, err := src.client.GetEndpoint(ctx, "/routes/filtered/"+neighborID)
+	res, err := src.client.GetEndpoint(ctx, "/routes/filtered/"+url.PathEscape(neighborID))
 	if err != nil {
 		log.Println("WARNING Could not retrieve filtered routes:", err)
 		log.Println("Is the 'routes_filtered' module active in birdwatcher?")
@@ -54,7 +55,7 @@ func (src *SingleTableBirdwatcher) fetchNotExportedRoutes(
 	ctx context.Context,
 	neighborID string,
 ) (*api.Meta, api.Routes, error) {
-	res, err := src.client.GetEndpoint(ctx, "/routes/noexport/"+neighborID)
+	res, err := src.client.GetEndpoint(ctx, "/routes/noexport/"+url.PathEscape(neighborID))
 	if err != nil {
 		log.Println("WARNING Could not retrieve routes not exported:", err)
 		log.Println("Is the 'routes_noexport' module active in birdwatcher?")

@@ -51,7 +51,10 @@ func (s *Server) apiRoutesListReceived(
 		return nil, err
 	}
 
-	neighborID := params.ByName("neighborId")
+	neighborID, err := validateNeighborID(params.ByName("neighborId"))
+	if err != nil {
+		return nil, err
+	}
 	source := s.cfg.SourceInstanceByID(rsID)
 	if source == nil {
 		return nil, ErrSourceNotFound
@@ -133,7 +136,10 @@ func (s *Server) apiRoutesListFiltered(
 		return nil, err
 	}
 
-	neighborID := params.ByName("neighborId")
+	neighborID, err := validateNeighborID(params.ByName("neighborId"))
+	if err != nil {
+		return nil, err
+	}
 	source := s.cfg.SourceInstanceByID(rsID)
 	if source == nil {
 		return nil, ErrSourceNotFound
@@ -216,7 +222,10 @@ func (s *Server) apiRoutesListNotExported(
 		return nil, err
 	}
 
-	neighborID := params.ByName("neighborId")
+	neighborID, err := validateNeighborID(params.ByName("neighborId"))
+	if err != nil {
+		return nil, err
+	}
 	source := s.cfg.SourceInstanceByID(rsID)
 	if source == nil {
 		return nil, ErrSourceNotFound
