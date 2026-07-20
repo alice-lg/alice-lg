@@ -159,6 +159,8 @@ func (src *SingleTableBirdwatcher) Neighbors(
 		return nil, err
 	}
 
+	neighbors = api.ExcludeHidden(src.config.HiddenNeighbors, neighbors)
+
 	response = &api.NeighborsResponse{
 		Response: api.Response{
 			Meta: apiStatus,

@@ -40,7 +40,7 @@ func (r *Route) MatchAddrFamily(family uint8) bool {
 	return r.AddrFamily == family
 }
 
-// MatchSourceID implements Filterable interface for routes
+// MatchSourceID implements RouteFilterable interface for routes
 func (r *Route) MatchSourceID(id string) bool {
 	return true // A route has no source info so we exclude this filter
 }

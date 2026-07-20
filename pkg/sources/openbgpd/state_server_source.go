@@ -196,6 +196,8 @@ func (src *StateServerSource) Neighbors(
 		},
 		Neighbors: nb,
 	}
+	response.Neighbors = api.ExcludeHidden(
+		src.cfg.HiddenNeighbors, response.Neighbors)
 	src.neighborsCache.Set(response)
 
 	return response, nil
@@ -231,6 +233,7 @@ func (src *StateServerSource) NeighborsSummary(
 	if err != nil {
 		return nil, err
 	}
+	nb = api.ExcludeHidden(src.cfg.HiddenNeighbors, nb)
 	// Set route server id (sourceID) for all neighbors
 	for _, n := range nb {
 		n.RouteServerID = src.cfg.ID
@@ -271,6 +274,7 @@ func (src *StateServerSource) NeighborsStatus(
 	if err != nil {
 		return nil, err
 	}
+	nb = api.ExcludeHidden(src.cfg.HiddenNeighbors, nb)
 
 	response := &api.NeighborsStatusResponse{
 		Response: api.Response{

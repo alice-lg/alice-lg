@@ -644,6 +644,9 @@ func (src *MultiTableBirdwatcher) Neighbors(
 		response = res
 	}
 
+	response.Neighbors = api.ExcludeHidden(
+		src.config.HiddenNeighbors, response.Neighbors)
+
 	// Cache result
 	src.neighborsCache.Set(response)
 

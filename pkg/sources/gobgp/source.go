@@ -133,6 +133,8 @@ func (gobgp *GoBGP) NeighborsStatus(
 		response.Neighbors = append(response.Neighbors, &ns)
 
 	}
+	response.Neighbors = api.ExcludeHidden(
+		gobgp.config.HiddenNeighbors, response.Neighbors)
 	return &response, nil
 }
 
@@ -212,6 +214,9 @@ func (gobgp *GoBGP) Neighbors(
 		}
 
 	}
+
+	response.Neighbors = api.ExcludeHidden(
+		gobgp.config.HiddenNeighbors, response.Neighbors)
 
 	return &response, nil
 }

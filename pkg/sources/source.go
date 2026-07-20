@@ -21,7 +21,7 @@ var (
 )
 
 // Source is a generic datasource for alice.
-// All route server adapters implement this interface.
+// All route server Source adapters implement this interface.
 type Source interface {
 	ExpireCaches() int
 
