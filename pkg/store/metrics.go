@@ -13,6 +13,7 @@ type metrics struct {
 	ctx            context.Context
 
 	neighborInfo   *prometheus.Desc
+	neighborState  *prometheus.Desc
 	neighborUptime *prometheus.Desc
 
 	routesReceived  *prometheus.Desc
@@ -40,6 +41,12 @@ func StartMetrics(ctx context.Context, s *NeighborsStore) {
 		"neighbor_info",
 		"Information about the neighbor including the state",
 		append(labels, "neighbor_state"), nil,
+	)
+
+	neighborState := prometheus.NewDesc(
+		"neighbor_state",
+		"Numeric representation of neighbor state (0 = down, 1 = up)",
+		labels, nil,
 	)
 
 	neighborUptime := prometheus.NewDesc(
@@ -77,6 +84,7 @@ func StartMetrics(ctx context.Context, s *NeighborsStore) {
 		ctx:            ctx,
 
 		neighborInfo:   neighborInfo,
+		neighborState:  neighborState,
 		neighborUptime: neighborUptime,
 
 		routesReceived:  routesReceived,
@@ -91,6 +99,7 @@ func StartMetrics(ctx context.Context, s *NeighborsStore) {
 // Describe implements prometheus.Collector and passes the descriptions of all the metrics we'll report
 func (m *metrics) Describe(ch chan<- *prometheus.Desc) {
 	ch <- m.neighborInfo
+	ch <- m.neighborState
 	ch <- m.neighborUptime
 	ch <- m.routesReceived
 	ch <- m.routesFiltered
@@ -128,11 +137,23 @@ func (m *metrics) Collect(ch chan<- prometheus.Metric) {
 				neighbor.Address,           // neighbor_address
 			}
 
+			// numeric representation of neighbor state
+			numState := float64(0)
+			if neighbor.State == "up" {
+				numState = 1
+			}
+
 			ch <- prometheus.MustNewConstMetric(
 				m.neighborInfo,
 				prometheus.GaugeValue,
 				1.0,
 				append(labels, neighbor.State)..., // neighbor_info has the additional label neighbor_state
+			)
+			ch <- prometheus.MustNewConstMetric(
+				m.neighborState,
+				prometheus.GaugeValue,
+				numState,
+				labels...,
 			)
 			ch <- prometheus.MustNewConstMetric(
 				m.neighborUptime,
