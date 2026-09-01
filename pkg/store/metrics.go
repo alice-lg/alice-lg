@@ -4,25 +4,25 @@ import (
 	"context"
 	"log"
 	"strconv"
-	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
 
 type metrics struct {
 	neighborsStore *NeighborsStore
+	ctx            context.Context
 
-	neighborInfo   *prometheus.GaugeVec
-	neighborUptime *prometheus.GaugeVec
+	neighborInfo   *prometheus.Desc
+	neighborUptime *prometheus.Desc
 
-	routesReceived  *prometheus.GaugeVec
-	routesFiltered  *prometheus.GaugeVec
-	routesPreferred *prometheus.GaugeVec
-	routesAccepted  *prometheus.GaugeVec
+	routesReceived  *prometheus.Desc
+	routesFiltered  *prometheus.Desc
+	routesPreferred *prometheus.Desc
+	routesAccepted  *prometheus.Desc
 }
 
-// Initialize
-func initMetrics(s *NeighborsStore) *metrics {
+// StartMetrics initializes a metrics object and registers it as a prometheus.Collector
+func StartMetrics(ctx context.Context, s *NeighborsStore) {
 	log.Println("[metrics] Initializing export.")
 
 	labels := []string{
@@ -36,63 +36,45 @@ func initMetrics(s *NeighborsStore) *metrics {
 		"neighbor_address",
 	}
 
-	neighborInfo := prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "neighbor_info",
-			Help: "Information about the neighbor including the state",
-		},
-		append(labels, "neighbor_state"),
+	neighborInfo := prometheus.NewDesc(
+		"neighbor_info",
+		"Information about the neighbor including the state",
+		append(labels, "neighbor_state"), nil,
 	)
 
-	neighborUptime := prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "neighbor_uptime_seconds_total",
-			Help: "The uptime of a neighbor on a route server in seconds",
-		},
-		labels,
+	neighborUptime := prometheus.NewDesc(
+		"neighbor_uptime_seconds_total",
+		"The uptime of a neighbor on a route server in seconds",
+		labels, nil,
 	)
 
-	routesReceived := prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "routes_received",
-			Help: "Total number of routes received by a route server for a given neighbor",
-		},
-		labels,
+	routesReceived := prometheus.NewDesc(
+		"routes_received",
+		"Total number of routes received by a route server for a given neighbor",
+		labels, nil,
 	)
 
-	routesFiltered := prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "routes_filtered",
-			Help: "Total number of routes filtered by a route server for a given neighbor",
-		},
-		labels,
+	routesFiltered := prometheus.NewDesc(
+		"routes_filtered",
+		"Total number of routes filtered by a route server for a given neighbor",
+		labels, nil,
 	)
 
-	routesPreferred := prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "routes_preferred",
-			Help: "Total number of routes preferred by a route server for a given neighbor",
-		},
-		labels,
+	routesPreferred := prometheus.NewDesc(
+		"routes_preferred",
+		"Total number of routes preferred by a route server for a given neighbor",
+		labels, nil,
 	)
 
-	routesAccepted := prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "routes_accepted",
-			Help: "Total number of routes accepted by a route server for a given neighbor",
-		},
-		labels,
+	routesAccepted := prometheus.NewDesc(
+		"routes_accepted",
+		"Total number of routes accepted by a route server for a given neighbor",
+		labels, nil,
 	)
 
-	prometheus.MustRegister(neighborInfo)
-	prometheus.MustRegister(neighborUptime)
-	prometheus.MustRegister(routesReceived)
-	prometheus.MustRegister(routesFiltered)
-	prometheus.MustRegister(routesPreferred)
-	prometheus.MustRegister(routesAccepted)
-
-	return &metrics{
+	m := &metrics{
 		neighborsStore: s,
+		ctx:            ctx,
 
 		neighborInfo:   neighborInfo,
 		neighborUptime: neighborUptime,
@@ -102,10 +84,22 @@ func initMetrics(s *NeighborsStore) *metrics {
 		routesPreferred: routesPreferred,
 		routesAccepted:  routesAccepted,
 	}
+
+	prometheus.MustRegister(m)
 }
 
-// Update the metrics with information from the store.
-func (m *metrics) update(ctx context.Context) error {
+// Describe implements prometheus.Collector and passes the descriptions of all the metrics we'll report
+func (m *metrics) Describe(ch chan<- *prometheus.Desc) {
+	ch <- m.neighborInfo
+	ch <- m.neighborUptime
+	ch <- m.routesReceived
+	ch <- m.routesFiltered
+	ch <- m.routesPreferred
+	ch <- m.routesAccepted
+}
+
+// Collect implements prometheus.Collector and returns the current state of all metrics so they can be scraped
+func (m *metrics) Collect(ch chan<- prometheus.Metric) {
 	rsIDs := m.neighborsStore.sources.GetSourceIDs()
 
 	// For all route servers, fetch neighbors list and
@@ -116,75 +110,61 @@ func (m *metrics) update(ctx context.Context) error {
 		}
 		rs := m.neighborsStore.sources.Get(rsID)
 
-		neighbors, err := m.neighborsStore.GetNeighborsAt(ctx, rsID)
+		neighbors, err := m.neighborsStore.GetNeighborsAt(m.ctx, rsID)
 		if err != nil {
-			return err
+			continue
 		}
 
 		// Get neighbors
 		for _, neighbor := range neighbors {
-
-			m.neighborInfo.With(prometheus.Labels{
-				"route_server_id":      rs.ID,
-				"route_server_name":    rs.Name,
-				"route_server_group":   rs.Group,
-				"neighbor_id":          neighbor.ID,
-				"neighbor_description": neighbor.Description,
-				"neighbor_asn":         strconv.Itoa(neighbor.ASN),
-				"neighbor_address":     neighbor.Address,
-				"neighbor_state":       neighbor.State,
-			}).Set(1.0)
-
-			labels := prometheus.Labels{
-				"route_server_id":      rs.ID,
-				"route_server_name":    rs.Name,
-				"route_server_group":   rs.Group,
-				"neighbor_id":          neighbor.ID,
-				"neighbor_description": neighbor.Description,
-				"neighbor_asn":         strconv.Itoa(neighbor.ASN),
-				"neighbor_address":     neighbor.Address,
+			// label values, in the same order as defined in StartMetrics
+			labels := []string{
+				rs.ID,                      // route_server_id
+				rs.Name,                    // route_server_name
+				rs.Group,                   // route_server_group
+				neighbor.ID,                // neighbor_id
+				neighbor.Description,       // neighbor_description
+				strconv.Itoa(neighbor.ASN), // neighbor_asn
+				neighbor.Address,           // neighbor_address
 			}
-			m.neighborUptime.
-				With(labels).
-				Set(neighbor.Uptime.Seconds())
-			m.routesReceived.
-				With(labels).
-				Set(float64(neighbor.RoutesReceived))
-			m.routesFiltered.
-				With(labels).
-				Set(float64(neighbor.RoutesFiltered))
-			m.routesPreferred.
-				With(labels).
-				Set(float64(neighbor.RoutesPreferred))
-			m.routesAccepted.
-				With(labels).
-				Set(float64(neighbor.RoutesAccepted))
-		}
-	}
 
-	return nil
-}
+			ch <- prometheus.MustNewConstMetric(
+				m.neighborInfo,
+				prometheus.GaugeValue,
+				1.0,
+				append(labels, neighbor.State)..., // neighbor_info has the additional label neighbor_state
+			)
+			ch <- prometheus.MustNewConstMetric(
+				m.neighborUptime,
+				prometheus.GaugeValue,
+				neighbor.Uptime.Seconds(),
+				labels...,
+			)
 
-// StartMetrics registers the metrics and starts a
-// periodical refresh.
-func StartMetrics(
-	ctx context.Context,
-	neighborsStore *NeighborsStore,
-) {
-	m := initMetrics(neighborsStore)
-
-	// Every 5 second, update the metrics
-	log.Println("[metrics] Starting refresh.")
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-time.After(time.Second * 5):
-			err := m.update(ctx)
-			if err != nil {
-				log.Println(
-					"[metrics] Error while updating:", err)
-			}
+			ch <- prometheus.MustNewConstMetric(
+				m.routesReceived,
+				prometheus.GaugeValue,
+				float64(neighbor.RoutesReceived),
+				labels...,
+			)
+			ch <- prometheus.MustNewConstMetric(
+				m.routesFiltered,
+				prometheus.GaugeValue,
+				float64(neighbor.RoutesFiltered),
+				labels...,
+			)
+			ch <- prometheus.MustNewConstMetric(
+				m.routesPreferred,
+				prometheus.GaugeValue,
+				float64(neighbor.RoutesPreferred),
+				labels...,
+			)
+			ch <- prometheus.MustNewConstMetric(
+				m.routesAccepted,
+				prometheus.GaugeValue,
+				float64(neighbor.RoutesAccepted),
+				labels...,
+			)
 		}
 	}
 }
