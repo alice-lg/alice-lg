@@ -78,6 +78,16 @@ func (b *NeighborsBackend) GetNeighborsMapAt(
 	return result, nil
 }
 
+// RemoveSource implements the NeighborsStoreBackend interface
+// by dropping all neighbors stored for the source.
+func (b *NeighborsBackend) RemoveSource(
+	ctx context.Context,
+	sourceID string,
+) error {
+	b.neighbors.Delete(sourceID)
+	return nil
+}
+
 // CountNeighborsAt retrieves the number of neighbors
 // at this source.
 func (b *NeighborsBackend) CountNeighborsAt(

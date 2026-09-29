@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/alice-lg/alice-lg/pkg/config"
+	"github.com/alice-lg/alice-lg/pkg/store"
 )
 
 func TestApiLogSourceError(t *testing.T) {
@@ -19,7 +20,7 @@ func TestApiLogSourceError(t *testing.T) {
 		},
 	}
 
-	s := &Server{cfg: cfg}
+	s := &Server{cfg: cfg, sources: store.NewSourcesRegistry(cfg)}
 
 	s.logSourceError("foo.bar", "rs1v4", 23, "Test")
 	s.logSourceError("foo.bam", "rs1v4", err)

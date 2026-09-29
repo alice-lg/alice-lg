@@ -87,6 +87,24 @@ func (b *NeighborsBackend) clear(
 	return err
 }
 
+// RemoveSource purges all neighbors stored for a source.
+func (b *NeighborsBackend) RemoveSource(
+	ctx context.Context,
+	sourceID string,
+) error {
+	tx, err := b.pool.BeginTx(ctx, pgx.TxOptions{
+		IsoLevel: pgx.ReadCommitted,
+	})
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+	if err := b.clear(ctx, tx, sourceID); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
+}
+
 // Private queryNeighborsAt selects all neighbors
 // for a given sourceID
 func (b *NeighborsBackend) queryNeighborsAt(

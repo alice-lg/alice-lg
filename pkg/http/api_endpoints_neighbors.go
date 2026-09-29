@@ -54,7 +54,7 @@ func (s *Server) apiNeighborsList(
 			Neighbors: neighbors,
 		}
 	} else {
-		source := s.cfg.SourceInstanceByID(rsID)
+		source := s.sources.SourceInstanceByID(rsID)
 		if source == nil {
 			return nil, ErrSourceNotFound
 		}

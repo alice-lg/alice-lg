@@ -12,7 +12,11 @@ import (
 
 // StartHousekeeping is a background task flushing
 // memory and expiring caches.
-func StartHousekeeping(ctx context.Context, cfg *config.Config) {
+func StartHousekeeping(
+	ctx context.Context,
+	cfg *config.Config,
+	sources *SourcesRegistry,
+) {
 
 	for {
 		if cfg.Housekeeping.Interval > 0 {
@@ -23,9 +27,10 @@ func StartHousekeeping(ctx context.Context, cfg *config.Config) {
 
 		log.Println("Housekeeping started")
 
-		// Expire the caches
+		// Expire the caches over the live source set, so a
+		// reloaded source set is honored.
 		log.Println("Expiring caches")
-		for _, source := range cfg.Sources {
+		for _, source := range sources.Sources() {
 			count := source.GetInstance().ExpireCaches()
 			log.Println("Expired", count, "entries for source", source.Name)
 		}

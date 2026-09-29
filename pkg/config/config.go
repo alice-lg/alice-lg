@@ -10,7 +10,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"reflect"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/go-ini/ini"
@@ -202,6 +204,36 @@ type SourceConfig struct {
 
 	// Source instance
 	instance sources.Source
+}
+
+// instanceMu guards the memoized instance of every SourceConfig;
+// the other fields are not written after loading.
+var instanceMu sync.Mutex
+
+// Equal compares two source configurations, ignoring the memoized
+// instance, the position in the file (Order) and the server level
+// stream parser throttle, so only an edited source differs.
+func (cfg *SourceConfig) Equal(other *SourceConfig) bool {
+	if cfg == nil || other == nil {
+		return cfg == other
+	}
+	instanceMu.Lock()
+	a, b := *cfg, *other
+	instanceMu.Unlock()
+	a.instance, b.instance = nil, nil
+	a.Order, b.Order = 0, 0
+	a.Birdwatcher.StreamParserThrottle, b.Birdwatcher.StreamParserThrottle = 0, 0
+	return reflect.DeepEqual(a, b)
+}
+
+// WithOrder returns a copy at a new position in the file that
+// shares the memoized instance.
+func (cfg *SourceConfig) WithOrder(order int) *SourceConfig {
+	instanceMu.Lock()
+	moved := *cfg
+	instanceMu.Unlock()
+	moved.Order = order
+	return &moved
 }
 
 // Config is the application configuration
@@ -768,7 +800,9 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 
 			if sourceType != "single_table" &&
 				sourceType != "multi_table" {
-				log.Fatal("Configuration error (birdwatcher source) unknown birdwatcher type:", sourceType)
+				return nil, fmt.Errorf(
+					"unknown birdwatcher type '%s' in source %s",
+					sourceType, srcCfg.ID)
 			}
 
 			c := birdwatcher.Config{
@@ -875,7 +909,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 
 // preprocessConfig parses the variables in the config
 // and applies it to the rest of the config.
-func preprocessConfig(data []byte) []byte {
+func preprocessConfig(data []byte) ([]byte, error) {
 	lines := bytes.Split(data, []byte("\n"))
 	config := make([][]byte, 0, len(lines))
 
@@ -895,11 +929,12 @@ func preprocessConfig(data []byte) []byte {
 		l := string(line)
 		exp, err := expMap.Expand(l)
 		if err != nil {
-			log.Fatal("Error expanding expression in config:", l, err)
+			return nil, fmt.Errorf(
+				"error expanding expression in config: %s: %v", l, err)
 		}
 		configLines = append(configLines, exp...)
 	}
-	return []byte(strings.Join(configLines, "\n"))
+	return []byte(strings.Join(configLines, "\n")), nil
 }
 
 // LoadConfig reads a configuration from a file.
@@ -915,7 +950,10 @@ func LoadConfig(file string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	configData = preprocessConfig(configData)
+	configData, err = preprocessConfig(configData)
+	if err != nil {
+		return nil, err
+	}
 
 	// Load configuration, but handle bgp communities section
 	// with our own parser
@@ -997,6 +1035,8 @@ func LoadConfig(file string) (*Config, error) {
 
 // GetInstance gets a source instance from config
 func (cfg *SourceConfig) GetInstance() sources.Source {
+	instanceMu.Lock()
+	defer instanceMu.Unlock()
 	if cfg.instance != nil {
 		return cfg.instance
 	}

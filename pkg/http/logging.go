@@ -16,7 +16,7 @@ func (s *Server) logSourceError(
 	args := []string{}
 
 	// Get source configuration
-	source := s.cfg.SourceByID(sourceID)
+	source := s.sources.SourceByID(sourceID)
 	sourceName := "unknown"
 	if source != nil {
 		sourceName = source.Name

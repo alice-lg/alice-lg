@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"math/rand"
+	"sync"
 	"time"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
@@ -62,6 +63,22 @@ type RoutesStoreBackend interface {
 		filters *api.SearchFilters,
 		limit uint,
 	) (api.LookupRoutes, error)
+
+	// AddSource registers a source with the backend so it
+	// is included in lookups. Called when a source appears
+	// during a configuration reload.
+	AddSource(
+		ctx context.Context,
+		sourceID string,
+	) error
+
+	// RemoveSource purges all routes for a source and
+	// deregisters it. Called when a source disappears
+	// during a configuration reload.
+	RemoveSource(
+		ctx context.Context,
+		sourceID string,
+	) error
 }
 
 // The RoutesStore holds a mapping of routes,
@@ -72,6 +89,12 @@ type RoutesStore struct {
 	sources   *SourcesStore
 	neighbors *NeighborsStore
 	limit     uint
+
+	// reconcileMu serializes a reload's reconcile against an
+	// in-flight refresh writing back to the backend, so a
+	// result cannot be written for a source the reload just
+	// purged.
+	reconcileMu sync.RWMutex
 }
 
 // NewRoutesStore makes a new store instance
@@ -106,6 +129,43 @@ func NewRoutesStore(
 		limit:     cfg.Server.RoutesStoreQueryLimit,
 	}
 	return store
+}
+
+// Reconcile aligns the store's sources with the provided
+// configuration. Removed and edited sources are purged from the
+// backend, new and edited sources are registered, and the
+// refresh loop picks them up on its next iteration. Server level
+// settings are not applied on reload. The reconcile is held
+// under the write lock so an in-flight refresh cannot write back
+// a source it purges.
+func (s *RoutesStore) Reconcile(ctx context.Context, cfg *config.Config) {
+	s.reconcileMu.Lock()
+	defer s.reconcileMu.Unlock()
+
+	added, changed, removed := s.sources.reconcile(cfg)
+	for _, id := range removed {
+		if err := s.backend.RemoveSource(ctx, id); err != nil {
+			log.Println("[routes store] error purging source", id, ":", err)
+		}
+	}
+	for _, id := range changed {
+		if err := s.backend.RemoveSource(ctx, id); err != nil {
+			log.Println("[routes store] error purging source", id, ":", err)
+		}
+		if err := s.backend.AddSource(ctx, id); err != nil {
+			log.Println("[routes store] error registering source", id, ":", err)
+		}
+	}
+	for _, id := range added {
+		if err := s.backend.AddSource(ctx, id); err != nil {
+			log.Println("[routes store] error registering source", id, ":", err)
+		}
+	}
+	if len(added) > 0 || len(changed) > 0 || len(removed) > 0 {
+		log.Println(
+			"[routes store] reconciled sources: added", added,
+			"changed", changed, "removed", removed)
+	}
 }
 
 // Start starts the routes store
@@ -146,24 +206,28 @@ func (s *RoutesStore) safeUpdateSource(ctx context.Context, id string) {
 		return
 	}
 
+	// Prepare for impact. Installed before the jitter sleep, so a
+	// source removed during the sleep cannot take down the process.
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(
+				"[routes store] recovering after failed routes refresh from",
+				id, "with error:", err)
+			s.sources.RefreshError(id, err)
+		}
+	}()
+
 	// Apply jitter so, we do not hit everything at once.
 	// TODO: Make configurable
 	time.Sleep(time.Duration(rand.Intn(30)) * time.Second)
 
 	src := s.sources.Get(id)
+	if src == nil {
+		return // removed by a reload during the jitter sleep
+	}
 	srcName := s.sources.GetName(id)
 
 	log.Println("[routes store] begin routes refresh from", srcName)
-
-	// Prepare for impact.
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(
-				"[routes store] recovering after failed routes refresh from",
-				src.Name, "with error:", err)
-			s.sources.RefreshError(id, err)
-		}
-	}()
 
 	if err := s.updateSource(ctx, src); err != nil {
 		log.Println(
@@ -215,12 +279,45 @@ func (s *RoutesStore) updateSource(
 	lookupRoutes := append(imported, filtered...)
 
 	log.Println("[routes store] importing", len(lookupRoutes), "routes into store from", src.Name)
-	if err = s.backend.SetRoutes(ctx, src.ID, lookupRoutes); err != nil {
+	if err = s.setRoutes(ctx, src, lookupRoutes); err != nil {
+		if errors.Is(err, ErrSourceRemoved) {
+			return nil // source removed during refresh; drop result
+		}
 		return err
 	}
 	log.Println("[routes store] successfully imported", len(lookupRoutes), "routes into store from", src.Name)
 
+	return s.refreshSuccess(src)
+}
+
+// refreshSuccess marks the refresh done unless a reload replaced
+// or removed the source after its routes were written.
+func (s *RoutesStore) refreshSuccess(src *config.SourceConfig) error {
+	s.reconcileMu.RLock()
+	defer s.reconcileMu.RUnlock()
+
+	if s.sources.Get(src.ID) != src {
+		return nil
+	}
 	return s.sources.RefreshSuccess(src.ID)
+}
+
+// setRoutes writes a refresh result to the backend unless the
+// source was removed or edited in the meantime. The comparison
+// is by identity, because an edited source is given a new
+// configuration and this result came from the previous one.
+func (s *RoutesStore) setRoutes(
+	ctx context.Context,
+	src *config.SourceConfig,
+	routes api.LookupRoutes,
+) error {
+	s.reconcileMu.RLock()
+	defer s.reconcileMu.RUnlock()
+
+	if s.sources.Get(src.ID) != src {
+		return ErrSourceRemoved
+	}
+	return s.backend.SetRoutes(ctx, src.ID, routes)
 }
 
 // awaitNeighborStore polls the neighbor store state
@@ -232,6 +329,13 @@ func (s *RoutesStore) awaitNeighborStore(
 	for {
 		if err := ctx.Err(); err != nil {
 			return err
+		}
+
+		// A removed source is never initialized again, so
+		// stop waiting instead of polling for the life of
+		// the process.
+		if !s.sources.Exists(srcID) {
+			return ErrSourceRemoved
 		}
 
 		if s.neighbors.IsInitialized(srcID) {

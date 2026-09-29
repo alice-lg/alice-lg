@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"regexp"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
@@ -48,6 +49,14 @@ type NeighborsStoreBackend interface {
 		ctx context.Context,
 		sourceID string,
 	) (int, error)
+
+	// RemoveSource purges all neighbors for a source.
+	// Called when a source disappears during a
+	// configuration reload.
+	RemoveSource(
+		ctx context.Context,
+		sourceID string,
+	) error
 }
 
 // NeighborsStore is queryable for neighbor information
@@ -56,6 +65,12 @@ type NeighborsStore struct {
 	sources *SourcesStore
 
 	forceNeighborRefresh bool
+
+	// reconcileMu serializes a reload's reconcile against an
+	// in-flight refresh writing back to the backend, so a
+	// result cannot be written for a source the reload just
+	// purged.
+	reconcileMu sync.RWMutex
 }
 
 // NewNeighborsStore creates a new store for neighbors
@@ -96,6 +111,35 @@ func NewNeighborsStore(
 	return store
 }
 
+// Reconcile aligns the store's sources with the provided
+// configuration. Removed and edited sources are purged from the
+// backend, so an edited source is re-fetched, and new sources
+// are picked up by the refresh loop on its next iteration.
+// Server level settings are not applied on reload. The reconcile
+// is held under the write lock so an in-flight refresh cannot
+// write back a source it purges.
+func (s *NeighborsStore) Reconcile(ctx context.Context, cfg *config.Config) {
+	s.reconcileMu.Lock()
+	defer s.reconcileMu.Unlock()
+
+	added, changed, removed := s.sources.reconcile(cfg)
+	for _, id := range removed {
+		if err := s.backend.RemoveSource(ctx, id); err != nil {
+			log.Println("[neighbors store] error purging source", id, ":", err)
+		}
+	}
+	for _, id := range changed {
+		if err := s.backend.RemoveSource(ctx, id); err != nil {
+			log.Println("[neighbors store] error purging source", id, ":", err)
+		}
+	}
+	if len(added) > 0 || len(changed) > 0 || len(removed) > 0 {
+		log.Println(
+			"[neighbors store] reconciled sources: added", added,
+			"changed", changed, "removed", removed)
+	}
+}
+
 // Start the store's housekeeping.
 func (s *NeighborsStore) Start(ctx context.Context) {
 	log.Println("Starting local neighbors store")
@@ -134,11 +178,45 @@ func (s *NeighborsStore) updateSource(
 		return err
 	}
 
-	if err = s.backend.SetNeighbors(ctx, srcID, res.Neighbors); err != nil {
+	if err = s.setNeighbors(ctx, src, srcID, res.Neighbors); err != nil {
+		if errors.Is(err, ErrSourceRemoved) {
+			return nil // source removed during refresh; drop result
+		}
 		return err
 	}
 
+	return s.refreshSuccess(src, srcID)
+}
+
+// refreshSuccess marks the refresh done unless a reload replaced
+// or removed the source after its neighbors were written.
+func (s *NeighborsStore) refreshSuccess(src sources.Source, srcID string) error {
+	s.reconcileMu.RLock()
+	defer s.reconcileMu.RUnlock()
+
+	if s.sources.GetInstance(srcID) != src {
+		return nil
+	}
 	return s.sources.RefreshSuccess(srcID)
+}
+
+// setNeighbors writes a refresh result to the backend unless
+// the source was removed or edited in the meantime. An edited
+// source is given a new instance, so comparing the instance
+// rejects a result fetched from the previous one.
+func (s *NeighborsStore) setNeighbors(
+	ctx context.Context,
+	src sources.Source,
+	srcID string,
+	neighbors api.Neighbors,
+) error {
+	s.reconcileMu.RLock()
+	defer s.reconcileMu.RUnlock()
+
+	if s.sources.GetInstance(srcID) != src {
+		return ErrSourceRemoved
+	}
+	return s.backend.SetNeighbors(ctx, srcID, neighbors)
 }
 
 // safeUpdateSource will try to update a source but
@@ -154,22 +232,26 @@ func (s *NeighborsStore) safeUpdateSource(ctx context.Context, id string) {
 		return
 	}
 
+	// Prepare for impact. Installed before the jitter sleep, so a
+	// source removed during the sleep cannot take down the process.
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(
+				"[neighbors store] recovering after failed neighbors refresh from",
+				id, "with error:", err)
+			s.sources.RefreshError(id, err)
+		}
+	}()
+
 	// Apply jitter so, we do not hit everything at once.
 	// TODO: Make configurable
 	time.Sleep(time.Duration(rand.Intn(30)) * time.Second)
 
 	src := s.sources.GetInstance(id)
+	if src == nil {
+		return // removed by a reload during the jitter sleep
+	}
 	srcName := s.sources.GetName(id)
-
-	// Prepare for impact.
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println(
-				"[neighbors store] recovering after failed neighbors refresh from",
-				srcName, "with error:", err)
-			s.sources.RefreshError(id, err)
-		}
-	}()
 
 	if err := s.updateSource(ctx, src, id); err != nil {
 		log.Println(

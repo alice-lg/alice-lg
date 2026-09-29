@@ -34,6 +34,26 @@ func (r *RoutesBackend) SetRoutes(
 	return nil
 }
 
+// AddSource implements the RoutesStoreBackend interface. The
+// in memory backend creates source entries lazily on the first
+// SetRoutes, so there is nothing to pre-register here.
+func (r *RoutesBackend) AddSource(
+	ctx context.Context,
+	sourceID string,
+) error {
+	return nil
+}
+
+// RemoveSource implements the RoutesStoreBackend interface by
+// dropping all routes stored for the source.
+func (r *RoutesBackend) RemoveSource(
+	ctx context.Context,
+	sourceID string,
+) error {
+	r.routes.Delete(sourceID)
+	return nil
+}
+
 // CountRoutesAt returns the number of filtered and imported
 // routes and implements the RoutesStoreBackend interface.
 func (r *RoutesBackend) CountRoutesAt(

@@ -20,6 +20,7 @@ import (
 type Server struct {
 	*http.Server
 	cfg            *config.Config
+	sources        *store.SourcesRegistry
 	routesStore    *store.RoutesStore
 	neighborsStore *store.NeighborsStore
 	pool           *pgxpool.Pool
@@ -28,12 +29,14 @@ type Server struct {
 // NewServer creates a new server
 func NewServer(
 	cfg *config.Config,
+	sources *store.SourcesRegistry,
 	pool *pgxpool.Pool,
 	routesStore *store.RoutesStore,
 	neighborsStore *store.NeighborsStore,
 ) *Server {
 	return &Server{
 		cfg:            cfg,
+		sources:        sources,
 		routesStore:    routesStore,
 		neighborsStore: neighborsStore,
 		pool:           pool,

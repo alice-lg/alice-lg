@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
 	"runtime"
 	"runtime/debug"
 	"runtime/pprof"
+	"syscall"
 	"time"
 
 	"github.com/alice-lg/alice-lg/pkg/config"
@@ -54,6 +56,40 @@ func startMemoryProfile(prefix string) {
 		createAllocProfile(filename)
 		time.Sleep(30 * time.Second)
 		t++
+	}
+}
+
+// handleReloadSignals reloads the source configuration from
+// disk on SIGHUP and reconciles the stores in place, without
+// restarting the process. Only source definitions are applied;
+// server level settings require a restart.
+func handleReloadSignals(
+	ctx context.Context,
+	configFilename string,
+	sources *store.SourcesRegistry,
+	routesStore *store.RoutesStore,
+	neighborsStore *store.NeighborsStore,
+) {
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGHUP)
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-sig:
+			log.Println("received SIGHUP, reloading source configuration")
+			cfg, err := config.LoadConfig(configFilename)
+			if err == nil {
+				err = store.ReconcileSources(
+					ctx, cfg, sources, routesStore, neighborsStore)
+			}
+			if err != nil {
+				log.Println(
+					"reload failed, keeping current configuration:", err)
+				continue
+			}
+			log.Println("source configuration reload complete")
+		}
 	}
 }
 
@@ -120,6 +156,7 @@ func main() {
 		}
 	}
 
+	sourcesRegistry := store.NewSourcesRegistry(cfg)
 	neighborsStore := store.NewNeighborsStore(cfg, neighborsBackend)
 	routesStore := store.NewRoutesStore(neighborsStore, cfg, routesBackend)
 
@@ -139,10 +176,15 @@ func main() {
 	}
 
 	// Start the Housekeeping
-	go store.StartHousekeeping(ctx, cfg)
+	go store.StartHousekeeping(ctx, cfg, sourcesRegistry)
+
+	// Reload source configuration in place on SIGHUP
+	go handleReloadSignals(
+		ctx, *configFilenameFlag, sourcesRegistry, routesStore, neighborsStore)
 
 	// Start HTTP API
-	server := http.NewServer(cfg, pool, routesStore, neighborsStore)
+	server := http.NewServer(
+		cfg, sourcesRegistry, pool, routesStore, neighborsStore)
 	go server.Start(ctx)
 
 	<-ctx.Done()

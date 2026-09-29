@@ -195,3 +195,114 @@ func TestFindByPrefix(t *testing.T) {
 	routes, _ = b.FindByPrefix(ctx, "5.5.", api.NewSearchFilters(), 0)
 	t.Log(routes)
 }
+
+// TestAddSourceRegistersOnlyAfterTableExists proves a failed table
+// creation leaves the source unregistered.
+func TestAddSourceRegistersOnlyAfterTableExists(t *testing.T) {
+	b := NewRoutesBackend(ConnectTest(), nil)
+
+	canceled, cancel := context.WithCancel(context.Background())
+	cancel()
+	if err := b.AddSource(canceled, "rs_add_failed"); err == nil {
+		t.Fatal("expected an error with a canceled context")
+	}
+	if b.hasSource("rs_add_failed") {
+		t.Error("a source whose table was not created should not be registered")
+	}
+
+	ctx := context.Background()
+	if err := b.AddSource(ctx, "rs_add_ok"); err != nil {
+		t.Fatal(err)
+	}
+	defer b.RemoveSource(ctx, "rs_add_ok")
+	if !b.hasSource("rs_add_ok") {
+		t.Error("expected rs_add_ok to be registered")
+	}
+	if _, err := b.FindByPrefix(ctx, "192.0.2.0", api.NewSearchFilters(), 1); err != nil {
+		t.Error("lookup over the registered source failed:", err)
+	}
+}
+
+// TestSetRoutesRegistersSourceAfterFailedAddSource proves a source
+// whose AddSource failed becomes visible to lookups on its next
+// refresh instead of staying hidden.
+func TestSetRoutesRegistersSourceAfterFailedAddSource(t *testing.T) {
+	ctx := context.Background()
+	b := NewRoutesBackend(ConnectTest(), nil)
+
+	canceled, cancel := context.WithCancel(ctx)
+	cancel()
+	if err := b.AddSource(canceled, "rs_heal"); err == nil {
+		t.Fatal("expected an error with a canceled context")
+	}
+	defer b.RemoveSource(ctx, "rs_heal")
+
+	route := &api.LookupRoute{
+		Neighbor: &api.Neighbor{ID: "n23"},
+		Route:    &api.Route{Network: "198.51.100.0/24"},
+	}
+	if err := b.SetRoutes(ctx, "rs_heal", api.LookupRoutes{route}); err != nil {
+		t.Fatal(err)
+	}
+	found, err := b.FindByPrefix(ctx, "198.51.100.", api.NewSearchFilters(), 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(found) != 1 {
+		t.Error("expected the refreshed source in lookups, got", len(found))
+	}
+}
+
+// TestLookupsDoNotRaceRemoveSource runs lookups while a source is
+// added and removed; a lookup must never query a dropped table.
+func TestLookupsDoNotRaceRemoveSource(t *testing.T) {
+	ctx := context.Background()
+	b := NewRoutesBackend(ConnectTest(), nil)
+	if err := b.AddSource(ctx, "rs_stable"); err != nil {
+		t.Fatal(err)
+	}
+	defer b.RemoveSource(ctx, "rs_stable")
+
+	neighbor, source := "n23", "rs_churn"
+	query := []*api.NeighborQuery{{NeighborID: &neighbor, SourceID: &source}}
+
+	stop := make(chan struct{})
+	errs := make(chan error, 2)
+	lookup := func(find func() error) {
+		for {
+			select {
+			case <-stop:
+				errs <- nil
+				return
+			default:
+			}
+			if err := find(); err != nil {
+				errs <- err
+				return
+			}
+		}
+	}
+	go lookup(func() error {
+		_, err := b.FindByPrefix(ctx, "198.51.100.", api.NewSearchFilters(), 0)
+		return err
+	})
+	go lookup(func() error {
+		_, err := b.FindByNeighbors(ctx, query, api.NewSearchFilters())
+		return err
+	})
+
+	for i := 0; i < 50; i++ {
+		if err := b.AddSource(ctx, "rs_churn"); err != nil {
+			t.Fatal(err)
+		}
+		if err := b.RemoveSource(ctx, "rs_churn"); err != nil {
+			t.Fatal(err)
+		}
+	}
+	close(stop)
+	for i := 0; i < 2; i++ {
+		if err := <-errs; err != nil {
+			t.Error("a lookup failed while a source was removed:", err)
+		}
+	}
+}

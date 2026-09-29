@@ -20,7 +20,7 @@ func (s *Server) apiRouteServersList(
 	// Get list of sources from config,
 	routeservers := api.RouteServers{}
 
-	sources := s.cfg.Sources
+	sources := s.sources.Sources()
 	for _, source := range sources {
 		routeservers = append(routeservers, api.RouteServer{
 			ID:         source.ID,
@@ -54,7 +54,7 @@ func (s *Server) apiRouteServerStatusShow(
 		return nil, err
 	}
 
-	source := s.cfg.SourceInstanceByID(rsID)
+	source := s.sources.SourceInstanceByID(rsID)
 	if source == nil {
 		return nil, ErrSourceNotFound
 	}

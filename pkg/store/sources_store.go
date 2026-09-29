@@ -17,6 +17,12 @@ import (
 var ErrSourceNotInitialized = errors.New(
 	"source is not initialized")
 
+// ErrSourceRemoved is returned if a source was removed or
+// its definition replaced by a configuration reload while a
+// refresh for it was still in flight.
+var ErrSourceRemoved = errors.New(
+	"source was removed during refresh")
+
 // Store State Constants
 const (
 	StateInit = iota
@@ -110,6 +116,65 @@ func NewSourcesStore(
 		refreshInterval:    refreshInterval,
 		refreshParallelism: refreshParallelism,
 	}
+}
+
+// reconcile updates the source set to match the desired
+// configuration. Sources that remain keep their status and
+// memoized instance; sources that appear are added with a
+// fresh status; sources that disappear are removed. The added
+// and removed source IDs are returned sorted for stable logs.
+func (s *SourcesStore) reconcile(
+	cfg *config.Config,
+) (added []string, changed []string, removed []string) {
+	s.Lock()
+	defer s.Unlock()
+
+	desired := make(map[string]*config.SourceConfig, len(cfg.Sources))
+	for _, src := range cfg.Sources {
+		desired[src.ID] = src
+	}
+
+	// Remove sources no longer present in the configuration.
+	for id := range s.sources {
+		if _, ok := desired[id]; !ok {
+			delete(s.sources, id)
+			delete(s.status, id)
+			removed = append(removed, id)
+		}
+	}
+
+	// Add sources that are new and adopt edited definitions.
+	// An unchanged source is left alone to preserve its
+	// instance and refresh state.
+	for id, src := range desired {
+		held, ok := s.sources[id]
+		if ok && held.Equal(src) {
+			continue
+		}
+		s.sources[id] = src
+		s.status[id] = &Status{
+			RefreshInterval: s.refreshInterval,
+			SourceID:        id,
+		}
+		if ok {
+			changed = append(changed, id)
+		} else {
+			added = append(added, id)
+		}
+	}
+
+	sort.Strings(added)
+	sort.Strings(changed)
+	sort.Strings(removed)
+	return added, changed, removed
+}
+
+// Exists reports whether a source is currently registered.
+func (s *SourcesStore) Exists(sourceID string) bool {
+	s.Lock()
+	defer s.Unlock()
+	_, ok := s.sources[sourceID]
+	return ok
 }
 
 // GetSourcesStatus will retrieve the status for all sources
@@ -218,18 +283,28 @@ func (s *SourcesStore) CachedAt(ctx context.Context) time.Time {
 	return t
 }
 
-// GetInstance retrieves a source instance by ID
+// GetInstance retrieves a source instance by ID, or nil if the
+// source is no longer registered.
 func (s *SourcesStore) GetInstance(sourceID string) sources.Source {
 	s.Lock()
 	defer s.Unlock()
-	return s.sources[sourceID].GetInstance()
+	src, ok := s.sources[sourceID]
+	if !ok {
+		return nil
+	}
+	return src.GetInstance()
 }
 
-// GetName retrieves a source name by ID
+// GetName retrieves a source name by ID, or the empty string if
+// the source is no longer registered.
 func (s *SourcesStore) GetName(sourceID string) string {
 	s.Lock()
 	defer s.Unlock()
-	return s.sources[sourceID].Name
+	src, ok := s.sources[sourceID]
+	if !ok {
+		return ""
+	}
+	return src.Name
 }
 
 // Get retrieves the source

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/alice-lg/alice-lg/pkg/api"
@@ -24,6 +25,10 @@ var (
 type RoutesBackend struct {
 	pool    *pgxpool.Pool
 	sources []*config.SourceConfig
+	// sourcesMu guards sources, which is mutated by
+	// AddSource and RemoveSource during a reload while
+	// FindByPrefix and Init read it.
+	sourcesMu sync.RWMutex
 }
 
 // NewRoutesBackend creates a new instance with a postgres
@@ -38,6 +43,23 @@ func NewRoutesBackend(
 	}
 }
 
+// sourceIDs returns a snapshot of the registered source IDs.
+func (b *RoutesBackend) sourceIDs() []string {
+	b.sourcesMu.RLock()
+	defer b.sourcesMu.RUnlock()
+	return b.sourceIDsLocked()
+}
+
+// sourceIDsLocked lists the registered source IDs; the caller
+// holds sourcesMu.
+func (b *RoutesBackend) sourceIDsLocked() []string {
+	ids := make([]string, 0, len(b.sources))
+	for _, src := range b.sources {
+		ids = append(ids, src.ID)
+	}
+	return ids
+}
+
 // Init will initialize all the route tables
 func (b *RoutesBackend) Init(ctx context.Context) error {
 	tx, err := b.pool.BeginTx(ctx, pgx.TxOptions{
@@ -48,12 +70,90 @@ func (b *RoutesBackend) Init(ctx context.Context) error {
 	}
 	defer tx.Rollback(ctx)
 
-	for _, src := range b.sources {
-		if err := b.initTable(ctx, tx, src.ID); err != nil {
+	for _, id := range b.sourceIDs() {
+		if err := b.initTable(ctx, tx, id); err != nil {
 			return err
 		}
 	}
 	return tx.Commit(ctx)
+}
+
+// AddSource creates the (empty) routes table for a source and
+// registers it once the table exists, so lookups succeed before
+// the first refresh and never query a missing table.
+func (b *RoutesBackend) AddSource(
+	ctx context.Context,
+	sourceID string,
+) error {
+	if b.hasSource(sourceID) {
+		return nil // already registered
+	}
+
+	tx, err := b.pool.BeginTx(ctx, pgx.TxOptions{
+		IsoLevel: pgx.ReadCommitted,
+	})
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+	if err := b.initTable(ctx, tx, sourceID); err != nil {
+		return err
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return err
+	}
+	b.register(sourceID)
+	return nil
+}
+
+// register adds a source whose table exists to the lookups.
+func (b *RoutesBackend) register(sourceID string) {
+	b.sourcesMu.Lock()
+	defer b.sourcesMu.Unlock()
+	if b.hasSourceLocked(sourceID) {
+		return
+	}
+	// FindByPrefix and Init only read the ID from this slice.
+	b.sources = append(b.sources, &config.SourceConfig{ID: sourceID})
+}
+
+// hasSource reports whether a source is registered.
+func (b *RoutesBackend) hasSource(sourceID string) bool {
+	b.sourcesMu.RLock()
+	defer b.sourcesMu.RUnlock()
+	return b.hasSourceLocked(sourceID)
+}
+
+// hasSourceLocked reports whether a source is registered; the
+// caller holds sourcesMu.
+func (b *RoutesBackend) hasSourceLocked(sourceID string) bool {
+	for _, src := range b.sources {
+		if src.ID == sourceID {
+			return true
+		}
+	}
+	return false
+}
+
+// RemoveSource deregisters a source and drops its routes table.
+func (b *RoutesBackend) RemoveSource(
+	ctx context.Context,
+	sourceID string,
+) error {
+	// Held across the drop, so no lookup is querying the table.
+	b.sourcesMu.Lock()
+	defer b.sourcesMu.Unlock()
+	kept := make([]*config.SourceConfig, 0, len(b.sources))
+	for _, src := range b.sources {
+		if src.ID != sourceID {
+			kept = append(kept, src)
+		}
+	}
+	b.sources = kept
+
+	tbl := b.routesTable(sourceID)
+	_, err := b.pool.Exec(ctx, "DROP TABLE IF EXISTS "+tbl)
+	return err
 }
 
 // SetRoutes implements the RoutesStoreBackend interface
@@ -89,6 +189,9 @@ func (b *RoutesBackend) SetRoutes(
 	if err := tx.Commit(ctx); err != nil {
 		return err
 	}
+	// SetRoutes recreates the table, so a source whose AddSource
+	// failed becomes visible to lookups on its next refresh.
+	b.register(sourceID)
 	return nil
 }
 
@@ -224,12 +327,20 @@ func (b *RoutesBackend) FindByNeighbors(
 	}
 	defer tx.Rollback(ctx)
 
+	// Held for the query, so RemoveSource cannot drop a table
+	// this query reads.
+	b.sourcesMu.RLock()
+	defer b.sourcesMu.RUnlock()
+
 	vals := make([]any, 0, len(neighbors))
 	vars := 0
 
 	qrys := []string{}
 
 	for _, neighborQuery := range neighbors {
+		if !b.hasSourceLocked(*neighborQuery.SourceID) {
+			continue // the source was removed, so its table is gone
+		}
 		tbl := b.routesTable(*neighborQuery.SourceID)
 		param := fmt.Sprintf("$%d", vars+1)
 		vals = append(vals, *neighborQuery.NeighborID)
@@ -242,6 +353,9 @@ func (b *RoutesBackend) FindByNeighbors(
 		vars++
 	}
 
+	if len(qrys) == 0 {
+		return api.LookupRoutes{}, nil
+	}
 	qry := strings.Join(qrys, " UNION ")
 
 	rows, err := tx.Query(ctx, qry, vals...)
@@ -266,10 +380,16 @@ func (b *RoutesBackend) FindByPrefix(
 		return nil, err
 	}
 	defer tx.Rollback(ctx)
+
+	// Held for the query, so RemoveSource cannot drop a table
+	// this query reads.
+	b.sourcesMu.RLock()
+	defer b.sourcesMu.RUnlock()
+
 	// We are searching route.Network
 	qrys := []string{}
-	for _, src := range b.sources {
-		tbl := b.routesTable(src.ID)
+	for _, id := range b.sourceIDsLocked() {
+		tbl := b.routesTable(id)
 		qry := `
 			SELECT route FROM ` + tbl + `
 			 WHERE network ILIKE $1
