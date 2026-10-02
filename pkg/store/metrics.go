@@ -139,7 +139,7 @@ func (m *metrics) Collect(ch chan<- prometheus.Metric) {
 
 			// numeric representation of neighbor state
 			numState := float64(0)
-			if neighbor.State == "up" {
+			if neighbor.State == "up" || neighbor.State == "established" {
 				numState = 1
 			}
 
