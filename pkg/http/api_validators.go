@@ -61,8 +61,8 @@ var (
 	}
 )
 
-// reValidNeighborID matches BIRD protocol names: alphanumeric and underscore only.
-var reValidNeighborID = regexp.MustCompile(`^[A-Za-z0-9_]+$`)
+// reValidNeighborID accepts BIRD protocol names and IP address IDs.
+var reValidNeighborID = regexp.MustCompile(`^[A-Za-z0-9_.:]+$`)
 
 // validateNeighborID rejects neighborId values that contain URL structural
 // characters (e.g. '?', '#', '&') which would otherwise be injected into
