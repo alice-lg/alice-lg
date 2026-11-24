@@ -48,7 +48,7 @@ func NewGoBGP(config Config) *GoBGP {
 		dialOpts = append(dialOpts, grpc.WithTransportCredentials(creds))
 	}
 
-	conn, err := grpc.Dial(config.Host, dialOpts...)
+	conn, err := grpc.NewClient(config.Host, dialOpts...)
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
