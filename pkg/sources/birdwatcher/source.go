@@ -45,7 +45,7 @@ func NewBirdwatcher(config Config) Birdwatcher {
 	neighborsCacheDisable := false
 
 	routesCacheDisabled := false
-	routesCacheMaxSize := 128
+	routesCacheMaxSize := config.RoutesCacheSize
 
 	// Initialize caches
 	neighborsCache := caches.NewNeighborsCache(neighborsCacheDisable)
