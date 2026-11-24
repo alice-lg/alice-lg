@@ -3,6 +3,7 @@ package caches
 import (
 	"github.com/alice-lg/alice-lg/pkg/api"
 
+	"fmt"
 	"testing"
 	"time"
 )
@@ -45,7 +46,7 @@ func TestRoutesCacheLru(t *testing.T) {
 	response := &api.RoutesResponse{
 		Response: api.Response{
 			Meta: &api.Meta{
-				TTL: time.Now().UTC().Add(23 * time.Millisecond),
+				TTL: time.Now().UTC().Add(time.Hour),
 			},
 		},
 	}
@@ -86,7 +87,90 @@ func TestRoutesCacheLru(t *testing.T) {
 	}
 
 	_, ok = cache.responses["n2"]
-	if !ok {
+	if ok {
 		t.Error("n2 should NOT be part of the key set")
+	}
+}
+
+func routesResponseWithTTL(ttl time.Duration) *api.RoutesResponse {
+	return &api.RoutesResponse{
+		Response: api.Response{
+			Meta: &api.Meta{
+				TTL: time.Now().UTC().Add(ttl),
+			},
+		},
+	}
+}
+
+func TestRoutesCacheSetHoldsSize(t *testing.T) {
+	const size = 4
+	cache := NewRoutesCache(false, size)
+
+	for i := 0; i < 3*size; i++ {
+		cache.Set(fmt.Sprintf("n%d", i), routesResponseWithTTL(time.Hour))
+	}
+
+	if len(cache.responses) != size {
+		t.Errorf("responses: got %d, want %d", len(cache.responses), size)
+	}
+	if len(cache.accessedAt) != size {
+		t.Errorf("accessedAt: got %d, want %d", len(cache.accessedAt), size)
+	}
+}
+
+func TestRoutesCacheGetDropsExpiredEntry(t *testing.T) {
+	cache := NewRoutesCache(false, 4)
+	cache.Set("expired", routesResponseWithTTL(-time.Minute))
+
+	if cache.Get("expired") != nil {
+		t.Error("Get should return nil for an expired entry")
+	}
+	if _, ok := cache.responses["expired"]; ok {
+		t.Error("expired entry should be gone from responses")
+	}
+	if _, ok := cache.accessedAt["expired"]; ok {
+		t.Error("expired entry should be gone from accessedAt")
+	}
+}
+
+func TestRoutesCacheExpireThenSetHoldsSize(t *testing.T) {
+	const size = 4
+	cache := NewRoutesCache(false, size)
+
+	for i := 0; i < size; i++ {
+		cache.Set(fmt.Sprintf("expired-%d", i), routesResponseWithTTL(-time.Minute))
+	}
+	if expired := cache.Expire(); expired != size {
+		t.Errorf("Expire: got %d, want %d", expired, size)
+	}
+	if len(cache.accessedAt) != 0 {
+		t.Errorf("accessedAt after Expire: got %d, want 0", len(cache.accessedAt))
+	}
+
+	for i := 0; i < 3*size; i++ {
+		cache.Set(fmt.Sprintf("fresh-%d", i), routesResponseWithTTL(time.Hour))
+	}
+	if len(cache.responses) != size {
+		t.Errorf("responses: got %d, want %d", len(cache.responses), size)
+	}
+	if len(cache.accessedAt) != size {
+		t.Errorf("accessedAt: got %d, want %d", len(cache.accessedAt), size)
+	}
+}
+
+func TestRoutesCacheSetExistingKeyKeepsOthers(t *testing.T) {
+	const size = 3
+	cache := NewRoutesCache(false, size)
+
+	for i := 0; i < size; i++ {
+		cache.Set(fmt.Sprintf("n%d", i), routesResponseWithTTL(time.Hour))
+	}
+	cache.Set("n1", routesResponseWithTTL(time.Hour))
+
+	if len(cache.responses) != size {
+		t.Errorf("responses: got %d, want %d", len(cache.responses), size)
+	}
+	if _, ok := cache.responses["n0"]; !ok {
+		t.Error("n0 should survive a re-Set of n1")
 	}
 }
