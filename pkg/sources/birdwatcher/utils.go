@@ -6,33 +6,58 @@ import (
 )
 
 /*
-LockMap uses the sync.Map to manage locks, accessed by a key.
+LockMap hands out one lock per key. A key stays in the map
+only while a caller holds or waits for its lock.
 TODO: Maybe this would be a nice generic helper
 */
 type LockMap struct {
-	locks *sync.Map
+	mu    sync.Mutex
+	locks map[string]*keyLock
+}
+
+// keyLock is the lock for one key and the number of
+// callers holding or waiting for it.
+type keyLock struct {
+	sync.Mutex
+	refs int
 }
 
 // NewLockMap creates a new LockMap
 func NewLockMap() *LockMap {
 	return &LockMap{
-		locks: &sync.Map{},
+		locks: make(map[string]*keyLock),
 	}
 }
 
 // Lock locks the lock.
 func (m *LockMap) Lock(key string) {
-	mutex, _ := m.locks.LoadOrStore(key, &sync.Mutex{})
-	mutex.(*sync.Mutex).Lock()
+	m.mu.Lock()
+	lock, ok := m.locks[key]
+	if !ok {
+		lock = &keyLock{}
+		m.locks[key] = lock
+	}
+	lock.refs++
+	m.mu.Unlock()
+
+	lock.Lock()
 }
 
-// Unlock unlocks the locked LockMap-lock.
+// Unlock unlocks the locked LockMap-lock and drops the key
+// once no caller holds or waits for it.
 func (m *LockMap) Unlock(key string) {
-	mutex, ok := m.locks.Load(key)
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	lock, ok := m.locks[key]
 	if !ok {
 		return // no lock
 	}
-	mutex.(*sync.Mutex).Unlock()
+	lock.refs--
+	if lock.refs == 0 {
+		delete(m.locks, key)
+	}
+	lock.Unlock()
 }
 
 // Wouldn't we all like to know?
