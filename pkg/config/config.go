@@ -765,6 +765,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 
 			peerTablePrefix := backendConfig.Key("peer_table_prefix").MustString("T")
 			pipeProtocolPrefix := backendConfig.Key("pipe_protocol_prefix").MustString("M")
+			routesCacheSize := backendConfig.Key("routes_cache_size").MustInt(128)
 
 			if sourceType != "single_table" &&
 				sourceType != "multi_table" {
@@ -786,6 +787,7 @@ func getSources(config *ini.File) ([]*SourceConfig, error) {
 				MainTable6:         mainTable6,
 				PeerTablePrefix:    peerTablePrefix,
 				PipeProtocolPrefix: pipeProtocolPrefix,
+				RoutesCacheSize:    routesCacheSize,
 			}
 
 			if err := backendConfig.MapTo(&c); err != nil {

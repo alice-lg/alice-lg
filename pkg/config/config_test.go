@@ -64,6 +64,8 @@ func TestSourceConfig(t *testing.T) {
 			"Example routeserver %s should have been identified as a birdwatcher source but was not",
 			rs1.Name,
 		)
+	} else if rs1.Birdwatcher.RoutesCacheSize != 128 {
+		t.Error("Unexpected default RoutesCacheSize", rs1.Birdwatcher.RoutesCacheSize)
 	}
 	if rs2.Birdwatcher == nilBirdwatcherConfig {
 		t.Errorf(
@@ -76,6 +78,9 @@ func TestSourceConfig(t *testing.T) {
 		}
 		if rs2.Birdwatcher.StreamParserThrottle != 2342 {
 			t.Error("Unexpected StreamParserThrottle", rs2.Birdwatcher.StreamParserThrottle)
+		}
+		if rs2.Birdwatcher.RoutesCacheSize != 64 {
+			t.Error("Unexpected RoutesCacheSize", rs2.Birdwatcher.RoutesCacheSize)
 		}
 	}
 	nilGoBGPConfig := gobgp.Config{}
