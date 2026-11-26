@@ -52,6 +52,7 @@ func (cache *RoutesCache) Get(neighborID string) *api.RoutesResponse {
 	}
 
 	if response.CacheTTL() < 0 {
+		cache.remove(neighborID)
 		return nil
 	}
 
@@ -69,11 +70,9 @@ func (cache *RoutesCache) Set(neighborID string, response *api.RoutesResponse) {
 	cache.Lock()
 	defer cache.Unlock()
 
-	if len(cache.responses) > cache.size {
+	if _, exists := cache.responses[neighborID]; !exists && len(cache.responses) >= cache.size {
 		// delete LRU
-		leastRecentNeighbor := cache.accessedAt.LRU()
-		delete(cache.accessedAt, leastRecentNeighbor)
-		delete(cache.responses, leastRecentNeighbor)
+		cache.remove(cache.accessedAt.LRU())
 	}
 
 	cache.accessedAt[neighborID] = time.Now()
@@ -93,8 +92,14 @@ func (cache *RoutesCache) Expire() int {
 	}
 
 	for _, key := range expiredKeys {
-		delete(cache.responses, key)
+		cache.remove(key)
 	}
 
 	return len(expiredKeys)
+}
+
+// Drop a neighbor from both maps; the caller holds the lock.
+func (cache *RoutesCache) remove(neighborID string) {
+	delete(cache.accessedAt, neighborID)
+	delete(cache.responses, neighborID)
 }
