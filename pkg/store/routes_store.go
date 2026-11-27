@@ -184,8 +184,10 @@ func (s *RoutesStore) updateSource(
 	ctx context.Context,
 	src *config.SourceConfig,
 ) error {
-	if err := s.awaitNeighborStore(ctx, src.ID); err != nil {
-		return err
+	// Release the slot while the neighbors are missing; the error
+	// state retries this source after 10s.
+	if !s.neighbors.IsInitialized(src.ID) {
+		return ErrSourceNotInitialized
 	}
 
 	rs := src.GetInstance()
@@ -221,25 +223,6 @@ func (s *RoutesStore) updateSource(
 	log.Println("[routes store] successfully imported", len(lookupRoutes), "routes into store from", src.Name)
 
 	return s.sources.RefreshSuccess(src.ID)
-}
-
-// awaitNeighborStore polls the neighbor store state
-// for the sourceID until the context is not longer valid.
-func (s *RoutesStore) awaitNeighborStore(
-	ctx context.Context,
-	srcID string,
-) error {
-	for {
-		if err := ctx.Err(); err != nil {
-			return err
-		}
-
-		if s.neighbors.IsInitialized(srcID) {
-			return nil
-		}
-
-		time.Sleep(100 * time.Millisecond)
-	}
 }
 
 // Status returns the store status meta
