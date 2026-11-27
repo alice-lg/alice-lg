@@ -113,13 +113,17 @@ func NewSourcesStore(
 }
 
 // GetSourcesStatus will retrieve the status for all sources
-// as a list.
+// as a list. The returned statuses are copies: refreshes keep
+// mutating the store's own Status structs under the lock, so
+// handing out the pointers would let callers read them
+// unsynchronized.
 func (s *SourcesStore) GetSourcesStatus() []*Status {
 	s.Lock()
 	defer s.Unlock()
 	status := []*Status{}
-	for _, s := range s.status {
-		status = append(status, s)
+	for _, src := range s.status {
+		srcStatus := *src
+		status = append(status, &srcStatus)
 	}
 	return status
 }
