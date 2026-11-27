@@ -177,17 +177,24 @@ func (s *SourcesStore) NextRefresh(
 func (s *SourcesStore) ShouldRefresh(
 	sourceID string,
 ) bool {
-	status, err := s.GetStatus(sourceID)
+	s.Lock()
+	defer s.Unlock()
+	status, err := s.getStatus(sourceID)
 	if err != nil {
 		log.Println("get status error:", err)
 		return false
 	}
+	return s.shouldRefresh(status)
+}
 
-	nextRefresh := status.LastRefresh.Add(s.refreshInterval)
-
+// shouldRefresh applies the refresh rule to a status.
+// The caller holds the lock.
+func (s *SourcesStore) shouldRefresh(status *Status) bool {
 	if status.State == StateBusy {
 		return false // Source is busy
 	}
+
+	nextRefresh := status.LastRefresh.Add(s.refreshInterval)
 	if status.State == StateError {
 		// The refresh interval in the config is ok if the
 		// success case. When an error occurs it is desirable
@@ -195,11 +202,7 @@ func (s *SourcesStore) ShouldRefresh(
 		nextRefresh = status.LastRefresh.Add(10 * time.Second)
 	}
 
-	if time.Now().UTC().Before(nextRefresh) {
-		return false // Too soon
-	}
-
-	return true // Go for it
+	return !time.Now().UTC().Before(nextRefresh)
 }
 
 // CachedAt retrieves the oldest refresh time
@@ -251,19 +254,23 @@ func (s *SourcesStore) GetSourceIDs() []string {
 }
 
 // GetSourceIDsForRefresh will retrieve a list of source IDs,
-// which are currently not locked, sorted by least refreshed.
+// which are not locked and due, sorted by least refreshed.
 // The number of sources returned is limited through the
 // refresh parallelism parameter.
 func (s *SourcesStore) GetSourceIDsForRefresh() []string {
 	s.Lock()
 	defer s.Unlock()
 
+	// Busy and not yet due sources never take a free slot.
 	locked := 0
 	sources := make(SourceStatusList, 0, len(s.status))
 	for _, status := range s.status {
-		sources = append(sources, status)
 		if status.State == StateBusy {
 			locked++
+			continue
+		}
+		if s.shouldRefresh(status) {
+			sources = append(sources, status)
 		}
 	}
 
