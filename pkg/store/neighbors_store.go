@@ -154,9 +154,14 @@ func (s *NeighborsStore) safeUpdateSource(ctx context.Context, id string) {
 		return
 	}
 
-	// Apply jitter so, we do not hit everything at once.
+	// Apply jitter so we do not hit everything at once, but
+	// skip it for the initial fill: the jitter exists to spread
+	// periodic refreshes, and delaying first population slows
+	// startup by minutes at high source counts.
 	// TODO: Make configurable
-	time.Sleep(time.Duration(rand.Intn(30)) * time.Second)
+	if initialized, _ := s.sources.IsInitialized(id); initialized {
+		time.Sleep(time.Duration(rand.Intn(30)) * time.Second)
+	}
 
 	src := s.sources.GetInstance(id)
 	srcName := s.sources.GetName(id)
