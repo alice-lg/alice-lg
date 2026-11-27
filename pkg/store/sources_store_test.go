@@ -102,3 +102,24 @@ func TestGetSourceIDsForRefreshParallel(t *testing.T) {
 		t.Error("expected src3 to be least refreshed")
 	}
 }
+
+func TestGetSourcesStatusReturnsCopies(t *testing.T) {
+	s := &SourcesStore{
+		status: map[string]*Status{
+			"rs1": {SourceID: "rs1", State: StateInit},
+		},
+	}
+
+	for _, status := range s.GetSourcesStatus() {
+		status.State = StateBusy
+		status.Initialized = true
+	}
+
+	stored := s.status["rs1"]
+	if stored.State != StateInit {
+		t.Errorf("store state changed through a returned status: %s", stored.State)
+	}
+	if stored.Initialized {
+		t.Error("store initialized flag changed through a returned status")
+	}
+}
